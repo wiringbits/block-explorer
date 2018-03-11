@@ -16,7 +16,7 @@ export class TransactionsService {
   constructor(private http: HttpClient) { }
 
   get(txid: string): Observable<any> {
-    const url = this.baseUrl + txid;
+    const url = `${this.baseUrl}/${txid}`;
     return this.http.get(url);
   }
 }
