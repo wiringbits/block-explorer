@@ -5,6 +5,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import { AppRoutingModule } from './app-routing.module';
 import { AlertModule, BsDropdownModule, CollapseModule, TooltipModule, ModalModule } from 'ngx-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
@@ -18,6 +19,7 @@ import { AppComponent } from './app.component';
     AppComponent
   ],
   imports: [
+    AppRoutingModule,
     AlertModule.forRoot(),
     BsDropdownModule.forRoot(),
     CollapseModule.forRoot(),
