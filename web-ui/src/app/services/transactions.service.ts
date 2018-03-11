@@ -15,7 +15,7 @@ export class TransactionsService {
 
   constructor(private http: HttpClient) { }
 
-  verifyEmail(txid: string): Observable<any> {
+  get(txid: string): Observable<any> {
     const url = this.baseUrl + txid;
     return this.http.get(url);
   }
