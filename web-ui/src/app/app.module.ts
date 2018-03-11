@@ -12,6 +12,8 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
+import { LanguageService } from './services/language.service';
+
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 
@@ -37,7 +39,7 @@ import { HomeComponent } from './components/home/home.component';
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
   ],
-  providers: [],
+  providers: [LanguageService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
