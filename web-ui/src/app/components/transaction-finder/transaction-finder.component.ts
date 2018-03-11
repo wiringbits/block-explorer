@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 
+import { ErrorService } from '../../services/error.service';
+
 @Component({
   selector: 'app-transaction-finder',
   templateUrl: './transaction-finder.component.html',
@@ -11,7 +13,10 @@ export class TransactionFinderComponent implements OnInit {
 
   form: FormGroup;
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(
+    private formBuilder: FormBuilder,
+    public errorService: ErrorService) {
+
     this.createForm();
   }
 

@@ -24,8 +24,22 @@ export class AppComponent {
 
   englishLang(): Object {
     return {
+      // default messages from angular
+      'required': 'A value is required',
+      'pattern': 'Invalid format',
+      'email': 'Invalid email',
+      'minlength': 'More characters are required',
+      'maxlength': 'Too many characters',
+      'min': 'The value is too small',
+      'max': 'The value is too big',
+
+      // messages
       'message.serverUnavailable': 'The server unavailable, please try again in a minute',
+
+      // actions
       'action.find': 'Find',
+
+      // labels
       'label.transactionId': 'Transaction Id'
     };
   }
