@@ -12,6 +12,7 @@ import { ToastrModule } from 'ngx-toastr';
 
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
+import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
 import { NotificationService } from './services/notification.service';
 import { TransactionsService } from './services/transactions.service';
@@ -50,6 +51,7 @@ import { TransactionFinderComponent } from './components/transaction-finder/tran
     TranslateModule.forRoot(),
   ],
   providers: [
+    ErrorService,
     LanguageService,
     NotificationService,
     TransactionsService

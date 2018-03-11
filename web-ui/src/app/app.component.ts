@@ -24,6 +24,7 @@ export class AppComponent {
 
   englishLang(): Object {
     return {
+      'message.serverUnavailable': 'The server unavailable, please try again in a minute',
       'action.find': 'Find',
       'label.transactionId': 'Transaction Id'
     };
