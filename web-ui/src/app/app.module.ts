@@ -14,6 +14,7 @@ import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
 import { LanguageService } from './services/language.service';
 import { NotificationService } from './services/notification.service';
+import { TransactionsService } from './services/transactions.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -50,7 +51,8 @@ import { TransactionFinderComponent } from './components/transaction-finder/tran
   ],
   providers: [
     LanguageService,
-    NotificationService
+    NotificationService,
+    TransactionsService
   ],
   bootstrap: [AppComponent]
 })
