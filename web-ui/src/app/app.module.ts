@@ -18,13 +18,15 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     FooterComponent,
-    NavbarComponent
+    NavbarComponent,
+    TransactionDetailsComponent
   ],
   imports: [
     AppRoutingModule,
