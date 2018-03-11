@@ -14,6 +14,7 @@ import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
 import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
+import { NavigatorService } from './services/navigator.service';
 import { NotificationService } from './services/notification.service';
 import { TransactionsService } from './services/transactions.service';
 
@@ -53,6 +54,7 @@ import { TransactionFinderComponent } from './components/transaction-finder/tran
   providers: [
     ErrorService,
     LanguageService,
+    NavigatorService,
     NotificationService,
     TransactionsService
   ],
