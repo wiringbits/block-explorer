@@ -16,11 +16,13 @@ import { LanguageService } from './services/language.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    FooterComponent
   ],
   imports: [
     AppRoutingModule,
