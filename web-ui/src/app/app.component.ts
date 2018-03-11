@@ -40,7 +40,12 @@ export class AppComponent {
       'action.find': 'Find',
 
       // labels
-      'label.transactionId': 'Transaction Id'
+      'label.transactionId': 'Transaction Id',
+      'label.confirmations': 'Confirmations',
+      'label.blockhash': 'Block Hash',
+      'label.blocktime': 'Block Time',
+      'label.inputAddresses': 'Senders',
+      'label.outputAddresses': 'Receivers'
     };
   }
 }

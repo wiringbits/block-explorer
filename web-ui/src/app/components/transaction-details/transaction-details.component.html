@@ -1,3 +1,49 @@
-<p>
-  transaction-details works!
-</p>
+<div>
+  <div [hidden]="transaction != null">
+    <alert>{{'message.transactionNotFound' | translate}}</alert>
+  </div>
+  <div *ngIf="transaction != null">
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactionId' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.txid}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.confirmations' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.confirmations}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockhash' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.blockhash}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blocktime' | translate}}</label>
+      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{transaction.blocktime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</label>
+    </div>
+
+    <!-- TODO: Add amounts -->
+    <div>
+      <div class="row">
+        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.inputAddresses' | translate}}</label>
+      </div>
+      <div class="row">
+        <div *ngFor="let item of inputAddresses(transaction)">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1"></label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{item}}</label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TODO: Add amounts -->
+    <div>
+      <div class="row">
+        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.outputAddresses' | translate}}</label>
+      </div>
+      <div class="row">
+        <div *ngFor="let item of outputAddresses(transaction)">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1"></label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{item}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
