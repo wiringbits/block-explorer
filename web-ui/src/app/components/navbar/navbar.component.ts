@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
@@ -7,9 +8,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
 
-  constructor() { }
+  public tabs = [];
+
+  constructor(private location: Location) { }
 
   ngOnInit() {
   }
 
+  /* tabs */
+  isSelected(path: string): boolean {
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+
+    return this.location.isCurrentPathEqualTo(path);
+  }
 }

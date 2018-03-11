@@ -1,3 +1,17 @@
-<p>
-  navbar works!
-</p>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a routerLink="/" class="navbar-brand">
+        <img src="assets/logo.png" alt="Logo">
+      </a>
+      <a routerLink="/">
+        <span class="navbar-brand">XSN Block Explorer</span>
+      </a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.path) }">
+        <a routerLink="{{tab.path}}">{{tab.label | translate}}</a>
+      </li>
+    </ul>
+  </div>
+</nav>
