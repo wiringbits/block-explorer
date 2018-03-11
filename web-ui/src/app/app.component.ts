@@ -23,6 +23,9 @@ export class AppComponent {
   }
 
   englishLang(): Object {
-    return {};
+    return {
+      'action.find': 'Find',
+      'label.transactionId': 'Transaction Id'
+    };
   }
 }

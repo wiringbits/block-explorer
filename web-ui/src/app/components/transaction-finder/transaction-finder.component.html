@@ -1,3 +1,12 @@
-<p>
-  transaction-finder works!
-</p>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate role="form" class="form-horizontal">
+
+  <div class="form-group">
+    <div class="col-xs-3 col-sm-3 col-md-2 col-lg-2">
+      <input formControlName="transactionId" type="text" id="transactionId" class="form-control" placeholder="{{ 'label.transactionId' | translate }}">
+    </div>
+    
+    <div class="text-left col-sm-offset-2">
+      <input type="submit" [disabled]="!form.valid" value="{{ 'action.find' | translate }}" class="btn btn-primary">
+    </div>
+  </div>
+</form>
