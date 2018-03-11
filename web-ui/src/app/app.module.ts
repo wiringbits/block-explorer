@@ -13,6 +13,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
 import { LanguageService } from './services/language.service';
+import { NotificationService } from './services/notification.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -47,7 +48,10 @@ import { TransactionFinderComponent } from './components/transaction-finder/tran
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
   ],
-  providers: [LanguageService],
+  providers: [
+    LanguageService,
+    NotificationService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
