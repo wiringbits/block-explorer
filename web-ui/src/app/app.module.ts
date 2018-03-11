@@ -19,6 +19,7 @@ import { HomeComponent } from './components/home/home.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component';
+import { TransactionFinderComponent } from './components/transaction-finder/transaction-finder.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { TransactionDetailsComponent } from './components/transaction-details/tr
     HomeComponent,
     FooterComponent,
     NavbarComponent,
-    TransactionDetailsComponent
+    TransactionDetailsComponent,
+    TransactionFinderComponent
   ],
   imports: [
     AppRoutingModule,
