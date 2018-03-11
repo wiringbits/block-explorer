@@ -3,6 +3,8 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { Observable } from 'rxjs/Observable';
 
 import { ErrorService } from '../../services/error.service';
+import { NavigatorService } from '../../services/navigator.service';
+import { TransactionsService } from '../../services/transactions.service';
 
 @Component({
   selector: 'app-transaction-finder',
@@ -15,6 +17,8 @@ export class TransactionFinderComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
+    private navigatorService: NavigatorService,
+    private transactionsService: TransactionsService,
     public errorService: ErrorService) {
 
     this.createForm();
@@ -30,6 +34,13 @@ export class TransactionFinderComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('submit now!');
+    const txid = this.form.get('transactionId').value;
+
+    // instead of redirecting, we check if the transaction is valid.
+    this.transactionsService.get(txid)
+      .subscribe(
+        response => this.navigatorService.transactionDetails(txid),
+        response => this.errorService.renderServerErrors(this.form, response)
+      );
   }
 }
