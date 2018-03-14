@@ -1,5 +1,7 @@
 package com.xsn.explorer.models
 
+import play.api.libs.json._
+
 class TransactionId private (val string: String) extends AnyVal
 
 object TransactionId {
@@ -15,4 +17,16 @@ object TransactionId {
       None
     }
   }
+
+  implicit val reads: Reads[TransactionId] = Reads { json =>
+    json.validate[String].flatMap { string =>
+      from(string)
+          .map(JsSuccess.apply(_))
+          .getOrElse {
+            JsError.apply("Invalid transaction")
+          }
+    }
+  }
+
+  implicit val writes: Writes[TransactionId] = Writes { obj => JsString(obj.string) }
 }
