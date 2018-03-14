@@ -3,62 +3,67 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.TransactionNotFoundError
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{Bad, Good}
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
 class TransactionsControllerSpec extends MyAPISpec {
 
+  val coinbaseTx: Transaction = Transaction(
+    id = TransactionId.from("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c").get,
+    size = 98,
+    blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get,
+    time = 1520276270L,
+    blocktime = 1520276270L,
+    confirmations = 5347,
+    vin = None,
+    vout = List(
+      TransactionVOUT(n = 0, address = Address.from("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"), value = 0, scriptPubKeyType = "pubkey"))
+  )
+
+  val nonCoinbaseTx: Transaction = Transaction(
+    id = TransactionId.from("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641").get,
+    size = 234,
+    blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get,
+    time = 1520318120,
+    blocktime = 1520318120,
+    confirmations = 1950,
+    vin = Some(
+      TransactionVIN(TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get, 2)),
+    vout = List(
+      TransactionVOUT(n = 1, value = BigDecimal("1171874.98281250"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
+      TransactionVOUT(n = 2, value = BigDecimal("1171874.98281250"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+  )
+
+  val nonCoinbasePreviousTx: Transaction = Transaction(
+    id = TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get,
+    size = 235,
+    blockhash = Blockhash.from("cc4ccf19cfb9fa373ba8da68c7d25266d675a2414db603edb3cc88f866a782ea").get,
+    time = 1520314409,
+    blocktime = 1520314409,
+    confirmations = 11239,
+    vin = Some(
+      TransactionVIN(TransactionId.from("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f").get, 2)),
+    vout = List(
+      TransactionVOUT(n = 1, value = BigDecimal("2343749.96562500"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
+      TransactionVOUT(n = 2, value = BigDecimal("2343749.96562500"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+  )
+
   val customXSNService = new XSNService {
     val map = Map(
-      TransactionId.from("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c").get ->
-        s"""
-           |{
-           |    "blockhash": "000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7",
-           |    "blocktime": 1520276270,
-           |    "confirmations": 5347,
-           |    "height": 1,
-           |    "hex": "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff03510101ffffffff010000000000000000232103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac00000000",
-           |    "locktime": 0,
-           |    "size": 98,
-           |    "time": 1520276270,
-           |    "txid": "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c",
-           |    "version": 1,
-           |    "vin": [
-           |        {
-           |            "coinbase": "510101",
-           |            "sequence": 4294967295
-           |        }
-           |    ],
-           |    "vout": [
-           |        {
-           |            "n": 0,
-           |            "scriptPubKey": {
-           |                "addresses": [
-           |                    "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"
-           |                ],
-           |                "asm": "03e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029 OP_CHECKSIG",
-           |                "hex": "2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac",
-           |                "reqSigs": 1,
-           |                "type": "pubkey"
-           |            },
-           |            "value": 0,
-           |            "valueSat": 0
-           |        }
-           |    ]
-           |}
-         """.stripMargin.trim
+      "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c" -> coinbaseTx,
+      "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641" -> nonCoinbaseTx,
+      "585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9" -> nonCoinbasePreviousTx
     )
 
-    override def getTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
-      val result = map.get(txid)
-          .map(s => Json.toJson(s))
+    override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+      val result = map.get(txid.string)
           .map(Good(_))
           .getOrElse {
             Bad(TransactionNotFoundError).accumulating
@@ -75,14 +80,55 @@ class TransactionsControllerSpec extends MyAPISpec {
   "GET /transactions/:txid" should {
     def url(txid: String) = s"/transactions/$txid"
 
-    "return an existing transaction" in {
-      val txid = "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
-      val response = GET(url(txid))
+    "return coinbase transaction" in {
+      val tx = coinbaseTx
+      val response = GET(url(tx.id.string))
 
       status(response) mustEqual OK
-      // TODO: Match result
-      //val json = contentAsJson(response)
-      //(json \ "txid").as[String] mustEqual txid
+      val json = contentAsJson(response)
+      (json \ "id").as[String] mustEqual tx.id.string
+      (json \ "blockhash").as[String] mustEqual tx.blockhash.string
+      (json \ "size").as[Int] mustEqual tx.size
+      (json \ "time").as[Long] mustEqual tx.time
+      (json \ "blocktime").as[Long] mustEqual tx.blocktime
+      (json \ "confirmations").as[Int] mustEqual tx.confirmations
+
+      val outputJsonList = (json \ "output").as[List[JsValue]]
+      outputJsonList.size mustEqual 1
+
+      val outputJson = outputJsonList.head
+      (outputJson \ "address").as[String] mustEqual tx.vout.head.address.get.string
+      (outputJson \ "value").as[BigDecimal] mustEqual tx.vout.head.value
+    }
+
+    "return non-coinbase transaction" in {
+      val tx = nonCoinbaseTx
+      val details = TransactionDetails.from(nonCoinbaseTx, nonCoinbasePreviousTx)
+      val response = GET(url(tx.id.string))
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      (json \ "id").as[String] mustEqual tx.id.string
+      (json \ "blockhash").as[String] mustEqual tx.blockhash.string
+      (json \ "size").as[Int] mustEqual tx.size
+      (json \ "time").as[Long] mustEqual tx.time
+      (json \ "blocktime").as[Long] mustEqual tx.blocktime
+      (json \ "confirmations").as[Int] mustEqual tx.confirmations
+
+      val inputJson = (json \ "input").as[JsValue]
+      (inputJson \ "address").as[String] mustEqual details.input.get.address.string
+      (inputJson \ "value").as[BigDecimal] mustEqual details.input.get.value
+
+      val outputJsonList = (json \ "output").as[List[JsValue]]
+      outputJsonList.size mustEqual 2
+
+      val outputJson = outputJsonList.head
+      (outputJson \ "address").as[String] mustEqual details.output.head.address.string
+      (outputJson \ "value").as[BigDecimal] mustEqual details.output.head.value
+
+      val outputJson2 = outputJsonList.drop(1).head
+      (outputJson2 \ "address").as[String] mustEqual details.output.drop(1).head.address.string
+      (outputJson2 \ "value").as[BigDecimal] mustEqual details.output.drop(1).head.value
     }
 
     "fail on wrong transaction format" in {

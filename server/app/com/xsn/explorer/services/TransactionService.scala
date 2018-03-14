@@ -5,15 +5,14 @@ import javax.inject.Inject
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.TransactionFormatError
-import com.xsn.explorer.models.TransactionId
-import org.scalactic.{One, Or}
-import play.api.libs.json.JsValue
+import com.xsn.explorer.models.{TransactionDetails, TransactionId}
+import org.scalactic.{Good, One, Or}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionService @Inject() (xsnService: XSNService)(implicit ec: ExecutionContext) {
 
-  def getTransaction(txidString: String): FutureApplicationResult[JsValue] = {
+  def getTransaction(txidString: String): FutureApplicationResult[TransactionDetails] = {
     val result = for {
       txid <- {
         val maybe = TransactionId.from(txidString)
@@ -21,7 +20,19 @@ class TransactionService @Inject() (xsnService: XSNService)(implicit ec: Executi
       }
 
       transaction <- xsnService.getTransaction(txid).toFutureOr
-    } yield transaction
+
+      previousMaybe <- transaction
+          .vin
+          .map(_.txid)
+          .map(xsnService.getTransaction)
+          .map { f => f.toFutureOr.map(Option.apply).toFuture }
+          .getOrElse { Future.successful(Good(Option.empty))}
+          .toFutureOr
+    } yield {
+      previousMaybe
+          .map { previous => TransactionDetails.from(transaction, previous) }
+          .getOrElse { TransactionDetails.from(transaction) }
+    }
 
     result.toFuture
   }

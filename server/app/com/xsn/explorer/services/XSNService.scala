@@ -7,7 +7,7 @@ import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors.{TransactionNotFoundError, XSNMessageError, XSNUnexpectedResponseError}
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.{Transaction, TransactionId}
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue}
@@ -17,7 +17,7 @@ import scala.util.Try
 
 trait XSNService {
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[JsValue]
+  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -32,18 +32,17 @@ class XSNServiceRPCImpl @Inject() (
       .withAuth(rpcConfig.username.string, rpcConfig.password.string, WSAuthScheme.BASIC)
       .withHttpHeaders("Content-Type" -> "text/plain")
 
-  // TODO: cache successful results
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
     server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
 
-          val maybe = Try(response.json)
-              .toOption
+          val maybe = Option(response)
+              .filter(_.status == 200)
+              .flatMap { r => Try(r.json).toOption }
               .flatMap { json =>
                 (json \ "result")
-                    .asOpt[JsValue]
-                    .filter(_ != JsNull)
+                    .asOpt[Transaction]
                     .map { Good(_) }
                     .orElse {
                       mapError(json)
@@ -53,7 +52,7 @@ class XSNServiceRPCImpl @Inject() (
               }
 
           maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, response = ${response.body}")
+            logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }
