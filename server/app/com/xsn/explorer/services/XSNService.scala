@@ -20,6 +20,8 @@ trait XSNService {
   def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction]
 
   def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance]
+
+  def getTransactionCount(address: Address): FutureApplicationResult[Int]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -78,6 +80,33 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
+  override def getTransactionCount(address: Address): FutureApplicationResult[Int] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "getaddresstxids",
+                  |  "params": [
+                  |    { "addresses": ["${address.string}"] }
+                  |  ]
+                  |}
+                  |""".stripMargin
+
+    // the network returns 0 for valid addresses
+    val errorCodeMapper = Map(-5 -> AddressFormatError)
+
+    server
+        .post(body)
+        .map { response =>
+
+          val maybe = getResult[List[JsValue]](response, errorCodeMapper)
+          maybe.map(_.map(_.size)).getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
   private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
         .asOpt[JsValue]
@@ -101,7 +130,7 @@ class XSNServiceRPCImpl @Inject() (
 
   private def getResult[A](
       response: WSResponse,
-      errorCodeMapper: Map[Int, ApplicationError] = Map.empty)(
+      errorCodeMapper: Map[Int, ApplicationError])(
       implicit reads: Reads[A]): Option[ApplicationResult[A]] = {
 
     Option(response)

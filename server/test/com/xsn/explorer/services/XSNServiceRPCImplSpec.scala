@@ -6,7 +6,7 @@ import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.models.{Address, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalactic.Bad
+import org.scalactic.{Bad, Good}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
@@ -274,6 +274,57 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
 
       whenReady(service.getAddressBalance(address)) { result =>
+        result mustEqual Bad(AddressFormatError).accumulating
+      }
+    }
+  }
+
+  "getTransactionCount" should {
+    "return the number of transactions" in {
+      val responseBody =
+        """
+          |{
+          |    "result": [
+          |      "3963203e8ff99c0effbc7c90ef1b534f7e60d9d4d1d131375bc73eb6af8b62d0",
+          |      "56eff1fc3ec29277a039944a10826e1bd24685bec5e5c46c946846cb859dc14b",
+          |      "d5718b83b6cec30e075c20dc61005a25a6eb707f14b92e89c2a9c4bc39635b5d",
+          |      "9cd1d22e786b7b8722ce51f551c3c5af2053a52bd7694b9ef79e0a5d95053b19",
+          |      "1dbf0277891ed39f8175fa08844eadbb6ed4b28464fbac0ba88464001192d79e",
+          |      "2520ec229a76db8efa8e3b384582ac5c1969224a97f32475b957151f0c8cdfa7",
+          |      "46d2f51afeab7aeb7adab821c374c7348ae0ff4edb7d0c9af995360630194cc8",
+          |      "1a91406280e2a77dc0baf8a13491a977cba2d2dae6a8ba93fc6bbd3a7aeec4e5",
+          |      "def0ae8bbfa45dca177f9c9f169e362bd25dee460a8ddc8c662e92e6968cd6d8"
+          |    ],
+          |    "error": null,
+          |    "id": null
+          |}
+        """.stripMargin.trim
+
+      val address = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getTransactionCount(address)) { result =>
+        result mustEqual Good(9)
+      }
+    }
+
+    "fail on invalid address" in {
+      val responseBody = """{"result":null,"error":{"code":-5,"message":"Invalid address"},"id":null}"""
+
+      val address = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLW").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getTransactionCount(address)) { result =>
         result mustEqual Bad(AddressFormatError).accumulating
       }
     }

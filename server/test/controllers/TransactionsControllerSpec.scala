@@ -3,6 +3,7 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -55,7 +56,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       TransactionVOUT(n = 2, value = BigDecimal("2343749.96562500"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
   )
 
-  val customXSNService = new XSNService {
+  val customXSNService = new DummyXSNService {
     val map = Map(
       "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c" -> coinbaseTx,
       "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641" -> nonCoinbaseTx,
@@ -71,8 +72,6 @@ class TransactionsControllerSpec extends MyAPISpec {
 
       Future.successful(result)
     }
-
-    override def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance] = ???
   }
 
   override val application = guiceApplicationBuilder
