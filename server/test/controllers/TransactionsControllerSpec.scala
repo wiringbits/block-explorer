@@ -71,6 +71,8 @@ class TransactionsControllerSpec extends MyAPISpec {
 
       Future.successful(result)
     }
+
+    override def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance] = ???
   }
 
   override val application = guiceApplicationBuilder

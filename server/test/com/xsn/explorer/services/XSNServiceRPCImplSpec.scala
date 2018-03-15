@@ -1,9 +1,9 @@
 package com.xsn.explorer.services
 
 import com.xsn.explorer.config.RPCConfig
-import com.xsn.explorer.errors.{TransactionNotFoundError, XSNMessageError, XSNUnexpectedResponseError}
+import com.xsn.explorer.errors.{AddressFormatError, TransactionNotFoundError, XSNMessageError, XSNUnexpectedResponseError}
 import com.xsn.explorer.helpers.Executors
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.{Address, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.Bad
@@ -227,6 +227,54 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       whenReady(service.getTransaction(txid)) { result =>
         result mustEqual Bad(XSNUnexpectedResponseError).accumulating
+      }
+    }
+  }
+
+  "getAddressBalance" should {
+    "return the balance" in {
+      val responseBody =
+        """
+          |{
+          |    "result": {
+          |      "balance": 24650100000000,
+          |      "received": 1060950100000000
+          |    },
+          |    "error": null,
+          |    "id": null
+          |}
+        """.stripMargin.trim
+
+      val address = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getAddressBalance(address)) { result =>
+        result.isGood mustEqual true
+
+        val balance = result.get
+        balance.balance mustEqual BigInt("24650100000000")
+        balance.received mustEqual BigInt("1060950100000000")
+      }
+    }
+
+    "fail on invalid address" in {
+      val responseBody = """{"result":null,"error":{"code":-5,"message":"Invalid address"},"id":null}"""
+
+      val address = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLW").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getAddressBalance(address)) { result =>
+        result mustEqual Bad(AddressFormatError).accumulating
       }
     }
   }
