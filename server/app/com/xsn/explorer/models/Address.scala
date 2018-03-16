@@ -1,8 +1,9 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.base.WrappedString
 import play.api.libs.json._
 
-class Address private (val string: String) extends AnyVal
+class Address private (val string: String) extends AnyVal with WrappedString
 
 object Address {
 
@@ -24,9 +25,5 @@ object Address {
             JsError.apply("Invalid address")
           }
     }
-  }
-
-  implicit val writes: Writes[Address] = Writes { obj =>
-    JsString(obj.string)
   }
 }

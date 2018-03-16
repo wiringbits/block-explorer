@@ -5,11 +5,11 @@ import play.api.libs.json._
 
 case class Transaction(
     id: TransactionId,
-    size: Int,
+    size: Size,
     blockhash: Blockhash,
     time: Long,
     blocktime: Long,
-    confirmations: Int,
+    confirmations: Confirmations,
     vin: Option[TransactionVIN],
     vout: List[TransactionVOUT],
 )
@@ -18,11 +18,11 @@ object Transaction {
 
   implicit val reads: Reads[Transaction] = {
     val builder = (__ \ 'txid).read[TransactionId] and
-        (__ \ 'size).read[Int] and
+        (__ \ 'size).read[Size] and
         (__ \ 'blockhash).read[Blockhash] and
         (__ \ 'time).read[Long] and
         (__ \ 'blocktime).read[Long] and
-        (__ \ 'confirmations).read[Int] and
+        (__ \ 'confirmations).read[Confirmations] and
         (__ \ 'vout).read[List[TransactionVOUT]] and
         (__ \ 'vin).readNullable[List[JsValue]]
             .map(_ getOrElse List.empty)

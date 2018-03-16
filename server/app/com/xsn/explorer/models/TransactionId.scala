@@ -1,8 +1,9 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.base.WrappedString
 import play.api.libs.json._
 
-class TransactionId private (val string: String) extends AnyVal
+class TransactionId private (val string: String) extends AnyVal with WrappedString
 
 object TransactionId {
 
@@ -27,6 +28,4 @@ object TransactionId {
           }
     }
   }
-
-  implicit val writes: Writes[TransactionId] = Writes { obj => JsString(obj.string) }
 }

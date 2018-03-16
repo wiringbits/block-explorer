@@ -1,8 +1,9 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.base.WrappedString
 import play.api.libs.json._
 
-class Blockhash private (val string: String) extends AnyVal
+class Blockhash private (val string: String) extends AnyVal with WrappedString
 
 object Blockhash {
   private val pattern = "^[a-f0-9]{64}$".r.pattern
@@ -26,6 +27,4 @@ object Blockhash {
           }
     }
   }
-
-  implicit val writes: Writes[Blockhash] = Writes { obj => JsString(obj.string) }
 }

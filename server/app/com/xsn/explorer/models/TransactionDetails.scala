@@ -4,11 +4,11 @@ import play.api.libs.json.{Json, Writes}
 
 case class TransactionDetails(
     id: TransactionId,
-    size: Int,
+    size: Size,
     blockhash: Blockhash,
     time: Long,
     blocktime: Long,
-    confirmations: Int,
+    confirmations: Confirmations,
     input: Option[TransactionValue],
     output: List[TransactionValue]) {
 

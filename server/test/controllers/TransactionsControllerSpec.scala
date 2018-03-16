@@ -18,11 +18,11 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   val coinbaseTx: Transaction = Transaction(
     id = TransactionId.from("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c").get,
-    size = 98,
+    size = Size(98),
     blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get,
     time = 1520276270L,
     blocktime = 1520276270L,
-    confirmations = 5347,
+    confirmations = Confirmations(5347),
     vin = None,
     vout = List(
       TransactionVOUT(n = 0, address = Address.from("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"), value = 0, scriptPubKeyType = "pubkey"))
@@ -30,11 +30,11 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   val nonCoinbaseTx: Transaction = Transaction(
     id = TransactionId.from("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641").get,
-    size = 234,
+    size = Size(234),
     blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get,
     time = 1520318120,
     blocktime = 1520318120,
-    confirmations = 1950,
+    confirmations = Confirmations(1950),
     vin = Some(
       TransactionVIN(TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get, 2)),
     vout = List(
@@ -44,11 +44,11 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   val nonCoinbasePreviousTx: Transaction = Transaction(
     id = TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get,
-    size = 235,
+    size = Size(235),
     blockhash = Blockhash.from("cc4ccf19cfb9fa373ba8da68c7d25266d675a2414db603edb3cc88f866a782ea").get,
     time = 1520314409,
     blocktime = 1520314409,
-    confirmations = 11239,
+    confirmations = Confirmations(11239),
     vin = Some(
       TransactionVIN(TransactionId.from("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f").get, 2)),
     vout = List(
@@ -89,10 +89,10 @@ class TransactionsControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
       (json \ "id").as[String] mustEqual tx.id.string
       (json \ "blockhash").as[String] mustEqual tx.blockhash.string
-      (json \ "size").as[Int] mustEqual tx.size
+      (json \ "size").as[Size] mustEqual tx.size
       (json \ "time").as[Long] mustEqual tx.time
       (json \ "blocktime").as[Long] mustEqual tx.blocktime
-      (json \ "confirmations").as[Int] mustEqual tx.confirmations
+      (json \ "confirmations").as[Confirmations] mustEqual tx.confirmations
 
       val outputJsonList = (json \ "output").as[List[JsValue]]
       outputJsonList.size mustEqual 1
@@ -111,10 +111,10 @@ class TransactionsControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
       (json \ "id").as[String] mustEqual tx.id.string
       (json \ "blockhash").as[String] mustEqual tx.blockhash.string
-      (json \ "size").as[Int] mustEqual tx.size
+      (json \ "size").as[Size] mustEqual tx.size
       (json \ "time").as[Long] mustEqual tx.time
       (json \ "blocktime").as[Long] mustEqual tx.blocktime
-      (json \ "confirmations").as[Int] mustEqual tx.confirmations
+      (json \ "confirmations").as[Confirmations] mustEqual tx.confirmations
 
       val inputJson = (json \ "input").as[JsValue]
       (inputJson \ "address").as[String] mustEqual details.input.get.address.string
