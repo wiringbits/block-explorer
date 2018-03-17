@@ -41,12 +41,18 @@ export class AppComponent {
       'action.find': 'Find',
 
       // labels
+      'label.coinName': 'XSN',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',
       'label.blocktime': 'Block Time',
-      'label.inputAddresses': 'Senders',
-      'label.outputAddresses': 'Receivers'
+      'label.noInput': 'No input',
+      'label.coinbase': 'Coinbase',
+      'label.output': 'Receivers',
+      'label.from': 'From',
+      'label.to': 'To',
+      'label.value': 'Amount',
+      'label.fee': 'Fee'
     };
   }
 }

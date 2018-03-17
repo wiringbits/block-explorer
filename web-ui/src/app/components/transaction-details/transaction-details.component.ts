@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 
+import { Transaction } from '../../models/transaction';
+
 import { ErrorService } from '../../services/error.service';
 import { NavigatorService } from '../../services/navigator.service';
 import { TransactionsService } from '../../services/transactions.service';
@@ -14,7 +16,7 @@ import { TransactionsService } from '../../services/transactions.service';
 })
 export class TransactionDetailsComponent implements OnInit {
 
-  transaction: object;
+  transaction: Transaction;
 
   constructor(
     private route: ActivatedRoute,
@@ -31,8 +33,7 @@ export class TransactionDetailsComponent implements OnInit {
     );
   }
 
-  private onTransactionRetrieved(response: any) {
-    console.log(response);
+  private onTransactionRetrieved(response: Transaction) {
     this.transaction = response;
   }
 
@@ -40,29 +41,16 @@ export class TransactionDetailsComponent implements OnInit {
     this.errorService.renderServerErrors(null, response);
   }
 
-  inputAddresses(transaction): string[] {
-    // TODO: complete
-    // transaction.vin.keys
-    return [];
+  getFee(tx: Transaction): number {
+    const vout = tx.output.map(t => t.value).reduce((a, b) => a + b);
+    return Math.max(0, this.getVIN(tx) - vout);
   }
 
-  // TODO: verify correctness
-  outputAddresses(transaction): string[] {
-    const keys: number[] = Array.from(transaction.vout.keys());
-    const nestedAddresses = keys.map(k => transaction.vout[k].scriptPubKey.addresses);
-    return this.flatten(nestedAddresses);
-  }
-
-  // TODO: move function to another package
-  private flatten = function (arr, result = []) {
-    for (let i = 0, length = arr.length; i < length; i++) {
-      const value = arr[i];
-      if (Array.isArray(value)) {
-        this.flatten(value, result);
-      } else {
-        result.push(value);
-      }
+  private getVIN(tx): number {
+    if (tx.input == null) {
+      return 0;
+    } else {
+      return tx.input.value;
     }
-    return result;
-  };
+  }
 }

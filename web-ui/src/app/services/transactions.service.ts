@@ -4,6 +4,8 @@ import { Observable } from 'rxjs/Observable';
 
 import { environment } from '../../environments/environment';
 
+import { Transaction } from '../models/transaction';
+
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
@@ -15,8 +17,8 @@ export class TransactionsService {
 
   constructor(private http: HttpClient) { }
 
-  get(txid: string): Observable<any> {
+  get(txid: string): Observable<Transaction> {
     const url = `${this.baseUrl}/${txid}`;
-    return this.http.get(url);
+    return this.http.get<Transaction>(url);
   }
 }
