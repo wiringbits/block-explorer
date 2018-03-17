@@ -11,8 +11,8 @@ import play.api.libs.json._
  */
 case class Block(
     hash: Blockhash,
-    previousBlockhash: Blockhash,
-    nextBlockhash: Blockhash,
+    previousBlockhash: Option[Blockhash], // first block doesn't have a previous block
+    nextBlockhash: Option[Blockhash], // last block doesn't have a next block
     merkleRoot: Blockhash,
     transactions: List[TransactionId],
     confirmations: Confirmations,
@@ -24,14 +24,30 @@ case class Block(
     nonce: Int,
     bits: String,
     chainwork: String,
-    difficulty: BigDecimal
-)
+    difficulty: BigDecimal,
+    tposContract: Option[String]) {
+
+  /**
+   * Every block until 75 is PoW.
+   */
+  def isPoW: Boolean = height.int <= 75
+
+  /**
+   * From block 76, we have just PoW or TPoS
+   */
+  def isPoS: Boolean = !isPoW && tposContract.isEmpty
+
+  /**
+   * TPoS blocks need a tposcontract
+   */
+  def isTPoS: Boolean = !isPoW && tposContract.nonEmpty
+}
 
 object Block {
   implicit val reads: Reads[Block] = {
     val builder = (__ \ 'hash).read[Blockhash] and
-        (__ \ 'previousblockhash).read[Blockhash] and
-        (__ \ 'nextblockhash).read[Blockhash] and
+        (__ \ 'previousblockhash).readNullable[Blockhash] and
+        (__ \ 'nextblockhash).readNullable[Blockhash] and
         (__ \ 'merkleroot).read[Blockhash] and
         (__ \ 'tx).read[List[TransactionId]] and
         (__ \ 'confirmations).read[Confirmations] and
@@ -43,16 +59,17 @@ object Block {
         (__ \ 'nonce).read[Int] and
         (__ \ 'bits).read[String] and
         (__ \ 'chainwork).read[String] and
-        (__ \ 'difficulty).read[BigDecimal]
+        (__ \ 'difficulty).read[BigDecimal] and
+        (__ \ 'tposcontract).readNullable[String]
 
     builder.apply { (hash, previous, next, root, transactions,
         confirmations, size, height, version, time,
-        medianTime, nonce, bits, chainwork, difficulty) =>
+        medianTime, nonce, bits, chainwork, difficulty, tposContract) =>
 
       Block(
         hash, previous, next, root, transactions,
         confirmations, size, height, version, time,
-        medianTime, nonce, bits, chainwork, difficulty)
+        medianTime, nonce, bits, chainwork, difficulty, tposContract)
     }
   }
 

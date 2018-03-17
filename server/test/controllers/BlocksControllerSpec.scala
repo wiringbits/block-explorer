@@ -139,8 +139,8 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
       (jsonBlock \ "version").as[Long] mustEqual block.version
       (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
-      (jsonBlock \ "previousBlockhash").as[Blockhash] mustEqual block.previousBlockhash
-      (jsonBlock \ "nextBlockhash").as[Blockhash] mustEqual block.nextBlockhash
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
 
       val jsonCoinstake = (jsonRewards \ "coinstake").as[JsValue]
       (jsonCoinstake \ "address").as[String] mustEqual "XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"
@@ -173,8 +173,8 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
       (jsonBlock \ "version").as[Long] mustEqual block.version
       (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
-      (jsonBlock \ "previousBlockhash").as[Blockhash] mustEqual block.previousBlockhash
-      (jsonBlock \ "nextBlockhash").as[Blockhash] mustEqual block.nextBlockhash
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
 
       val jsonCoinstake = (jsonRewards \ "coinstake").as[JsValue]
       (jsonCoinstake \ "address").as[String] mustEqual "XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"
@@ -245,8 +245,9 @@ class BlocksControllerSpec extends MyAPISpec {
       bits = "1d011212",
       chainwork = "00000000000000000000000000000000000000000000000000000084c71ff420",
       difficulty = BigDecimal("0.9340526210769362"),
-      previousBlockhash = Blockhash.from("000003dc4c2fc449dededaaad6efc33ce1b64b88a060652dc47edc63d6d6b524").get,
-      nextBlockhash = Blockhash.from("000000125c06cedf38b07bff174bdb61027935dbcb34831d28cff40bedb519d5").get
+      previousBlockhash = Some(Blockhash.from("000003dc4c2fc449dededaaad6efc33ce1b64b88a060652dc47edc63d6d6b524").get),
+      nextBlockhash = Some(Blockhash.from("000000125c06cedf38b07bff174bdb61027935dbcb34831d28cff40bedb519d5").get),
+      tposContract = None
     )
   }
 }
