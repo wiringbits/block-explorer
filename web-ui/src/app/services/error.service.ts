@@ -33,8 +33,8 @@ export class ErrorService {
           this.setFieldError(form, fieldName, message);
         }
       } else {
-        const message = element.message;
-        this.notificationService.error(message);
+        this.translateService.get(element.message || 'message.unknownErrors')
+          .subscribe(msg => this.notificationService.error(msg));
       }
     });
   }

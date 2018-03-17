@@ -35,6 +35,7 @@ export class AppComponent {
 
       // messages
       'message.serverUnavailable': 'The server unavailable, please try again in a minute',
+      'message.unknownError': 'Unknown error, please try again in a minute',
 
       // actions
       'action.find': 'Find',
