@@ -6,3 +6,5 @@
 GET   /transactions/:txid    controllers.TransactionsController.getTransaction(txid: String)
 
 GET   /addresses/:address    controllers.AddressesController.getDetails(address: String)
+
+GET   /blocks/:blockhash    controllers.BlocksController.getDetails(blockhash: String)
