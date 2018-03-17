@@ -12,6 +12,12 @@ class BlockLogic {
     Or.from(maybe, One(BlockhashFormatError))
   }
 
+  def getPoWTransactionId(block: Block): ApplicationResult[TransactionId] = {
+    val maybe = block.transactions.headOption
+
+    Or.from(maybe, One(BlockNotFoundError))
+  }
+
   /**
    * Get the coinstake transaction id for the given block.
    *
@@ -43,10 +49,10 @@ class BlockLogic {
    * Sometimes there could be rounding errors, for example, when the input is not exactly divisible by 2,
    * we return 0 in that case because the reward could be negative.
    */
-  def getRewards(
+  def getPoSRewards(
       coinstakeTx: Transaction,
       coinstakeAddress: Address,
-      coinstakeInput: BigDecimal): ApplicationResult[BlockRewards] = {
+      coinstakeInput: BigDecimal): ApplicationResult[PoSBlockRewards] = {
 
     // first vout is empty, useless
     val coinstakeVOUT = coinstakeTx.vout.drop(1)
@@ -69,7 +75,7 @@ class BlockLogic {
         )
       }
 
-      Good(BlockRewards(coinstakeReward, masternodeRewardMaybe))
+      Good(PoSBlockRewards(coinstakeReward, masternodeRewardMaybe))
     } else {
       Bad(BlockNotFoundError).accumulating
     }

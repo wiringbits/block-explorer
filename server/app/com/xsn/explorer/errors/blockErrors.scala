@@ -22,3 +22,12 @@ case object BlockNotFoundError extends BlockError with InputValidationError {
     List(error)
   }
 }
+
+case object TPoSBlockNotSupportedError extends BlockError with InputValidationError {
+
+  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
+    val message = messagesApi("error.block.tposUnsupported")
+    val error = FieldValidationError("blockhash", message)
+    List(error)
+  }
+}

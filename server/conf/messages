@@ -9,3 +9,4 @@ error.address.format=Invalid address format
 
 error.block.format=Invalid blockhash format
 error.block.notFound=Block not found
+error.block.tposUnsupported=TPoS Blocks are not supported at the moment

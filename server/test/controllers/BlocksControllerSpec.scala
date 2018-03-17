@@ -75,10 +75,34 @@ class BlocksControllerSpec extends MyAPISpec {
     )
   )
 
+  // TPoS
+  val tposBlock = posBlock.copy(
+    hash = Blockhash.from("c6944a33e3e03eb0ccd350f1fc2d6e5f3bd1411e1efddc0990aa3243663b41b7").get,
+    tposContract = Some("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701"))
+
+  // PoW
+  val powBlock = posBlock.copy(
+    hash = Blockhash.from("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8").get,
+    transactions = List(
+      TransactionId.from("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8").get
+    ),
+    height = Height(2)
+  )
+
+  val powBlockPreviousTx = createTx(
+    id = TransactionId.from("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8").get,
+    vin = None,
+    vout = List(
+      TransactionVOUT(BigDecimal("76500000.00000000"), 0, "pubkey", Some(Address.from("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9").get))
+    )
+  )
+
   val customXSNService = new DummyXSNService {
     val blocks = Map(
       posBlock.hash -> posBlock,
-      posBlockRoundingError.hash -> posBlockRoundingError
+      posBlockRoundingError.hash -> posBlockRoundingError,
+      tposBlock.hash -> tposBlock,
+      powBlock.hash -> powBlock
     )
 
     override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
@@ -91,12 +115,12 @@ class BlocksControllerSpec extends MyAPISpec {
       Future.successful(result)
     }
 
-
     val txs = Map(
       posBlockCoinstakeTx.id -> posBlockCoinstakeTx,
       posBlockCoinstakeTxInput.id -> posBlockCoinstakeTxInput,
       posBlockRoundingErrorCoinstakeTx.id -> posBlockRoundingErrorCoinstakeTx,
-      posBlockRoundingErrorCoinstakeTxInput.id -> posBlockRoundingErrorCoinstakeTxInput
+      posBlockRoundingErrorCoinstakeTxInput.id -> posBlockRoundingErrorCoinstakeTxInput,
+      powBlockPreviousTx.id -> powBlockPreviousTx
     )
 
     override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
@@ -184,6 +208,36 @@ class BlocksControllerSpec extends MyAPISpec {
       jsonMasternode.isEmpty mustEqual true
     }
 
+    "retrieve a PoW block" in {
+      val block = powBlock
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      (jsonBlock \ "hash").as[Blockhash] mustEqual block.hash
+      (jsonBlock \ "size").as[Size] mustEqual block.size
+      (jsonBlock \ "bits").as[String] mustEqual block.bits
+      (jsonBlock \ "chainwork").as[String] mustEqual block.chainwork
+      (jsonBlock \ "difficulty").as[BigDecimal] mustEqual block.difficulty
+      (jsonBlock \ "confirmations").as[Confirmations] mustEqual block.confirmations
+      (jsonBlock \ "height").as[Height] mustEqual block.height
+      (jsonBlock \ "medianTime").as[Long] mustEqual block.medianTime
+      (jsonBlock \ "time").as[Long] mustEqual block.time
+      (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+      (jsonBlock \ "version").as[Long] mustEqual block.version
+      (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
+
+      val jsonReward = (jsonRewards \ "reward").as[JsValue]
+      (jsonReward \ "address").as[String] mustEqual "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"
+      (jsonReward \ "value").as[BigDecimal] mustEqual BigDecimal("76500000")
+    }
+
     "fail on the wrong blockhash format" in {
       val response = GET(url("000125c06cedf38b07bff174bdb61027935dbcb34831d28cff40bedb519d5"))
 
@@ -215,9 +269,29 @@ class BlocksControllerSpec extends MyAPISpec {
       (error \ "field").as[String] mustEqual "blockhash"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
+
+    "fail on TPoS block" in {
+      val response = GET(url("c6944a33e3e03eb0ccd350f1fc2d6e5f3bd1411e1efddc0990aa3243663b41b7"))
+
+      status(response) mustEqual BAD_REQUEST
+
+      val json = contentAsJson(response)
+      val errorList = (json \ "errors").as[List[JsValue]]
+
+      errorList.size mustEqual 1
+      val error = errorList.head
+
+      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "field").as[String] mustEqual "blockhash"
+      (error \ "message").as[String].nonEmpty mustEqual true
+    }
   }
 
   private def createTx(id: TransactionId, vin: TransactionVIN, vout: List[TransactionVOUT]): Transaction = {
+    createTx(id, Some(vin), vout)
+  }
+
+  private def createTx(id: TransactionId, vin: Option[TransactionVIN], vout: List[TransactionVOUT]): Transaction = {
     Transaction(
       id = id,
       size = Size(234),
@@ -225,7 +299,7 @@ class BlocksControllerSpec extends MyAPISpec {
       time = 1520318120,
       blocktime = 1520318120,
       confirmations = Confirmations(1950),
-      vin = Some(vin),
+      vin = vin,
       vout = vout
     )
   }
