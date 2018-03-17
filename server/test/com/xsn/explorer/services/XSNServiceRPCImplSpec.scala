@@ -1,9 +1,9 @@
 package com.xsn.explorer.services
 
 import com.xsn.explorer.config.RPCConfig
-import com.xsn.explorer.errors.{AddressFormatError, TransactionNotFoundError, XSNMessageError, XSNUnexpectedResponseError}
+import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.Executors
-import com.xsn.explorer.models.{Address, TransactionId}
+import com.xsn.explorer.models.{Address, Blockhash, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.{Bad, Good}
@@ -326,6 +326,70 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       whenReady(service.getTransactionCount(address)) { result =>
         result mustEqual Bad(AddressFormatError).accumulating
+      }
+    }
+  }
+
+  "getBlock" should {
+    "return a block" in {
+      val responseBody =
+        """
+          |{
+          |    "result": {
+          |      "hash": "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81",
+          |      "confirmations": 11163,
+          |      "size": 478,
+          |      "height": 809,
+          |      "version": 536870912,
+          |      "merkleroot": "598cc6ba8238d87641b0dbd02485b7d635b5417429df3145c98c3ff8779ab4b8",
+          |      "tx": [
+          |        "7f12adbb63d443502cf151c76946d5faa0b1c662a5d67afc7da085c74e06f1ce",
+          |        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+          |      ],
+          |      "time": 1520318120,
+          |      "mediantime": 1520318054,
+          |      "nonce": 0,
+          |      "bits": "1d011212",
+          |      "difficulty": 0.9340526210769362,
+          |      "chainwork": "00000000000000000000000000000000000000000000000000000084c71ff420",
+          |      "previousblockhash": "9490ce5d14bb5e79a790ddede03fc3a9bde3f7156f34a57ae3ceb56ae7426c14",
+          |      "nextblockhash": "f6e3199c241131e79640fe027a6ef993c02b3520c3d4ba08cd67abfbb98ec07e"
+          |    },
+          |    "error": null,
+          |    "id": null
+          |}
+          |""".stripMargin
+
+      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getBlock(blockhash)) { result =>
+        result.isGood mustEqual true
+
+        val block = result.get
+        block.hash.string mustEqual "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81"
+        block.transactions.size mustEqual 2
+      }
+    }
+
+    "fail on unknown block" in {
+      val responseBody = """{"result":null,"error":{"code":-5,"message":"Block not found"},"id":null}"""
+
+      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b80").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getBlock(blockhash)) { result =>
+        result mustEqual Bad(BlockNotFoundError).accumulating
       }
     }
   }

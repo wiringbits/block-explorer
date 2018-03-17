@@ -6,3 +6,6 @@ error.transaction.format=Invalid transaction format
 error.transaction.notFound=Transaction not found
 
 error.address.format=Invalid address format
+
+error.block.format=Invalid blockhash format
+error.block.notFound=Block not found

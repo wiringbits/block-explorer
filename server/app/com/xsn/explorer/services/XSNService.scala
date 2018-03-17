@@ -5,9 +5,9 @@ import javax.inject.Inject
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.config.RPCConfig
-import com.xsn.explorer.errors.{AddressFormatError, TransactionNotFoundError, XSNMessageError, XSNUnexpectedResponseError}
+import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
-import com.xsn.explorer.models.{Address, AddressBalance, Transaction, TransactionId}
+import com.xsn.explorer.models._
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue, Reads}
@@ -22,6 +22,8 @@ trait XSNService {
   def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance]
 
   def getTransactionCount(address: Address): FutureApplicationResult[Int]
+
+  def getBlock(blockhash: Blockhash): FutureApplicationResult[Block]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -101,6 +103,23 @@ class XSNServiceRPCImpl @Inject() (
           val maybe = getResult[List[JsValue]](response, errorCodeMapper)
           maybe.map(_.map(_.size)).getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+    val errorCodeMapper = Map(-5 -> BlockNotFoundError)
+    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
+
+    server
+        .post(body)
+        .map { response =>
+
+          val maybe = getResult[Block](response, errorCodeMapper)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }
