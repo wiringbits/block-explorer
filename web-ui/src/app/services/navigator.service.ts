@@ -11,6 +11,14 @@ export class NavigatorService {
     this.router.navigate([path]);
   }
 
+  addressDetails(address: string) {
+    this.go('/addresses/' + address);
+  }
+
+  blockDetails(blockhash: string) {
+    this.go('/blocks/' + blockhash);
+  }
+
   transactionDetails(txid: string) {
     this.go('/transactions/' + txid);
   }

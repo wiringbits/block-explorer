@@ -80,7 +80,7 @@ export class ErrorService {
     return control != null;
   }
 
-  private setFieldError(form: FormGroup, fieldName: string, message: string) {
+  setFieldError(form: FormGroup, fieldName: string, message: string) {
     const control = this.findFieldControl(form, fieldName);
     const errors = { [message]: true };
     control.setErrors(errors);

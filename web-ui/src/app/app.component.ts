@@ -40,11 +40,15 @@ export class AppComponent {
       'message.addressNotFound': 'Address not found',
       'message.blockNotFound': 'Block not found',
 
+      // error messages
+      'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction',
+
       // actions
       'action.find': 'Find',
 
       // labels
       'label.coinName': 'XSN',
+      'label.searchField': 'Transaction id or Blockhash or Address',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',

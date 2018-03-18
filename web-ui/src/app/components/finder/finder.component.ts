@@ -2,9 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import { ErrorService } from '../../services/error.service';
 import { NavigatorService } from '../../services/navigator.service';
+import { AddressesService } from '../../services/addresses.service';
+import { BlocksService } from '../../services/blocks.service';
 import { TransactionsService } from '../../services/transactions.service';
+
+const BLOCK_REGEX = '^[A-Fa-f0-9]{64}$';
+const ADDRESS_REGEX = '^[a-zA-Z0-9]{34}$';
 
 @Component({
   selector: 'app-finder',
@@ -18,7 +25,10 @@ export class FinderComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private navigatorService: NavigatorService,
+    private addressesService: AddressesService,
+    private blocksService: BlocksService,
     private transactionsService: TransactionsService,
+    private translateService: TranslateService,
     public errorService: ErrorService) {
 
     this.createForm();
@@ -29,18 +39,40 @@ export class FinderComponent implements OnInit {
 
   private createForm() {
     this.form = this.formBuilder.group({
-      transactionId: [null, [Validators.required, Validators.pattern('^[A-Fa-f0-9]{64}$')]],
+      searchField: [null, [Validators.required, Validators.pattern(`(${ADDRESS_REGEX})|(${BLOCK_REGEX})`)]],
     });
   }
 
   onSubmit() {
-    const txid = this.form.get('transactionId').value;
+    const searchField = this.form.get('searchField').value;
 
-    // instead of redirecting, we check if the transaction is valid.
-    this.transactionsService.get(txid)
+    if (new RegExp(ADDRESS_REGEX).test(searchField)) {
+      // address
+      this.addressesService.get(searchField)
+        .subscribe(
+          response => this.navigatorService.addressDetails(searchField),
+          response => this.errorService.renderServerErrors(this.form, response)
+        );
+    } else {
+      // block or transaction
+      this.transactionsService.get(searchField)
+        .subscribe(
+          response => this.navigatorService.transactionDetails(searchField),
+          response => this.lookForBlock(searchField)
+        );
+    }
+  }
+
+  private lookForBlock(blockhash: string) {
+    this.blocksService.get(blockhash)
       .subscribe(
-        response => this.navigatorService.transactionDetails(txid),
-        response => this.errorService.renderServerErrors(this.form, response)
+        response => this.navigatorService.blockDetails(blockhash),
+        response => this.onNothingFound()
       );
+  }
+
+  private onNothingFound() {
+    this.translateService.get('error.nothingFound')
+      .subscribe(msg => this.errorService.setFieldError(this.form, 'searchField', msg));
   }
 }
