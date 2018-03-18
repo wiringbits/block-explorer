@@ -1,3 +1,27 @@
-<p>
-  address-details works!
-</p>
+<div>
+  <div [hidden]="address != null">
+    <alert>{{'message.addressNotFound' | translate}}</alert>
+  </div>
+  <div *ngIf="address != null">
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{addressString}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.balance' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{address.balance}} {{'label.coinName' | translate}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.received' | translate}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{address.received}} {{'label.coinName' | translate}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.spent' | translate}}</label>
+      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{getSent(address)}} {{'label.coinName' | translate}}</label>
+    </div>
+    <div class="row">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactionCount' | translate}}</label>
+      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{address.transactionCount}}</label>
+    </div>
+  </div>
+</div>

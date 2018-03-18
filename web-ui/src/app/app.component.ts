@@ -36,6 +36,8 @@ export class AppComponent {
       // messages
       'message.serverUnavailable': 'The server unavailable, please try again in a minute',
       'message.unknownError': 'Unknown error, please try again in a minute',
+      'message.transactionNotFound': 'Transaction not found',
+      'message.addressNotFound': 'Address not found',
 
       // actions
       'action.find': 'Find',
@@ -52,7 +54,13 @@ export class AppComponent {
       'label.from': 'From',
       'label.to': 'To',
       'label.value': 'Amount',
-      'label.fee': 'Fee'
+      'label.fee': 'Fee',
+
+      'label.address': 'Address',
+      'label.balance': 'Balance',
+      'label.received': 'Received',
+      'label.spent': 'Spent',
+      'label.transactionCount': 'Transactions'
     };
   }
 }
