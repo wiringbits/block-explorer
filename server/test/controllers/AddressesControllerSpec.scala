@@ -15,7 +15,7 @@ import play.api.test.Helpers._
 import scala.concurrent.Future
 
 
-class AddressesTransactionSpec extends MyAPISpec {
+class AddressesControllerSpec extends MyAPISpec {
 
   def addressDetails(balance: Int, received: Int, txCount: Int) = {
     AddressDetails(AddressBalance(BigDecimal(balance), BigDecimal(received)), txCount)
