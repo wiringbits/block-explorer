@@ -7,11 +7,11 @@ import { NavigatorService } from '../../services/navigator.service';
 import { TransactionsService } from '../../services/transactions.service';
 
 @Component({
-  selector: 'app-transaction-finder',
-  templateUrl: './transaction-finder.component.html',
-  styleUrls: ['./transaction-finder.component.css']
+  selector: 'app-finder',
+  templateUrl: './finder.component.html',
+  styleUrls: ['./finder.component.css']
 })
-export class TransactionFinderComponent implements OnInit {
+export class FinderComponent implements OnInit {
 
   form: FormGroup;
 

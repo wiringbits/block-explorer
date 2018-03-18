@@ -25,7 +25,7 @@ import { HomeComponent } from './components/home/home.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component';
-import { TransactionFinderComponent } from './components/transaction-finder/transaction-finder.component';
+import { FinderComponent } from './components/finder/finder.component';
 import { AddressDetailsComponent } from './components/address-details/address-details.component';
 import { BlockDetailsComponent } from './components/block-details/block-details.component';
 
@@ -36,7 +36,7 @@ import { BlockDetailsComponent } from './components/block-details/block-details.
     FooterComponent,
     NavbarComponent,
     TransactionDetailsComponent,
-    TransactionFinderComponent,
+    FinderComponent,
     AddressDetailsComponent,
     BlockDetailsComponent
   ],
