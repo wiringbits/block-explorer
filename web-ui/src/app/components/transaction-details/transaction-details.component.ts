@@ -42,7 +42,7 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   getFee(tx: Transaction): number {
-    const vout = tx.output.map(t => t.value).reduce((a, b) => a + b);
+    const vout = tx.output.map(t => t.value).reduce((a, b) => a + b, 0);
     return Math.max(0, this.getVIN(tx) - vout);
   }
 

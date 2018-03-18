@@ -14,7 +14,8 @@
     <!-- TODO: Add link to block view -->
     <div class="row">
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockhash' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.blockhash}}</label>
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
+        <a routerLink="/blocks/{{transaction.blockhash}}">{{transaction.blockhash}}</a></label>
     </div>
     <div class="row">
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blocktime' | translate}}</label>
@@ -36,7 +37,9 @@
       <div *ngIf="transaction.input != null">
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.from' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.input.address}}</label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
+            <a routerLink="/addresses/{{transaction.input.address}}">{{transaction.input.address}}</a>
+          </label>
         </div>
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.value' | translate}}</label>
@@ -53,7 +56,9 @@
       <div *ngFor="let item of transaction.output">
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.to' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{item.address}}</label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
+            <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+          </label>
         </div>
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.value' | translate}}</label>
