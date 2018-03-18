@@ -48,6 +48,7 @@ export class AppComponent {
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',
       'label.blocktime': 'Block Time',
+      'label.medianTime': 'Median Time',
       'label.noInput': 'No input',
       'label.coinbase': 'Coinbase',
       'label.output': 'Receivers',
@@ -60,7 +61,24 @@ export class AppComponent {
       'label.balance': 'Balance',
       'label.received': 'Received',
       'label.spent': 'Spent',
-      'label.transactionCount': 'Transactions'
+      'label.transactionCount': 'Transactions',
+
+      'label.blockType': 'Block type',
+      'label.next': 'Next',
+      'label.previous': 'Previous',
+      'label.merkleRoot': 'Merkle root',
+      'label.size': 'Size',
+      'label.version': 'Version',
+      'label.nonce': 'Nonce',
+      'label.bits': 'Bits',
+      'label.chainwork': 'Chainwork',
+      'label.difficulty': 'Difficulty',
+      'label.transactions': 'Transactions',
+      'label.rewards': 'Rewards',
+      'label.coinstake': 'Coinstake',
+      'label.masternode': 'Master node',
+      'label.amount': 'Amount',
+      'label.blockReward': 'Block reward'
     };
   }
 }
