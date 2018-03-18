@@ -13,6 +13,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
 import { AddressesService } from './services/addresses.service';
+import { BlocksService } from './services/blocks.service';
 import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
 import { NavigatorService } from './services/navigator.service';
@@ -58,6 +59,7 @@ import { BlockDetailsComponent } from './components/block-details/block-details.
   ],
   providers: [
     AddressesService,
+    BlocksService,
     ErrorService,
     LanguageService,
     NavigatorService,

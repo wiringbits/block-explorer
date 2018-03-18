@@ -1,0 +1,36 @@
+
+
+export class BlockDetails {
+  block: Block;
+  rewards: BlockRewards;
+}
+
+class Block {
+  hash: string;
+  previousBlockhash: string;
+  nextBlockhash: string;
+  merkleRoot: string;
+  transactions: string[];
+  confirmations: number;
+  size: number;
+  height: number;
+  version: number;
+  time: number;
+  medianTime: number;
+  nonce: number;
+  bits: string;
+  chainwork: string;
+  difficulty: number;
+  tposContract: string;
+}
+
+class BlockRewards {
+  reward: BlockReward;
+  coinstake: BlockReward;
+  masternode: BlockReward;
+}
+
+class BlockReward {
+  address: string;
+  value: number;
+}
