@@ -26,6 +26,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component';
 import { TransactionFinderComponent } from './components/transaction-finder/transaction-finder.component';
 import { AddressDetailsComponent } from './components/address-details/address-details.component';
+import { BlockDetailsComponent } from './components/block-details/block-details.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { AddressDetailsComponent } from './components/address-details/address-de
     NavbarComponent,
     TransactionDetailsComponent,
     TransactionFinderComponent,
-    AddressDetailsComponent
+    AddressDetailsComponent,
+    BlockDetailsComponent
   ],
   imports: [
     AppRoutingModule,
