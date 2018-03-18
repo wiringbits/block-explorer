@@ -152,7 +152,7 @@ class XSNServiceRPCImpl @Inject() (
       errorCodeMapper: Map[Int, ApplicationError])(
       implicit reads: Reads[A]): Option[ApplicationResult[A]] = {
 
-    Option(response)
+    val maybe = Option(response)
         .filter(_.status == 200)
         .flatMap { r => Try(r.json).toOption }
         .flatMap { json =>
@@ -165,5 +165,13 @@ class XSNServiceRPCImpl @Inject() (
                     .map(_.accumulating)
               }
         }
+
+    // if there is no result nor error, it is probably that the server returned non 200 status
+    maybe.orElse {
+      Try(response.json)
+          .toOption
+          .flatMap { json => mapError(json, errorCodeMapper) }
+          .map { e => Bad(e).accumulating }
+    }
   }
 }

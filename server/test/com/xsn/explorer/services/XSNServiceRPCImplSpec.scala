@@ -184,7 +184,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     "handle transaction not found" in {
       val responseBody = """{"result":null,"error":{"code":-5,"message":"No information available about transaction"},"id":null}"""
       val json = Json.parse(responseBody)
-      when(response.status).thenReturn(200)
+      when(response.status).thenReturn(500)
       when(response.json).thenReturn(json)
       when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
 
