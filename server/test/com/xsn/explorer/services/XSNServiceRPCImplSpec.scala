@@ -237,7 +237,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
         """
           |{
           |    "result": {
-          |      "balance": 24650100000000,
+          |      "balance": 2465010000000000,
           |      "received": 1060950100000000
           |    },
           |    "error": null,
@@ -257,8 +257,8 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
         result.isGood mustEqual true
 
         val balance = result.get
-        balance.balance mustEqual BigInt("24650100000000")
-        balance.received mustEqual BigInt("1060950100000000")
+        balance.balance mustEqual BigDecimal("24650100.00000000")
+        balance.received mustEqual BigDecimal("10609501.00000000")
       }
     }
 

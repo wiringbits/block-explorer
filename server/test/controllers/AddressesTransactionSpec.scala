@@ -18,7 +18,7 @@ import scala.concurrent.Future
 class AddressesTransactionSpec extends MyAPISpec {
 
   def addressDetails(balance: Int, received: Int, txCount: Int) = {
-    AddressDetails(AddressBalance(BigInt(balance), BigInt(received)), txCount)
+    AddressDetails(AddressBalance(BigDecimal(balance), BigDecimal(received)), txCount)
   }
 
   val addressEmpty = addressDetails(0, 0, 0)
@@ -56,8 +56,8 @@ class AddressesTransactionSpec extends MyAPISpec {
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
-      (json \ "balance").as[Int] mustEqual address.balance.balance.intValue()
-      (json \ "received").as[Int] mustEqual address.balance.received.intValue()
+      (json \ "balance").as[BigDecimal] mustEqual address.balance.balance
+      (json \ "received").as[BigDecimal] mustEqual address.balance.received
       (json \ "transactionCount").as[Int] mustEqual address.transactionCount
     }
 

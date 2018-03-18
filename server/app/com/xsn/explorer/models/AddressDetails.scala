@@ -8,8 +8,8 @@ object AddressDetails {
 
   implicit val writes: Writes[AddressDetails] = Writes { obj =>
     val values = Map(
-      "balance" -> JsNumber(BigDecimal(obj.balance.balance)),
-      "received" -> JsNumber(BigDecimal(obj.balance.received)),
+      "balance" -> JsNumber(obj.balance.balance),
+      "received" -> JsNumber(obj.balance.received),
       "transactionCount" -> JsNumber(obj.transactionCount))
 
     JsObject.apply(values)

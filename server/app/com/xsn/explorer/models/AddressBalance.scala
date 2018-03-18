@@ -1,24 +1,23 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.util.Extensions.BigDecimalExt
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class AddressBalance(balance: BigInt, received: BigInt)
+case class AddressBalance(balance: BigDecimal, received: BigDecimal)
 
 object AddressBalance {
+  /**
+   * The RPC server is giving us these values in satoshis, we transform
+   * them to BigDecimal to match the format used by the application.
+   */
   implicit val reads: Reads[AddressBalance] = {
     val builder = (__ \ 'balance).read[BigDecimal] and (__ \ 'received).read[BigDecimal]
 
     builder.apply { (balance, received) =>
-      AddressBalance(balance.toBigInt(), received.toBigInt())
+      AddressBalance(balance.fromSatoshis, received.fromSatoshis)
     }
   }
 
-  implicit val writes: Writes[AddressBalance] = Writes { obj =>
-    val values = Map(
-      "balance" -> JsNumber(BigDecimal(obj.balance)),
-      "received" -> JsNumber(BigDecimal(obj.received)))
-
-    JsObject.apply(values)
-  }
+  implicit val writes: Writes[AddressBalance] = Json.writes[AddressBalance]
 }
