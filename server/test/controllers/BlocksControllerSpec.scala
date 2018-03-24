@@ -79,8 +79,58 @@ class BlocksControllerSpec extends MyAPISpec {
 
   // TPoS
   val tposBlock = posBlock.copy(
-    hash = Blockhash.from("c6944a33e3e03eb0ccd350f1fc2d6e5f3bd1411e1efddc0990aa3243663b41b7").get,
-    tposContract = Some(createTransactionId("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701")))
+    hash = Blockhash.from("19f320185015d146237efe757852b21c5e08b88b2f4de9d3fa9517d8463e472b").get,
+    tposContract = Some(createTransactionId("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701")),
+    transactions = List(
+      createTransactionId("28568eb4a2c69a292b7d56daa45e3b17fbfc8af9310d5c2d444600e64266c87f"),
+      createTransactionId("8c7feafc18576b89bf87faf8aa89feaac1a3fad7d5da77d1fe773219a0e9d864")
+    )
+  )
+
+  val tposBlockContractTx = createTx(
+    createTransactionId("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701"),
+    None,
+    List(
+      TransactionVOUT(
+        n = 0,
+        value = BigDecimal(0),
+        scriptPubKey = Some(createScriptPubKey("nulldata", "OP_RETURN 5869337351664d51737932437a4d5a54726e4b573648464770315671465468644c77 58794a4338786e664672484e634d696e68366778755052595939484361593944416f 99"))
+      )
+    )
+  )
+
+  val tposBlockCoinstakeTx = createTx(
+    createTransactionId("8c7feafc18576b89bf87faf8aa89feaac1a3fad7d5da77d1fe773219a0e9d864"),
+    Some(TransactionVIN(createTransactionId("9ecf10916467dccc8c8f3a87d869dc5aceb57d5d1c2117036fe60f31369a284e"), 1)),
+    List(
+      TransactionVOUT(BigDecimal(0), 0, None),
+      TransactionVOUT(
+        n = 1,
+        value = BigDecimal("1022.27500000"),
+        scriptPubKey = Some(createScriptPubKey("pubkeyhash", createAddress("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw")))
+      ),
+
+      TransactionVOUT(
+        n = 2,
+        value = BigDecimal("0.22500000"),
+        scriptPubKey = Some(createScriptPubKey("pubkeyhash", createAddress("XyJC8xnfFrHNcMinh6gxuPRYY9HCaY9DAo")))
+      ),
+
+      TransactionVOUT(
+        n = 3,
+        value = BigDecimal("22.50000000"),
+        scriptPubKey = Some(createScriptPubKey("pubkeyhash", createAddress("XydZnssXHCxxRtB4rk7evfKT9XP7GqyA9N")))
+      )
+    )
+  )
+
+  val tposBlockCoinstakeTxInput = createTx(
+    createTransactionId("9ecf10916467dccc8c8f3a87d869dc5aceb57d5d1c2117036fe60f31369a284e"),
+    None,
+    List(
+      TransactionVOUT(n = 1, value = BigDecimal(1000))
+    )
+  )
 
   // PoW
   val powBlock = posBlock.copy(
@@ -122,7 +172,10 @@ class BlocksControllerSpec extends MyAPISpec {
       posBlockCoinstakeTxInput.id -> posBlockCoinstakeTxInput,
       posBlockRoundingErrorCoinstakeTx.id -> posBlockRoundingErrorCoinstakeTx,
       posBlockRoundingErrorCoinstakeTxInput.id -> posBlockRoundingErrorCoinstakeTxInput,
-      powBlockPreviousTx.id -> powBlockPreviousTx
+      powBlockPreviousTx.id -> powBlockPreviousTx,
+      tposBlockContractTx.id -> tposBlockContractTx,
+      tposBlockCoinstakeTx.id -> tposBlockCoinstakeTx,
+      tposBlockCoinstakeTxInput.id -> tposBlockCoinstakeTxInput
     )
 
     override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
@@ -240,6 +293,46 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonReward \ "value").as[BigDecimal] mustEqual BigDecimal("76500000")
     }
 
+    "retrieve TPoS block" in {
+      val block = tposBlock
+      val response = GET(url("19f320185015d146237efe757852b21c5e08b88b2f4de9d3fa9517d8463e472b"))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      (jsonBlock \ "hash").as[Blockhash] mustEqual block.hash
+      (jsonBlock \ "size").as[Size] mustEqual block.size
+      (jsonBlock \ "bits").as[String] mustEqual block.bits
+      (jsonBlock \ "chainwork").as[String] mustEqual block.chainwork
+      (jsonBlock \ "difficulty").as[BigDecimal] mustEqual block.difficulty
+      (jsonBlock \ "confirmations").as[Confirmations] mustEqual block.confirmations
+      (jsonBlock \ "height").as[Height] mustEqual block.height
+      (jsonBlock \ "medianTime").as[Long] mustEqual block.medianTime
+      (jsonBlock \ "time").as[Long] mustEqual block.time
+      (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+      (jsonBlock \ "version").as[Long] mustEqual block.version
+      (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
+      (jsonBlock \ "tposContract").as[String] mustEqual block.tposContract.get.string
+
+      val jsonOwner = (jsonRewards \ "owner").as[JsValue]
+      (jsonOwner \ "address").as[String] mustEqual "Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw"
+      (jsonOwner \ "value").as[BigDecimal] mustEqual BigDecimal("22.275")
+
+      val jsonMerchant = (jsonRewards \ "merchant").as[JsValue]
+      (jsonMerchant \ "address").as[String] mustEqual "XyJC8xnfFrHNcMinh6gxuPRYY9HCaY9DAo"
+      (jsonMerchant \ "value").as[BigDecimal] mustEqual BigDecimal("0.225")
+
+      val jsonMasternode = (jsonRewards \ "masternode").as[JsValue]
+      (jsonMasternode \ "address").as[String] mustEqual "XydZnssXHCxxRtB4rk7evfKT9XP7GqyA9N"
+      (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
+
+    }
+
     "fail on the wrong blockhash format" in {
       val response = GET(url("000125c06cedf38b07bff174bdb61027935dbcb34831d28cff40bedb519d5"))
 
@@ -258,22 +351,6 @@ class BlocksControllerSpec extends MyAPISpec {
 
     "fail on an unknown block" in {
       val response = GET(url("000003dc4c2fc449dededaaad6efc33ce1b64b88a060652dc47edc63d6d6b524"))
-
-      status(response) mustEqual BAD_REQUEST
-
-      val json = contentAsJson(response)
-      val errorList = (json \ "errors").as[List[JsValue]]
-
-      errorList.size mustEqual 1
-      val error = errorList.head
-
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
-      (error \ "field").as[String] mustEqual "blockhash"
-      (error \ "message").as[String].nonEmpty mustEqual true
-    }
-
-    "fail on TPoS block" in {
-      val response = GET(url("c6944a33e3e03eb0ccd350f1fc2d6e5f3bd1411e1efddc0990aa3243663b41b7"))
 
       status(response) mustEqual BAD_REQUEST
 

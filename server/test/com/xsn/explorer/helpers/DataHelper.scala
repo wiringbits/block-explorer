@@ -20,4 +20,7 @@ object DataHelper {
     ScriptPubKey(scriptType, "", List(address))
   }
 
+  def createScriptPubKey(scriptType: String, asm: String, address: Option[Address] = None) = {
+    ScriptPubKey(scriptType, asm, address.toList)
+  }
 }

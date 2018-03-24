@@ -4,12 +4,11 @@ import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.errors.{BlockNotFoundError, TPoSBlockNotSupportedError}
+import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
-import org.scalactic.Bad
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class BlockService @Inject() (
     xsnService: XSNService,
@@ -85,9 +84,44 @@ class BlockService @Inject() (
     result.toFuture
   }
 
-  // TODO: Complete it
+  // TODO: Handle blocks with coin split
   private def getTPoSBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
-    val result = Bad(TPoSBlockNotSupportedError).accumulating
-    Future.successful(result)
+    val result = for {
+      coinstakeTxId <- blockLogic
+          .getCoinstakeTransactionId(block)
+          .toFutureOr
+      coinstakeTx <- xsnService
+          .getTransaction(coinstakeTxId)
+          .toFutureOr
+      coinstakeTxVIN <- transactionLogic
+          .getVIN(coinstakeTx, BlockNotFoundError)
+          .toFutureOr
+
+      previousToCoinstakeTx <- xsnService
+          .getTransaction(coinstakeTxVIN.txid)
+          .toFutureOr
+      previousToCoinstakeVOUT <- transactionLogic
+          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockNotFoundError)
+          .toFutureOr
+
+      tposTxId <- blockLogic
+          .getTPoSTransactionId(block)
+          .toFutureOr
+      tposTx <- xsnService
+          .getTransaction(tposTxId)
+          .toFutureOr
+
+      addresses <- blockLogic
+          .getTPoSAddresses(tposTx)
+          .toFutureOr
+
+      (ownerAddress, merchantAddress) = addresses
+
+      rewards <- blockLogic
+          .getTPoSRewards(coinstakeTx, ownerAddress, merchantAddress, previousToCoinstakeVOUT.value)
+          .toFutureOr
+    } yield rewards
+
+    result.toFuture
   }
 }
