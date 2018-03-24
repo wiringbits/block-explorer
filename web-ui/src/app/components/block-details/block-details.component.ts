@@ -30,6 +30,7 @@ export class BlockDetailsComponent implements OnInit {
   }
 
   private onBlockhash(blockhash: string) {
+    this.blockDetails = null;
     this.blocksService.get(blockhash).subscribe(
       response => this.onBlockRetrieved(response),
       response => this.onError(response)
