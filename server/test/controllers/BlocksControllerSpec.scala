@@ -5,7 +5,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
+import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN, TransactionVOUT}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{Bad, Good}

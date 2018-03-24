@@ -1,5 +1,6 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.rpc.TransactionVOUT
 import play.api.libs.json.{Json, Writes}
 
 case class TransactionValue(address: Address, value: BigDecimal)

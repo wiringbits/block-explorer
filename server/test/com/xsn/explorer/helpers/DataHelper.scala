@@ -1,7 +1,7 @@
 package com.xsn.explorer.helpers
 
-import com.xsn.explorer.models.rpc.ScriptPubKey
-import com.xsn.explorer.models.{Address, TransactionId, TransactionVOUT}
+import com.xsn.explorer.models.rpc.{ScriptPubKey, TransactionVOUT}
+import com.xsn.explorer.models.{Address, TransactionId}
 
 object DataHelper {
 
