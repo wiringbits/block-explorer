@@ -6,7 +6,7 @@ import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.models.{Address, Blockhash, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalactic.{Bad, Good}
+import org.scalactic.Bad
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
@@ -279,8 +279,8 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     }
   }
 
-  "getTransactionCount" should {
-    "return the number of transactions" in {
+  "getTransactions" should {
+    "return the transactions" in {
       val responseBody =
         """
           |{
@@ -308,8 +308,9 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       when(response.json).thenReturn(json)
       when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
 
-      whenReady(service.getTransactionCount(address)) { result =>
-        result mustEqual Good(9)
+      whenReady(service.getTransactions(address)) { result =>
+        result.isGood mustEqual true
+        result.get.size mustEqual 9
       }
     }
 
@@ -324,7 +325,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       when(response.json).thenReturn(json)
       when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
 
-      whenReady(service.getTransactionCount(address)) { result =>
+      whenReady(service.getTransactions(address)) { result =>
         result mustEqual Bad(AddressFormatError).accumulating
       }
     }

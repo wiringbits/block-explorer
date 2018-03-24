@@ -22,7 +22,7 @@ trait XSNService {
 
   def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance]
 
-  def getTransactionCount(address: Address): FutureApplicationResult[Int]
+  def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
 
   def getBlock(blockhash: Blockhash): FutureApplicationResult[Block]
 }
@@ -83,7 +83,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getTransactionCount(address: Address): FutureApplicationResult[Int] = {
+  override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -101,8 +101,8 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
 
-          val maybe = getResult[List[JsValue]](response, errorCodeMapper)
-          maybe.map(_.map(_.size)).getOrElse {
+          val maybe = getResult[List[TransactionId]](response, errorCodeMapper)
+          maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating

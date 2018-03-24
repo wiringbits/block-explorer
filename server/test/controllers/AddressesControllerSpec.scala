@@ -3,7 +3,7 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.helpers.DummyXSNService
+import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.AddressBalance
 import com.xsn.explorer.services.XSNService
@@ -15,15 +15,19 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-
 class AddressesControllerSpec extends MyAPISpec {
 
-  def addressDetails(balance: Int, received: Int, txCount: Int) = {
-    AddressDetails(AddressBalance(BigDecimal(balance), BigDecimal(received)), txCount)
-  }
+  import DataHelper._
 
-  val addressEmpty = addressDetails(0, 0, 0)
-  val addressFilled = addressDetails(100, 200, 25)
+  val addressEmpty = createAddressDetails(0, 0, List())
+  val addressFilled = createAddressDetails(
+    100,
+    200,
+    List(
+      createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"),
+      createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
+    )
+  )
 
   val customXSNService = new DummyXSNService {
     val map = Map(
@@ -37,8 +41,8 @@ class AddressesControllerSpec extends MyAPISpec {
       Future.successful(result)
     }
 
-    override def getTransactionCount(address: Address): FutureApplicationResult[Int] = {
-      val maybe = map.get(address.string).map(_.transactionCount)
+    override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = {
+      val maybe = map.get(address.string).map(_.transactions)
       val result = Or.from(maybe, One(AddressFormatError))
       Future.successful(result)
     }
@@ -59,7 +63,7 @@ class AddressesControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
       (json \ "balance").as[BigDecimal] mustEqual address.balance.balance
       (json \ "received").as[BigDecimal] mustEqual address.balance.received
-      (json \ "transactionCount").as[Int] mustEqual address.transactionCount
+      (json \ "transactions").as[List[String]].size mustEqual address.transactions.size
     }
 
     "fail on bad address format" in {

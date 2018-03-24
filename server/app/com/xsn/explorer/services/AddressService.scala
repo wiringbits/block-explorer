@@ -20,8 +20,8 @@ class AddressService @Inject() (xsnService: XSNService)(implicit ec: ExecutionCo
       }
 
       balance <- xsnService.getAddressBalance(address).toFutureOr
-      transactionCount <- xsnService.getTransactionCount(address).toFutureOr
-    } yield AddressDetails(balance, transactionCount)
+      transactions <- xsnService.getTransactions(address).toFutureOr
+    } yield AddressDetails(balance, transactions)
 
     result.toFuture
   }

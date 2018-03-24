@@ -9,6 +9,6 @@ class DummyXSNService extends XSNService {
 
   override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = ???
   override def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance] = ???
-  override def getTransactionCount(address: Address): FutureApplicationResult[Int] = ???
+  override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = ???
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = ???
 }
