@@ -6,6 +6,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 
 import scala.concurrent.ExecutionContext
