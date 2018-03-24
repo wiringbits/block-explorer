@@ -3,7 +3,7 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
-import com.xsn.explorer.helpers.DummyXSNService
+import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
 import com.xsn.explorer.models._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -15,6 +15,8 @@ import play.api.test.Helpers._
 import scala.concurrent.Future
 
 class BlocksControllerSpec extends MyAPISpec {
+
+  import DataHelper._
 
   // PoS block
   val posBlock = createBlock(
@@ -29,10 +31,10 @@ class BlocksControllerSpec extends MyAPISpec {
     id = TransactionId.from("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641").get,
     vin = TransactionVIN(TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get, 2),
     vout = List(
-      TransactionVOUT(BigDecimal("0"), 0, "nonstandard", None),
-      TransactionVOUT(n = 1, value = BigDecimal("600"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
-      TransactionVOUT(n = 2, value = BigDecimal("600"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
-      TransactionVOUT(BigDecimal("10"), 3, "pubkeyhash", Some(Address.from("XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp6").get))
+      TransactionVOUT(n = 0, value = BigDecimal("0")),
+      createTransactionVOUT(1, BigDecimal(600), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal(600), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(3, BigDecimal(10), createScriptPubKey("pubkeyhash", createAddress("XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp6")))
     )
   )
 
@@ -40,9 +42,9 @@ class BlocksControllerSpec extends MyAPISpec {
     id = TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get,
     vin = TransactionVIN(TransactionId.from("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f").get, 2),
     vout = List(
-      TransactionVOUT(BigDecimal("0"), 0, "nonstandard", None),
-      TransactionVOUT(BigDecimal("1"), 1, "pubkeyhash", Some(Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL").get)),
-      TransactionVOUT(BigDecimal("1000"), 2, "pubkeyhash", Some(Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL").get))
+      TransactionVOUT(BigDecimal("0"), 0, None),
+      createTransactionVOUT(1, BigDecimal(1), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal(1000), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
     )
   )
 
@@ -59,9 +61,9 @@ class BlocksControllerSpec extends MyAPISpec {
     id = TransactionId.from("0b761343c7be39116d5429953e0cfbf51bfe83400ab27d61084222451045116c").get,
     vin = TransactionVIN(TransactionId.from("1860288a5a87c79e617f743af44600e050c28ddb7d929d93d43a9148e2ba6638").get, 1),
     vout = List(
-      TransactionVOUT(BigDecimal("0"), 0, "nonstandard", None),
-      TransactionVOUT(n = 1, value = BigDecimal("292968.74570312"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
-      TransactionVOUT(n = 2, value = BigDecimal("292968.74570312"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))
+      TransactionVOUT(BigDecimal("0"), 0, None),
+      createTransactionVOUT(1, BigDecimal("292968.74570312"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal("292968.74570312"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
     )
   )
 
@@ -69,16 +71,16 @@ class BlocksControllerSpec extends MyAPISpec {
     id = TransactionId.from("1860288a5a87c79e617f743af44600e050c28ddb7d929d93d43a9148e2ba6638").get,
     vin = TransactionVIN(TransactionId.from("ef157f5ec0b3a6cdf669ff799988ee94d9fa2af8adaf2408ae9e34b47310831f").get, 2),
     vout = List(
-      TransactionVOUT(BigDecimal("0"), 0, "nonstandard", None),
-      TransactionVOUT(BigDecimal("585937.49140625"), 1, "pubkeyhash", Some(Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL").get)),
-      TransactionVOUT(BigDecimal("585937.49140625"), 2, "pubkeyhash", Some(Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL").get))
+      TransactionVOUT(BigDecimal("0"), 0, None),
+      createTransactionVOUT(1, BigDecimal("585937.49140625"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal("585937.49140625"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
     )
   )
 
   // TPoS
   val tposBlock = posBlock.copy(
     hash = Blockhash.from("c6944a33e3e03eb0ccd350f1fc2d6e5f3bd1411e1efddc0990aa3243663b41b7").get,
-    tposContract = Some("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701"))
+    tposContract = Some(createTransactionId("7f2b5f25b0ae24a417633e4214827f930a69802c1c43d1fb2ff7b7075b2d1701")))
 
   // PoW
   val powBlock = posBlock.copy(
@@ -93,7 +95,7 @@ class BlocksControllerSpec extends MyAPISpec {
     id = TransactionId.from("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8").get,
     vin = None,
     vout = List(
-      TransactionVOUT(BigDecimal("76500000.00000000"), 0, "pubkey", Some(Address.from("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9").get))
+      createTransactionVOUT(0, BigDecimal("76500000.00000000"), createScriptPubKey("pubkey", createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9")))
     )
   )
 

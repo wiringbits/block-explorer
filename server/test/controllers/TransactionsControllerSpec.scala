@@ -3,7 +3,7 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.TransactionNotFoundError
-import com.xsn.explorer.helpers.DummyXSNService
+import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
 import com.xsn.explorer.models._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -16,6 +16,8 @@ import scala.concurrent.Future
 
 class TransactionsControllerSpec extends MyAPISpec {
 
+  import DataHelper._
+
   val coinbaseTx: Transaction = Transaction(
     id = TransactionId.from("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c").get,
     size = Size(98),
@@ -25,7 +27,8 @@ class TransactionsControllerSpec extends MyAPISpec {
     confirmations = Confirmations(5347),
     vin = None,
     vout = List(
-      TransactionVOUT(n = 0, address = Address.from("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"), value = 0, scriptPubKeyType = "pubkey"))
+      createTransactionVOUT(0, BigDecimal(0), createScriptPubKey("pubkey", createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9")))
+    )
   )
 
   val nonCoinbaseTx: Transaction = Transaction(
@@ -38,8 +41,9 @@ class TransactionsControllerSpec extends MyAPISpec {
     vin = Some(
       TransactionVIN(TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get, 2)),
     vout = List(
-      TransactionVOUT(n = 1, value = BigDecimal("1171874.98281250"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
-      TransactionVOUT(n = 2, value = BigDecimal("1171874.98281250"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+      createTransactionVOUT(1, BigDecimal("1171874.98281250"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal("1171874.98281250"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+    )
   )
 
   val nonCoinbasePreviousTx: Transaction = Transaction(
@@ -50,10 +54,11 @@ class TransactionsControllerSpec extends MyAPISpec {
     blocktime = 1520314409,
     confirmations = Confirmations(11239),
     vin = Some(
-      TransactionVIN(TransactionId.from("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f").get, 2)),
+      TransactionVIN(createTransactionId("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f"), 2)),
     vout = List(
-      TransactionVOUT(n = 1, value = BigDecimal("2343749.96562500"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")),
-      TransactionVOUT(n = 2, value = BigDecimal("2343749.96562500"), scriptPubKeyType = "pubkeyhash", address = Address.from("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+      createTransactionVOUT(1, BigDecimal("2343749.96562500"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
+      createTransactionVOUT(2, BigDecimal("2343749.96562500"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
+    )
   )
 
   val customXSNService = new DummyXSNService {

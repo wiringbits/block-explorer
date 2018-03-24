@@ -25,7 +25,7 @@ case class Block(
     bits: String,
     chainwork: String,
     difficulty: BigDecimal,
-    tposContract: Option[String]) {
+    tposContract: Option[TransactionId]) {
 
   /**
    * Every block until 75 is PoW.
@@ -60,7 +60,7 @@ object Block {
         (__ \ 'bits).read[String] and
         (__ \ 'chainwork).read[String] and
         (__ \ 'difficulty).read[BigDecimal] and
-        (__ \ 'tposcontract).readNullable[String]
+        (__ \ 'tposcontract).readNullable[TransactionId]
 
     builder.apply { (hash, previous, next, root, transactions,
         confirmations, size, height, version, time,
