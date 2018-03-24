@@ -2,7 +2,7 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.services.XSNService
 
 class DummyXSNService extends XSNService {

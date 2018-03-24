@@ -1,5 +1,6 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.rpc
 
+import com.xsn.explorer.models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 

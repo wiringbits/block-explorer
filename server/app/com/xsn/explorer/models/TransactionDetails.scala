@@ -1,5 +1,6 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.rpc.Transaction
 import play.api.libs.json.{Json, Writes}
 
 case class TransactionDetails(
