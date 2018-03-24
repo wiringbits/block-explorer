@@ -8,7 +8,7 @@ import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{Block, Transaction}
+import com.xsn.explorer.models.rpc.{AddressBalance, Block, Transaction}
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue, Reads}

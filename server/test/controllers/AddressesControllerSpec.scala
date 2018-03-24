@@ -5,6 +5,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.AddressFormatError
 import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.rpc.AddressBalance
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{One, Or}

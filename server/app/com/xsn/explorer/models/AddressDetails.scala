@@ -1,5 +1,6 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.rpc.AddressBalance
 import play.api.libs.json._
 
 case class AddressDetails(balance: AddressBalance, transactionCount: Int)

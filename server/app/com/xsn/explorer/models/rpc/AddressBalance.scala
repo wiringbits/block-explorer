@@ -1,4 +1,4 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.rpc
 
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import play.api.libs.functional.syntax._
