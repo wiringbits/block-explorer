@@ -90,7 +90,8 @@ export class AppComponent {
       'label.merchant': 'Merchant',
       'label.total': 'Total',
       'label.summary': 'Summary',
-      'label.block': 'Block'
+      'label.block': 'Block',
+      'label.transaction': 'Transaction'
     };
   }
 }

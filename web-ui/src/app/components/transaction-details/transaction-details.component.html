@@ -4,66 +4,91 @@
   </div>
   <div *ngIf="transaction != null">
     <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactionId' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.id}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.confirmations' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.confirmations}}</label>
-    </div>
-    <!-- TODO: Add link to block view -->
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockhash' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-        <a routerLink="/blocks/{{transaction.blockhash}}">{{transaction.blockhash}}</a></label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blocktime' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{transaction.blocktime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.fee' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{getFee(transaction)}} {{'label.coinName' | translate}}</label>
+      <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.transaction' | translate}}</h2>
     </div>
 
-    <!-- Input -->
-    <div>
-      <div *ngIf="transaction.input == null">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.noInput' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.coinbase' | translate}}</label>
-        </div>
-      </div>
-      <div *ngIf="transaction.input != null">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.from' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-            <a routerLink="/addresses/{{transaction.input.address}}">{{transaction.input.address}}</a>
-          </label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.value' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{transaction.input.value}} {{'label.coinName' | translate}}</label>
-        </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.summary' | translate}}</th>
+              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>{{'label.transactionId' | translate}}</td>
+              <td>{{transaction.id}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.confirmations' | translate}}</td>
+              <td>{{transaction.confirmations}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.blockhash' | translate}}</td>
+              <td>
+                <a routerLink="/blocks/{{transaction.blockhash}}">{{transaction.blockhash}}</a>
+              </td>
+            </tr>
+            <tr>
+              <td>{{'label.blocktime' | translate}}</td>
+              <td>{{transaction.blocktime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.fee' | translate}}</td>
+              <td>{{getFee(transaction)}} {{'label.coinName' | translate}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Output -->
-    <div>
-      <div class="row">
-        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1"><strong>{{'label.output' | translate}}</strong></label>
-      </div>
-      <div *ngFor="let item of transaction.output">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.to' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-            <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
-          </label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.value' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{item.value}} {{'label.coinName' | translate}}</label>
-        </div>
+    <div class="row">
+      <!-- Input -->
+      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr *ngIf="transaction.input == null">
+              <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.noInput' | translate}}</th>
+              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
+            </tr>
+            <tr *ngIf="transaction.input != null">
+              <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.from' | translate}}</th>
+              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="transaction.input == null">
+              <td>{{'label.coinbase' | translate}}</td>
+              <td></td>
+            </tr>
+            <tr *ngIf="transaction.input != null">
+              <td>
+                <a routerLink="/addresses/{{transaction.input.address}}">{{transaction.input.address}}</a>
+              </td>
+              <td>{{transaction.input.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <!-- Output -->
+            <tr>
+              <td><strong>{{'label.output' | translate}}</strong></td>
+              <td></td>
+            </tr>
+            <tr *ngFor="let item of transaction.output">
+              <td>
+                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+              </td>
+              <td>{{item.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
