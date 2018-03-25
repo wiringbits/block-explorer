@@ -25,9 +25,11 @@ class Block {
 }
 
 class BlockRewards {
-  reward: BlockReward;
-  coinstake: BlockReward;
-  masternode: BlockReward;
+  reward: BlockReward; // PoW
+  coinstake: BlockReward; // PoS
+  masternode: BlockReward; // PoS and TPoS
+  owner: BlockReward; // TPoS
+  merchant: BlockReward; // TPoS
 }
 
 class BlockReward {

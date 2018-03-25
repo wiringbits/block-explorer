@@ -58,4 +58,12 @@ export class BlockDetailsComponent implements OnInit {
   isPoW(details: BlockDetails): boolean {
     return details.block.height <= 75;
   }
+
+  isPoS(details: BlockDetails): boolean {
+    return !this.isPoW(details) && details.block.tposContract == null;
+  }
+
+  isTPoS(details: BlockDetails): boolean {
+    return !this.isPoW(details) && details.block.tposContract != null;
+  }
 }

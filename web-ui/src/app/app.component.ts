@@ -83,7 +83,11 @@ export class AppComponent {
       'label.coinstake': 'Coinstake',
       'label.masternode': 'Master node',
       'label.amount': 'Amount',
-      'label.blockReward': 'Block reward'
+      'label.blockReward': 'Block reward',
+
+      'label.tposContract': 'Contract',
+      'label.owner': 'Owner',
+      'label.merchant': 'Merchant'
     };
   }
 }

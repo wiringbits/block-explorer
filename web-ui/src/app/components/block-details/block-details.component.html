@@ -9,6 +9,13 @@
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getBlockType(blockDetails)}}</label>
     </div>
 
+    <div class="row" *ngIf="isTPoS(blockDetails)">
+      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.tposContract' | translate}}</label>
+      <div class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
+        <a routerLink="/transactions/{{blockDetails.block.tposContract}}">{{blockDetails.block.tposContract}}</a>
+      </div>
+    </div>
+
     <div class="row">
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockhash' | translate}}</label>
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.hash}} ({{blockDetails.block.height}})</label>
@@ -80,6 +87,7 @@
 
     <!-- rewards -->
     <div>
+      <!-- PoW -->
       <div *ngIf="isPoW(blockDetails)">
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
@@ -96,7 +104,8 @@
         </div>
       </div>
 
-      <div *ngIf="!isPoW(blockDetails)">
+      <!-- PoS -->
+      <div *ngIf="isPoS(blockDetails)">
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
         </div>
@@ -122,6 +131,59 @@
           <div class="row">
             <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
             <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.masternode.value}}  {{'label.coinName' | translate}}</label>
+          </div>
+          <div class="row">
+            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
+            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
+              <a routerLink="/addresses/{{blockDetails.rewards.masternode.address}}">{{blockDetails.rewards.masternode.address}}</a>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TPoS -->
+      <div *ngIf="isTPoS(blockDetails)">
+        <div class="row">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
+        </div>
+      
+        <div class="row">
+          <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.owner' | translate}}</label>
+        </div>
+        <div class="row">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
+          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.owner.value}} {{'label.coinName' | translate}}</label>
+        </div>
+        <div class="row">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
+          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
+            <a routerLink="/addresses/{{blockDetails.rewards.owner.address}}">{{blockDetails.rewards.owner.address}}</a>
+          </label>
+        </div>
+
+        <div>
+          <div class="row">
+            <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.merchant' | translate}}</label>
+          </div>
+          <div class="row">
+            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
+            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.merchant.value}} {{'label.coinName' | translate}}</label>
+          </div>
+          <div class="row">
+            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
+            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
+              <a routerLink="/addresses/{{blockDetails.rewards.merchant.address}}">{{blockDetails.rewards.merchant.address}}</a>
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="blockDetails.rewards.masternode != null">
+          <div class="row">
+            <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.masternode' | translate}}</label>
+          </div>
+          <div class="row">
+            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
+            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</label>
           </div>
           <div class="row">
             <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
