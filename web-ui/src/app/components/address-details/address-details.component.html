@@ -4,34 +4,57 @@
   </div>
   <div *ngIf="address != null">
     <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{addressString}}</label>
+      <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.address' | translate}}</h2>
     </div>
     <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.balance' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{address.balance}} {{'label.coinName' | translate}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.received' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{address.received}} {{'label.coinName' | translate}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.spent' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{getSent(address)}} {{'label.coinName' | translate}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactionCount' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{address.transactions.length}}</label>
+      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.summary' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>{{'label.address' | translate}}</td>
+              <td>{{addressString}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.balance' | translate}}</td>
+              <td>{{address.balance}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.received' | translate}}</td>
+              <td>{{address.received}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.spent' | translate}}</td>
+              <td>{{getSent(address)}} {{'label.coinName' | translate}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div>
-      <div class="row">
-        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactions' | translate}}</label>
-      </div>
-      <div class="row" *ngFor="let item of address.transactions">
-        <div class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-          <a routerLink="/transactions/{{item}}">{{item}}</a>
-        </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}} ({{address.transactions.length}})</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of address.transactions">
+              <td>
+                <a routerLink="/transactions/{{item}}">{{item}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
