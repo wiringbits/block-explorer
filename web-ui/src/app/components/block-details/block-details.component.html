@@ -111,6 +111,11 @@
         </div>
 
         <div class="row">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.total' | translate}}</label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getPoSTotalReward(blockDetails)}}  {{'label.coinName' | translate}}</label>
+        </div>
+
+        <div class="row">
           <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.coinstake' | translate}}</label>
         </div>
         <div class="row">
@@ -146,7 +151,12 @@
         <div class="row">
           <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
         </div>
-      
+
+        <div class="row">
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.total' | translate}}</label>
+          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getTPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</label>
+        </div>
+
         <div class="row">
           <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.owner' | translate}}</label>
         </div>

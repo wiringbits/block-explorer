@@ -66,4 +66,36 @@ export class BlockDetailsComponent implements OnInit {
   isTPoS(details: BlockDetails): boolean {
     return !this.isPoW(details) && details.block.tposContract != null;
   }
+
+  getPoSTotalReward(details: BlockDetails): number {
+    let total = 0;
+
+    if (details.rewards.masternode != null) {
+      total += details.rewards.masternode.value;
+    }
+
+    if (details.rewards.coinstake != null) {
+      total += details.rewards.coinstake.value;
+    }
+
+    return total;
+  }
+
+  getTPoSTotalReward(details: BlockDetails): number {
+    let total = 0;
+
+    if (details.rewards.masternode != null) {
+      total += details.rewards.masternode.value;
+    }
+
+    if (details.rewards.owner != null) {
+      total += details.rewards.owner.value;
+    }
+
+    if (details.rewards.merchant != null) {
+      total += details.rewards.merchant.value;
+    }
+
+    return total;
+  }
 }
