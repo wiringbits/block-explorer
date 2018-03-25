@@ -21,7 +21,18 @@
     </div>
     <div class="row">
       <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactionCount' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{address.transactionCount}}</label>
+      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{address.transactions.length}}</label>
+    </div>
+
+    <div>
+      <div class="row">
+        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactions' | translate}}</label>
+      </div>
+      <div class="row" *ngFor="let item of address.transactions">
+        <div class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
+          <a routerLink="/transactions/{{item}}">{{item}}</a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
