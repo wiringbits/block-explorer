@@ -88,7 +88,9 @@ export class AppComponent {
       'label.tposContract': 'Contract',
       'label.owner': 'Owner',
       'label.merchant': 'Merchant',
-      'label.total': 'Total'
+      'label.total': 'Total',
+      'label.summary': 'Summary',
+      'label.block': 'Block'
     };
   }
 }

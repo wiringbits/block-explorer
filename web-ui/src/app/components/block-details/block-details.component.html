@@ -3,219 +3,261 @@
     <alert>{{'message.blockNotFound' | translate}}</alert>
   </div>
   <div *ngIf="blockDetails != null">
-    <!-- TODO: probably it would be better to just get the block type from the server-->
     <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockType' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getBlockType(blockDetails)}}</label>
+      <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.block' | translate}} #{{blockDetails.block.height}}</h2>
     </div>
 
-    <div class="row" *ngIf="isTPoS(blockDetails)">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.tposContract' | translate}}</label>
-      <div class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-        <a routerLink="/transactions/{{blockDetails.block.tposContract}}">{{blockDetails.block.tposContract}}</a>
-      </div>
-    </div>
+    <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+      <table class="table table-condensed table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th class="col-xs-4 col-sm-4 col-md-3 col-lg-9">{{'label.summary' | translate}}</th>
+            <th class="col-xs-8 col-sm-8 col-md-3 col-lg-9"></th>
+          </tr>
+        </thead>
 
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockhash' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.hash}} ({{blockDetails.block.height}})</label>
+        <tbody>
+          <tr>
+            <!-- TODO: probably it would be better to just get the block type from the server-->
+            <td>{{'label.blockType' | translate}}</td>
+            <td>{{getBlockType(blockDetails)}}</td>
+          </tr>
+          <tr *ngIf="isTPoS(blockDetails)">
+            <td>{{'label.tposContract' | translate}}</td>
+            <td><a routerLink="/transactions/{{blockDetails.block.tposContract}}">{{blockDetails.block.tposContract}}</a></td>
+          </tr>
+          <tr>
+            <td>{{'label.blockhash' | translate}}</td>
+            <td>{{blockDetails.block.hash}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.merkleRoot' | translate}}</td>
+            <td>{{blockDetails.block.merkleRoot}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.confirmations' | translate}}</td>
+            <td>{{blockDetails.block.confirmations}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.size' | translate}}</td>
+            <td>{{blockDetails.block.size}} bytes</td>
+          </tr>
+          <tr>
+            <td>{{'label.version' | translate}}</td>
+            <td>{{blockDetails.block.version}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.nonce' | translate}}</td>
+            <td>{{blockDetails.block.nonce}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.bits' | translate}}</td>
+            <td>{{blockDetails.block.bits}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.chainwork' | translate}}</td>
+            <td>{{blockDetails.block.chainwork}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.difficulty' | translate}}</td>
+            <td>{{blockDetails.block.difficulty}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.blocktime' | translate}}</td>
+            <td>{{blockDetails.block.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+          </tr>
+          <tr>
+            <td>{{'label.medianTime' | translate}}</td>
+            <td>{{blockDetails.block.medianTime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>
+              <a *ngIf="blockDetails.block.previousBlockhash != null" routerLink="/blocks/{{blockDetails.block.previousBlockhash}}">
+                {{'label.previous' | translate}} ({{blockDetails.block.height - 1}})
+              </a>
+            </td>
+            <td>
+              <a *ngIf="blockDetails.block.nextBlockhash != null" routerLink="/blocks/{{blockDetails.block.nextBlockhash}}">
+                {{'label.next' | translate}} ({{blockDetails.block.height + 1}})
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <div class="row" *ngIf="blockDetails.block.nextBlockhash != null">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.next' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-        <a routerLink="/blocks/{{blockDetails.block.nextBlockhash}}">{{blockDetails.block.height + 1}}</a>
-      </label>
-    </div>
-
-    <div class="row" *ngIf="blockDetails.block.previousBlockhash != null">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.previous' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-        <a routerLink="/blocks/{{blockDetails.block.previousBlockhash}}">{{blockDetails.block.height - 1}}</a>
-      </label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.merkleRoot' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.merkleRoot}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.confirmations' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.confirmations}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.size' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.size}} bytes</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.version' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.version}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.nonce' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.nonce}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.bits' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.bits}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.chainwork' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.chainwork}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.difficulty' | translate}}</label>
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{blockDetails.block.difficulty}}</label>
-    </div>
-
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blocktime' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.block.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</label>
-    </div>
-    <div class="row">
-      <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.medianTime' | translate}}</label>
-      <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.block.medianTime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</label>
-    </div>
-    <hr>
 
     <!-- rewards -->
-    <div>
+    <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-4 col-lg-offset-1 col-lg-4">
+
       <!-- PoW -->
       <div *ngIf="isPoW(blockDetails)">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.blockReward' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.reward.value}}  {{'label.coinName' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-            <a routerLink="/addresses/{{blockDetails.rewards.reward.address}}">{{blockDetails.rewards.reward.address}}</a>
-          </label>
-        </div>
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.blockReward' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{blockDetails.rewards.reward.value}} {{'label.coinName' | translate}}</th>
+            </tr>
+          </thead>
+        
+          <tbody>
+            <tr>
+              <td>{{'label.address' | translate}}</td>
+              <td><a routerLink="/addresses/{{blockDetails.rewards.reward.address}}">{{blockDetails.rewards.reward.address}}</a></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- PoS -->
       <div *ngIf="isPoS(blockDetails)">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
-        </div>
-
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.total' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getPoSTotalReward(blockDetails)}}  {{'label.coinName' | translate}}</label>
-        </div>
-
-        <div class="row">
-          <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.coinstake' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.coinstake.value}} {{'label.coinName' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-            <a routerLink="/addresses/{{blockDetails.rewards.coinstake.address}}">{{blockDetails.rewards.coinstake.address}}</a>
-          </label>
-        </div>
-
-        <div *ngIf="blockDetails.rewards.masternode != null">
-          <div class="row">
-            <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.masternode' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.masternode.value}}  {{'label.coinName' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-              <a routerLink="/addresses/{{blockDetails.rewards.masternode.address}}">{{blockDetails.rewards.masternode.address}}</a>
-            </label>
-          </div>
-        </div>
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.rewards' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{getPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
+            </tr>
+          </thead>
+        
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td><strong>{{'label.coinstake' | translate}}</strong></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{'label.amount' | translate}}</td>
+              <td>{{blockDetails.rewards.coinstake.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.address' | translate}}</td>
+              <td>
+                <a routerLink="/addresses/{{blockDetails.rewards.coinstake.address}}">{{blockDetails.rewards.coinstake.address}}</a>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td><strong>{{'label.masternode' | translate}}</strong></td>
+              <td></td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td>{{'label.amount' | translate}}</td>
+              <td>{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td>{{'label.address' | translate}}</td>
+              <td>
+                <a routerLink="/addresses/{{blockDetails.rewards.masternode.address}}">{{blockDetails.rewards.masternode.address}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- TPoS -->
       <div *ngIf="isTPoS(blockDetails)">
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.rewards' | translate}}</label>
-        </div>
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.rewards' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{getTPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
+            </tr>
+          </thead>
+        
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <strong>{{'label.owner' | translate}}</strong>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{'label.amount' | translate}}</td>
+              <td>{{blockDetails.rewards.owner.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.address' | translate}}</td>
+              <td>
+                <a routerLink="/addresses/{{blockDetails.rewards.owner.address}}">{{blockDetails.rewards.owner.address}}</a>
+              </td>
+            </tr>
 
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.total' | translate}}</label>
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{getTPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</label>
-        </div>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <strong>{{'label.merchant' | translate}}</strong>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>{{'label.amount' | translate}}</td>
+              <td>{{blockDetails.rewards.merchant.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr>
+              <td>{{'label.address' | translate}}</td>
+              <td>
+                <a routerLink="/addresses/{{blockDetails.rewards.merchant.address}}">{{blockDetails.rewards.merchant.address}}</a>
+              </td>
+            </tr>
 
-        <div class="row">
-          <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.owner' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.owner.value}} {{'label.coinName' | translate}}</label>
-        </div>
-        <div class="row">
-          <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-          <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-            <a routerLink="/addresses/{{blockDetails.rewards.owner.address}}">{{blockDetails.rewards.owner.address}}</a>
-          </label>
-        </div>
-
-        <div>
-          <div class="row">
-            <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.merchant' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.merchant.value}} {{'label.coinName' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-              <a routerLink="/addresses/{{blockDetails.rewards.merchant.address}}">{{blockDetails.rewards.merchant.address}}</a>
-            </label>
-          </div>
-        </div>
-
-        <div *ngIf="blockDetails.rewards.masternode != null">
-          <div class="row">
-            <label class="col-sm-offset-1 col-md-offset-1 col-offset-xs-1 col-offset-lg-1">{{'label.masternode' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.amount' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</label>
-          </div>
-          <div class="row">
-            <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.address' | translate}}</label>
-            <label class="col-sm-3 col-md-2 col-xs-2 col-lg-2">
-              <a routerLink="/addresses/{{blockDetails.rewards.masternode.address}}">{{blockDetails.rewards.masternode.address}}</a>
-            </label>
-          </div>
-        </div>
+            <tr>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td>
+                <strong>{{'label.masternode' | translate}}</strong>
+              </td>
+              <td></td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td>{{'label.amount' | translate}}</td>
+              <td>{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</td>
+            </tr>
+            <tr *ngIf="blockDetails.rewards.masternode != null">
+              <td>{{'label.address' | translate}}</td>
+              <td>
+                <a routerLink="/addresses/{{blockDetails.rewards.masternode.address}}">{{blockDetails.rewards.masternode.address}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <hr>
 
     <!-- transactions -->
-    <div>
-      <div class="row">
-        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">{{'label.transactions' | translate}}</label>
-      </div>
-      <div class="row" *ngFor="let item of blockDetails.block.transactions">
-        <label class="col-sm-2 col-md-1 col-xs-1 col-lg-1">
-          <a routerLink="/transactions/{{item}}">{{item}}</a>
-        </label>
-      </div>
+    <div class="col-xs-12 col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
+      <table class="table table-condensed table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}}</th>
+          </tr>
+        </thead>
+      
+        <tbody>
+          <tr *ngFor="let item of blockDetails.block.transactions">
+            <td>
+              <a routerLink="/transactions/{{item}}">{{item}}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
