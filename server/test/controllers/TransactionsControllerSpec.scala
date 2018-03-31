@@ -3,9 +3,9 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.TransactionNotFoundError
-import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
+import com.xsn.explorer.helpers.{DummyXSNService, TransactionLoader}
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{Transaction, TransactionVIN}
+import com.xsn.explorer.models.rpc.Transaction
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{Bad, Good}
@@ -17,60 +17,19 @@ import scala.concurrent.Future
 
 class TransactionsControllerSpec extends MyAPISpec {
 
-  import DataHelper._
-
-  val coinbaseTx: Transaction = Transaction(
-    id = TransactionId.from("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c").get,
-    size = Size(98),
-    blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get,
-    time = 1520276270L,
-    blocktime = 1520276270L,
-    confirmations = Confirmations(5347),
-    vin = None,
-    vout = List(
-      createTransactionVOUT(0, BigDecimal(0), createScriptPubKey("pubkey", createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9")))
-    )
-  )
-
-  val nonCoinbaseTx: Transaction = Transaction(
-    id = TransactionId.from("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641").get,
-    size = Size(234),
-    blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get,
-    time = 1520318120,
-    blocktime = 1520318120,
-    confirmations = Confirmations(1950),
-    vin = Some(
-      TransactionVIN(TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get, 2)),
-    vout = List(
-      createTransactionVOUT(1, BigDecimal("1171874.98281250"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
-      createTransactionVOUT(2, BigDecimal("1171874.98281250"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
-    )
-  )
-
-  val nonCoinbasePreviousTx: Transaction = Transaction(
-    id = TransactionId.from("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9").get,
-    size = Size(235),
-    blockhash = Blockhash.from("cc4ccf19cfb9fa373ba8da68c7d25266d675a2414db603edb3cc88f866a782ea").get,
-    time = 1520314409,
-    blocktime = 1520314409,
-    confirmations = Confirmations(11239),
-    vin = Some(
-      TransactionVIN(createTransactionId("fd74206866fc4ed986d39084eb9f20de6cb324b028693f33d60897ac995fff4f"), 2)),
-    vout = List(
-      createTransactionVOUT(1, BigDecimal("2343749.96562500"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"))),
-      createTransactionVOUT(2, BigDecimal("2343749.96562500"), createScriptPubKey("pubkeyhash", createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL")))
-    )
-  )
+  val coinbaseTx = TransactionLoader.get("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
+  val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+  val nonCoinbasePreviousTx = TransactionLoader.get("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9")
 
   val customXSNService = new DummyXSNService {
     val map = Map(
-      "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c" -> coinbaseTx,
-      "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641" -> nonCoinbaseTx,
-      "585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9" -> nonCoinbasePreviousTx
+      coinbaseTx.id -> coinbaseTx,
+      nonCoinbaseTx.id -> nonCoinbaseTx,
+      nonCoinbasePreviousTx.id -> nonCoinbasePreviousTx
     )
 
     override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
-      val result = map.get(txid.string)
+      val result = map.get(txid)
           .map(Good(_))
           .getOrElse {
             Bad(TransactionNotFoundError).accumulating
