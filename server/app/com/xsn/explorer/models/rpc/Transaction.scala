@@ -11,7 +11,7 @@ case class Transaction(
     time: Long,
     blocktime: Long,
     confirmations: Confirmations,
-    vin: Option[TransactionVIN],
+    vin: List[TransactionVIN],
     vout: List[TransactionVOUT],
 )
 
@@ -28,7 +28,6 @@ object Transaction {
         (__ \ 'vin).readNullable[List[JsValue]]
             .map(_ getOrElse List.empty)
             .map { list => list.flatMap(_.asOpt[TransactionVIN]) }
-            .map(_.headOption)
 
     builder.apply { (id, size, blockHash, time, blockTime, confirmations, vout, vin) =>
       Transaction(id, size, blockHash, time, blockTime, confirmations, vin, vout)

@@ -4,8 +4,10 @@ import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.errors.TransactionFormatError
-import com.xsn.explorer.models.{TransactionDetails, TransactionId}
+import com.xsn.explorer.errors.{TransactionFormatError, TransactionNotFoundError}
+import com.xsn.explorer.models.rpc.TransactionVIN
+import com.xsn.explorer.models.{TransactionDetails, TransactionId, TransactionValue}
+import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.{Good, One, Or}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,19 +23,40 @@ class TransactionService @Inject() (xsnService: XSNService)(implicit ec: Executi
 
       transaction <- xsnService.getTransaction(txid).toFutureOr
 
-      previousMaybe <- transaction
+      input <- transaction
           .vin
-          .map(_.txid)
-          .map(xsnService.getTransaction)
-          .map { f => f.toFutureOr.map(Option.apply).toFuture }
-          .getOrElse { Future.successful(Good(Option.empty))}
+          .map(getTransactionValue)
           .toFutureOr
-    } yield {
-      previousMaybe
-          .map { previous => TransactionDetails.from(transaction, previous) }
-          .getOrElse { TransactionDetails.from(transaction) }
-    }
+    } yield TransactionDetails.from(transaction, input)
 
     result.toFuture
+  }
+
+  private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
+    val valueMaybe = for {
+      value <- vin.value
+      address <- vin.address
+    } yield TransactionValue(address, value)
+
+    valueMaybe
+        .map(Good(_))
+        .map(Future.successful)
+        .getOrElse {
+          val txid = vin.txid
+
+          val result = for {
+            tx <- xsnService.getTransaction(txid).toFutureOr
+            r <- {
+              val maybe = tx
+                  .vout
+                  .find(_.n == vin.voutIndex)
+                  .flatMap(TransactionValue.from)
+
+              Or.from(maybe, One(TransactionNotFoundError)).toFutureOr
+            }
+          } yield r
+
+          result.toFuture
+        }
   }
 }

@@ -14,7 +14,7 @@ class TransactionLogic {
   }
 
   def getVIN(tx: Transaction, error: ApplicationError): ApplicationResult[TransactionVIN] = {
-    val maybe = tx.vin
+    val maybe = tx.vin.headOption
     Or.from(maybe, One(error))
   }
 

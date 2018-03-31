@@ -93,7 +93,8 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
         val tx = result.get
         tx.id.string mustEqual txid.string
-        tx.vin.value.txid.string mustEqual "585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9"
+        tx.vin.size mustEqual 1
+        tx.vin.head.txid.string mustEqual "585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9"
         tx.vout.size mustEqual 3
       }
     }
