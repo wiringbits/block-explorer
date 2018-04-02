@@ -1,0 +1,39 @@
+<div>
+  <div [hidden]="blocks != null">
+    <alert>{{'message.loadingLatestBlocks' | translate}}</alert>
+  </div>
+
+  <div *ngIf="blocks != null">
+    <div class="row">
+      <h2 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-1'">{{'label.latestBlocks' | translate}}</h2>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.height' | translate}}</th>
+              <th class="col-xs-4 col-sm-4 col-md-2 col-lg-2">{{'label.blocktime' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.difficulty' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-2 col-lg-2">{{'label.extractedBy' | translate}}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of blocks">
+              <td>
+                <a routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
+              </td>
+              <td>{{item.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+              <td>{{item.transactions.length}}</td>
+              <td>{{item.difficulty}}</td>
+              <td>{{extractedBy(item) | translate}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

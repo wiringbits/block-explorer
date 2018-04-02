@@ -33,12 +33,18 @@ export class AppComponent {
       'min': 'The value is too small',
       'max': 'The value is too big',
 
+      // app specific values
+      'PoW': 'Proof of Work',
+      'PoS': 'Proof of Stake',
+      'TPoS': 'Trustless Proof of Stake',
+
       // messages
       'message.serverUnavailable': 'The server unavailable, please try again in a minute',
       'message.unknownErrors': 'Unknown error, please try again in a minute',
       'message.transactionNotFound': 'Transaction not found',
       'message.addressNotFound': 'Address not found',
       'message.blockNotFound': 'Block not found',
+      'message.loadingLatestBlocks': 'Loading latest blocks...',
 
       // error messages
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction',
@@ -91,7 +97,10 @@ export class AppComponent {
       'label.total': 'Total',
       'label.summary': 'Summary',
       'label.block': 'Block',
-      'label.transaction': 'Transaction'
+      'label.transaction': 'Transaction',
+      'label.height': 'Block height',
+      'label.extractedBy': 'Extracted by',
+      'label.latestBlocks': 'Latest 10 blocks'
     };
   }
 }

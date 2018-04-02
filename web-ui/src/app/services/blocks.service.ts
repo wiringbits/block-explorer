@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { environment } from '../../environments/environment';
 
-import { BlockDetails } from '../models/block';
+import { Block, BlockDetails } from '../models/block';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -20,5 +20,9 @@ export class BlocksService {
   get(blockhash: string): Observable<BlockDetails> {
     const url = `${this.baseUrl}/${blockhash}`;
     return this.http.get<BlockDetails>(url);
+  }
+
+  getLatest(): Observable<Block[]> {
+    return this.http.get<Block[]>(this.baseUrl);
   }
 }

@@ -28,6 +28,7 @@ import { TransactionDetailsComponent } from './components/transaction-details/tr
 import { FinderComponent } from './components/finder/finder.component';
 import { AddressDetailsComponent } from './components/address-details/address-details.component';
 import { BlockDetailsComponent } from './components/block-details/block-details.component';
+import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { BlockDetailsComponent } from './components/block-details/block-details.
     TransactionDetailsComponent,
     FinderComponent,
     AddressDetailsComponent,
-    BlockDetailsComponent
+    BlockDetailsComponent,
+    LatestBlocksComponent
   ],
   imports: [
     AppRoutingModule,

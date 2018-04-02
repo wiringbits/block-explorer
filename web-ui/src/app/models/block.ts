@@ -5,7 +5,7 @@ export class BlockDetails {
   rewards: BlockRewards;
 }
 
-class Block {
+export class Block {
   hash: string;
   previousBlockhash: string;
   nextBlockhash: string;
