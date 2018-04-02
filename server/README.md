@@ -5,9 +5,7 @@
 
 2. In case you modified the parameters to start the xsn rpc server, edit the [application.conf](server/conf/application.conf).
 
-3. Add this `play.filters.enabled += "play.filters.cors.CORSFilter"` to the [application.conf](server/conf/application.conf).
-
-4. Run the application with: `sbt run`
+3. Run the application with: `sbt run`
 
 ## Test
 Run the `sbt test` command to execute the tests.
