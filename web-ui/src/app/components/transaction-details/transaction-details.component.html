@@ -61,15 +61,15 @@
           </thead>
 
           <tbody>
-            <tr *ngIf="transaction.input == null">
+            <tr *ngIf="transaction.input == null || transaction.input.length == 0">
               <td>{{'label.coinbase' | translate}}</td>
               <td></td>
             </tr>
-            <tr *ngIf="transaction.input != null">
+            <tr *ngFor="let item of transaction.input">
               <td>
-                <a routerLink="/addresses/{{transaction.input.address}}">{{transaction.input.address}}</a>
+                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
               </td>
-              <td>{{transaction.input.value}} {{'label.coinName' | translate}}</td>
+              <td>{{item.value}} {{'label.coinName' | translate}}</td>
             </tr>
             <tr>
               <td></td>

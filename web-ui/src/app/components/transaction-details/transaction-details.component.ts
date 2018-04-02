@@ -47,10 +47,10 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   private getVIN(tx): number {
-    if (tx.input == null) {
+    if (tx.input == null || tx.input.length === 0) {
       return 0;
     } else {
-      return tx.input.value;
+      return tx.input.map(t => t.value).reduce((a, b) => a + b, 0);
     }
   }
 }

@@ -6,7 +6,7 @@ export class Transaction {
   time: number;
   blocktime: number;
   confirmations: number;
-  input: TransactionValue;
+  input: TransactionValue[];
   output: TransactionValue[];
 }
 
