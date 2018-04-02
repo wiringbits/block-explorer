@@ -32,6 +32,27 @@ class BlockService @Inject() (
     result.toFuture
   }
 
+  def getLatestBlocks(): FutureApplicationResult[List[Block]] = {
+    /**
+     * Temporal workaround to retrieve the latest blocks, they
+     * will be retrieved from the database once available.
+     */
+    val result = for {
+      a <- xsnService.getLatestBlock().toFutureOr
+      b <- xsnService.getBlock(a.previousBlockhash.get).toFutureOr
+      c <- xsnService.getBlock(b.previousBlockhash.get).toFutureOr
+      d <- xsnService.getBlock(c.previousBlockhash.get).toFutureOr
+      e <- xsnService.getBlock(d.previousBlockhash.get).toFutureOr
+      f <- xsnService.getBlock(e.previousBlockhash.get).toFutureOr
+      g <- xsnService.getBlock(f.previousBlockhash.get).toFutureOr
+      h <- xsnService.getBlock(g.previousBlockhash.get).toFutureOr
+      i <- xsnService.getBlock(h.previousBlockhash.get).toFutureOr
+      j <- xsnService.getBlock(i.previousBlockhash.get).toFutureOr
+    } yield List(a, b, c, d, e, f, g, h, i, j)
+
+    result.toFuture
+  }
+
   private def getBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
     if (block.isPoW) {
       getPoWBlockRewards(block)

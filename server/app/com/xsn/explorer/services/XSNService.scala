@@ -2,6 +2,7 @@ package com.xsn.explorer.services
 
 import javax.inject.Inject
 
+import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.config.RPCConfig
@@ -25,6 +26,8 @@ trait XSNService {
   def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
 
   def getBlock(blockhash: Blockhash): FutureApplicationResult[Block]
+
+  def getLatestBlock(): FutureApplicationResult[Block]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -127,6 +130,35 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
+  override def getLatestBlock(): FutureApplicationResult[Block] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "getbestblockhash",
+                  |  "params": []
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .flatMap { response =>
+
+          val result = for {
+            blockhash <- getResult[Blockhash](response)
+                .orElse {
+                  logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+                  None
+                }
+                .getOrElse(Bad(XSNUnexpectedResponseError).accumulating)
+                .toFutureOr
+
+            block <- getBlock(blockhash).toFutureOr
+          } yield block
+
+          result.toFuture
+        }
+  }
+
   private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
         .asOpt[JsValue]
@@ -150,7 +182,7 @@ class XSNServiceRPCImpl @Inject() (
 
   private def getResult[A](
       response: WSResponse,
-      errorCodeMapper: Map[Int, ApplicationError])(
+      errorCodeMapper: Map[Int, ApplicationError] = Map.empty)(
       implicit reads: Reads[A]): Option[ApplicationResult[A]] = {
 
     val maybe = Option(response)

@@ -10,6 +10,10 @@ class BlocksController @Inject() (
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
+  def getLatestBlocks() = publicNoInput { _ =>
+    blockService.getLatestBlocks()
+  }
+
   def getDetails(blockhash: String) = publicNoInput { _ =>
     blockService.getDetails(blockhash)
   }
