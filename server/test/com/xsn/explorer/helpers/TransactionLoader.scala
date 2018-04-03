@@ -12,8 +12,12 @@ object TransactionLoader {
   }
 
   def json(txid: String): JsValue = {
-    val resource = s"$BasePath/$txid"
-    val json = scala.io.Source.fromResource(resource).getLines().mkString("\n")
-    Json.parse(json)
+    try {
+      val resource = s"$BasePath/$txid"
+      val json = scala.io.Source.fromResource(resource).getLines().mkString("\n")
+      Json.parse(json)
+    } catch {
+      case _ => throw new RuntimeException(s"Transaction $txid not found")
+    }
   }
 }

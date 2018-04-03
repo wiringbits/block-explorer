@@ -98,47 +98,49 @@ class BlockLogic {
     }
   }
 
-  // TODO: Complete it for coin split
   def getTPoSRewards(
       coinstakeTx: Transaction,
       owner: Address,
       merchant: Address,
       coinstakeInput: BigDecimal): ApplicationResult[TPoSBlockRewards] = {
 
-    // first vout is empty, useless
-    val coinstakeVOUT = coinstakeTx.vout.drop(1)
+    /**
+     * While we expected the following
+     * - 1st output is empty and it is removed.
+     * - 3 outputs, normal TPoS
+     * - 4 outputs, coin split TPoS
+     *
+     * In order to display partial solutions, we will just filter by the
+     * addresses to get the rewards.
+     */
+    val coinstakeVOUT = coinstakeTx.vout
 
-    // TODO: We can probably have upto 4 outputs
-    if (coinstakeVOUT.size >= 1 && coinstakeVOUT.size <= 3) {
-      val ownerValue = coinstakeVOUT
-          .filter(_.address contains owner)
-          .map(_.value)
-          .sum
+    val ownerValue = coinstakeVOUT
+        .filter(_.address contains owner)
+        .map(_.value)
+        .sum
 
-      val ownerReward = BlockReward(
-        owner,
-        (ownerValue - coinstakeInput) max 0)
+    val ownerReward = BlockReward(
+      owner,
+      (ownerValue - coinstakeInput) max 0)
 
-      // merchant
-      val merchantValue = coinstakeVOUT.filter(_.address contains merchant).map(_.value).sum
-      val merchantReward = BlockReward(merchant, merchantValue)
+    // merchant
+    val merchantValue = coinstakeVOUT.filter(_.address contains merchant).map(_.value).sum
+    val merchantReward = BlockReward(merchant, merchantValue)
 
-      // master node
-      val masternodeRewardOUT = coinstakeVOUT.filterNot { out =>
-        out.address.contains(owner) ||
-            out.address.contains(merchant)
-      }
-      val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.address).headOption
-      val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
-        BlockReward(
-          masternodeAddress,
-          masternodeRewardOUT.filter(_.address contains masternodeAddress).map(_.value).sum
-        )
-      }
-
-      Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
-    } else {
-      Bad(BlockNotFoundError).accumulating
+    // master node
+    val masternodeRewardOUT = coinstakeVOUT.filterNot { out =>
+      out.address.contains(owner) ||
+          out.address.contains(merchant)
     }
+    val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.address).headOption
+    val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
+      BlockReward(
+        masternodeAddress,
+        masternodeRewardOUT.filter(_.address contains masternodeAddress).map(_.value).sum
+      )
+    }
+
+    Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
   }
 }

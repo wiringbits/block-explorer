@@ -6,10 +6,11 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
+import org.scalactic.Good
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class BlockService @Inject() (
     xsnService: XSNService,
@@ -106,7 +107,6 @@ class BlockService @Inject() (
     result.toFuture
   }
 
-  // TODO: Handle blocks with coin split
   private def getTPoSBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
     val result = for {
       coinstakeTxId <- blockLogic
@@ -119,12 +119,7 @@ class BlockService @Inject() (
           .getVIN(coinstakeTx, BlockNotFoundError)
           .toFutureOr
 
-      previousToCoinstakeTx <- xsnService
-          .getTransaction(coinstakeTxVIN.txid)
-          .toFutureOr
-      previousToCoinstakeVOUT <- transactionLogic
-          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockNotFoundError)
-          .toFutureOr
+      coinstakeInput <- getCoinstakeInput(coinstakeTxVIN).toFutureOr
 
       tposTxId <- blockLogic
           .getTPoSTransactionId(block)
@@ -140,10 +135,31 @@ class BlockService @Inject() (
       (ownerAddress, merchantAddress) = addresses
 
       rewards <- blockLogic
-          .getTPoSRewards(coinstakeTx, ownerAddress, merchantAddress, previousToCoinstakeVOUT.value)
+          .getTPoSRewards(coinstakeTx, ownerAddress, merchantAddress, coinstakeInput)
           .toFutureOr
     } yield rewards
 
     result.toFuture
+  }
+
+  private def getCoinstakeInput(coinstakeTxVIN: TransactionVIN): FutureApplicationResult[BigDecimal] = {
+    def loadFromTx = {
+      val result = for {
+        previousToCoinstakeTx <- xsnService
+            .getTransaction(coinstakeTxVIN.txid)
+            .toFutureOr
+        previousToCoinstakeVOUT <- transactionLogic
+            .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockNotFoundError)
+            .toFutureOr
+      } yield previousToCoinstakeVOUT.value
+
+      result.toFuture
+    }
+
+    coinstakeTxVIN
+        .value
+        .map(Good(_))
+        .map(Future.successful)
+        .getOrElse(loadFromTx)
   }
 }

@@ -33,6 +33,10 @@ class BlocksControllerSpec extends MyAPISpec {
   val tposBlockCoinstakeTx = TransactionLoader.get("8c7feafc18576b89bf87faf8aa89feaac1a3fad7d5da77d1fe773219a0e9d864")
   val tposBlockCoinstakeTxInput = TransactionLoader.get("9ecf10916467dccc8c8f3a87d869dc5aceb57d5d1c2117036fe60f31369a284e")
 
+  val tposBlock2 = BlockLoader.get("a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c")
+  val tposBlock2ContractTx = TransactionLoader.get(tposBlock2.tposContract.get.string)
+  val tposBlock2CoinstakeTx = TransactionLoader.get(tposBlock2.transactions(1).string)
+
   // PoW
   val powBlock = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
   val powBlockPreviousTx = TransactionLoader.get("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8")
@@ -42,6 +46,7 @@ class BlocksControllerSpec extends MyAPISpec {
       posBlock.hash -> posBlock,
       posBlockRoundingError.hash -> posBlockRoundingError,
       tposBlock.hash -> tposBlock,
+      tposBlock2.hash -> tposBlock2,
       powBlock.hash -> powBlock
     )
 
@@ -63,7 +68,9 @@ class BlocksControllerSpec extends MyAPISpec {
       powBlockPreviousTx.id -> powBlockPreviousTx,
       tposBlockContractTx.id -> tposBlockContractTx,
       tposBlockCoinstakeTx.id -> tposBlockCoinstakeTx,
-      tposBlockCoinstakeTxInput.id -> tposBlockCoinstakeTxInput
+      tposBlockCoinstakeTxInput.id -> tposBlockCoinstakeTxInput,
+      tposBlock2CoinstakeTx.id -> tposBlock2CoinstakeTx,
+      tposBlock2ContractTx.id -> tposBlock2ContractTx
     )
 
     override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
@@ -183,7 +190,7 @@ class BlocksControllerSpec extends MyAPISpec {
 
     "retrieve TPoS block" in {
       val block = tposBlock
-      val response = GET(url("19f320185015d146237efe757852b21c5e08b88b2f4de9d3fa9517d8463e472b"))
+      val response = GET(url(block.hash.string))
 
       status(response) mustEqual OK
 
@@ -219,6 +226,45 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonMasternode \ "address").as[String] mustEqual "XydZnssXHCxxRtB4rk7evfKT9XP7GqyA9N"
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
 
+    }
+
+    "retrieve TPoS block with coinsplit" in {
+      val block = tposBlock2
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      (jsonBlock \ "hash").as[Blockhash] mustEqual block.hash
+      (jsonBlock \ "size").as[Size] mustEqual block.size
+      (jsonBlock \ "bits").as[String] mustEqual block.bits
+      (jsonBlock \ "chainwork").as[String] mustEqual block.chainwork
+      (jsonBlock \ "difficulty").as[BigDecimal] mustEqual block.difficulty
+      (jsonBlock \ "confirmations").as[Confirmations] mustEqual block.confirmations
+      (jsonBlock \ "height").as[Height] mustEqual block.height
+      (jsonBlock \ "medianTime").as[Long] mustEqual block.medianTime
+      (jsonBlock \ "time").as[Long] mustEqual block.time
+      (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+      (jsonBlock \ "version").as[Long] mustEqual block.version
+      (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
+      (jsonBlock \ "tposContract").as[String] mustEqual block.tposContract.get.string
+
+      val jsonOwner = (jsonRewards \ "owner").as[JsValue]
+      (jsonOwner \ "address").as[String] mustEqual "Xu5UkgRL8YRqoW6uEW8SxMLDkJwbjFVfge"
+      (jsonOwner \ "value").as[BigDecimal] mustEqual BigDecimal("22.275")
+
+      val jsonMerchant = (jsonRewards \ "merchant").as[JsValue]
+      (jsonMerchant \ "address").as[String] mustEqual "XbGFpsuhv6AH3gp3dx5eQrAexP5kESh9bY"
+      (jsonMerchant \ "value").as[BigDecimal] mustEqual BigDecimal("0.225")
+
+      val jsonMasternode = (jsonRewards \ "masternode").as[JsValue]
+      (jsonMasternode \ "address").as[String] mustEqual "Xc3bKuGzy9grJZxC2ieTgQjjgyTMKSLqSM"
+      (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
     }
 
     "fail on the wrong blockhash format" in {
