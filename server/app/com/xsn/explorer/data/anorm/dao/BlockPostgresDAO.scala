@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
+import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
 
 class BlockPostgresDAO {
@@ -54,6 +55,19 @@ class BlockPostgresDAO {
       'bits -> block.bits,
       'chainwork -> block.chainwork,
       'difficulty -> block.difficulty
+    ).as(parseBlock.singleOpt).flatten
+  }
+
+  def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
+    SQL(
+      """
+        |SELECT hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |FROM blocks
+        |WHERE hash = {hash}
+      """.stripMargin
+    ).on(
+      "hash" -> blockhash.string
     ).as(parseBlock.singleOpt).flatten
   }
 }
