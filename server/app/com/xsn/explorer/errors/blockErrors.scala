@@ -1,6 +1,6 @@
 package com.xsn.explorer.errors
 
-import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError}
+import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError, ServerError}
 import play.api.i18n.{Lang, MessagesApi}
 
 sealed trait BlockError
@@ -21,4 +21,9 @@ case object BlockNotFoundError extends BlockError with InputValidationError {
     val error = FieldValidationError("blockhash", message)
     List(error)
   }
+}
+
+case object BlockUnknownError extends BlockError with ServerError {
+  override def cause: Option[Throwable] = None
+  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
 }
