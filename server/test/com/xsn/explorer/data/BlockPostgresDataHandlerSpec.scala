@@ -13,23 +13,23 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   lazy val dataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
 
-  "create" should {
+  "upsert" should {
     "add a new block" in {
       // PoS block
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
-      val result = dataHandler.create(block)
+      val result = dataHandler.upsert(block)
       result.isGood mustEqual true
       matches(block, result.get)
     }
 
     "override an existing block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-      dataHandler.create(block)
+      dataHandler.upsert(block)
 
       val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058").copy(hash = block.hash)
       val expected = newBlock.copy(hash = block.hash)
-      val result = dataHandler.create(newBlock)
+      val result = dataHandler.upsert(newBlock)
       result.isGood mustEqual true
       matches(expected, result.get)
     }
@@ -39,7 +39,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     "return a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
-      dataHandler.create(block)
+      dataHandler.upsert(block)
 
       val result = dataHandler.getBy(block.hash)
       result.isGood mustEqual true
@@ -57,7 +57,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
   "delete" should {
     "delete a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-      dataHandler.create(block)
+      dataHandler.upsert(block)
 
       val result = dataHandler.delete(block.hash)
       result.isGood mustEqual true
@@ -80,7 +80,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
 
-      List(block1, block2, block0).foreach(dataHandler.create)
+      List(block1, block2, block0).foreach(dataHandler.upsert)
 
       val result = dataHandler.getLatestBlock()
       result.isGood mustEqual true

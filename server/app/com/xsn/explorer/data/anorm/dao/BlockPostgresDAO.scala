@@ -9,7 +9,7 @@ import com.xsn.explorer.models.rpc.Block
 
 class BlockPostgresDAO {
 
-  def create(block: Block)(implicit conn: Connection): Option[Block] = {
+  def upsert(block: Block)(implicit conn: Connection): Option[Block] = {
     SQL(
       """
         |INSERT INTO blocks

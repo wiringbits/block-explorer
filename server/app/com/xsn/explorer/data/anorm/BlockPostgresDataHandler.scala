@@ -17,8 +17,8 @@ class BlockPostgresDataHandler @Inject() (
     extends BlockBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def create(block: Block): ApplicationResult[Block] = database.withConnection { implicit conn =>
-    val maybe = blockPostgresDAO.create(block)
+  override def upsert(block: Block): ApplicationResult[Block] = database.withConnection { implicit conn =>
+    val maybe = blockPostgresDAO.upsert(block)
     Or.from(maybe, One(BlockUnknownError))
   }
 
