@@ -11,6 +11,8 @@ trait BlockDataHandler[F[_]] {
   def create(block: Block): F[Block]
 
   def getBy(blockhash: Blockhash): F[Block]
+
+  def delete(blockhash: Blockhash): F[Block]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

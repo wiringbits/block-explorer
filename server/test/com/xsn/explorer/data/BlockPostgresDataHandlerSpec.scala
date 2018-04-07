@@ -54,6 +54,24 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
+  "delete" should {
+    "delete a block" in {
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+      dataHandler.create(block)
+
+      val result = dataHandler.delete(block.hash)
+      result.isGood mustEqual true
+      matches(block, result.get)
+    }
+
+    "fail on block not found" in {
+      val blockhash = Blockhash.from("b858d38a3552c83aea58f66fe00ae220352a235e33fcf1f3af04507a61a9dc32").get
+
+      val result = dataHandler.delete(blockhash)
+      result mustEqual Bad(BlockNotFoundError).accumulating
+    }
+  }
+
   private def matches(expected: Block, result: Block) = {
     // NOTE: transactions and confirmations are not matched intentionally
     result.hash mustEqual expected.hash

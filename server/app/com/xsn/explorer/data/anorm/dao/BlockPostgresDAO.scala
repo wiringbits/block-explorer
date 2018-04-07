@@ -70,4 +70,17 @@ class BlockPostgresDAO {
       "hash" -> blockhash.string
     ).as(parseBlock.singleOpt).flatten
   }
+
+  def delete(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
+    SQL(
+      """
+        |DELETE FROM blocks
+        |WHERE hash = {hash}
+        |RETURNING hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+      """.stripMargin
+    ).on(
+      "hash" -> blockhash.string
+    ).as(parseBlock.singleOpt).flatten
+  }
 }
