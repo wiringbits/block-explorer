@@ -39,6 +39,7 @@ export class AppComponent {
       'TPoS': 'Trustless Proof of Stake',
 
       // messages
+      'message.unavailable': 'Unavailable',
       'message.serverUnavailable': 'The server unavailable, please try again in a minute',
       'message.unknownErrors': 'Unknown error, please try again in a minute',
       'message.transactionNotFound': 'Transaction not found',
@@ -100,7 +101,8 @@ export class AppComponent {
       'label.transaction': 'Transaction',
       'label.height': 'Block height',
       'label.extractedBy': 'Extracted by',
-      'label.latestBlocks': 'Latest 10 blocks'
+      'label.latestBlocks': 'Latest 10 blocks',
+      'label.totalSupply': 'Total supply'
     };
   }
 }

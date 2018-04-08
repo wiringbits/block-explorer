@@ -30,6 +30,7 @@ import { FinderComponent } from './components/finder/finder.component';
 import { AddressDetailsComponent } from './components/address-details/address-details.component';
 import { BlockDetailsComponent } from './components/block-details/block-details.component';
 import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.component';
+import { TickerComponent } from './components/ticker/ticker.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.
     FinderComponent,
     AddressDetailsComponent,
     BlockDetailsComponent,
-    LatestBlocksComponent
+    LatestBlocksComponent,
+    TickerComponent
   ],
   imports: [
     AppRoutingModule,
