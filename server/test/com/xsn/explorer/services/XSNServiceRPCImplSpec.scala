@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
-import com.xsn.explorer.models.{Address, Blockhash}
+import com.xsn.explorer.models.{Address, Blockhash, Height}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.Bad
@@ -309,6 +309,39 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       whenReady(service.getBlock(blockhash)) { result =>
         result mustEqual Bad(BlockNotFoundError).accumulating
+      }
+    }
+  }
+
+  "getServerStatistics" should {
+    "return the statistics" in {
+      val content =
+        """
+          |{
+          |  "height": 45204,
+          |  "bestblock": "60da3eccf50f10254dcc35c9a25006e129bc5f0d101f83bad5ce008cc4b47c75",
+          |  "transactions": 93047,
+          |  "txouts": 142721,
+          |  "hash_serialized_2": "1f439c1d43753b9935abeb8a8de9f9010b96f7533ccfdde4432de3648a6f20de",
+          |  "disk_size": 7105097,
+          |  "total_amount": 77634169.93285364
+          |}
+        """.stripMargin
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getServerStatistics()) { result =>
+        result.isGood mustEqual true
+
+        val stats = result.get
+        stats.height mustEqual Height(45204)
+        stats.transactions mustEqual 93047
+        stats.totalSupply mustEqual BigDecimal("77634169.93285364")
       }
     }
   }

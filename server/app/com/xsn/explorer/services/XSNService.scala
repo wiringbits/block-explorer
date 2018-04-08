@@ -9,7 +9,7 @@ import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{AddressBalance, Block, Transaction}
+import com.xsn.explorer.models.rpc.{AddressBalance, Block, ServerStatistics, Transaction}
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue, Reads}
@@ -28,6 +28,8 @@ trait XSNService {
   def getBlock(blockhash: Blockhash): FutureApplicationResult[Block]
 
   def getLatestBlock(): FutureApplicationResult[Block]
+
+  def getServerStatistics(): FutureApplicationResult[ServerStatistics]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -156,6 +158,27 @@ class XSNServiceRPCImpl @Inject() (
           } yield block
 
           result.toFuture
+        }
+  }
+
+  override def getServerStatistics(): FutureApplicationResult[ServerStatistics] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "gettxoutsetinfo",
+                  |  "params": []
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[ServerStatistics](response)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
         }
   }
 
