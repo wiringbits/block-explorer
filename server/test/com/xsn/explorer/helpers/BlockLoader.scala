@@ -1,5 +1,7 @@
 package com.xsn.explorer.helpers
 
+import java.io.File
+
 import com.xsn.explorer.models.rpc.Block
 import play.api.libs.json.{JsValue, Json}
 
@@ -19,5 +21,14 @@ object BlockLoader {
     } catch {
       case _ => throw new RuntimeException(s"Block $blockhash not found")
     }
+  }
+
+  def all(): List[Block] = {
+    val uri = getClass.getResource(s"/$BasePath")
+    new File(uri.getPath)
+        .listFiles()
+        .toList
+        .map(_.getName)
+        .map(get)
   }
 }
