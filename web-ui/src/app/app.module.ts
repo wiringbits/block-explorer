@@ -18,6 +18,7 @@ import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
 import { NavigatorService } from './services/navigator.service';
 import { NotificationService } from './services/notification.service';
+import { TickerService } from './services/ticker.service';
 import { TransactionsService } from './services/transactions.service';
 
 import { AppComponent } from './app.component';
@@ -66,6 +67,7 @@ import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.
     LanguageService,
     NavigatorService,
     NotificationService,
+    TickerService,
     TransactionsService
   ],
   bootstrap: [AppComponent]
