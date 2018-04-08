@@ -3,6 +3,8 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
+GET   /health                controllers.HealthController.check()
+
 GET   /transactions/:txid    controllers.TransactionsController.getTransaction(txid: String)
 
 GET   /addresses/:address    controllers.AddressesController.getDetails(address: String)
