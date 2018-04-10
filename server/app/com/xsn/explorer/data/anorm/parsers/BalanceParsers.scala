@@ -2,11 +2,12 @@ package com.xsn.explorer.data.anorm.parsers
 
 import anorm.SqlParser._
 import anorm._
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.Balance
 
 object BalanceParsers {
 
-  val parseAddress = str("address").map(Address.from)
+  import CommonParsers._
+
   val parseReceived = get[BigDecimal]("received")
   val parseSpent = get[BigDecimal]("spent")
 

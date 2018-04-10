@@ -1,11 +1,13 @@
 package com.xsn.explorer.helpers
 
 import com.xsn.explorer.models.rpc.{AddressBalance, ScriptPubKey, TransactionVOUT}
-import com.xsn.explorer.models.{Address, AddressDetails, TransactionId}
+import com.xsn.explorer.models.{Address, AddressDetails, Blockhash, TransactionId}
 
 object DataHelper {
 
   def createAddress(string: String) = Address.from(string).get
+
+  def createBlockhash(string: String) = Blockhash.from(string).get
 
   def createTransactionId(string: String) = TransactionId.from(string).get
 

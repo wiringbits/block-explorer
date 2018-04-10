@@ -7,6 +7,8 @@ import com.xsn.explorer.models.rpc.Block
 
 object BlockParsers {
 
+  import CommonParsers._
+
   val parseHash = str("hash").map(Blockhash.from)
   val parseNextBlockhash = str("next_blockhash").map(Blockhash.from)
   val parsePreviousBlockhash = str("previous_blockhash").map(Blockhash.from)
@@ -15,7 +17,6 @@ object BlockParsers {
   val parseSize = int("size").map(Size.apply)
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
-  val parseTime = long("time")
   val parseMedianTime = long("median_time")
   val parseNonce = int("nonce")
   val parseBits = str("bits")
