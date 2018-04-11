@@ -15,6 +15,8 @@ trait BlockDataHandler[F[_]] {
   def delete(blockhash: Blockhash): F[Block]
 
   def getLatestBlock(): F[Block]
+
+  def getFirstBlock(): F[Block]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

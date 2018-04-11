@@ -95,6 +95,30 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
+  "getFirstBlock" should {
+    "return the block" in {
+      clearDatabase()
+
+      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+
+      List(block1, block2, block0).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+
+      val result = dataHandler.getFirstBlock()
+      result.isGood mustEqual true
+      println(result.get.height.int)
+      matches(block0, result.get)
+    }
+
+    "fail on no blocks" in {
+      clearDatabase()
+
+      val result = dataHandler.getLatestBlock()
+      result mustEqual Bad(BlockNotFoundError).accumulating
+    }
+  }
+
   private def clearDatabase() = {
     database.withConnection { implicit conn =>
       _root_.anorm.SQL("""DELETE FROM blocks""").execute()

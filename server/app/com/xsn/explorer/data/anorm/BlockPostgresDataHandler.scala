@@ -36,4 +36,9 @@ class BlockPostgresDataHandler @Inject() (
     val maybe = blockPostgresDAO.getLatestBlock
     Or.from(maybe, One(BlockNotFoundError))
   }
+
+  override def getFirstBlock(): ApplicationResult[Block] = database.withConnection { implicit conn =>
+    val maybe = blockPostgresDAO.getFirstBlock
+    Or.from(maybe, One(BlockNotFoundError))
+  }
 }

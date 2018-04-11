@@ -95,4 +95,16 @@ class BlockPostgresDAO {
       """.stripMargin
     ).as(parseBlock.singleOpt).flatten
   }
+
+  def getFirstBlock(implicit conn: Connection): Option[Block] = {
+    SQL(
+      """
+        |SELECT hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |FROM blocks
+        |ORDER BY height
+        |LIMIT 1
+      """.stripMargin
+    ).as(parseBlock.singleOpt).flatten
+  }
 }
