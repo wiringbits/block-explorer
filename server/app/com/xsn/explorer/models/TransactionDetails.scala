@@ -1,6 +1,5 @@
 package com.xsn.explorer.models
 
-import com.xsn.explorer.models.rpc.Transaction
 import play.api.libs.json.{Json, Writes}
 
 case class TransactionDetails(
@@ -22,13 +21,13 @@ case class TransactionDetails(
 
 object TransactionDetails {
 
-  def from(tx: Transaction, input: List[TransactionValue]): TransactionDetails = {
+  def from(tx: rpc.Transaction, input: List[TransactionValue]): TransactionDetails = {
     TransactionDetails
         .from(tx)
         .copy(input = input)
   }
 
-  def from(tx: Transaction): TransactionDetails = {
+  def from(tx: rpc.Transaction): TransactionDetails = {
     val output = tx.vout.flatMap(TransactionValue.from)
 
     TransactionDetails(tx.id, tx.size, tx.blockhash, tx.time, tx.blocktime, tx.confirmations, List.empty, output)

@@ -8,11 +8,14 @@ import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.DatabasePostgresSeeder
 import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.Transaction
 import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 /**
  * Process events related to blocks coming from the RPC server.
@@ -39,38 +42,79 @@ class BlockEventsProcessor @Inject() (
    * @param blockhash the new latest block
    */
   def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Unit] = {
-    xsnService
-        .getBlock(blockhash)
-        .toFutureOr
-        .mapWithError { block =>
-          scala.concurrent.blocking {
-            newLatestBlock(block)
-          }
-        }
-        .toFuture
+    val result = for {
+      block <- xsnService.getBlock(blockhash).toFutureOr
+      rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
+      transactions = rpcTransactions.map(Transaction.fromRPC)
+      r <- newLatestBlock(block, transactions).toFutureOr
+    } yield r
+
+    result.toFuture
   }
 
-  private def newLatestBlock(newBlock: Block): ApplicationResult[Unit] = {
-    val latestBlockResult = blockBlockingDataHandler.getLatestBlock()
+  private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Unit] = {
+    def onRechain(orphanBlock: Block): FutureApplicationResult[Unit] = {
+      val result = for {
+        orphanRPCTransactions <- orphanBlock.transactions.map(xsnService.getTransaction).toFutureOr
+        orphanTransactions = orphanRPCTransactions.map(Transaction.fromRPC)
+      } yield {
+        val command = DatabasePostgresSeeder.ReplaceBlockCommand(
+          orphanBlock = orphanBlock,
+          orphanTransactions = orphanTransactions,
+          newBlock = newBlock,
+          newTransactions = newTransactions)
+
+        scala.concurrent.blocking {
+          databasePostgresSeeder.replaceLatestBlock(command)
+        }
+      }
+
+      result
+          .mapWithError(identity)
+          .toFuture
+    }
+
+    def onFirstBlock: FutureApplicationResult[Unit] = {
+      logger.info(s"first block = ${newBlock.hash.string}")
+
+      val command = DatabasePostgresSeeder.CreateBlockCommand(newBlock, newTransactions)
+      def unsafe: ApplicationResult[Unit] = scala.concurrent.blocking {
+        databasePostgresSeeder.firstBlock(command)
+      }
+
+      Future(unsafe)
+    }
+
+    def onNewBlock(latestBlock: Block): FutureApplicationResult[Unit] = {
+      logger.info(s"existing latest block = ${latestBlock.hash.string} -> new latest block = ${newBlock.hash.string}")
+
+      val command = DatabasePostgresSeeder.CreateBlockCommand(newBlock, newTransactions)
+      def unsafe = scala.concurrent.blocking {
+        databasePostgresSeeder.newLatestBlock(command)
+      }
+
+      Future(unsafe)
+    }
+
+    val latestBlockResult = scala.concurrent.blocking {
+      blockBlockingDataHandler.getLatestBlock()
+    }
 
     latestBlockResult
         .map { latestBlock =>
-          if (newBlock.previousBlockhash.contains(latestBlock.hash)) {
-            // latest block -> new block
-            logger.info(s"existing latest block = ${latestBlock.hash.string} -> new latest block = ${newBlock.hash.string}")
-            databasePostgresSeeder.newLatestBlock(newBlock)
-          } else if (newBlock.hash == latestBlock.hash) {
+          if (newBlock.hash == latestBlock.hash) {
             // duplicated msg
             logger.info(s"ignoring duplicated latest block = ${newBlock.hash.string}")
-            Good(())
+            Future.successful(Good(()))
+          } else if (newBlock.previousBlockhash.contains(latestBlock.hash)) {
+            // latest block -> new block
+            onNewBlock(latestBlock)
           } else {
-            logger.info(s"orphan block = ${latestBlock.hash.string}, new latest block = ${newBlock.hash.string}")
-            databasePostgresSeeder.replaceLatestBlock(newBlock, latestBlock.hash)
+            logger.info(s"rechain, orphan block = ${latestBlock.hash.string}, new latest block = ${newBlock.hash.string}")
+
+            onRechain(latestBlock)
           }
         }
-        .getOrElse {
-          logger.info(s"first block = ${newBlock.hash.string}")
-          databasePostgresSeeder.firstBlock(newBlock)
-        }
+        .getOrElse(onFirstBlock)
   }
 }

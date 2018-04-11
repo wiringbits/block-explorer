@@ -1,5 +1,7 @@
 package com.xsn.explorer.helpers
 
+import java.io.File
+
 import com.xsn.explorer.models.rpc.Transaction
 import play.api.libs.json.{JsValue, Json}
 
@@ -19,5 +21,14 @@ object TransactionLoader {
     } catch {
       case _ => throw new RuntimeException(s"Transaction $txid not found")
     }
+  }
+
+  def all(): List[Transaction] = {
+    val uri = getClass.getResource(s"/$BasePath")
+    new File(uri.getPath)
+        .listFiles()
+        .toList
+        .map(_.getName)
+        .map(get)
   }
 }

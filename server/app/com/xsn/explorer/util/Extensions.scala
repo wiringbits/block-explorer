@@ -36,4 +36,14 @@ object Extensions {
       new FutureOr(future)
     }
   }
+
+  implicit class ListOptionExt[+A](val inner: List[Option[A]]) extends AnyVal {
+    def everything: Option[List[A]] = {
+      if (inner.forall(_.isDefined)) {
+        Some(inner.flatten)
+      } else {
+        None
+      }
+    }
+  }
 }

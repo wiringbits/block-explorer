@@ -21,4 +21,26 @@ object Transaction {
       address: Address,
       tposOwnerAddress: Option[Address],
       tposMerchantAddress: Option[Address])
+
+  def fromRPC(tx: rpc.Transaction): Transaction = {
+    val inputs = tx.vin.zipWithIndex.map { case (vin, index) =>
+      Transaction.Input(index, vin.value, vin.address)
+    }
+
+    val outputs = tx.vout.flatMap { vout =>
+      val tposAddresses = vout.scriptPubKey.flatMap(_.getTPoSAddresses)
+      for {
+        address <- vout.address
+      } yield Transaction.Output(vout.n, vout.value, address, tposAddresses.map(_._1), tposAddresses.map(_._2))
+    }
+
+    Transaction(
+      id = tx.id,
+      blockhash = tx.blockhash,
+      time = tx.time,
+      size = tx.size,
+      inputs = inputs,
+      outputs = outputs
+    )
+  }
 }

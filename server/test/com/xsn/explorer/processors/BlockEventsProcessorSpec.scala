@@ -1,81 +1,71 @@
 package com.xsn.explorer.processors
 
-import com.alexitc.playsonify.core.FutureApplicationResult
-import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, DatabasePostgresSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.{BlockLoader, FileBasedXSNService}
 import com.xsn.explorer.models.rpc.Block
-import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-
-import scala.concurrent.Future
 
 class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures with BeforeAndAfter {
 
   lazy val dataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
-  lazy val dataSeeder = new DatabasePostgresSeeder(database, new BlockPostgresDAO)
+  lazy val dataSeeder = new DatabasePostgresSeeder(
+    database,
+    new BlockPostgresDAO,
+    new TransactionPostgresDAO,
+    new BalancePostgresDAO)
+
+  lazy val xsnService = new FileBasedXSNService
+  lazy val processor = new BlockEventsProcessor(xsnService, dataSeeder, dataHandler)
 
   before {
     clearDatabase()
   }
 
   "newLatestBlock" should {
-    "process first block" in {
+    "fail on genesis block due to the missing transaction" in {
+      // see https://github.com/X9Developers/XSN/issues/32
       val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
 
-      val xsnService = new FileBasedXSNService {
-        override def getLatestBlock(): FutureApplicationResult[Block] = {
-          Future.successful(Bad(BlockNotFoundError).accumulating)
-        }
-      }
-
-      val processor = new BlockEventsProcessor(xsnService, dataSeeder, dataHandler)
       whenReady(processor.newLatestBlock(block0.hash)) { result =>
+        result.isBad mustEqual true
+      }
+    }
+
+    "process first block" in {
+      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+
+      whenReady(processor.newLatestBlock(block1.hash)) { result =>
         result.isGood mustEqual true
       }
     }
 
     "process a new block" in {
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block0, block1).foreach(dataHandler.upsert)
-      val xsnService = new FileBasedXSNService {
-        override def getLatestBlock(): FutureApplicationResult[Block] = {
-          val latest = block1.copy(nextBlockhash = None)
-          Future.successful(Good(latest).accumulating)
-        }
-      }
+      List(block1, block2).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
 
-      val processor = new BlockEventsProcessor(xsnService, dataSeeder, dataHandler)
-      whenReady(processor.newLatestBlock(block2.hash)) { result =>
+      whenReady(processor.newLatestBlock(block3.hash)) { result =>
         result.isGood mustEqual true
-        val blocks = List(block0, block1, block2)
+        val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
       }
     }
 
     "process a rechain" in {
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block0, block1, block2).foreach(dataHandler.upsert)
-      val xsnService = new FileBasedXSNService {
-        override def getLatestBlock(): FutureApplicationResult[Block] = {
-          val latest = block2.copy(nextBlockhash = None)
-          Future.successful(Good(latest).accumulating)
-        }
-      }
+      List(block1, block2, block3).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
 
-      val processor = new BlockEventsProcessor(xsnService, dataSeeder, dataHandler)
-      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+      whenReady(processor.newLatestBlock(block2.hash)) { result =>
         result.isGood mustEqual true
-        val blocks = List(block0, block1)
+        val blocks = List(block1, block2)
         verifyBlockchain(blocks)
       }
     }
@@ -89,9 +79,14 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       dbBlock.nextBlockhash mustEqual block.nextBlockhash
     }
   }
+
   private def clearDatabase() = {
     database.withConnection { implicit conn =>
+      _root_.anorm.SQL("""DELETE FROM transaction_outputs""").execute()
+      _root_.anorm.SQL("""DELETE FROM transaction_inputs""").execute()
+      _root_.anorm.SQL("""DELETE FROM transactions""").execute()
       _root_.anorm.SQL("""DELETE FROM blocks""").execute()
+      _root_.anorm.SQL("""DELETE FROM balances""").execute()
     }
   }
 
