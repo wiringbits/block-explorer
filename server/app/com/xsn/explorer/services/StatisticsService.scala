@@ -3,11 +3,23 @@ package com.xsn.explorer.services
 import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.xsn.explorer.models.rpc.ServerStatistics
+import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
+import com.xsn.explorer.data.async.BalanceFutureDataHandler
+import com.xsn.explorer.models.Statistics
 
-class StatisticsService @Inject() (xsnService: XSNService) {
+import scala.concurrent.ExecutionContext
 
-  def getServerStatistics(): FutureApplicationResult[ServerStatistics] = {
-    xsnService.getServerStatistics()
+class StatisticsService @Inject() (
+    xsnService: XSNService,
+    balanceFutureDataHandler: BalanceFutureDataHandler)(
+    implicit ec: ExecutionContext) {
+
+  def getStatistics(): FutureApplicationResult[Statistics] = {
+    val result = for {
+      server <- xsnService.getServerStatistics().toFutureOr
+      circulatingSupply <- balanceFutureDataHandler.getCirculatingSupply().toFutureOr
+    } yield Statistics(server.height, server.transactions, server.totalSupply, circulatingSupply)
+
+    result.toFuture
   }
 }

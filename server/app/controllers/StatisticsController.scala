@@ -11,6 +11,6 @@ class StatisticsController @Inject() (
     extends MyJsonController(cc) {
 
   def getStatus() = publicNoInput { _ =>
-    statisticsService.getServerStatistics()
+    statisticsService.getStatistics()
   }
 }
