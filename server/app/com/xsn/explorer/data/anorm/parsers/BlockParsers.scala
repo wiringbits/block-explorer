@@ -9,7 +9,6 @@ object BlockParsers {
 
   import CommonParsers._
 
-  val parseHash = str("hash").map(Blockhash.from)
   val parseNextBlockhash = str("next_blockhash").map(Blockhash.from)
   val parsePreviousBlockhash = str("previous_blockhash").map(Blockhash.from)
   val parseTposContract = str("tpos_contract").map(TransactionId.from)
@@ -24,7 +23,7 @@ object BlockParsers {
   val parseDifficulty = get[BigDecimal]("difficulty")
 
   val parseBlock = (
-      parseHash ~
+      parseBlockhash ~
           parseNextBlockhash.? ~
           parsePreviousBlockhash.? ~
           parseTposContract.? ~

@@ -2,7 +2,7 @@
 # --- !Ups
 
 CREATE TABLE blocks(
-  hash VARCHAR(64) NOT NULL,
+  blockhash VARCHAR(64) NOT NULL,
   previous_blockhash VARCHAR(64) NULL,
   next_blockhash VARCHAR(64) NULL,
   merkle_root VARCHAR(64) NULL,
@@ -17,7 +17,11 @@ CREATE TABLE blocks(
   chainwork VARCHAR(80) NOT NULL,
   difficulty DECIMAL(30, 20),
   -- constraints
-  CONSTRAINT blocks_hash_pk PRIMARY KEY (hash)
+  CONSTRAINT blocks_blockhash_pk PRIMARY KEY (blockhash),
+  CONSTRAINT blocks_blockhash_format CHECK (blockhash ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT blocks_previous_blockhash_format CHECK (previous_blockhash ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT blocks_next_blockhash_format CHECK (next_blockhash ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT blocks_tpos_contract_format CHECK (tpos_contract ~ '^[a-f0-9]{64}$')
 );
 
 CREATE INDEX blocks_height_index ON blocks USING BTREE (height);

@@ -14,15 +14,15 @@ class BlockPostgresDAO {
       """
         |INSERT INTO blocks
         |  (
-        |    hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |    blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |    height, version, time, median_time, nonce, bits, chainwork, difficulty
         |  )
         |VALUES
         |  (
-        |    {hash}, {previous_blockhash}, {next_blockhash}, {tpos_contract}, {merkle_root}, {size},
+        |    {blockhash}, {previous_blockhash}, {next_blockhash}, {tpos_contract}, {merkle_root}, {size},
         |    {height}, {version}, {time}, {median_time}, {nonce}, {bits}, {chainwork}, {difficulty}
         |  )
-        |ON CONFLICT (hash)
+        |ON CONFLICT (blockhash)
         |DO UPDATE
         |  SET previous_blockhash = EXCLUDED.previous_blockhash,
         |      next_blockhash = EXCLUDED.next_blockhash,
@@ -37,11 +37,11 @@ class BlockPostgresDAO {
         |      bits = EXCLUDED.bits,
         |      chainwork = EXCLUDED.chainwork,
         |      difficulty = EXCLUDED.difficulty
-        |RETURNING hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty
       """.stripMargin
     ).on(
-      'hash -> block.hash.string,
+      'blockhash -> block.hash.string,
       'previous_blockhash -> block.previousBlockhash.map(_.string),
       'next_blockhash -> block.nextBlockhash.map(_.string),
       'tpos_contract -> block.tposContract.map(_.string),
@@ -61,13 +61,13 @@ class BlockPostgresDAO {
   def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
     SQL(
       """
-        |SELECT hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |       height, version, time, median_time, nonce, bits, chainwork, difficulty
         |FROM blocks
-        |WHERE hash = {hash}
+        |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-      "hash" -> blockhash.string
+      "blockhash" -> blockhash.string
     ).as(parseBlock.singleOpt).flatten
   }
 
@@ -75,19 +75,19 @@ class BlockPostgresDAO {
     SQL(
       """
         |DELETE FROM blocks
-        |WHERE hash = {hash}
-        |RETURNING hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |WHERE blockhash = {blockhash}
+        |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty
       """.stripMargin
     ).on(
-      "hash" -> blockhash.string
+      "blockhash" -> blockhash.string
     ).as(parseBlock.singleOpt).flatten
   }
 
   def getLatestBlock(implicit conn: Connection): Option[Block] = {
     SQL(
       """
-        |SELECT hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |       height, version, time, median_time, nonce, bits, chainwork, difficulty
         |FROM blocks
         |ORDER BY height DESC
@@ -99,7 +99,7 @@ class BlockPostgresDAO {
   def getFirstBlock(implicit conn: Connection): Option[Block] = {
     SQL(
       """
-        |SELECT hash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |       height, version, time, median_time, nonce, bits, chainwork, difficulty
         |FROM blocks
         |ORDER BY height
