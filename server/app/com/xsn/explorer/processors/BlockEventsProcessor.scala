@@ -6,9 +6,8 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.DatabasePostgresSeeder
-import com.xsn.explorer.models.Blockhash
+import com.xsn.explorer.models.{Blockhash, Transaction}
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.Transaction
 import com.xsn.explorer.services.XSNService
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.Good
@@ -41,13 +40,13 @@ class BlockEventsProcessor @Inject() (
    *
    * @param blockhash the new latest block
    */
-  def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Unit] = {
+  def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
       rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
       transactions = rpcTransactions.map(Transaction.fromRPC)
       r <- newLatestBlock(block, transactions).toFutureOr
-    } yield r
+    } yield block
 
     result.toFuture
   }

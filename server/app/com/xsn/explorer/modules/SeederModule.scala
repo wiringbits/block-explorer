@@ -11,6 +11,7 @@ import com.amazonaws.services.sqs.model.Message
 import com.xsn.explorer.config.SeederConfig
 import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.processors.BlockEventsProcessor
+import com.xsn.explorer.tasks.BlockSynchronizerTask
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.inject.{SimpleModule, _}
@@ -24,7 +25,8 @@ class SeederModule extends SimpleModule(bind[SQSSeederTask].toSelf.eagerly())
 @Singleton
 class SQSSeederTask @Inject() (
     config: SeederConfig,
-    blockEventsProcessor: BlockEventsProcessor)(
+    blockEventsProcessor: BlockEventsProcessor,
+    blockSynchronizerTask: BlockSynchronizerTask)(
     implicit sqs: AmazonSQSAsync,
     materializer: Materializer) {
 
@@ -68,6 +70,7 @@ class SQSSeederTask @Inject() (
         case Good(_) =>
           logger.info(s"Block processed successfully = ${blockhash.string}")
           sqs.deleteMessageAsync(config.queueUrl, message.getReceiptHandle)
+          blockSynchronizerTask.sync()
       }
     }
 

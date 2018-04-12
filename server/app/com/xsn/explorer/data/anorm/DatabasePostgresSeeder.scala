@@ -70,7 +70,7 @@ class DatabasePostgresSeeder @Inject() (
 
     result
         .map(Good(_))
-        .getOrElse(throw new RuntimeException("Unable to add the new latest block"))
+        .getOrElse(throw new RuntimeException("Unable to an old block"))
   }
 
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {

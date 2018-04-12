@@ -57,7 +57,7 @@ class BlockSynchronizerTask @Inject() (
   }
 
   private def tryToSync() = {
-    val result = for {
+    val futureOr = for {
       firstBlock <- blockDataHandler.getFirstBlock().toFutureOr
       previous <- Or.from(firstBlock.previousBlockhash, One(BlockNotFoundError)).toFutureOr
       _ <- {
@@ -67,16 +67,38 @@ class BlockSynchronizerTask @Inject() (
         } else {
           // sync
           logger.info(s"Sync required until block ${firstBlock.height.int}")
-          doSync(previous)
+          val r = doSync(previous)
+
+          r.foreach {
+            case Good(_) =>
+              logger.info("Sync completed")
+            case _ => ()
+          }
+
+          r
         }
       }.toFutureOr
     } yield ()
 
-    result.toFuture
+    val result = futureOr.toFuture
+
+    result.foreach {
+      case Bad(errors) =>
+        logger.error(s"Failed to sync blocks, errors = $errors")
+
+      case _ => ()
+    }
+
+    result.recover {
+      case NonFatal(ex) =>
+        logger.error(s"Failed to sync blocks", ex)
+    }
+
+    result
   }
 
   private def doSync(blockhash: Blockhash): FutureApplicationResult[Unit] = {
-    val futureOr = for {
+    val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
       rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
       transactions = rpcTransactions.map(Transaction.fromRPC)
@@ -87,7 +109,7 @@ class BlockSynchronizerTask @Inject() (
 
       _ <- block
             .previousBlockhash
-            .filter(_ => block.height.int >= FirstBlockHeight.int)
+            .filter(_ => block.height.int > FirstBlockHeight.int)
             .map { previous =>
               doSync(previous)
             }
@@ -98,20 +120,6 @@ class BlockSynchronizerTask @Inject() (
             .toFutureOr
     } yield ()
 
-    val result = futureOr.toFuture
-
-    result.foreach {
-      case Bad(errors) =>
-        logger.error(s"Failed to sync block = ${blockhash.string}, errors = $errors")
-
-      case _ => ()
-    }
-
-    result.recover {
-      case NonFatal(ex) =>
-        logger.error(s"Failed to sync block = ${blockhash.string}", ex)
-    }
-
-    result
+    result.toFuture
   }
 }
