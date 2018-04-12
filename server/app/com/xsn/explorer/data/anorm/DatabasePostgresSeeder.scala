@@ -63,6 +63,16 @@ class DatabasePostgresSeeder @Inject() (
         .getOrElse(throw new RuntimeException("Unable to replace latest block"))
   }
 
+  def insertOldBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+    val result = for {
+      _ <- upsertBlockCascade(command)
+    } yield ()
+
+    result
+        .map(Good(_))
+        .getOrElse(throw new RuntimeException("Unable to add the new latest block"))
+  }
+
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {
     for {
       // block
