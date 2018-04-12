@@ -13,3 +13,5 @@ GET   /blocks                controllers.BlocksController.getLatestBlocks()
 GET   /blocks/:blockhash     controllers.BlocksController.getDetails(blockhash: String)
 
 GET   /stats                 controllers.StatisticsController.getStatus()
+
+GET   /balances              controllers.BalancesController.getRichest(offset: Int ?= 0, limit: Int ?= 10)
