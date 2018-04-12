@@ -11,6 +11,8 @@ trait BalanceDataHandler[F[_]] {
   def upsert(balance: Balance): F[Balance]
 
   def getRichest(query: PaginatedQuery): F[PaginatedResult[Balance]]
+
+  def getCirculatingSupply(): F[BigDecimal]
 }
 
 trait BalanceBlockingDataHandler extends BalanceDataHandler[ApplicationResult]

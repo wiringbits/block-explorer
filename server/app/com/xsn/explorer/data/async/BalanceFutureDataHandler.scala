@@ -22,4 +22,8 @@ class BalanceFutureDataHandler @Inject() (
   override def getRichest(query: PaginatedQuery): FutureApplicationResult[PaginatedResult[Balance]] = Future {
     blockingDataHandler.getRichest(query)
   }
+
+  override def getCirculatingSupply(): FutureApplicationResult[BigDecimal] = Future {
+    blockingDataHandler.getCirculatingSupply()
+  }
 }

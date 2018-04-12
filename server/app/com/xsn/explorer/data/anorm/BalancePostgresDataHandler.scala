@@ -30,4 +30,10 @@ class BalancePostgresDataHandler @Inject() (
 
     Good(result)
   }
+
+  override def getCirculatingSupply(): ApplicationResult[BigDecimal] = withConnection { implicit conn =>
+    val result = balancePostgresDAO.getCirculatingSupply
+
+    Good(result)
+  }
 }
