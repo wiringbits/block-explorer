@@ -1,0 +1,37 @@
+<div>
+  <div [hidden]="balances != null">
+    <alert>{{'message.loadingRichestAddresses' | translate}}</alert>
+  </div>
+
+  <div *ngIf="balances != null">
+    <div class="row">
+      <h2 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-1'">{{'label.richestAddresses' | translate}}</h2>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+        <table class="table table-condensed table-bordered table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.available' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.received' | translate}}</th>
+              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.spent' | translate}}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of balances">
+              <td>
+                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+              </td>
+              <td>{{item.available}} {{'label.coinName' | translate}}</td>
+              <td>{{item.received}} {{'label.coinName' | translate}}</td>
+              <td>{{item.spent}} {{'label.coinName' | translate}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

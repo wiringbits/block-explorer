@@ -46,6 +46,7 @@ export class AppComponent {
       'message.addressNotFound': 'Address not found',
       'message.blockNotFound': 'Block not found',
       'message.loadingLatestBlocks': 'Loading latest blocks...',
+      'message.loadingRichestAddresses': 'Loading richest addresses...',
 
       // error messages
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction',
@@ -71,6 +72,7 @@ export class AppComponent {
 
       'label.address': 'Address',
       'label.balance': 'Balance',
+      'label.available': 'Available',
       'label.received': 'Received',
       'label.spent': 'Spent',
       'label.transactionCount': 'Transactions',
@@ -102,7 +104,8 @@ export class AppComponent {
       'label.height': 'Block height',
       'label.extractedBy': 'Extracted by',
       'label.latestBlocks': 'Latest 10 blocks',
-      'label.totalSupply': 'Total supply'
+      'label.totalSupply': 'Total supply',
+      'label.richestAddresses': 'Richest addresses'
     };
   }
 }

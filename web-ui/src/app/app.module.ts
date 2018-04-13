@@ -13,6 +13,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
 
 import { AddressesService } from './services/addresses.service';
+import { BalancesService } from './services/balances.service';
 import { BlocksService } from './services/blocks.service';
 import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
@@ -31,6 +32,7 @@ import { AddressDetailsComponent } from './components/address-details/address-de
 import { BlockDetailsComponent } from './components/block-details/block-details.component';
 import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.component';
 import { TickerComponent } from './components/ticker/ticker.component';
+import { RichestAddressesComponent } from './components/richest-addresses/richest-addresses.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,8 @@ import { TickerComponent } from './components/ticker/ticker.component';
     AddressDetailsComponent,
     BlockDetailsComponent,
     LatestBlocksComponent,
-    TickerComponent
+    TickerComponent,
+    RichestAddressesComponent
   ],
   imports: [
     AppRoutingModule,
@@ -64,6 +67,7 @@ import { TickerComponent } from './components/ticker/ticker.component';
   ],
   providers: [
     AddressesService,
+    BalancesService,
     BlocksService,
     ErrorService,
     LanguageService,
