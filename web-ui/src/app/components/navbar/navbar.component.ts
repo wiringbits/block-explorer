@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 
+class Tab {
+  label: string;
+  path: string;
+}
+
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
@@ -8,7 +13,9 @@ import { Location } from '@angular/common';
 })
 export class NavbarComponent implements OnInit {
 
-  public tabs = [];
+  public tabs: Tab[] = [
+    { label: 'label.richestAddresses', path: 'richest-addresses' }
+  ];
 
   constructor(private location: Location) { }
 
