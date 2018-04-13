@@ -10,7 +10,8 @@ import { AlertModule, BsDropdownModule, CollapseModule, TooltipModule, ModalModu
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 
-import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module'
+import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -64,6 +65,7 @@ import { RichestAddressesComponent } from './components/richest-addresses/riches
     HttpClientModule,
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
+    NgxPaginationModule
   ],
   providers: [
     AddressesService,
