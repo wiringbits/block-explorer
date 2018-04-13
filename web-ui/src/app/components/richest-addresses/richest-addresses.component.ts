@@ -1,10 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
+import { Observable } from 'rxjs/Observable';
+
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
+
 import { Balance } from '../../models/balance';
 
 import { BalancesService } from '../../services/balances.service';
 import { ErrorService } from '../../services/error.service';
-import { PaginatedResult } from '../../models/paginated-result';
 
 @Component({
   selector: 'app-richest-addresses',
@@ -13,31 +17,28 @@ import { PaginatedResult } from '../../models/paginated-result';
 })
 export class RichestAddressesComponent implements OnInit {
 
-  balances: Balance[];
+  // pagination
+  total = 0;
+  currentPage = 1;
+  pageSize = 10;
+  asyncItems: Observable<Balance[]>;
 
   constructor(
     private balancesService: BalancesService,
     private errorService: ErrorService) { }
 
   ngOnInit() {
-    this.balances = [];
-    this.updateBalances();
+    this.getPage(this.currentPage);
   }
 
-  private updateBalances() {
-    this.balancesService
-      .getRichest()
-      .subscribe(
-        response => this.onBalancesRetrieved(response),
-        response => this.onError(response)
-      );
-  }
+  getPage(page: number) {
+    const offset = (page - 1) * this.pageSize;
+    const limit = this.pageSize;
 
-  private onBalancesRetrieved(response: PaginatedResult<Balance>) {
-    this.balances = response.data;
-  }
-
-  private onError(response: any) {
-    this.errorService.renderServerErrors(null, response);
+    this.asyncItems = this.balancesService
+      .getRichest(offset, limit)
+      .do(response => this.total = response.total)
+      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
+      .map(response => response.data);
   }
 }
