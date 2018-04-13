@@ -1,6 +1,7 @@
 
 export class ServerStats {
   totalSupply: number;
+  circulatingSupply: number;
   transactions: number;
-  height: number;
+  blocks: number;
 }

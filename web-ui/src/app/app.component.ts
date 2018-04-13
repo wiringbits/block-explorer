@@ -105,6 +105,8 @@ export class AppComponent {
       'label.extractedBy': 'Extracted by',
       'label.latestBlocks': 'Latest 10 blocks',
       'label.totalSupply': 'Total supply',
+      'label.circulatingSupply': 'Circulating supply',
+      'label.blocks': 'Blocks',
       'label.richestAddresses': 'Richest addresses'
     };
   }
