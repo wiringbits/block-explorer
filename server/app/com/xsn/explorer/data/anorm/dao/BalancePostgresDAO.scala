@@ -63,17 +63,4 @@ class BalancePostgresDAO {
 
     Count(result)
   }
-
-  def getCirculatingSupply(implicit conn: Connection): BigDecimal = {
-    SQL(
-      """
-        |SELECT SUM(available)
-        |FROM balances
-        |WHERE address NOT IN (
-        |  SELECT address
-        |  FROM hidden_addresses
-        |)
-      """.stripMargin
-    ).as(SqlParser.scalar[BigDecimal].single)
-  }
 }
