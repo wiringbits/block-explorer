@@ -35,7 +35,6 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
     private errorService: ErrorService) { }
 
   ngOnInit() {
-    this.blocks = [];
     this.updateBlocks();
   }
 
