@@ -13,4 +13,5 @@ class DummyXSNService extends XSNService {
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = ???
   override def getLatestBlock(): FutureApplicationResult[Block] = ???
   override def getServerStatistics(): FutureApplicationResult[ServerStatistics] = ???
+  override def getMasternodeCount(): FutureApplicationResult[Int] = ???
 }

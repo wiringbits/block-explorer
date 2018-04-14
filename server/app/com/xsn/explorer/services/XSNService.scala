@@ -30,6 +30,8 @@ trait XSNService {
   def getLatestBlock(): FutureApplicationResult[Block]
 
   def getServerStatistics(): FutureApplicationResult[ServerStatistics]
+
+  def getMasternodeCount(): FutureApplicationResult[Int]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -174,6 +176,27 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
           val maybe = getResult[ServerStatistics](response)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getMasternodeCount(): FutureApplicationResult[Int] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "masternode",
+                  |  "params": ["count"]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[Int](response)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 

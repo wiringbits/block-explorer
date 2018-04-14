@@ -1,12 +1,16 @@
 package controllers
 
-import com.alexitc.playsonify.core.ApplicationResult
+import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
+import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models.Statistics
+import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 class StatisticsControllerSpec extends MyAPISpec {
 
@@ -20,8 +24,15 @@ class StatisticsControllerSpec extends MyAPISpec {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
   }
 
+  val xsnService = new DummyXSNService {
+    override def getMasternodeCount(): FutureApplicationResult[Int] = {
+      Future.successful(Good(1000))
+    }
+  }
+
   override val application = guiceApplicationBuilder
       .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
+      .overrides(bind[XSNService].to(xsnService))
       .build()
 
   "GET /stats" should {
@@ -34,6 +45,7 @@ class StatisticsControllerSpec extends MyAPISpec {
       (json \ "transactions").as[Int] mustEqual stats.transactions
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply
       (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply
+      (json \ "masternodes").as[Int] mustEqual 1000
     }
   }
 }
