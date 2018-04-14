@@ -2,15 +2,16 @@ package com.xsn.explorer.processors
 
 import javax.inject.Inject
 
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
-import com.xsn.explorer.data.BlockBlockingDataHandler
-import com.xsn.explorer.data.anorm.DatabasePostgresSeeder
-import com.xsn.explorer.models.{Blockhash, Transaction}
+import com.xsn.explorer.data.DatabaseSeeder
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
+import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.{Blockhash, Transaction}
 import com.xsn.explorer.services.XSNService
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
-import org.scalactic.Good
+import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,8 +22,8 @@ import scala.concurrent.Future
  */
 class BlockEventsProcessor @Inject() (
     xsnService: XSNService,
-    databasePostgresSeeder: DatabasePostgresSeeder,
-    blockBlockingDataHandler: BlockBlockingDataHandler) {
+    databaseSeeder: DatabaseFutureSeeder,
+    blockDataHandler: BlockFutureDataHandler) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -31,12 +32,14 @@ class BlockEventsProcessor @Inject() (
    *
    * The following scenarios are handled for the new latest block:
    *
-   * 1. It is new on our database, we just append it.
+   * 1. It is new on our database, we just append it (possibly first block).
    *    - current blocks = A -> B, new latest block = C, new blocks = A -> B -> C
    *    - current blocks = empty, new latest block = A, new blocks = A
    *
-   * 2. It is an existing block, hence, the previous from the latest one in our database .
+   * 2. It is the previous block from our latest block (rechain).
    *    - current blocks = A -> B -> C, new latest block = B, new blocks = A -> B
+   *
+   * 3. None of previous cases, it is a block that might be missing in our chain.
    *
    * @param blockhash the new latest block
    */
@@ -56,64 +59,69 @@ class BlockEventsProcessor @Inject() (
       val result = for {
         orphanRPCTransactions <- orphanBlock.transactions.map(xsnService.getTransaction).toFutureOr
         orphanTransactions = orphanRPCTransactions.map(Transaction.fromRPC)
-      } yield {
-        val command = DatabasePostgresSeeder.ReplaceBlockCommand(
+
+        command = DatabaseSeeder.ReplaceBlockCommand(
           orphanBlock = orphanBlock,
           orphanTransactions = orphanTransactions,
           newBlock = newBlock,
           newTransactions = newTransactions)
+        _ <- databaseSeeder.replaceLatestBlock(command).toFutureOr
+      } yield ()
 
-        scala.concurrent.blocking {
-          databasePostgresSeeder.replaceLatestBlock(command)
-        }
-      }
-
-      result
-          .mapWithError(identity)
-          .toFuture
+      result.toFuture
     }
 
     def onFirstBlock: FutureApplicationResult[Unit] = {
       logger.info(s"first block = ${newBlock.hash.string}")
 
-      val command = DatabasePostgresSeeder.CreateBlockCommand(newBlock, newTransactions)
-      def unsafe: ApplicationResult[Unit] = scala.concurrent.blocking {
-        databasePostgresSeeder.firstBlock(command)
-      }
-
-      Future(unsafe)
+      val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
+      databaseSeeder.firstBlock(command)
     }
 
     def onNewBlock(latestBlock: Block): FutureApplicationResult[Unit] = {
       logger.info(s"existing latest block = ${latestBlock.hash.string} -> new latest block = ${newBlock.hash.string}")
 
-      val command = DatabasePostgresSeeder.CreateBlockCommand(newBlock, newTransactions)
-      def unsafe = scala.concurrent.blocking {
-        databasePostgresSeeder.newLatestBlock(command)
-      }
-
-      Future(unsafe)
+      val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
+      databaseSeeder.newLatestBlock(command)
     }
 
-    val latestBlockResult = scala.concurrent.blocking {
-      blockBlockingDataHandler.getLatestBlock()
+    def onMissingBlock(): FutureApplicationResult[Unit] = {
+      val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
+      databaseSeeder.insertPendingBlock(command)
     }
 
-    latestBlockResult
-        .map { latestBlock =>
-          if (newBlock.hash == latestBlock.hash) {
-            // duplicated msg
-            logger.info(s"ignoring duplicated latest block = ${newBlock.hash.string}")
-            Future.successful(Good(()))
-          } else if (newBlock.previousBlockhash.contains(latestBlock.hash)) {
-            // latest block -> new block
-            onNewBlock(latestBlock)
-          } else {
-            logger.info(s"rechain, orphan block = ${latestBlock.hash.string}, new latest block = ${newBlock.hash.string}")
-
-            onRechain(latestBlock)
+    val result = for {
+      latestBlockMaybe <- blockDataHandler
+          .getLatestBlock()
+          .map {
+            case Good(block) => Good(Some(block))
+            case Bad(One(BlockNotFoundError)) => Good(None)
+            case Bad(errors) => Bad(errors)
           }
-        }
-        .getOrElse(onFirstBlock)
+          .toFutureOr
+
+      _ <- latestBlockMaybe
+            .map { latestBlock =>
+              if (newBlock.hash == latestBlock.hash) {
+                // duplicated msg
+                logger.info(s"ignoring duplicated latest block = ${newBlock.hash.string}")
+                Future.successful(Good(()))
+              } else if (newBlock.previousBlockhash.contains(latestBlock.hash)) {
+                // latest block -> new block
+                onNewBlock(latestBlock)
+              } else if (latestBlock.previousBlockhash.contains(newBlock.hash)) {
+                logger.info(s"rechain, orphan block = ${latestBlock.hash.string}, new latest block = ${newBlock.hash.string}")
+
+                onRechain(latestBlock)
+              } else {
+                logger.info(s"Adding possible missing block = ${newBlock.hash.string}")
+                onMissingBlock()
+              }
+            }
+            .getOrElse(onFirstBlock)
+            .toFutureOr
+    } yield ()
+
+    result.toFuture
   }
 }

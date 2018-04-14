@@ -4,8 +4,8 @@ import javax.inject.{Inject, Singleton}
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.data.anorm.DatabasePostgresSeeder
-import com.xsn.explorer.data.async.BlockFutureDataHandler
+import com.xsn.explorer.data.DatabaseSeeder
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.{Blockhash, Height, Transaction}
 import com.xsn.explorer.services.XSNService
@@ -26,7 +26,7 @@ import scala.util.control.NonFatal
 class BlockSynchronizerTask @Inject() (
     xsnService: XSNService,
     blockDataHandler: BlockFutureDataHandler,
-    databasePostgresSeeder: DatabasePostgresSeeder) {
+    databaseSeeder: DatabaseFutureSeeder) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val lock = new Object
@@ -103,8 +103,8 @@ class BlockSynchronizerTask @Inject() (
       rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
       transactions = rpcTransactions.map(Transaction.fromRPC)
 
-      command = DatabasePostgresSeeder.CreateBlockCommand(block, transactions)
-      _ <- scala.concurrent.blocking { databasePostgresSeeder.insertOldBlock(command) }.toFutureOr
+      command = DatabaseSeeder.CreateBlockCommand(block, transactions)
+      _ <- databaseSeeder.insertPendingBlock(command).toFutureOr
       _ = logger.debug(s"Block ${block.height.int} saved")
 
       _ <- block

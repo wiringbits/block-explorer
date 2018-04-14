@@ -4,8 +4,9 @@ import java.sql.Connection
 import javax.inject.Inject
 
 import com.alexitc.playsonify.core.ApplicationResult
+import com.xsn.explorer.data.DatabaseBlockingSeeder
+import com.xsn.explorer.data.DatabaseSeeder._
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Address, Balance, Transaction}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import org.scalactic.Good
@@ -16,11 +17,10 @@ class DatabasePostgresSeeder @Inject() (
     blockPostgresDAO: BlockPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
     addressPostgresDAO: BalancePostgresDAO)
-    extends AnormPostgresDataHandler {
+    extends DatabaseBlockingSeeder
+    with AnormPostgresDataHandler {
 
-  import DatabasePostgresSeeder._
-
-  def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = database.withTransaction { implicit conn =>
+  override def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = database.withTransaction { implicit conn =>
     val result = upsertBlockCascade(command)
 
     result
@@ -28,13 +28,8 @@ class DatabasePostgresSeeder @Inject() (
         .getOrElse(throw new RuntimeException("Unable to add the first block"))
   }
 
-  /**
-   * Creates the new latest block assuming there is a previous block.
-   *
-   * @param command
-   * @return
-   */
-  def newLatestBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+
+  override def newLatestBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
     val result = for {
       // link previous block
       previousBlockhash <- command.block.previousBlockhash
@@ -49,7 +44,7 @@ class DatabasePostgresSeeder @Inject() (
         .getOrElse(throw new RuntimeException("Unable to add the new latest block"))
   }
 
-  def replaceLatestBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+  override def replaceLatestBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
     val deleteCommand = DeleteBlockCommand(command.orphanBlock, command.orphanTransactions)
     val createCommand = CreateBlockCommand(command.newBlock, command.newTransactions)
 
@@ -63,7 +58,7 @@ class DatabasePostgresSeeder @Inject() (
         .getOrElse(throw new RuntimeException("Unable to replace latest block"))
   }
 
-  def insertOldBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+  override def insertPendingBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
     val result = for {
       _ <- upsertBlockCascade(command)
     } yield ()
@@ -153,13 +148,4 @@ class DatabasePostgresSeeder @Inject() (
         .groupBy(_._1)
         .mapValues { list => list.map(_._2).sum }
   }
-}
-
-object DatabasePostgresSeeder {
-
-  case class CreateBlockCommand(block: Block, transactions: List[Transaction])
-  case class DeleteBlockCommand(block: Block, transactions: List[Transaction])
-  case class ReplaceBlockCommand(
-      orphanBlock: Block, orphanTransactions: List[Transaction],
-      newBlock: Block, newTransactions: List[Transaction])
 }
