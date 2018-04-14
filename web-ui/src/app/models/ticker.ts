@@ -4,4 +4,5 @@ export class ServerStats {
   circulatingSupply: number;
   transactions: number;
   blocks: number;
+  masternodes: number;
 }
