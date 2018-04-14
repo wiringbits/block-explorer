@@ -9,9 +9,8 @@
         <thead>
           <tr>
             <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.available' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.received' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.spent' | translate}}</th>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.amount' | translate}}</th>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.percentOfCoins' | translate}}</th>
           </tr>
         </thead>
 
@@ -21,8 +20,8 @@
               <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
             </td>
             <td>{{item.available}} {{'label.coinName' | translate}}</td>
-            <td>{{item.received}} {{'label.coinName' | translate}}</td>
-            <td>{{item.spent}} {{'label.coinName' | translate}}</td>
+            <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'label.unavailable' | translate}}</td>
+            <td *ngIf="ticker != null && ticker.circulatingSupply != null">{{getPercent(item)}} %</td>
           </tr>
         </tbody>
       </table>

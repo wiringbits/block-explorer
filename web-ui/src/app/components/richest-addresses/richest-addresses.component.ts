@@ -9,6 +9,8 @@ import { Balance } from '../../models/balance';
 
 import { BalancesService } from '../../services/balances.service';
 import { ErrorService } from '../../services/error.service';
+import { TickerService } from '../../services/ticker.service';
+import { ServerStats } from '../../models/ticker';
 
 @Component({
   selector: 'app-richest-addresses',
@@ -16,6 +18,9 @@ import { ErrorService } from '../../services/error.service';
   styleUrls: ['./richest-addresses.component.css']
 })
 export class RichestAddressesComponent implements OnInit {
+
+  // ticker
+  ticker: ServerStats;
 
   // pagination
   total = 0;
@@ -25,10 +30,12 @@ export class RichestAddressesComponent implements OnInit {
 
   constructor(
     private balancesService: BalancesService,
+    private tickerService: TickerService,
     private errorService: ErrorService) { }
 
   ngOnInit() {
     this.getPage(this.currentPage);
+    this.tickerService.get().subscribe(response => this.ticker = response);
   }
 
   getPage(page: number) {
@@ -40,5 +47,9 @@ export class RichestAddressesComponent implements OnInit {
       .do(response => this.total = response.total)
       .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
       .map(response => response.data);
+  }
+
+  getPercent(balance: Balance): number {
+    return balance.available * 100 / this.ticker.circulatingSupply;
   }
 }

@@ -108,7 +108,8 @@ export class AppComponent {
       'label.circulatingSupply': 'Circulating supply',
       'label.blocks': 'Blocks',
       'label.richestAddresses': 'Richest addresses',
-      'label.masternodes': 'Masternodes'
+      'label.masternodes': 'Masternodes',
+      'label.percentOfCoins': 'Percent of coins'
     };
   }
 }
