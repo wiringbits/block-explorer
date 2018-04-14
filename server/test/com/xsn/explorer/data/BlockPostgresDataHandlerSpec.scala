@@ -119,12 +119,6 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
-  private def clearDatabase() = {
-    database.withConnection { implicit conn =>
-      _root_.anorm.SQL("""DELETE FROM blocks""").execute()
-    }
-  }
-
   private def matches(expected: Block, result: Block) = {
     // NOTE: transactions and confirmations are not matched intentionally
     result.hash mustEqual expected.hash

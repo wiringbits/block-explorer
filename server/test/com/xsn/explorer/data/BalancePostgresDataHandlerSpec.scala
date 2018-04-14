@@ -5,6 +5,7 @@ import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.Balance
+import com.xsn.explorer.models.base.{Limit, Offset, PaginatedQuery}
 import org.scalactic.Good
 
 class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
@@ -45,6 +46,57 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
       val result = dataHandler.upsert(patch)
       result mustEqual Good(expected)
+    }
+  }
+
+  "getRichest" should {
+
+    val balances = List(
+      Balance(
+        address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
+        received = BigDecimal("1000"),
+        spent = BigDecimal("0")),
+
+      Balance(
+        address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        received = BigDecimal("1000"),
+        spent = BigDecimal("100")),
+
+      Balance(
+        address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
+        received = BigDecimal("10000"),
+        spent = BigDecimal("1000")),
+
+      Balance(
+        address = DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = BigDecimal("1000"),
+        spent = BigDecimal("500"))
+    ).sortBy(_.available).reverse
+
+    def prepare() = {
+      clearDatabase()
+
+      balances
+          .map(dataHandler.upsert)
+          .foreach(_.isGood mustEqual true)
+    }
+
+    "return the first 3 richest addresses" in {
+      prepare()
+      val query = PaginatedQuery(Offset(0), Limit(3))
+      val expected = balances.take(3)
+
+      val result = dataHandler.getRichest(query)
+      result.map(_.data) mustEqual Good(expected)
+    }
+
+    "skip the first richest address" in {
+      prepare()
+      val query = PaginatedQuery(Offset(1), Limit(3))
+      val expected = balances.drop(1).take(3)
+
+      val result = dataHandler.getRichest(query)
+      result.map(_.data) mustEqual Good(expected)
     }
   }
 

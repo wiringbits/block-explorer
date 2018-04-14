@@ -80,16 +80,6 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     }
   }
 
-  private def clearDatabase() = {
-    database.withConnection { implicit conn =>
-      _root_.anorm.SQL("""DELETE FROM transaction_outputs""").execute()
-      _root_.anorm.SQL("""DELETE FROM transaction_inputs""").execute()
-      _root_.anorm.SQL("""DELETE FROM transactions""").execute()
-      _root_.anorm.SQL("""DELETE FROM blocks""").execute()
-      _root_.anorm.SQL("""DELETE FROM balances""").execute()
-    }
-  }
-
   private def countBlocks() = {
     database.withConnection { implicit conn =>
       _root_.anorm.SQL("""SELECT COUNT(*) FROM blocks""").as(_root_.anorm.SqlParser.scalar[Int].single)
