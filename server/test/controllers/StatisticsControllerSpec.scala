@@ -1,30 +1,27 @@
 package controllers
 
-import com.alexitc.playsonify.core.FutureApplicationResult
-import com.xsn.explorer.helpers.DummyXSNService
-import com.xsn.explorer.models.Height
-import com.xsn.explorer.models.rpc.ServerStatistics
-import com.xsn.explorer.services.XSNService
+import com.alexitc.playsonify.core.ApplicationResult
+import com.xsn.explorer.data.StatisticsBlockingDataHandler
+import com.xsn.explorer.models.Statistics
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
 import play.api.test.Helpers._
 
-import scala.concurrent.Future
-
 class StatisticsControllerSpec extends MyAPISpec {
 
-  val stats = ServerStatistics(Height(45454), 93548, BigDecimal("77645419.93177629"))
+  val stats = Statistics(
+    blocks = 45454,
+    transactions = 93548,
+    totalSupply = BigDecimal("154516849.91650322"),
+    circulatingSupply = BigDecimal("78016849.91636708"))
 
-  val customXSNService = new DummyXSNService {
-    override def getServerStatistics(): FutureApplicationResult[ServerStatistics] = {
-      val result = Good(stats)
-      Future.successful(result)
-    }
+  val dataHandler = new StatisticsBlockingDataHandler {
+    override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
   }
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[XSNService].to(customXSNService))
+      .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
       .build()
 
   "GET /stats" should {
@@ -33,9 +30,10 @@ class StatisticsControllerSpec extends MyAPISpec {
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
-      (json \ "height").as[Int] mustEqual stats.height.int
+      (json \ "blocks").as[Int] mustEqual stats.blocks
       (json \ "transactions").as[Int] mustEqual stats.transactions
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply
+      (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply
     }
   }
 }
