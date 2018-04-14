@@ -9,17 +9,19 @@ object StatisticsDetails {
   implicit val writes: Writes[StatisticsDetails] = Writes { obj =>
     val values = Map(
       "blocks" -> JsNumber(obj.statistics.blocks),
-      "transactions" -> JsNumber(obj.statistics.transactions),
-      "totalSupply" -> JsNumber(obj.statistics.totalSupply),
-      "circulatingSupply" -> JsNumber(obj.statistics.circulatingSupply))
+      "transactions" -> JsNumber(obj.statistics.transactions))
 
-    val result = obj.masternodes
-        .map { count =>
-          values + ("masternodes" -> JsNumber(count))
-        }
-        .getOrElse {
-          values
-        }
+    val extras = List(
+      "totalSupply" -> obj.statistics.totalSupply.map(JsNumber.apply),
+      "circulatingSupply" -> obj.statistics.circulatingSupply.map(JsNumber.apply),
+      "masternodes" -> obj.masternodes.map(c => JsNumber.apply(c))
+    ).flatMap { case (key, maybe) =>
+      maybe.map(key -> _)
+    }
+
+    val result = extras.foldLeft(values) { case (acc, value) =>
+      acc + value
+    }
 
     JsObject.apply(result)
   }

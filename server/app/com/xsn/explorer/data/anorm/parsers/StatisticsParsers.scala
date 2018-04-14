@@ -11,7 +11,7 @@ object StatisticsParsers {
   val parseTotalSupply = get[BigDecimal]("total_supply")
   val parseCirculatingSupply = get[BigDecimal]("circulating_supply")
 
-  val parseStatistics = (parseBlocks ~ parseTransactions ~ parseTotalSupply ~ parseCirculatingSupply).map {
+  val parseStatistics = (parseBlocks ~ parseTransactions ~ parseTotalSupply.? ~ parseCirculatingSupply.?).map {
     case blocks ~ transactions ~ totalSupply ~ circulatingSupply =>
       Statistics(blocks, transactions, totalSupply, circulatingSupply)
   }
