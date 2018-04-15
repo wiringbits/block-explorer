@@ -8,8 +8,8 @@ import com.xsn.explorer.data.DatabaseSeeder
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.{Blockhash, Transaction}
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.models.{Blockhash, Transaction, TransactionId}
+import com.xsn.explorer.services.{TransactionService, XSNService}
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
@@ -22,6 +22,7 @@ import scala.concurrent.Future
  */
 class BlockEventsProcessor @Inject() (
     xsnService: XSNService,
+    transactionService: TransactionService,
     databaseSeeder: DatabaseFutureSeeder,
     blockDataHandler: BlockFutureDataHandler) {
 
@@ -46,10 +47,29 @@ class BlockEventsProcessor @Inject() (
   def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
-      rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
-      transactions = rpcTransactions.map(Transaction.fromRPC)
+      transactions <- block.transactions.map(getTransaction).toFutureOr
       r <- newLatestBlock(block, transactions).toFutureOr
     } yield block
+
+    result.toFuture
+  }
+
+  private def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+    val result = for {
+      tx <- xsnService.getTransaction(txid).toFutureOr
+      transactionVIN <- tx.vin.map { vin =>
+        transactionService.getTransactionValue(vin)
+            .map {
+              case Good(transactionValue) =>
+                val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
+                Good(newVIN)
+
+              case Bad(_) => Good(vin)
+            }
+      }.toFutureOr
+
+      rpcTransaction = tx.copy(vin = transactionVIN)
+    } yield Transaction.fromRPC(rpcTransaction)
 
     result.toFuture
   }
@@ -57,8 +77,7 @@ class BlockEventsProcessor @Inject() (
   private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Unit] = {
     def onRechain(orphanBlock: Block): FutureApplicationResult[Unit] = {
       val result = for {
-        orphanRPCTransactions <- orphanBlock.transactions.map(xsnService.getTransaction).toFutureOr
-        orphanTransactions = orphanRPCTransactions.map(Transaction.fromRPC)
+        orphanTransactions <- orphanBlock.transactions.map(getTransaction).toFutureOr
 
         command = DatabaseSeeder.ReplaceBlockCommand(
           orphanBlock = orphanBlock,

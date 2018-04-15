@@ -32,7 +32,7 @@ class TransactionService @Inject() (xsnService: XSNService)(implicit ec: Executi
     result.toFuture
   }
 
-  private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
+  def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
     val valueMaybe = for {
       value <- vin.value
       address <- vin.address

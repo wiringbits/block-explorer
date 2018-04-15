@@ -2,12 +2,14 @@ package com.xsn.explorer.processors
 
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
+import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.helpers.Executors._
-import com.xsn.explorer.helpers.{BlockLoader, FileBasedXSNService}
+import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
+import com.xsn.explorer.models.base._
+import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.services.TransactionService
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 
@@ -23,8 +25,9 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
   lazy val xsnService = new FileBasedXSNService
   lazy val processor = new BlockEventsProcessor(
     xsnService,
-    new DatabaseFutureSeeder(dataSeeder),
-    new BlockFutureDataHandler(dataHandler))
+    new TransactionService(xsnService)(Executors.globalEC),
+    new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
+    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
 
   before {
     clearDatabase()
@@ -106,6 +109,25 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         val stats = statsDataHandler.getStatistics().get
         stats.totalSupply.isEmpty mustEqual true
         stats.circulatingSupply.isEmpty mustEqual true
+      }
+    }
+
+    "process a block without spent index on transactions" in {
+      val block = BlockLoader.get("000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924")
+
+      whenReady(processor.newLatestBlock(block.hash)) { result =>
+        result.isGood mustEqual true
+
+        val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+        val balance = balanceDataHandler.get(
+          PaginatedQuery(Offset(0), Limit(100)),
+          FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder))
+            .get
+            .data
+            .find(_.address.string == "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9")
+            .get
+
+        balance.spent mustEqual BigDecimal("76500000.000000000000000")
       }
     }
   }
