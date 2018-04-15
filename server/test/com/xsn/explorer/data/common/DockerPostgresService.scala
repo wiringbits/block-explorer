@@ -13,6 +13,7 @@ trait DockerPostgresService extends DockerKit {
   import scala.concurrent.duration._
 
   val postgresContainer = DockerContainer(PostgresImage)
+      .withCommand("-N 500")
       .withPorts((PostgresAdvertisedPort, Some(PostgresExposedPort)))
       .withEnv(s"POSTGRES_USER=$PostgresUsername", s"POSTGRES_PASSWORD=$PostgresPassword")
       .withReadyChecker(
