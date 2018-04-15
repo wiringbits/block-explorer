@@ -43,8 +43,8 @@ class StatisticsControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
       (json \ "blocks").as[Int] mustEqual stats.blocks
       (json \ "transactions").as[Int] mustEqual stats.transactions
-      (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply
-      (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply
+      (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
+      (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
       (json \ "masternodes").as[Int] mustEqual 1000
     }
   }
