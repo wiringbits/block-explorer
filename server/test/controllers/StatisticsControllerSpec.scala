@@ -17,8 +17,8 @@ class StatisticsControllerSpec extends MyAPISpec {
   val stats = Statistics(
     blocks = 45454,
     transactions = 93548,
-    totalSupply = BigDecimal("154516849.91650322"),
-    circulatingSupply = BigDecimal("78016849.91636708"))
+    totalSupply = Some(BigDecimal("154516849.91650322")),
+    circulatingSupply = Some(BigDecimal("78016849.91636708")))
 
   val dataHandler = new StatisticsBlockingDataHandler {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
