@@ -18,8 +18,8 @@ export class BalancesService {
 
   constructor(private http: HttpClient) { }
 
-  getRichest(offset: number = 0, limit: number = 10): Observable<PaginatedResult<Balance>> {
-    const url = `${this.baseUrl}?offset=${offset}&limit=${limit}`;
+  get(offset: number = 0, limit: number = 10, orderBy: string = ''): Observable<PaginatedResult<Balance>> {
+    const url = `${this.baseUrl}?offset=${offset}&limit=${limit}&orderBy=${orderBy}`;
     return this.http.get<PaginatedResult<Balance>>(url);
   }
 }

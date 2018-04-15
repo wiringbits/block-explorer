@@ -20,7 +20,7 @@
               <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
             </td>
             <td>{{item.available}} {{'label.coinName' | translate}}</td>
-            <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'label.unavailable' | translate}}</td>
+            <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'message.unavailable' | translate}}</td>
             <td *ngIf="ticker != null && ticker.circulatingSupply != null">{{getPercent(item)}} %</td>
           </tr>
         </tbody>

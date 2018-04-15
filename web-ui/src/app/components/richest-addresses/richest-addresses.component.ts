@@ -43,7 +43,7 @@ export class RichestAddressesComponent implements OnInit {
     const limit = this.pageSize;
 
     this.asyncItems = this.balancesService
-      .getRichest(offset, limit)
+      .get(offset, limit, 'available:desc')
       .do(response => this.total = response.total)
       .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
       .map(response => response.data);
