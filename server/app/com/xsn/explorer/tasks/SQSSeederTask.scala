@@ -66,7 +66,11 @@ class SQSSeederTask @Inject() (
         case Good(_) =>
           logger.info(s"Block processed successfully = ${blockhash.string}")
           sqs.deleteMessageAsync(config.queueUrl, message.getReceiptHandle)
-          blockSynchronizerTask.sync()
+      }
+
+      result.foreach {
+        case Good(eventResult) => onBlockResult(eventResult)
+        case _ => ()
       }
     }
 
@@ -79,5 +83,19 @@ class SQSSeederTask @Inject() (
           None
         }
         .foreach(onBlockhash)
+  }
+
+  private def onBlockResult(eventResult: BlockEventsProcessor.Result) = eventResult match {
+    case BlockEventsProcessor.FirstBlockCreated(block) =>
+      blockSynchronizerTask.sync()
+
+    case BlockEventsProcessor.NewBlockAppended(block) =>
+      blockSynchronizerTask.sync()
+
+    case BlockEventsProcessor.RechainDone(orphanBlock, newBlock) =>
+      blockSynchronizerTask.sync()
+
+    case BlockEventsProcessor.MissingBlockProcessed(block) => ()
+    case BlockEventsProcessor.ExistingBlockIgnored(block) => ()
   }
 }
