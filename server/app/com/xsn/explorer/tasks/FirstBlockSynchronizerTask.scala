@@ -7,8 +7,8 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.data.DatabaseSeeder
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.errors.BlockNotFoundError
-import com.xsn.explorer.models.{Blockhash, Height, Transaction}
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.models.{Blockhash, Height}
+import com.xsn.explorer.services.{TransactionService, XSNService}
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.{Bad, Good, One, Or}
 import org.slf4j.LoggerFactory
@@ -25,6 +25,7 @@ import scala.util.control.NonFatal
 @Singleton
 class FirstBlockSynchronizerTask @Inject() (
     xsnService: XSNService,
+    transactionService: TransactionService,
     blockDataHandler: BlockFutureDataHandler,
     databaseSeeder: DatabaseFutureSeeder) {
 
@@ -100,8 +101,7 @@ class FirstBlockSynchronizerTask @Inject() (
   private def doSync(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
-      rpcTransactions <- block.transactions.map(xsnService.getTransaction).toFutureOr
-      transactions = rpcTransactions.map(Transaction.fromRPC)
+      transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
 
       command = DatabaseSeeder.CreateBlockCommand(block, transactions)
       _ <- databaseSeeder.insertPendingBlock(command).toFutureOr
