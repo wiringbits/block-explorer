@@ -11,6 +11,6 @@ class TransactionsController @Inject() (
     extends MyJsonController(cc) {
 
   def getTransaction(txid: String) = publicNoInput { _ =>
-    transactionService.getTransaction(txid)
+    transactionService.getTransactionDetails(txid)
   }
 }

@@ -8,7 +8,7 @@ import com.xsn.explorer.data.DatabaseSeeder
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.{Blockhash, Transaction, TransactionId}
+import com.xsn.explorer.models.{Blockhash, Transaction}
 import com.xsn.explorer.services.{TransactionService, XSNService}
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.{Bad, Good, One}
@@ -49,29 +49,9 @@ class BlockEventsProcessor @Inject() (
   def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Result] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
-      transactions <- block.transactions.map(getTransaction).toFutureOr
+      transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
       r <- newLatestBlock(block, transactions).toFutureOr
     } yield r
-
-    result.toFuture
-  }
-
-  private def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
-    val result = for {
-      tx <- xsnService.getTransaction(txid).toFutureOr
-      transactionVIN <- tx.vin.map { vin =>
-        transactionService.getTransactionValue(vin)
-            .map {
-              case Good(transactionValue) =>
-                val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
-                Good(newVIN)
-
-              case Bad(_) => Good(vin)
-            }
-      }.toFutureOr
-
-      rpcTransaction = tx.copy(vin = transactionVIN)
-    } yield Transaction.fromRPC(rpcTransaction)
 
     result.toFuture
   }
@@ -79,7 +59,7 @@ class BlockEventsProcessor @Inject() (
   private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Result] = {
     def onRechain(orphanBlock: Block): FutureApplicationResult[Result] = {
       val result = for {
-        orphanTransactions <- orphanBlock.transactions.map(getTransaction).toFutureOr
+        orphanTransactions <- orphanBlock.transactions.map(transactionService.getTransaction).toFutureOr
 
         command = DatabaseSeeder.ReplaceBlockCommand(
           orphanBlock = orphanBlock,

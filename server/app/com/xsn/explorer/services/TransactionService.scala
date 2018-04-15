@@ -6,15 +6,15 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.{TransactionFormatError, TransactionNotFoundError}
 import com.xsn.explorer.models.rpc.TransactionVIN
-import com.xsn.explorer.models.{TransactionDetails, TransactionId, TransactionValue}
+import com.xsn.explorer.models.{Transaction, TransactionDetails, TransactionId, TransactionValue}
 import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
-import org.scalactic.{Good, One, Or}
+import org.scalactic.{Bad, Good, One, Or}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionService @Inject() (xsnService: XSNService)(implicit ec: ExecutionContext) {
 
-  def getTransaction(txidString: String): FutureApplicationResult[TransactionDetails] = {
+  def getTransactionDetails(txidString: String): FutureApplicationResult[TransactionDetails] = {
     val result = for {
       txid <- {
         val maybe = TransactionId.from(txidString)
@@ -32,7 +32,27 @@ class TransactionService @Inject() (xsnService: XSNService)(implicit ec: Executi
     result.toFuture
   }
 
-  def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
+  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+    val result = for {
+      tx <- xsnService.getTransaction(txid).toFutureOr
+      transactionVIN <- tx.vin.map { vin =>
+        getTransactionValue(vin)
+            .map {
+              case Good(transactionValue) =>
+                val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
+                Good(newVIN)
+
+              case Bad(_) => Good(vin)
+            }
+      }.toFutureOr
+
+      rpcTransaction = tx.copy(vin = transactionVIN)
+    } yield Transaction.fromRPC(rpcTransaction)
+
+    result.toFuture
+  }
+
+  private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
     val valueMaybe = for {
       value <- vin.value
       address <- vin.address
