@@ -1,6 +1,7 @@
 package com.xsn.explorer.processors
 
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
@@ -17,7 +18,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     database,
     new BlockPostgresDAO,
     new TransactionPostgresDAO,
-    new BalancePostgresDAO)
+    new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   lazy val xsnService = new FileBasedXSNService
   lazy val processor = new BlockEventsProcessor(

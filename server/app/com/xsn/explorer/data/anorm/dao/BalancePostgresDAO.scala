@@ -1,13 +1,16 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
+import javax.inject.Inject
 
 import anorm._
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
 import com.xsn.explorer.models.Balance
-import com.xsn.explorer.models.base.{Count, PaginatedQuery}
+import com.xsn.explorer.models.base.{Count, FieldOrdering, PaginatedQuery}
+import com.xsn.explorer.models.fields.BalanceField
 
-class BalancePostgresDAO {
+class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   def upsert(balance: Balance)(implicit conn: Connection): Option[Balance] = {
     SQL(
@@ -30,16 +33,21 @@ class BalancePostgresDAO {
     ).as(parseBalance.singleOpt).flatten
   }
 
-  def getRichest(query: PaginatedQuery)(implicit conn: Connection): List[Balance] = {
+  def get(
+      query: PaginatedQuery,
+      ordering: FieldOrdering[BalanceField])(
+      implicit conn: Connection): List[Balance] = {
+
+    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
-      """
+      s"""
         |SELECT address, received, spent, available
         |FROM balances
         |WHERE address NOT IN (
         |  SELECT address
         |  FROM hidden_addresses
         |)
-        |ORDER BY available DESC
+        |$orderBy
         |OFFSET {offset}
         |LIMIT {limit}
       """.stripMargin

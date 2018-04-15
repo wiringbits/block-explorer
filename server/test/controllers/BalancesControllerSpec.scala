@@ -5,6 +5,7 @@ import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.base._
+import com.xsn.explorer.models.fields.BalanceField
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
@@ -40,7 +41,7 @@ class BalancesControllerSpec extends MyAPISpec {
 
     override def upsert(balance: Balance): ApplicationResult[Balance] = ???
 
-    override def getRichest(query: PaginatedQuery): ApplicationResult[PaginatedResult[Balance]] = {
+    override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
       val list = balances.drop(query.offset.int).take(query.limit.int)
       val result = PaginatedResult(
         offset = query.offset,

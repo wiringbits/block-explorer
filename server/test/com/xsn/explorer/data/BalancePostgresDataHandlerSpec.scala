@@ -2,15 +2,19 @@ package com.xsn.explorer.data
 
 import com.xsn.explorer.data.anorm.BalancePostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.Balance
-import com.xsn.explorer.models.base.{Limit, Offset, PaginatedQuery}
+import com.xsn.explorer.models.base._
+import com.xsn.explorer.models.fields.BalanceField
 import org.scalactic.Good
 
 class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
-  lazy val dataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO)
+  lazy val dataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+
+  val defaultOrdering = FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder)
 
   "upsert" should {
     "create an empty balance" in {
@@ -49,7 +53,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
-  "getRichest" should {
+  "get" should {
 
     val balances = List(
       Balance(
@@ -86,7 +90,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val query = PaginatedQuery(Offset(0), Limit(3))
       val expected = balances.take(3)
 
-      val result = dataHandler.getRichest(query)
+      val result = dataHandler.get(query, defaultOrdering)
       result.map(_.data) mustEqual Good(expected)
     }
 
@@ -95,7 +99,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val query = PaginatedQuery(Offset(1), Limit(3))
       val expected = balances.drop(1).take(3)
 
-      val result = dataHandler.getRichest(query)
+      val result = dataHandler.get(query, defaultOrdering)
       result.map(_.data) mustEqual Good(expected)
     }
   }
