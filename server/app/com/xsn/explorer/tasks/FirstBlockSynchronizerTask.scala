@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
  * This task helps to sync it from the first saved block backwards to the genesis one.
  */
 @Singleton
-class BlockSynchronizerTask @Inject() (
+class FirstBlockSynchronizerTask @Inject() (
     xsnService: XSNService,
     blockDataHandler: BlockFutureDataHandler,
     databaseSeeder: DatabaseFutureSeeder) {
