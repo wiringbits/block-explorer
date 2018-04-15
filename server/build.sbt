@@ -27,7 +27,8 @@ val playsonifyVersion = "1.1.0"
 lazy val root = (project in file("."))
     .enablePlugins(PlayScala)
 
-
+// don't include play generated classes into code coverage
+coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 
 libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
 
