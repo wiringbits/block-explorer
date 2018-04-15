@@ -1,7 +1,7 @@
 package com.xsn.explorer.processors
 
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, DatabasePostgresSeeder}
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.Executors._
@@ -86,6 +86,25 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         result.isGood mustEqual true
         val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
+      }
+    }
+
+    "processing a repeated missing block doesn't affect the balance" in {
+      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+
+      List(block1, block2, block3).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+
+      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+        result.isGood mustEqual true
+        val blocks = List(block1, block2, block3)
+        verifyBlockchain(blocks)
+
+        val statsDataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
+        val stats = statsDataHandler.getStatistics().get
+        stats.totalSupply.isEmpty mustEqual true
+        stats.circulatingSupply.isEmpty mustEqual true
       }
     }
   }

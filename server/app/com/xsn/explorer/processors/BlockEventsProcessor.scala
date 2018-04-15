@@ -86,8 +86,20 @@ class BlockEventsProcessor @Inject() (
     }
 
     def onMissingBlock(): FutureApplicationResult[Unit] = {
-      val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
-      databaseSeeder.insertPendingBlock(command)
+      blockDataHandler
+          .getBy(newBlock.hash)
+          .flatMap {
+            case Good(_) =>
+              logger.info(s"The block ${newBlock.hash.string} is not missing but duplicated, ignoring")
+              Future.successful { Good(()) }
+
+            case Bad(One(BlockNotFoundError)) =>
+              val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
+              databaseSeeder.insertPendingBlock(command)
+
+            case Bad(errors) =>
+              Future.successful(Bad(errors))
+          }
     }
 
     val result = for {
