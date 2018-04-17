@@ -9,7 +9,7 @@ language: scala
 scala:
    - 2.12.2
 
-before_script: cd alerts-server
+before_script: cd server
 
 script:
 - sbt clean coverage test coverageReport
