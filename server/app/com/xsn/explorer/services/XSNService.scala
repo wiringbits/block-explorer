@@ -9,7 +9,6 @@ import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{AddressBalance, Block, ServerStatistics, Transaction}
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue, Reads}
@@ -19,19 +18,21 @@ import scala.util.Try
 
 trait XSNService {
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction]
+  def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction]
 
-  def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance]
+  def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance]
 
   def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
 
-  def getBlock(blockhash: Blockhash): FutureApplicationResult[Block]
+  def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block]
 
-  def getLatestBlock(): FutureApplicationResult[Block]
+  def getLatestBlock(): FutureApplicationResult[rpc.Block]
 
-  def getServerStatistics(): FutureApplicationResult[ServerStatistics]
+  def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics]
 
   def getMasternodeCount(): FutureApplicationResult[Int]
+
+  def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -47,14 +48,14 @@ class XSNServiceRPCImpl @Inject() (
       .withHttpHeaders("Content-Type" -> "text/plain")
 
 
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+  override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction] = {
     val errorCodeMapper = Map(-5 -> TransactionNotFoundError)
 
     server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
 
-          val maybe = getResult[Transaction](response, errorCodeMapper)
+          val maybe = getResult[rpc.Transaction](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
 
@@ -63,7 +64,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance] = {
+  override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = {
     val body = s"""
          |{
          |  "jsonrpc": "1.0",
@@ -81,7 +82,7 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
 
-          val maybe = getResult[AddressBalance](response, errorCodeMapper)
+          val maybe = getResult[rpc.AddressBalance](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
 
@@ -117,7 +118,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+  override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
@@ -125,7 +126,7 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
 
-          val maybe = getResult[Block](response, errorCodeMapper)
+          val maybe = getResult[rpc.Block](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
 
@@ -134,7 +135,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getLatestBlock(): FutureApplicationResult[Block] = {
+  override def getLatestBlock(): FutureApplicationResult[rpc.Block] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -163,7 +164,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getServerStatistics(): FutureApplicationResult[ServerStatistics] = {
+  override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -175,7 +176,7 @@ class XSNServiceRPCImpl @Inject() (
     server
         .post(body)
         .map { response =>
-          val maybe = getResult[ServerStatistics](response)
+          val maybe = getResult[rpc.ServerStatistics](response)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
@@ -197,6 +198,32 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
           val maybe = getResult[Int](response)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "masternode",
+                  |  "params": ["list", "full"]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[Map[String, String]](response)
+              .map {
+                case Good(map) => Good(rpc.Masternode.fromMap(map))
+                case Bad(errors) => Bad(errors)
+              }
+
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 

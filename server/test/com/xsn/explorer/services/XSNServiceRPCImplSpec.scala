@@ -3,10 +3,11 @@ package com.xsn.explorer.services
 import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
-import com.xsn.explorer.models.{Address, Blockhash, Height}
+import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.{Address, Blockhash, Height, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalactic.Bad
+import org.scalactic.{Bad, Good}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
@@ -342,6 +343,68 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
         stats.height mustEqual Height(45204)
         stats.transactions mustEqual 93047
         stats.totalSupply mustEqual BigDecimal("77634169.93285364")
+      }
+    }
+  }
+
+  "getMasternodeCount" should {
+    "return the count" in {
+      val content = "10"
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getMasternodeCount()) { result =>
+        result mustEqual Good(10)
+      }
+    }
+  }
+
+  "getMasternodes" should {
+    "return the masternodes" in {
+      val content =
+        """
+          |{
+          |  "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01-0": "  WATCHDOG_EXPIRED 70208 XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2 1524349009   513323 1524297814  63936 45.77.136.212:62583",
+          |  "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01-1": "  ENABLED          70208 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1524349028   777344 1524312645  64183 45.32.148.13:62583"
+          |}
+        """.stripMargin
+
+      val expected = List(
+        Masternode(
+          txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+          ip = "45.77.136.212:62583",
+          protocol = "70208",
+          status = "WATCHDOG_EXPIRED",
+          activeSeconds = 513323,
+          lastSeen = 1524297814L,
+          Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get),
+
+        Masternode(
+          txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+          ip = "45.32.148.13:62583",
+          protocol = "70208",
+          status = "ENABLED",
+          activeSeconds = 777344,
+          lastSeen = 1524312645L,
+          Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
+      )
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getMasternodes()) { result =>
+        result.isGood mustEqual true
+
+        val masternodes = result.get
+        masternodes mustEqual expected
       }
     }
   }
