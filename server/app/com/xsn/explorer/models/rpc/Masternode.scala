@@ -49,7 +49,7 @@ object Masternode {
   }
 
   private def parseValues(key: String, values: List[String]): Option[Masternode] = values match {
-    case status :: protocol :: payee :: lastPaid :: activeSeconds :: lastSeen :: lastPaidBlock :: ip :: _ =>
+    case status :: protocol :: payee :: lastSeen :: activeSeconds :: lastPaid :: lastPaidBlock :: ip :: _ =>
       for {
         txid <- parseTxid(key)
         payee <- Address.from(payee)

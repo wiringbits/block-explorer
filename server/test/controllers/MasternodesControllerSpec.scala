@@ -22,7 +22,7 @@ class MasternodesControllerSpec extends MyAPISpec {
       protocol = "70208",
       status = "WATCHDOG_EXPIRED",
       activeSeconds = 513323,
-      lastSeen = 1524297814L,
+      lastSeen = 1524349009,
       payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get),
 
     Masternode(
@@ -31,7 +31,7 @@ class MasternodesControllerSpec extends MyAPISpec {
       protocol = "70208",
       status = "ENABLED",
       activeSeconds = 777344,
-      lastSeen = 1524312645L,
+      lastSeen = 1524349028,
       payee = Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
   )
 
