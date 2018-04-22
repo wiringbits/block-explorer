@@ -1,0 +1,41 @@
+<div>
+  <div class="row">
+    <h2 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-1'">{{'label.masternodes' | translate}}</h2>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+      <table class="table table-condensed table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">#</th>
+            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
+            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">{{'label.protocol' | translate}}</th>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.active' | translate}}</th>
+            <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.lastSeen' | translate}}</th>
+            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.payee' | translate}}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'masternodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+            <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
+            <td>{{item.ip}}</td>
+            <td>{{item.protocol}}</td>
+            <td>{{item.status}}</td>
+            <td>{{item.activeSeconds}}</td>
+            <td>{{item.lastSeen * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>
+              <a routerLink="/addresses/{{item.payee}}">{{item.payee}}</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="has-text-centered">
+        <pagination-controls (pageChange)="getPage($event)" id="masternodes"></pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>

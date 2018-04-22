@@ -18,6 +18,7 @@ import { BalancesService } from './services/balances.service';
 import { BlocksService } from './services/blocks.service';
 import { ErrorService } from './services/error.service';
 import { LanguageService } from './services/language.service';
+import { MasternodesService } from './services/masternodes.service';
 import { NavigatorService } from './services/navigator.service';
 import { NotificationService } from './services/notification.service';
 import { TickerService } from './services/ticker.service';
@@ -34,6 +35,7 @@ import { BlockDetailsComponent } from './components/block-details/block-details.
 import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.component';
 import { TickerComponent } from './components/ticker/ticker.component';
 import { RichestAddressesComponent } from './components/richest-addresses/richest-addresses.component';
+import { MasternodesComponent } from './components/masternodes/masternodes.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +49,8 @@ import { RichestAddressesComponent } from './components/richest-addresses/riches
     BlockDetailsComponent,
     LatestBlocksComponent,
     TickerComponent,
-    RichestAddressesComponent
+    RichestAddressesComponent,
+    MasternodesComponent
   ],
   imports: [
     AppRoutingModule,
@@ -73,6 +76,7 @@ import { RichestAddressesComponent } from './components/richest-addresses/riches
     BlocksService,
     ErrorService,
     LanguageService,
+    MasternodesService,
     NavigatorService,
     NotificationService,
     TickerService,
