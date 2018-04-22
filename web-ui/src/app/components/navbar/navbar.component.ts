@@ -14,8 +14,6 @@ class Tab {
 export class NavbarComponent implements OnInit {
 
   public tabs: Tab[] = [
-    { label: 'label.richestAddresses', path: 'richest-addresses' },
-    { label: 'label.masternodes', path: 'masternodes' }
   ];
 
   constructor(private location: Location) { }
