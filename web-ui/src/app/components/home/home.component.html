@@ -1,5 +1,16 @@
 <div>
   <app-finder></app-finder>
   <app-ticker></app-ticker>
-  <app-latest-blocks></app-latest-blocks>
+
+  <tabset class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-xs-offset-1 col-xs-10">
+    <tab heading="{{'label.latestBlocks' | translate}}" (select)="selectView('latestBlocks')">
+      <app-latest-blocks *ngIf="isSelected('latestBlocks')"></app-latest-blocks>
+    </tab>
+    <tab heading="{{'label.richestAddresses' | translate}}" (select)="selectView('richestAddresses')">
+      <app-richest-addresses *ngIf="isSelected('richestAddresses')"></app-richest-addresses>
+    </tab>
+    <tab heading="{{'label.masternodes' | translate}}" (select)="selectView('masternodes')">
+      <app-masternodes *ngIf="isSelected('masternodes')"></app-masternodes>
+    </tab>
+  </tabset>
 </div>

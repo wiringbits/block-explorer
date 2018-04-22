@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AlertModule, BsDropdownModule, CollapseModule, TooltipModule, ModalModule } from 'ngx-bootstrap';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 
@@ -68,7 +69,8 @@ import { MasternodesComponent } from './components/masternodes/masternodes.compo
     HttpClientModule,
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
-    NgxPaginationModule
+    NgxPaginationModule,
+    TabsModule.forRoot()
   ],
   providers: [
     AddressesService,

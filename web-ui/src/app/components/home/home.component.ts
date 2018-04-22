@@ -7,9 +7,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
+  currentView = 'latestBlocks';
+
   constructor() { }
 
   ngOnInit() {
   }
 
+  selectView(view: string) {
+    this.currentView = view;
+  }
+
+  isSelected(view: string): boolean {
+    return this.currentView === view;
+  }
 }
