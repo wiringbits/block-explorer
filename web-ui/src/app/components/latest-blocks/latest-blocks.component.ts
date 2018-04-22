@@ -47,6 +47,12 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
   private updateBlocks() {
     const polling$ = new Subject();
 
+    /**
+     * There is around 1 new block per minute, it is a waste of resources
+     * to be checking for new blocks quite frequently.
+     */
+    const interval = 50000;
+
     // polling based on https://stackoverflow.com/a/42659054/3211175
     this.subscription$ = Observable
       .of(null)
@@ -54,7 +60,7 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
       .switchMap(_ =>
         this.blocksService.getLatest()
           .do(_ => {
-            setTimeout(_ => polling$.next(null), 5000);
+            setTimeout(_ => polling$.next(null), interval);
           })
       )
       .subscribe(
