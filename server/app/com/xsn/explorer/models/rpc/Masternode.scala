@@ -1,6 +1,7 @@
 package com.xsn.explorer.models.rpc
 
 import com.xsn.explorer.models.{Address, TransactionId}
+import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
 
@@ -15,6 +16,8 @@ case class Masternode(
 )
 
 object Masternode {
+
+  implicit val writes: Writes[Masternode] = Json.writes[Masternode]
 
   /**
    * The RPC server give us a map like this one:

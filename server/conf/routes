@@ -15,3 +15,5 @@ GET   /blocks/:blockhash     controllers.BlocksController.getDetails(blockhash: 
 GET   /stats                 controllers.StatisticsController.getStatus()
 
 GET   /balances              controllers.BalancesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
+
+GET   /masternodes           controllers.MasternodesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
