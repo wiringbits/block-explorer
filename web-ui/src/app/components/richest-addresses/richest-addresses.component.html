@@ -8,6 +8,7 @@
       <table class="table table-condensed table-bordered table-striped table-hover">
         <thead>
           <tr>
+            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">#</th>
             <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
             <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.amount' | translate}}</th>
             <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.percentOfCoins' | translate}}</th>
@@ -15,7 +16,8 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let item of asyncItems | async | paginate: { id: 'richestAddresses', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+          <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'richestAddresses', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+            <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
             <td>
               <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
             </td>
