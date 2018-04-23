@@ -17,6 +17,8 @@ import { ErrorService } from '../../services/error.service';
 })
 export class MasternodesComponent implements OnInit {
 
+  Math: Math = Math;
+
   // pagination
   total = 0;
   currentPage = 1;
