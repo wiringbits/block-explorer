@@ -35,7 +35,7 @@ libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
 libraryDependencies += "com.alexitc" %% "playsonify" % playsonifyVersion
 libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
-libraryDependencies += "com.typesafe.play" %% "anorm" % "2.5.3"
+libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.1"
 libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1212"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
