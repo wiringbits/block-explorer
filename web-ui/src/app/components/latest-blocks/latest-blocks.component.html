@@ -30,7 +30,7 @@
               <td>
                 <a routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
               </td>
-              <td>{{item.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+              <td>{{item.time * 1000 | amTimeAgo}}</td>
               <td>{{item.transactions.length}}</td>
               <td>{{item.difficulty}}</td>
               <td>{{extractedBy(item) | translate}}</td>
