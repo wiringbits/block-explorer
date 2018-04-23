@@ -66,4 +66,14 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       result mustEqual Bad(TransactionNotFoundError).accumulating
     }
   }
+
+  "deleteBy blockhash" should {
+    "delete the transactions related to a block" in {
+      dataHandler.upsert(transaction).isGood mustEqual true
+
+      val result = dataHandler.deleteBy(transaction.blockhash)
+      result.isGood mustEqual true
+      result.get mustEqual List(transaction)
+    }
+  }
 }

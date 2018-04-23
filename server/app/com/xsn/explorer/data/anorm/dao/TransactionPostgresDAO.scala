@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models.{Transaction, TransactionId}
+import com.xsn.explorer.models.{Blockhash, Transaction, TransactionId}
 
 class TransactionPostgresDAO {
 
@@ -39,6 +39,28 @@ class TransactionPostgresDAO {
     for {
       tx <- txMaybe.flatten
     } yield tx.copy(inputs = inputs, outputs = outputs)
+  }
+
+  /**
+   * NOTE: Ensure the connection has an open transaction.
+   */
+  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Transaction] = {
+    val transactions = SQL(
+      """
+        |DELETE FROM transactions
+        |WHERE blockhash = {blockhash}
+        |RETURNING txid, blockhash, time, size
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string
+    ).as(parseTransaction.*).flatten
+
+    transactions.map { tx =>
+      val inputs = deleteInputs(tx.id)
+      val outputs = deleteOutputs(tx.id)
+
+      tx.copy(inputs = inputs, outputs = outputs)
+    }
   }
 
   private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
