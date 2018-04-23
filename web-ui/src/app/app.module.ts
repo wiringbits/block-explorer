@@ -14,6 +14,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module';
 import { NgxPaginationModule } from 'ngx-pagination';
 
+import { MomentModule } from 'ngx-moment';
+
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
 import { BlocksService } from './services/blocks.service';
@@ -70,7 +72,8 @@ import { MasternodesComponent } from './components/masternodes/masternodes.compo
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
     NgxPaginationModule,
-    TabsModule.forRoot()
+    TabsModule.forRoot(),
+    MomentModule
   ],
   providers: [
     AddressesService,
