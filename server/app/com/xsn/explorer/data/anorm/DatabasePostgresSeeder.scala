@@ -7,6 +7,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.DatabaseBlockingSeeder
 import com.xsn.explorer.data.DatabaseSeeder._
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Address, Balance, Transaction}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import org.scalactic.Good
@@ -45,11 +46,10 @@ class DatabasePostgresSeeder @Inject() (
   }
 
   override def replaceLatestBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
-    val deleteCommand = DeleteBlockCommand(command.orphanBlock, command.orphanTransactions)
     val createCommand = CreateBlockCommand(command.newBlock, command.newTransactions)
 
     val result = for {
-      _ <- deleteBlockCascade(deleteCommand)
+      _ <- deleteBlockCascade(command.orphanBlock)
       _ <- upsertBlockCascade(createCommand)
     } yield ()
 
@@ -95,16 +95,16 @@ class DatabasePostgresSeeder @Inject() (
     } yield ()
   }
 
-  private def deleteBlockCascade(command: DeleteBlockCommand)(implicit conn: Connection): Option[Unit] = {
+  private def deleteBlockCascade(block: Block)(implicit conn: Connection): Option[Unit] = {
     for {
       // block
-      _ <- blockPostgresDAO.delete(command.block.hash)
+      _ <- blockPostgresDAO.delete(block.hash)
 
       // transactions
-      _ = command.transactions.foreach(tx => transactionPostgresDAO.delete(tx.id))
+      deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
 
       // balances
-      _ <- spendMap(command.transactions)
+      _ <- spendMap(deletedTransactions)
           .map { case (address, value) =>
             val balance = Balance(address, spent = -value)
             addressPostgresDAO.upsert(balance)
@@ -112,7 +112,7 @@ class DatabasePostgresSeeder @Inject() (
           .toList
           .everything
 
-      _ <- receiveMap(command.transactions)
+      _ <- receiveMap(deletedTransactions)
           .map { case (address, value) =>
             val balance = Balance(address, received = -value)
             addressPostgresDAO.upsert(balance)

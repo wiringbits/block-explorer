@@ -130,6 +130,36 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         balance.spent mustEqual BigDecimal("76500000.000000000000000")
       }
     }
+
+    "process a rechain without corrupting the balances table" in {
+      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+
+      List(block1, block2)
+          .map(_.hash)
+          .map(processor.newLatestBlock)
+          .foreach { whenReady(_) { _.isGood mustEqual true } }
+
+      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+        result.isGood mustEqual true
+        val blocks = List(block1)
+        verifyBlockchain(blocks)
+
+        val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+        val balances = balanceDataHandler.get(
+          PaginatedQuery(Offset(0), Limit(100)),
+          FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder))
+            .get
+            .data
+
+        val balance = balances
+            .find(_.address.string == "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9")
+            .get
+
+        balance.received mustEqual BigDecimal(0)
+        balance.spent mustEqual BigDecimal(0)
+      }
+    }
   }
 
   private def verifyBlockchain(blocks: List[Block]) = {

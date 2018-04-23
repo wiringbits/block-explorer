@@ -4,6 +4,8 @@ import play.api.libs.json.{JsString, Writes}
 
 trait WrappedString extends Any {
   def string: String
+
+  override def toString: String = string
 }
 
 object WrappedString {

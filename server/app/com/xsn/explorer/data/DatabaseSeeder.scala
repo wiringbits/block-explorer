@@ -37,9 +37,8 @@ trait DatabaseSeeder[F[_]] {
 object DatabaseSeeder {
 
   case class CreateBlockCommand(block: Block, transactions: List[Transaction])
-  case class DeleteBlockCommand(block: Block, transactions: List[Transaction])
   case class ReplaceBlockCommand(
-      orphanBlock: Block, orphanTransactions: List[Transaction],
+      orphanBlock: Block,
       newBlock: Block, newTransactions: List[Transaction])
 
 }

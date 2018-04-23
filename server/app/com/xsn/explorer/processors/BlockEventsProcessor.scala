@@ -58,14 +58,12 @@ class BlockEventsProcessor @Inject() (
 
   private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Result] = {
     def onRechain(orphanBlock: Block): FutureApplicationResult[Result] = {
-      val result = for {
-        orphanTransactions <- orphanBlock.transactions.map(transactionService.getTransaction).toFutureOr
+      val command = DatabaseSeeder.ReplaceBlockCommand(
+        orphanBlock = orphanBlock,
+        newBlock = newBlock,
+        newTransactions = newTransactions)
 
-        command = DatabaseSeeder.ReplaceBlockCommand(
-          orphanBlock = orphanBlock,
-          orphanTransactions = orphanTransactions,
-          newBlock = newBlock,
-          newTransactions = newTransactions)
+      val result = for {
         _ <- databaseSeeder.replaceLatestBlock(command).toFutureOr
       } yield RechainDone(orphanBlock, newBlock)
 
