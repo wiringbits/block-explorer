@@ -11,6 +11,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Address, Balance, Transaction}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import org.scalactic.Good
+import org.slf4j.LoggerFactory
 import play.api.db.Database
 
 class DatabasePostgresSeeder @Inject() (
@@ -20,6 +21,8 @@ class DatabasePostgresSeeder @Inject() (
     addressPostgresDAO: BalancePostgresDAO)
     extends DatabaseBlockingSeeder
     with AnormPostgresDataHandler {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = database.withTransaction { implicit conn =>
     val result = upsertBlockCascade(command)
@@ -34,9 +37,13 @@ class DatabasePostgresSeeder @Inject() (
     val result = for {
       // link previous block
       previousBlockhash <- command.block.previousBlockhash
-      previous <- blockPostgresDAO.getBy(previousBlockhash)
-      newPrevious = previous.copy(nextBlockhash = Some(command.block.hash))
-      _ <- blockPostgresDAO.upsert(newPrevious)
+      _ <- blockPostgresDAO
+          .setNextBlockhash(previousBlockhash, command.block.hash)
+          .orElse {
+            logger.warn(s"Failed to link previous block = ${previousBlockhash.string} to ${command.block.hash.string} because it wasn't found")
+            None
+          }
+
       _ <- upsertBlockCascade(command)
     } yield ()
 
@@ -71,7 +78,10 @@ class DatabasePostgresSeeder @Inject() (
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {
     for {
       // block
-      _ <- blockPostgresDAO.upsert(command.block)
+      _ <- blockPostgresDAO
+            .delete(command.block.hash)
+            .orElse { Some(command.block) }
+      _ <- blockPostgresDAO.insert(command.block)
 
       // transactions
       _ <- command.transactions.map(tx => transactionPostgresDAO.upsert(tx)).everything

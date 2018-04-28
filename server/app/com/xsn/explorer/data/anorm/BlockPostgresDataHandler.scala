@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
-import com.xsn.explorer.errors.{BlockNotFoundError, BlockUnknownError}
+import com.xsn.explorer.errors._
 import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
 import org.scalactic.{One, Or}
@@ -17,9 +17,19 @@ class BlockPostgresDataHandler @Inject() (
     extends BlockBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def upsert(block: Block): ApplicationResult[Block] = database.withConnection { implicit conn =>
-    val maybe = blockPostgresDAO.upsert(block)
-    Or.from(maybe, One(BlockUnknownError))
+  override def insert(block: Block): ApplicationResult[Block] = {
+    val result = withConnection { implicit conn =>
+      val maybe = blockPostgresDAO.insert(block)
+      Or.from(maybe, One(BlockUnknownError))
+    }
+
+    result.badMap { errors =>
+      errors.map {
+        case PostgresForeignKeyViolationError("blockhash", _) => RepeatedBlockhashError
+        case PostgresForeignKeyViolationError("height", _) => RepeatedBlockHeightError
+        case e => e
+      }
+    }
   }
 
   override def getBy(blockhash: Blockhash): ApplicationResult[Block] = database.withConnection { implicit conn =>

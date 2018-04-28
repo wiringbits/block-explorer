@@ -3,35 +3,49 @@ package com.xsn.explorer.data
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.BlockNotFoundError
+import com.xsn.explorer.errors.{BlockNotFoundError, RepeatedBlockHeightError, RepeatedBlockhashError}
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
 import org.scalactic.Bad
+import org.scalatest.BeforeAndAfter
 
-class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
+class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
+
+  before {
+    clearDatabase()
+  }
 
   lazy val dataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
 
-  "upsert" should {
+  "insert" should {
     "add a new block" in {
       // PoS block
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
-      val result = dataHandler.upsert(block)
+      val result = dataHandler.insert(block)
       result.isGood mustEqual true
       matches(block, result.get)
     }
 
-    "override an existing block" in {
+    "fail on existing blockhash" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-      dataHandler.upsert(block)
+      dataHandler.insert(block).isGood mustEqual true
 
-      val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058").copy(hash = block.hash)
-      val expected = newBlock.copy(hash = block.hash)
-      val result = dataHandler.upsert(newBlock)
-      result.isGood mustEqual true
-      matches(expected, result.get)
+      val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
+          .copy(hash = block.hash)
+      val result = dataHandler.insert(newBlock)
+      result mustEqual Bad(RepeatedBlockhashError).accumulating
+    }
+
+    "fail on existing height" in {
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+      dataHandler.insert(block).isGood mustEqual true
+
+      val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
+          .copy(height = block.height)
+      val result = dataHandler.insert(newBlock)
+      result mustEqual Bad(RepeatedBlockHeightError).accumulating
     }
   }
 
@@ -39,7 +53,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     "return a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
-      dataHandler.upsert(block)
+      dataHandler.insert(block)
 
       val result = dataHandler.getBy(block.hash)
       result.isGood mustEqual true
@@ -57,7 +71,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
   "delete" should {
     "delete a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-      dataHandler.upsert(block)
+      dataHandler.insert(block)
 
       val result = dataHandler.delete(block.hash)
       result.isGood mustEqual true
@@ -80,7 +94,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
 
-      List(block1, block2, block0).foreach(dataHandler.upsert)
+      List(block1, block2, block0).foreach(dataHandler.insert)
 
       val result = dataHandler.getLatestBlock()
       result.isGood mustEqual true
@@ -103,7 +117,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
 
-      List(block1, block2, block0).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+      List(block1, block2, block0).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       val result = dataHandler.getFirstBlock()
       result.isGood mustEqual true

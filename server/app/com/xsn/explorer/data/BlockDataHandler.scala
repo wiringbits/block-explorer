@@ -8,7 +8,7 @@ import scala.language.higherKinds
 
 trait BlockDataHandler[F[_]] {
 
-  def upsert(block: Block): F[Block]
+  def insert(block: Block): F[Block]
 
   def getBy(blockhash: Blockhash): F[Block]
 

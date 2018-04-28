@@ -9,7 +9,7 @@ import com.xsn.explorer.models.rpc.Block
 
 class BlockPostgresDAO {
 
-  def upsert(block: Block)(implicit conn: Connection): Option[Block] = {
+  def insert(block: Block)(implicit conn: Connection): Option[Block] = {
     SQL(
       """
         |INSERT INTO blocks
@@ -22,21 +22,6 @@ class BlockPostgresDAO {
         |    {blockhash}, {previous_blockhash}, {next_blockhash}, {tpos_contract}, {merkle_root}, {size},
         |    {height}, {version}, {time}, {median_time}, {nonce}, {bits}, {chainwork}, {difficulty}
         |  )
-        |ON CONFLICT (blockhash)
-        |DO UPDATE
-        |  SET previous_blockhash = EXCLUDED.previous_blockhash,
-        |      next_blockhash = EXCLUDED.next_blockhash,
-        |      tpos_contract = EXCLUDED.tpos_contract,
-        |      merkle_root = EXCLUDED.merkle_root,
-        |      size = EXCLUDED.size,
-        |      height = EXCLUDED.height,
-        |      version = EXCLUDED.version,
-        |      time = EXCLUDED.time,
-        |      median_time = EXCLUDED.median_time,
-        |      nonce = EXCLUDED.nonce,
-        |      bits = EXCLUDED.bits,
-        |      chainwork = EXCLUDED.chainwork,
-        |      difficulty = EXCLUDED.difficulty
         |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty
       """.stripMargin
@@ -55,6 +40,25 @@ class BlockPostgresDAO {
       'bits -> block.bits,
       'chainwork -> block.chainwork,
       'difficulty -> block.difficulty
+    ).as(parseBlock.single)
+  }
+
+  def setNextBlockhash(
+      blockhash: Blockhash,
+      nextBlockhash: Blockhash)(
+      implicit conn: Connection): Option[Block] = {
+
+    SQL(
+      """
+        |UPDATE blocks
+        |SET next_blockhash = {next_blockhash}
+        |WHERE blockhash = {blockhash}
+        |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string,
+      'next_blockhash -> nextBlockhash.string
     ).as(parseBlock.singleOpt).flatten
   }
 

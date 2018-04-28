@@ -1,17 +1,24 @@
 package com.xsn.explorer.processors
 
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
+import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
 import com.xsn.explorer.models.base._
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.rpc.{Block, Transaction}
+import com.xsn.explorer.models.{Blockhash, TransactionId}
+import com.xsn.explorer.processors.BlockEventsProcessor.{NewBlockAppended, RechainDone}
 import com.xsn.explorer.services.TransactionService
+import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
+
+import scala.concurrent.Future
 
 class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures with BeforeAndAfter {
 
@@ -56,10 +63,10 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
       val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block1, block2).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+      List(block1, block2).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       whenReady(processor.newLatestBlock(block3.hash)) { result =>
-        result.isGood mustEqual true
+        result mustEqual Good(NewBlockAppended(block3))
         val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
       }
@@ -70,12 +77,17 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
       val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block1, block2, block3).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+      List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
-      whenReady(processor.newLatestBlock(block2.hash)) { result =>
-        result.isGood mustEqual true
-        val blocks = List(block1, block2)
-        verifyBlockchain(blocks)
+      whenReady(processor.newLatestBlock(block2.hash)) {
+        case Good(RechainDone(orphanBlock, newBlock)) =>
+          orphanBlock.hash mustEqual block3.hash
+          newBlock.hash mustEqual block2.hash
+
+          val blocks = List(block1, block2)
+          verifyBlockchain(blocks)
+
+        case _ => fail()
       }
     }
 
@@ -84,7 +96,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
       val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block2, block3).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+      List(block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       whenReady(processor.newLatestBlock(block1.hash)) { result =>
         result.isGood mustEqual true
@@ -98,7 +110,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
       val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
 
-      List(block1, block2, block3).map(dataHandler.upsert).foreach(_.isGood mustEqual true)
+      List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       whenReady(processor.newLatestBlock(block1.hash)) { result =>
         result.isGood mustEqual true

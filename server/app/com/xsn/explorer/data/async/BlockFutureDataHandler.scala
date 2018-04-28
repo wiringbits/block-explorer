@@ -15,8 +15,8 @@ class BlockFutureDataHandler @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends BlockDataHandler[FutureApplicationResult] {
 
-  def upsert(block: Block): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.upsert(block)
+  def insert(block: Block): FutureApplicationResult[Block] = Future {
+    blockBlockingDataHandler.insert(block)
   }
 
   def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
