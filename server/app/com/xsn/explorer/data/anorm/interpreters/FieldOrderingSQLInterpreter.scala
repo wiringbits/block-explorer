@@ -1,6 +1,6 @@
 package com.xsn.explorer.data.anorm.interpreters
 
-import com.xsn.explorer.models.base.{FieldOrdering, OrderingCondition}
+import com.alexitc.playsonify.models.{FieldOrdering, OrderingCondition}
 
 class FieldOrderingSQLInterpreter {
 

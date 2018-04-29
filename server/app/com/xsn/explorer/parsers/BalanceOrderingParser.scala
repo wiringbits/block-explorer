@@ -1,6 +1,7 @@
 package com.xsn.explorer.parsers
 
-import com.xsn.explorer.models.base.OrderingCondition
+import com.alexitc.playsonify.models.OrderingCondition
+import com.alexitc.playsonify.parsers.FieldOrderingParser
 import com.xsn.explorer.models.fields.BalanceField
 
 class BalanceOrderingParser extends FieldOrderingParser[BalanceField] {

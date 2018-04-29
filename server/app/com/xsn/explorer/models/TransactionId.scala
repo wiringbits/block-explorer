@@ -1,6 +1,6 @@
 package com.xsn.explorer.models
 
-import com.xsn.explorer.models.base.WrappedString
+import com.alexitc.playsonify.models.WrappedString
 import play.api.libs.json._
 
 class TransactionId private (val string: String) extends AnyVal with WrappedString

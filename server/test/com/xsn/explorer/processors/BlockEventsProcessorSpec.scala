@@ -1,24 +1,19 @@
 package com.xsn.explorer.processors
 
-import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
-import com.xsn.explorer.models.base._
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.rpc.{Block, Transaction}
-import com.xsn.explorer.models.{Blockhash, TransactionId}
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.processors.BlockEventsProcessor.{NewBlockAppended, RechainDone}
 import com.xsn.explorer.services.TransactionService
-import org.scalactic.{Bad, Good}
+import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-
-import scala.concurrent.Future
 
 class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures with BeforeAndAfter {
 

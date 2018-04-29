@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import com.xsn.explorer.models.base.{Limit, Offset, OrderingQuery, PaginatedQuery}
+import com.alexitc.playsonify.models.{Limit, Offset, OrderingQuery, PaginatedQuery}
 import com.xsn.explorer.services.MasternodeService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 

@@ -4,10 +4,10 @@ import java.sql.Connection
 import javax.inject.Inject
 
 import anorm._
+import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
 import com.xsn.explorer.models.Balance
-import com.xsn.explorer.models.base.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.models.fields.BalanceField
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {

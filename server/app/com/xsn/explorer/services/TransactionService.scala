@@ -3,11 +3,10 @@ package com.xsn.explorer.services
 import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
+import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.xsn.explorer.errors.{TransactionFormatError, TransactionNotFoundError}
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.{Transaction, TransactionDetails, TransactionId, TransactionValue}
-import com.xsn.explorer.util.Extensions.FutureApplicationResultExt
 import org.scalactic.{Bad, Good, One, Or}
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -2,13 +2,13 @@ package com.xsn.explorer.services
 
 import javax.inject.Inject
 
-import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.models.base._
+import com.alexitc.playsonify.core.FuturePaginatedResult
+import com.alexitc.playsonify.models._
+import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.models.fields.MasternodeField
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.parsers.MasternodeOrderingParser
-import com.xsn.explorer.services.validators.PaginatedQueryValidator
 
 import scala.concurrent.ExecutionContext
 
@@ -18,9 +18,9 @@ class MasternodeService @Inject() (
     xsnService: XSNService)(
     implicit ec: ExecutionContext) {
 
-  def getMasternodes(paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FutureApplicationResult[PaginatedResult[Masternode]] = {
+  def getMasternodes(paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[Masternode] = {
     val result = for {
-      validatedQuery <- queryValidator.validate(paginatedQuery).toFutureOr
+      validatedQuery <- queryValidator.validate(paginatedQuery, 2000).toFutureOr
       ordering <- masternodeOrderingParser.from(orderingQuery).toFutureOr
       masternodes <- xsnService.getMasternodes().toFutureOr
     } yield build(masternodes, validatedQuery, ordering)

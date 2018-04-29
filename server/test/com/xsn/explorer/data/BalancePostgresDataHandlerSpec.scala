@@ -1,12 +1,12 @@
 package com.xsn.explorer.data
 
+import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.anorm.BalancePostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.Balance
-import com.xsn.explorer.models.base._
 import com.xsn.explorer.models.fields.BalanceField
 import org.scalactic.Good
 

@@ -2,7 +2,7 @@ package com.xsn.explorer.models
 
 import javax.xml.bind.DatatypeConverter
 
-import com.xsn.explorer.models.base.WrappedString
+import com.alexitc.playsonify.models.WrappedString
 import play.api.libs.json._
 
 import scala.util.Try

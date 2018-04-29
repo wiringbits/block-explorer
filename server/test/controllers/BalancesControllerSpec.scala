@@ -1,10 +1,10 @@
 package controllers
 
 import com.alexitc.playsonify.core.ApplicationResult
+import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.Balance
-import com.xsn.explorer.models.base._
 import com.xsn.explorer.models.fields.BalanceField
 import controllers.common.MyAPISpec
 import org.scalactic.Good
