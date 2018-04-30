@@ -52,7 +52,7 @@ class DatabasePostgresSeeder @Inject() (
         .getOrElse(throw new RuntimeException("Unable to add the new latest block"))
   }
 
-  override def replaceLatestBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+  override def replaceBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
     val createCommand = CreateBlockCommand(command.newBlock, command.newTransactions)
 
     val result = for {

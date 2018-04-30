@@ -49,7 +49,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     }
   }
 
-  "getBy" should {
+  "getBy blockhash" should {
     "return a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
@@ -64,6 +64,25 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       val blockhash = Blockhash.from("b858d38a3552c83aea58f66fe00ae220352a235e33fcf1f3af04507a61a9dc32").get
 
       val result = dataHandler.getBy(blockhash)
+      result mustEqual Bad(BlockNotFoundError).accumulating
+    }
+  }
+
+  "getBy height" should {
+    "return a block" in {
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      dataHandler.insert(block)
+
+      val result = dataHandler.getBy(block.height)
+      result.isGood mustEqual true
+      matches(block, result.get)
+    }
+
+    "fail on block not found" in {
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      val result = dataHandler.getBy(block.height)
       result mustEqual Bad(BlockNotFoundError).accumulating
     }
   }

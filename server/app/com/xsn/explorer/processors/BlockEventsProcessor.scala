@@ -6,7 +6,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps}
 import com.xsn.explorer.data.DatabaseSeeder
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
-import com.xsn.explorer.errors.BlockNotFoundError
+import com.xsn.explorer.errors._
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Transaction}
 import com.xsn.explorer.services.{TransactionService, XSNService}
@@ -52,7 +52,12 @@ class BlockEventsProcessor @Inject() (
       r <- newLatestBlock(block, transactions).toFutureOr
     } yield r
 
-    result.toFuture
+    result.toFuture.map {
+      case Good(r) => Good(r)
+      case Bad(One(BlockNotFoundError)) => Good(MissingBlockIgnored)
+      case Bad(One(TransactionNotFoundError)) => Good(MissingBlockIgnored)
+      case Bad(errors) => Bad(errors)
+    }
   }
 
   private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Result] = {
@@ -63,7 +68,7 @@ class BlockEventsProcessor @Inject() (
         newTransactions = newTransactions)
 
       val result = for {
-        _ <- databaseSeeder.replaceLatestBlock(command).toFutureOr
+        _ <- databaseSeeder.replaceBlock(command).toFutureOr
       } yield RechainDone(orphanBlock, newBlock)
 
       result.toFuture
@@ -90,6 +95,21 @@ class BlockEventsProcessor @Inject() (
           .toFuture
     }
 
+    def onRepeatedBlockHeight(): FutureApplicationResult[Result] = {
+      val result = for {
+        orphanBlock <- blockDataHandler.getBy(newBlock.height).toFutureOr
+
+        replaceCommand = DatabaseSeeder.ReplaceBlockCommand(
+          orphanBlock = orphanBlock,
+          newBlock = newBlock,
+          newTransactions = newTransactions)
+
+        _ <- databaseSeeder.replaceBlock(replaceCommand).toFutureOr
+      } yield ReplacedByBlockHeight
+
+      result.toFuture
+    }
+
     def onMissingBlock(): FutureApplicationResult[Result] = {
       blockDataHandler
           .getBy(newBlock.hash)
@@ -99,12 +119,13 @@ class BlockEventsProcessor @Inject() (
               Future.successful { Good(ExistingBlockIgnored(newBlock)) }
 
             case Bad(One(BlockNotFoundError)) =>
-              val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
+              val createCommand = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
               databaseSeeder
-                  .insertPendingBlock(command)
-                  .toFutureOr
-                  .map(_ => MissingBlockProcessed(newBlock))
-                  .toFuture
+                  .insertPendingBlock(createCommand)
+                  .flatMap {
+                    case Good(_) => Future.successful { Good(MissingBlockProcessed(newBlock)) }
+                    case Bad(One(PostgresForeignKeyViolationError("height", _))) => onRepeatedBlockHeight()
+                  }
 
             case Bad(errors) =>
               Future.successful(Bad(errors))
@@ -155,4 +176,6 @@ object BlockEventsProcessor {
   case class ExistingBlockIgnored(block: Block) extends Result
   case class NewBlockAppended(block: Block) extends Result
   case class RechainDone(orphanBlock: Block, newBlock: Block) extends Result
+  case object MissingBlockIgnored extends Result
+  case object ReplacedByBlockHeight extends Result
 }

@@ -25,7 +25,7 @@ trait DatabaseSeeder[F[_]] {
    * The database has some blocks but there is a rechain happening, we need to
    * replace our current latest block with the new latest block.
    */
-  def replaceLatestBlock(command: ReplaceBlockCommand): F[Unit]
+  def replaceBlock(command: ReplaceBlockCommand): F[Unit]
 
   /**
    * The database has some blocks but the chain is not complete, we are inserting

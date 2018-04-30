@@ -21,8 +21,8 @@ class DatabaseFutureSeeder @Inject() (
     blockingSeeder.newLatestBlock(command)
   }
 
-  override def replaceLatestBlock(command: DatabaseSeeder.ReplaceBlockCommand): FutureApplicationResult[Unit] = Future {
-    blockingSeeder.replaceLatestBlock(command)
+  override def replaceBlock(command: DatabaseSeeder.ReplaceBlockCommand): FutureApplicationResult[Unit] = Future {
+    blockingSeeder.replaceBlock(command)
   }
 
   override def insertPendingBlock(command: DatabaseSeeder.CreateBlockCommand): FutureApplicationResult[Unit] = Future {
