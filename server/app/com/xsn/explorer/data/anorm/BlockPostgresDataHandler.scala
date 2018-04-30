@@ -6,8 +6,8 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.errors._
-import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.{Blockhash, Height}
 import org.scalactic.{One, Or}
 import play.api.db.Database
 
@@ -34,6 +34,11 @@ class BlockPostgresDataHandler @Inject() (
 
   override def getBy(blockhash: Blockhash): ApplicationResult[Block] = database.withConnection { implicit conn =>
     val maybe = blockPostgresDAO.getBy(blockhash)
+    Or.from(maybe, One(BlockNotFoundError))
+  }
+
+  override def getBy(height: Height): ApplicationResult[Block] = withConnection { implicit conn =>
+    val maybe = blockPostgresDAO.getBy(height)
     Or.from(maybe, One(BlockNotFoundError))
   }
 

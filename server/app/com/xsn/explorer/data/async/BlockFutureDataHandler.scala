@@ -5,8 +5,8 @@ import javax.inject.Inject
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
-import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.{Blockhash, Height}
 
 import scala.concurrent.Future
 
@@ -15,23 +15,27 @@ class BlockFutureDataHandler @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends BlockDataHandler[FutureApplicationResult] {
 
-  def insert(block: Block): FutureApplicationResult[Block] = Future {
+  override def insert(block: Block): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.insert(block)
   }
 
-  def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
+  override def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getBy(blockhash)
   }
 
-  def delete(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
+  override def getBy(height: Height): FutureApplicationResult[Block] = Future {
+    blockBlockingDataHandler.getBy(height)
+  }
+
+  override def delete(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.delete(blockhash)
   }
 
-  def getLatestBlock(): FutureApplicationResult[Block] = Future {
+  override def getLatestBlock(): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getLatestBlock()
   }
 
-  def getFirstBlock(): FutureApplicationResult[Block] = Future {
+  override def getFirstBlock(): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getFirstBlock()
   }
 }
