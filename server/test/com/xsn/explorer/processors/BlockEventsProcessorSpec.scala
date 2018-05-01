@@ -46,7 +46,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
 
       whenReady(processor.newLatestBlock(block0.hash)) { result =>
-        result.isBad mustEqual true
+        result mustEqual Good(MissingBlockIgnored)
       }
     }
 
