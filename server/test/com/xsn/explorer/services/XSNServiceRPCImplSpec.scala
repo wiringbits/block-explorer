@@ -11,7 +11,7 @@ import org.scalactic.{Bad, Good}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
-import play.api.libs.json.{JsNull, JsValue, Json}
+import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.Future
@@ -309,6 +309,37 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
 
       whenReady(service.getBlock(blockhash)) { result =>
+        result mustEqual Bad(BlockNotFoundError).accumulating
+      }
+    }
+  }
+
+  "getBlockhash" should {
+    "return the blockhash" in {
+      val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
+      val responseBody = createRPCSuccessfulResponse(JsString(blockhash.string))
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getBlockhash(Height(3))) { result =>
+        result mustEqual Good(blockhash)
+      }
+    }
+
+    "fail on unknown block" in {
+      val responseBody = createRPCErrorResponse(-8, "Block height out of range")
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getBlockhash(Height(-1))) { result =>
         result mustEqual Bad(BlockNotFoundError).accumulating
       }
     }

@@ -26,6 +26,8 @@ trait XSNService {
 
   def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block]
 
+  def getBlockhash(height: Height): FutureApplicationResult[Blockhash]
+
   def getLatestBlock(): FutureApplicationResult[rpc.Block]
 
   def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics]
@@ -131,6 +133,23 @@ class XSNServiceRPCImpl @Inject() (
           val maybe = getResult[rpc.Block](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+    val errorCodeMapper = Map(-8 -> BlockNotFoundError)
+    val body = s"""{ "jsonrpc": "1.0", "method": "getblockhash", "params": [${height.int}] }"""
+
+    server
+        .post(body)
+        .map { response =>
+
+          val maybe = getResult[Blockhash](response, errorCodeMapper)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, txid = ${height.int}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }

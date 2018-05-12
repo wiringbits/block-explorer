@@ -11,6 +11,7 @@ class DummyXSNService extends XSNService {
   override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = ???
   override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = ???
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = ???
+  override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = ???
   override def getLatestBlock(): FutureApplicationResult[rpc.Block] = ???
   override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = ???
   override def getMasternodeCount(): FutureApplicationResult[Int] = ???
