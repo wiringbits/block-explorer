@@ -173,6 +173,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       }
     }
 
+    // TODO: failed once on travis, might not be stable
     "ignore orphan block on rare rechain events when the rpc server doesn't have the block anymore" in {
       // see https://github.com/X9Developers/block-explorer/issues/6
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
