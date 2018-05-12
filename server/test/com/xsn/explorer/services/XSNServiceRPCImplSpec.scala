@@ -3,8 +3,8 @@ package com.xsn.explorer.services
 import com.xsn.explorer.config.RPCConfig
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
+import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Masternode
-import com.xsn.explorer.models.{Address, Blockhash, Height, TransactionId}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.{Bad, Good}
@@ -405,6 +405,57 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
         val masternodes = result.get
         masternodes mustEqual expected
+      }
+    }
+  }
+
+  "getMasternode" should {
+    "return the masternode" in {
+      val content =
+        """
+          |{
+          |  "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01-1": "  ENABLED          70208 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1524349028   777344 1524312645  64183 45.32.148.13:62583"
+          |}
+        """.stripMargin
+
+      val expected = Masternode(
+        txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+        ip = "45.32.148.13:62583",
+        protocol = "70208",
+        status = "ENABLED",
+        activeSeconds = 777344,
+        lastSeen = 1524349028,
+        Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      val ip = IPAddress.from("45.32.148.13").get
+      whenReady(service.getMasternode(ip)) { result =>
+        result mustEqual Good(expected)
+      }
+    }
+
+    "fail when the masternode is not found" in {
+      val content =
+        """
+          |{}
+        """.stripMargin
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      val ip = IPAddress.from("45.32.148.13").get
+      whenReady(service.getMasternode(ip)) { result =>
+        result mustEqual Bad(MasternodeNotFoundError).accumulating
       }
     }
   }

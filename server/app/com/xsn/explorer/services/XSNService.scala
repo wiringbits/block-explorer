@@ -33,6 +33,8 @@ trait XSNService {
   def getMasternodeCount(): FutureApplicationResult[Int]
 
   def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]]
+
+  def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -221,6 +223,38 @@ class XSNServiceRPCImpl @Inject() (
           val maybe = getResult[Map[String, String]](response)
               .map {
                 case Good(map) => Good(rpc.Masternode.fromMap(map))
+                case Bad(errors) => Bad(errors)
+              }
+
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "masternode",
+                  |  "params": ["list", "full", "${ipAddress.string}"]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[Map[String, String]](response)
+              .map {
+                case Good(map) =>
+                  rpc.Masternode
+                      .fromMap(map)
+                      .headOption
+                      .map(Good(_))
+                      .getOrElse(Bad(MasternodeNotFoundError).accumulating)
+
                 case Bad(errors) => Bad(errors)
               }
 
