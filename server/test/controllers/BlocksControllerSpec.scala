@@ -60,6 +60,17 @@ class BlocksControllerSpec extends MyAPISpec {
       Future.successful(result)
     }
 
+    override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+      val result = blocks
+          .values
+          .find(_.height == height)
+          .map(_.hash)
+          .map(Good(_))
+          .getOrElse(Bad(BlockNotFoundError).accumulating)
+
+      Future.successful(result)
+    }
+
     val txs = Map(
       posBlockCoinstakeTx.id -> posBlockCoinstakeTx,
       posBlockCoinstakeTxInput.id -> posBlockCoinstakeTxInput,
@@ -88,8 +99,8 @@ class BlocksControllerSpec extends MyAPISpec {
       .overrides(bind[XSNService].to(customXSNService))
       .build()
 
-  "GET /blocks/:blockhash" should {
-    def url(blockhash: String) = s"/blocks/$blockhash"
+  "GET /blocks/:query" should {
+    def url(query: String) = s"/blocks/$query"
 
     "retrieve a PoS block" in {
       val block = posBlock
@@ -225,7 +236,6 @@ class BlocksControllerSpec extends MyAPISpec {
       val jsonMasternode = (jsonRewards \ "masternode").as[JsValue]
       (jsonMasternode \ "address").as[String] mustEqual "XydZnssXHCxxRtB4rk7evfKT9XP7GqyA9N"
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
-
     }
 
     "retrieve TPoS block with coinsplit" in {
@@ -267,8 +277,58 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
     }
 
+    "retrieve a block by height" in {
+      val block = posBlock
+      val response = GET(url(block.height.toString))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      (jsonBlock \ "hash").as[Blockhash] mustEqual block.hash
+      (jsonBlock \ "size").as[Size] mustEqual block.size
+      (jsonBlock \ "bits").as[String] mustEqual block.bits
+      (jsonBlock \ "chainwork").as[String] mustEqual block.chainwork
+      (jsonBlock \ "difficulty").as[BigDecimal] mustEqual block.difficulty
+      (jsonBlock \ "confirmations").as[Confirmations] mustEqual block.confirmations
+      (jsonBlock \ "height").as[Height] mustEqual block.height
+      (jsonBlock \ "medianTime").as[Long] mustEqual block.medianTime
+      (jsonBlock \ "time").as[Long] mustEqual block.time
+      (jsonBlock \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+      (jsonBlock \ "version").as[Long] mustEqual block.version
+      (jsonBlock \ "nonce").as[Int] mustEqual block.nonce
+      (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+      (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
+
+      val jsonCoinstake = (jsonRewards \ "coinstake").as[JsValue]
+      (jsonCoinstake \ "address").as[String] mustEqual "XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"
+      (jsonCoinstake \ "value").as[BigDecimal] mustEqual BigDecimal("22.49999999")
+
+      val jsonMasternode = (jsonRewards \ "masternode").as[JsValue]
+      (jsonMasternode \ "address").as[String] mustEqual "XjUDDq221NwqRtp85wfvoDrMaaxvUCDRrY"
+      (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
+    }
+
     "fail on the wrong blockhash format" in {
       val response = GET(url("000125c06cedf38b07bff174bdb61027935dbcb34831d28cff40bedb519d5"))
+
+      status(response) mustEqual BAD_REQUEST
+
+      val json = contentAsJson(response)
+      val errorList = (json \ "errors").as[List[JsValue]]
+
+      errorList.size mustEqual 1
+      val error = errorList.head
+
+      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "field").as[String] mustEqual "blockhash"
+      (error \ "message").as[String].nonEmpty mustEqual true
+    }
+
+    "fail on unknown block height" in {
+      val response = GET(url("-1"))
 
       status(response) mustEqual BAD_REQUEST
 

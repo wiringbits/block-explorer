@@ -10,7 +10,7 @@ GET   /transactions/:txid    controllers.TransactionsController.getTransaction(t
 GET   /addresses/:address    controllers.AddressesController.getDetails(address: String)
 
 GET   /blocks                controllers.BlocksController.getLatestBlocks()
-GET   /blocks/:blockhash     controllers.BlocksController.getDetails(blockhash: String)
+GET   /blocks/:query         controllers.BlocksController.getDetails(query: String)
 
 GET   /stats                 controllers.StatisticsController.getStatus()
 

@@ -33,6 +33,22 @@ class BlockService @Inject() (
     result.toFuture
   }
 
+  def getDetails(height: Height): FutureApplicationResult[BlockDetails] = {
+    val result = for {
+      blockhash <- xsnService
+          .getBlockhash(height)
+          .toFutureOr
+
+      block <- xsnService
+          .getBlock(blockhash)
+          .toFutureOr
+
+      rewards <- getBlockRewards(block).toFutureOr
+    } yield BlockDetails(block, rewards)
+
+    result.toFuture
+  }
+
   def getLatestBlocks(): FutureApplicationResult[List[Block]] = {
     /**
      * Temporal workaround to retrieve the latest blocks, they
