@@ -19,5 +19,8 @@ object BalanceField {
     case _ => None
   }
 
-  implicit val columnNameResolver: ColumnNameResolver[BalanceField] = (field) => field.string
+  implicit val columnNameResolver: ColumnNameResolver[BalanceField] = (field) => field match {
+    case Available => s"(${Received.string} - ${Spent.string})"
+    case f => f.string
+  }
 }

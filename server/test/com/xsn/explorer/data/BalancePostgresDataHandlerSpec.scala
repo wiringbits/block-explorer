@@ -25,21 +25,6 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       result mustEqual Good(balance)
     }
 
-    "set the available amount" in {
-      val address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF")
-      val balance = Balance(address, received = BigDecimal(10), spent = BigDecimal(5))
-
-      val result = dataHandler.upsert(balance)
-      result mustEqual Good(balance)
-      database.withConnection { implicit conn =>
-        val available = _root_.anorm
-            .SQL(s"SELECT available FROM balances WHERE address = '${address.string}'")
-            .as(_root_.anorm.SqlParser.get[BigDecimal]("available").single)
-
-        available mustEqual balance.available
-      }
-    }
-
     "update an existing balance" in {
       val address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
       val initialBalance = Balance(address, received = BigDecimal(10), spent = BigDecimal(5))

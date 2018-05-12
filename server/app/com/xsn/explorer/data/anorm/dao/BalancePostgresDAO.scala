@@ -16,20 +16,18 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     SQL(
       """
         |INSERT INTO balances
-        |  (address, received, spent, available)
+        |  (address, received, spent)
         |VALUES
-        |  ({address}, {received}, {spent}, {available})
+        |  ({address}, {received}, {spent})
         |ON CONFLICT (address) DO UPDATE
         |  SET received = balances.received + EXCLUDED.received,
-        |      spent = balances.spent + EXCLUDED.spent,
-        |      available = balances.available + EXCLUDED.available
+        |      spent = balances.spent + EXCLUDED.spent
         |RETURNING address, received, spent
       """.stripMargin
     ).on(
       'address -> balance.address.string,
       'received -> balance.received,
       'spent -> balance.spent,
-      'available -> balance.available
     ).as(parseBalance.singleOpt).flatten
   }
 
@@ -41,7 +39,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
       s"""
-        |SELECT address, received, spent, available
+        |SELECT address, received, spent
         |FROM balances
         |WHERE address NOT IN (
         |  SELECT address

@@ -12,9 +12,9 @@ class StatisticsPostgresDAO {
     SQL(
       """
         |SELECT
-        |  (SELECT SUM(available) FROM balances) AS total_supply,
+        |  (SELECT SUM(received - spent) FROM balances) AS total_supply,
         |  (
-        |    SELECT SUM(available) FROM balances
+        |    SELECT SUM(received - spent) FROM balances
         |    WHERE address NOT IN (SELECT address FROM hidden_addresses)
         |  ) AS circulating_supply,
         |  (SELECT COUNT(*) FROM transactions) AS transactions,
