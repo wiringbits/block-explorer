@@ -102,5 +102,8 @@ class SQSSeederTask @Inject() (
 
     case BlockEventsProcessor.ExistingBlockIgnored(block) =>
       backwardsSynchronizerTask.sync(block)
+
+    case BlockEventsProcessor.MissingBlockIgnored => ()
+    case BlockEventsProcessor.ReplacedByBlockHeight => ()
   }
 }

@@ -125,6 +125,7 @@ class BlockEventsProcessor @Inject() (
                   .flatMap {
                     case Good(_) => Future.successful { Good(MissingBlockProcessed(newBlock)) }
                     case Bad(One(PostgresForeignKeyViolationError("height", _))) => onRepeatedBlockHeight()
+                    case Bad(errors) => Future.successful(Bad(errors))
                   }
 
             case Bad(errors) =>
