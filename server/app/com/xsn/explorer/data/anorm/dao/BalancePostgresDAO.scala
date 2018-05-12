@@ -7,13 +7,16 @@ import anorm._
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
-import com.xsn.explorer.models.Balance
+import com.xsn.explorer.models.{Address, Balance}
 import com.xsn.explorer.models.fields.BalanceField
+import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   def upsert(balance: Balance)(implicit conn: Connection): Option[Balance] = {
-    SQL(
+    val createdBalance = SQL(
       """
         |INSERT INTO balances
         |  (address, received, spent)
@@ -29,6 +32,35 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
       'received -> balance.received,
       'spent -> balance.spent,
     ).as(parseBalance.singleOpt).flatten
+
+    for {
+      balance <- createdBalance
+      computed <- computeBalance(balance.address) if computed != balance
+    } {
+      logger.warn(s"CORRUPTED_BALANCE, expected spent = ${computed.spent}, actual = ${balance.spent}, expected received = ${computed.received}, actual = ${balance.received}")
+    }
+
+    createdBalance
+  }
+
+  private def computeBalance(address: Address)(implicit conn: Connection) = {
+    SQL(
+      """
+        |SELECT {address} AS address,
+        |       (
+        |         SELECT COALESCE(SUM(value), 0)
+        |         FROM transaction_inputs
+        |         WHERE address = {address}
+        |       ) AS spent,
+        |       (
+        |         SELECT COALESCE(SUM(value), 0)
+        |         FROM transaction_outputs
+        |         WHERE address = {address}
+        |       ) AS received
+      """.stripMargin
+    ).on(
+      'address -> address.string
+    ).as(parseBalance.single)
   }
 
   def get(
