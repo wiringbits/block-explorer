@@ -9,6 +9,7 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import org.scalactic.Good
+import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,6 +18,27 @@ class BlockService @Inject() (
     blockLogic: BlockLogic,
     transactionLogic: TransactionLogic)(
     implicit ec: ExecutionContext) {
+
+  def getRawBlock(blockhashString: String): FutureApplicationResult[JsValue] = {
+    val result = for {
+      blockhash <- blockLogic
+          .getBlockhash(blockhashString)
+          .toFutureOr
+
+      block <- xsnService.getRawBlock(blockhash).toFutureOr
+    } yield block
+
+    result.toFuture
+  }
+
+  def getRawBlock(height: Height): FutureApplicationResult[JsValue] = {
+    val result = for {
+      blockhash <- xsnService.getBlockhash(height).toFutureOr
+      block <- xsnService.getRawBlock(blockhash).toFutureOr
+    } yield block
+
+    result.toFuture
+  }
 
   def getDetails(blockhashString: String): FutureApplicationResult[BlockDetails] = {
     val result = for {

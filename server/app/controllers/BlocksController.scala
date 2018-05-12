@@ -28,4 +28,11 @@ class BlocksController @Inject() (
         .map(blockService.getDetails)
         .getOrElse(blockService.getDetails(query))
   }
+
+  def getRawBlock(query: String) = publicNoInput { _ =>
+    Try(query.toInt)
+        .map(Height.apply)
+        .map(blockService.getRawBlock)
+        .getOrElse(blockService.getRawBlock(query))
+  }
 }

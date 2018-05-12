@@ -12,6 +12,7 @@ GET   /addresses/:address    controllers.AddressesController.getDetails(address:
 
 GET   /blocks                controllers.BlocksController.getLatestBlocks()
 GET   /blocks/:query         controllers.BlocksController.getDetails(query: String)
+GET   /blocks/:query/raw     controllers.BlocksController.getRawBlock(query: String)
 
 GET   /stats                 controllers.StatisticsController.getStatus()
 

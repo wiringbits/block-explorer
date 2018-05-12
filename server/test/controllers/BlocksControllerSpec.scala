@@ -60,6 +60,17 @@ class BlocksControllerSpec extends MyAPISpec {
       Future.successful(result)
     }
 
+    override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+      val result = blocks.get(blockhash)
+          .map { _ => BlockLoader.json(blockhash.string) }
+          .map(Good(_))
+          .getOrElse {
+            Bad(BlockNotFoundError).accumulating
+          }
+
+      Future.successful(result)
+    }
+
     override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
       val result = blocks
           .values
@@ -357,6 +368,30 @@ class BlocksControllerSpec extends MyAPISpec {
       (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "blockhash"
       (error \ "message").as[String].nonEmpty mustEqual true
+    }
+  }
+
+  "GET /blocks/:query/raw" should {
+    def url(query: String) = s"/blocks/$query/raw"
+
+    "retrieve a block by blockhash" in {
+      val block = posBlock
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      json mustEqual BlockLoader.json(block.hash.string)
+    }
+
+    "retrieve a block by height" in {
+      val block = posBlock
+      val response = GET(url(block.height.toString))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      json mustEqual BlockLoader.json(block.hash.string)
     }
   }
 }
