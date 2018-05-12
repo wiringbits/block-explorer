@@ -13,4 +13,8 @@ class TransactionsController @Inject() (
   def getTransaction(txid: String) = publicNoInput { _ =>
     transactionService.getTransactionDetails(txid)
   }
+
+  def getRawTransaction(txid: String) = publicNoInput { _ =>
+    transactionService.getRawTransaction(txid)
+  }
 }

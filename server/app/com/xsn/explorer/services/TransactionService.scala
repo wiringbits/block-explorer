@@ -8,10 +8,24 @@ import com.xsn.explorer.errors.{TransactionFormatError, TransactionNotFoundError
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.{Transaction, TransactionDetails, TransactionId, TransactionValue}
 import org.scalactic.{Bad, Good, One, Or}
+import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionService @Inject() (xsnService: XSNService)(implicit ec: ExecutionContext) {
+
+  def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
+    val result = for {
+      txid <- {
+        val maybe = TransactionId.from(txidString)
+        Or.from(maybe, One(TransactionFormatError)).toFutureOr
+      }
+
+      transaction <- xsnService.getRawTransaction(txid).toFutureOr
+    } yield transaction
+
+    result.toFuture
+  }
 
   def getTransactionDetails(txidString: String): FutureApplicationResult[TransactionDetails] = {
     val result = for {

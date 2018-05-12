@@ -41,6 +41,17 @@ class TransactionsControllerSpec extends MyAPISpec {
 
       Future.successful(result)
     }
+
+    override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+      val result = map.get(txid)
+          .map { _ => TransactionLoader.json(txid.string) }
+          .map(Good(_))
+          .getOrElse {
+            Bad(TransactionNotFoundError).accumulating
+          }
+
+      Future.successful(result)
+    }
   }
 
   override val application = guiceApplicationBuilder
@@ -177,6 +188,21 @@ class TransactionsControllerSpec extends MyAPISpec {
       (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "transactionId"
       (error \ "message").as[String].nonEmpty mustEqual true
+    }
+  }
+
+  "GET transactions/:txid/raw" should {
+    def url(txid: String) = s"/transactions/$txid/raw"
+
+    "retrieve the raw transaction" in {
+      val tx = coinbaseTx
+      val expected = TransactionLoader.json(tx.id.string)
+      val response = GET(url(tx.id.string))
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+
+      json mustEqual expected
     }
   }
 }
