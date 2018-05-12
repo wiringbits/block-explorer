@@ -332,6 +332,24 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     }
   }
 
+  "getRawBlock" should {
+    "return a block" in {
+      val block = BlockLoader.json("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81")
+      val responseBody = createRPCSuccessfulResponse(block)
+      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get
+
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getRawBlock(blockhash)) { result =>
+        result mustEqual Good(block)
+      }
+    }
+  }
+
   "getBlockhash" should {
     "return the blockhash" in {
       val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
