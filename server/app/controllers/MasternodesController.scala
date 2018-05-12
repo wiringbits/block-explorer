@@ -17,4 +17,8 @@ class MasternodesController @Inject() (
 
     masternodeService.getMasternodes(paginatedQuery, orderingQuery)
   }
+
+  def getBy(ipAddress: String) = publicNoInput { _ =>
+    masternodeService.getMasternode(ipAddress)
+  }
 }

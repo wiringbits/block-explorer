@@ -1,12 +1,14 @@
 package controllers
 
+import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
+import com.xsn.explorer.errors.MasternodeNotFoundError
 import com.xsn.explorer.helpers.DummyXSNService
-import com.xsn.explorer.models.{Address, TransactionId}
 import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.{Address, IPAddress, TransactionId}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.{Good, One, Or}
+import org.scalactic.{Bad, Good}
 import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.test.Helpers._
@@ -35,9 +37,19 @@ class MasternodesControllerSpec extends MyAPISpec {
       payee = Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
   )
 
+  val masternode = masternodes.last
+
   val xsnService = new DummyXSNService {
     override def getMasternodes(): FutureApplicationResult[List[Masternode]] = {
       Future.successful(Good(masternodes))
+    }
+
+    override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[Masternode] = {
+      if (masternode.ip.startsWith(ipAddress.string)) {
+        Future.successful(Good(masternode))
+      } else {
+        Future.successful(Bad(MasternodeNotFoundError).accumulating)
+      }
     }
   }
 
@@ -48,7 +60,7 @@ class MasternodesControllerSpec extends MyAPISpec {
   "GET /masternodes" should {
     "return the masternodes" in {
       val expected = masternodes.head
-      val response = GET("/masternodes?offset=1&limit=10&orderByactiveSeconds:desc")
+      val response = GET("/masternodes?offset=1&limit=10&orderBy=activeSeconds:desc")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
@@ -65,6 +77,51 @@ class MasternodesControllerSpec extends MyAPISpec {
       (item \ "lastSeen").as[Long] mustEqual expected.lastSeen
       (item \ "activeSeconds").as[Long] mustEqual expected.activeSeconds
       (item \ "status").as[String] mustEqual expected.status
+    }
+  }
+
+  "GET /masternodes/:ip" should {
+    "return the masternode" in {
+      val expected = masternode
+      val response = GET("/masternodes/45.32.148.13")
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      (json \ "activeSeconds").as[Long] mustEqual expected.activeSeconds
+      (json \ "ip").as[String] mustEqual expected.ip
+      (json \ "lastSeen").as[Long] mustEqual expected.lastSeen
+      (json \ "payee").as[String] mustEqual expected.payee.string
+      (json \ "protocol").as[String] mustEqual expected.protocol
+      (json \ "status").as[String] mustEqual expected.status
+      (json \ "txid").as[String] mustEqual expected.txid.string
+    }
+
+    "fail on masternode not found" in {
+      val response = GET("/masternodes/45.32.149.13")
+      status(response) mustEqual NOT_FOUND
+
+      val json = contentAsJson(response)
+      val errorList = (json \ "errors").as[List[JsValue]]
+      errorList.size mustEqual 1
+
+      val error = errorList.head
+      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "field").as[String] mustEqual "ip"
+      (error \ "message").as[String].nonEmpty mustEqual true
+    }
+
+    "fail on bad ip format" in {
+      val response = GET("/masternodes/45.32.149.1333")
+      status(response) mustEqual BAD_REQUEST
+
+      val json = contentAsJson(response)
+      val errorList = (json \ "errors").as[List[JsValue]]
+      errorList.size mustEqual 1
+
+      val error = errorList.head
+      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "field").as[String] mustEqual "ip"
+      (error \ "message").as[String].nonEmpty mustEqual true
     }
   }
 }

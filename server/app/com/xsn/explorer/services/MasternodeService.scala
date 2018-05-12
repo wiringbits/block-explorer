@@ -3,12 +3,15 @@ package com.xsn.explorer.services
 import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.alexitc.playsonify.core.FuturePaginatedResult
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
 import com.alexitc.playsonify.models._
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
+import com.xsn.explorer.errors.IPAddressFormatError
+import com.xsn.explorer.models.IPAddress
 import com.xsn.explorer.models.fields.MasternodeField
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.parsers.MasternodeOrderingParser
+import org.scalactic.{Bad, Good}
 
 import scala.concurrent.ExecutionContext
 
@@ -24,6 +27,20 @@ class MasternodeService @Inject() (
       ordering <- masternodeOrderingParser.from(orderingQuery).toFutureOr
       masternodes <- xsnService.getMasternodes().toFutureOr
     } yield build(masternodes, validatedQuery, ordering)
+
+    result.toFuture
+  }
+
+  def getMasternode(ipAddressString: String): FutureApplicationResult[Masternode] = {
+    val result = for {
+      ipAddress <- IPAddress
+          .from(ipAddressString)
+          .map(Good(_))
+          .getOrElse(Bad(IPAddressFormatError).accumulating)
+          .toFutureOr
+
+      masternode <- xsnService.getMasternode(ipAddress).toFutureOr
+    } yield masternode
 
     result.toFuture
   }
