@@ -20,6 +20,8 @@ trait XSNService {
 
   def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction]
 
+  def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue]
+
   def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance]
 
   def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
@@ -60,6 +62,22 @@ class XSNServiceRPCImpl @Inject() (
         .map { response =>
 
           val maybe = getResult[rpc.Transaction](response, errorCodeMapper)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+    val errorCodeMapper = Map(-5 -> TransactionNotFoundError)
+
+    server
+        .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
+        .map { response =>
+
+          val maybe = getResult[JsValue](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
 

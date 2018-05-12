@@ -4,10 +4,12 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.services.XSNService
+import play.api.libs.json.JsValue
 
 class DummyXSNService extends XSNService {
 
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction] = ???
+  override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = ???
   override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = ???
   override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = ???
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = ???

@@ -157,6 +157,24 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     }
   }
 
+  "getRawTransaction" should {
+    "retrieve the raw transaction" in {
+      val txid = createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
+      val expected = TransactionLoader.json(txid.string)
+
+      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getRawTransaction(txid)) { result =>
+        result mustEqual Good(expected)
+      }
+    }
+  }
+
   "getAddressBalance" should {
     "return the balance" in {
       val responseBody =
