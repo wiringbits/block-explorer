@@ -22,7 +22,7 @@ class BalanceService @Inject() (
     val result = for {
       validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
       ordering <- balanceOrderingParser.from(orderingQuery).toFutureOr
-      balances <- balanceFutureDataHandler.get(validatedQuery, ordering).toFutureOr
+      balances <- balanceFutureDataHandler.getNonZeroBalances(validatedQuery, ordering).toFutureOr
     } yield balances
 
     result.toFuture

@@ -23,4 +23,11 @@ class BalanceFutureDataHandler @Inject() (
   override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] = Future {
     blockingDataHandler.get(query, ordering)
   }
+
+  override def getNonZeroBalances(
+      query: PaginatedQuery,
+      ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] = Future {
+
+    blockingDataHandler.getNonZeroBalances(query, ordering)
+  }
 }

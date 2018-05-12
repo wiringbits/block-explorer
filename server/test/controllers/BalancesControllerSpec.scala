@@ -41,12 +41,15 @@ class BalancesControllerSpec extends MyAPISpec {
 
     override def upsert(balance: Balance): ApplicationResult[Balance] = ???
 
-    override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
-      val list = balances.drop(query.offset.int).take(query.limit.int)
+    override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = ???
+
+    override def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
+      val filtered = balances.filter(_.available > 0)
+      val list = filtered.drop(query.offset.int).take(query.limit.int)
       val result = PaginatedResult(
         offset = query.offset,
         limit = query.limit,
-        total = Count(balances.size),
+        total = Count(filtered.size),
         data = list)
 
       Good(result)

@@ -12,6 +12,8 @@ trait BalanceDataHandler[F[_]] {
   def upsert(balance: Balance): F[Balance]
 
   def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): F[PaginatedResult[Balance]]
+
+  def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): F[PaginatedResult[Balance]]
 }
 
 trait BalanceBlockingDataHandler extends BalanceDataHandler[ApplicationResult]
