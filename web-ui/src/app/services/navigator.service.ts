@@ -22,4 +22,8 @@ export class NavigatorService {
   transactionDetails(txid: string) {
     this.go('/transactions/' + txid);
   }
+
+  masternodeDetails(ipAddress: string) {
+    this.go(`/masternodes/${ipAddress}`);
+  }
 }
