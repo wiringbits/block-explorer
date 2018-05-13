@@ -18,13 +18,13 @@ class DatabasePostgresSeeder @Inject() (
     override val database: Database,
     blockPostgresDAO: BlockPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
-    addressPostgresDAO: BalancePostgresDAO)
+    balancePostgresDAO: BalancePostgresDAO)
     extends DatabaseBlockingSeeder
     with AnormPostgresDataHandler {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = database.withTransaction { implicit conn =>
+  override def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
     val result = upsertBlockCascade(command)
 
     result
@@ -78,28 +78,17 @@ class DatabasePostgresSeeder @Inject() (
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {
     for {
       // block
-      _ <- blockPostgresDAO
-            .delete(command.block.hash)
-            .orElse { Some(command.block) }
+      _ <- deleteBlockCascade(command.block)
+          .orElse(Some(()))
+
       _ <- blockPostgresDAO.insert(command.block)
 
       // transactions
       _ <- command.transactions.map(tx => transactionPostgresDAO.upsert(tx)).everything
 
       // balances
-      _ <- spendMap(command.transactions)
-          .map { case (address, value) =>
-            val balance = Balance(address, spent = value)
-            addressPostgresDAO.upsert(balance)
-          }
-          .toList
-          .everything
-
-      _ <- receiveMap(command.transactions)
-          .map { case (address, value) =>
-            val balance = Balance(address, received = value)
-            addressPostgresDAO.upsert(balance)
-          }
+      _ <- balances(command.transactions)
+          .map { b => balancePostgresDAO.upsert(b) }
           .toList
           .everything
     } yield ()
@@ -114,19 +103,9 @@ class DatabasePostgresSeeder @Inject() (
       deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
 
       // balances
-      _ <- spendMap(deletedTransactions)
-          .map { case (address, value) =>
-            val balance = Balance(address, spent = -value)
-            addressPostgresDAO.upsert(balance)
-          }
-          .toList
-          .everything
-
-      _ <- receiveMap(deletedTransactions)
-          .map { case (address, value) =>
-            val balance = Balance(address, received = -value)
-            addressPostgresDAO.upsert(balance)
-          }
+      _ <- balances(deletedTransactions)
+          .map { b => b.copy(spent = -b.spent, received = -b.received) }
+          .map { b => balancePostgresDAO.upsert(b) }
           .toList
           .everything
     } yield ()
@@ -157,5 +136,24 @@ class DatabasePostgresSeeder @Inject() (
         }
         .groupBy(_._1)
         .mapValues { list => list.map(_._2).sum }
+  }
+
+  private def balances(transactions: List[Transaction]) = {
+    val spentList = spendMap(transactions).map { case (address, spent) =>
+      Balance(address, spent = spent)
+    }
+
+    val receiveList = receiveMap(transactions).map { case (address, received) =>
+      Balance(address, received = received)
+    }
+
+    (spentList ++ receiveList)
+        .groupBy(_.address)
+        .mapValues { _.reduce(mergeBalances) }
+        .values
+  }
+
+  def mergeBalances(a: Balance, b: Balance): Balance = {
+    Balance(a.address, spent = a.spent + b.spent, received = a.received + b.received)
   }
 }

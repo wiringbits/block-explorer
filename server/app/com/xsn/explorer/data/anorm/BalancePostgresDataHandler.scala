@@ -18,7 +18,7 @@ class BalancePostgresDataHandler @Inject() (
     extends BalanceBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def upsert(balance: Balance): ApplicationResult[Balance] = withConnection { implicit conn =>
+  override def upsert(balance: Balance): ApplicationResult[Balance] = withTransaction { implicit conn =>
     val maybe = balancePostgresDAO.upsert(balance)
 
     Or.from(maybe, One(BalanceUnknownError))

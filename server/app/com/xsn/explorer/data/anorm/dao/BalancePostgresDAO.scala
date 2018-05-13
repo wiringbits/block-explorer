@@ -7,16 +7,23 @@ import anorm._
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
-import com.xsn.explorer.models.{Address, Balance}
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.{Address, Balance}
 import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def upsert(balance: Balance)(implicit conn: Connection): Option[Balance] = {
-    val createdBalance = SQL(
+  /**
+   * create or update the balance for an address
+   *
+   * NOTE: ensure the connection has an open transaction, this is required
+   *       until the debug log is removed.
+   */
+  def upsert(partial: Balance)(implicit conn: Connection): Option[Balance] = {
+    val computedMaybe = computeBalance(partial.address)
+    val updatedBalance = SQL(
       """
         |INSERT INTO balances
         |  (address, received, spent)
@@ -28,19 +35,19 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
         |RETURNING address, received, spent
       """.stripMargin
     ).on(
-      'address -> balance.address.string,
-      'received -> balance.received,
-      'spent -> balance.spent,
+      'address -> partial.address.string,
+      'received -> partial.received,
+      'spent -> partial.spent,
     ).as(parseBalance.singleOpt).flatten
 
     for {
-      balance <- createdBalance
-      computed <- computeBalance(balance.address) if computed != balance
+      balance <- updatedBalance
+      computed <- computedMaybe if computed != balance
     } {
       logger.warn(s"CORRUPTED_BALANCE, expected spent = ${computed.spent}, actual = ${balance.spent}, expected received = ${computed.received}, actual = ${balance.received}")
     }
 
-    createdBalance
+    updatedBalance
   }
 
   private def computeBalance(address: Address)(implicit conn: Connection) = {
