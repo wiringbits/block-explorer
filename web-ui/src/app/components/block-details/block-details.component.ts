@@ -26,7 +26,7 @@ export class BlockDetailsComponent implements OnInit {
     private errorService: ErrorService) { }
 
   ngOnInit() {
-    this.route.params.forEach(params => this.onBlockhash(params['blockhash']));
+    this.route.params.forEach(params => this.onBlockhash(params['query']));
   }
 
   private onBlockhash(blockhash: string) {

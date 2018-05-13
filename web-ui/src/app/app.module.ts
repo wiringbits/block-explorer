@@ -42,6 +42,8 @@ import { MasternodesComponent } from './components/masternodes/masternodes.compo
 import { MasternodeDetailsComponent } from './components/masternode-details/masternode-details.component';
 import { TransactionRawComponent } from './components/transaction-raw/transaction-raw.component';
 import { TransactionComponent } from './components/transaction/transaction.component';
+import { BlockComponent } from './components/block/block.component';
+import { BlockRawComponent } from './components/block-raw/block-raw.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +61,9 @@ import { TransactionComponent } from './components/transaction/transaction.compo
     MasternodesComponent,
     MasternodeDetailsComponent,
     TransactionRawComponent,
-    TransactionComponent
+    TransactionComponent,
+    BlockComponent,
+    BlockRawComponent
   ],
   imports: [
     AppRoutingModule,

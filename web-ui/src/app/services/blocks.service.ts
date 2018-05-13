@@ -22,6 +22,11 @@ export class BlocksService {
     return this.http.get<BlockDetails>(url);
   }
 
+  getRaw(query: string): Observable<any> {
+    const url = `${this.baseUrl}/${query}/raw`;
+    return this.http.get<any>(url);
+  }
+
   getLatest(): Observable<Block[]> {
     return this.http.get<Block[]>(this.baseUrl);
   }
