@@ -57,7 +57,7 @@ export class AppComponent {
 
       // labels
       'label.coinName': 'XSN',
-      'label.searchField': 'Transaction id, Blockhash, Address, IP address',
+      'label.searchField': 'Transaction id, Blockhash, Block number, Address, IP address',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',

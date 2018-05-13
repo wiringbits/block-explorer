@@ -12,6 +12,7 @@ import { TransactionsService } from '../../services/transactions.service';
 import { MasternodesService } from '../../services/masternodes.service';
 
 const BLOCK_REGEX = '^[A-Fa-f0-9]{64}$';
+const BLOCK_NUMBER_REGEX = '^(\\d{1,10})$';
 const ADDRESS_REGEX = '^[a-zA-Z0-9]{34}$';
 const IP_ADDRESS_REGEX = '^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$';
 
@@ -41,8 +42,9 @@ export class FinderComponent implements OnInit {
   }
 
   private createForm() {
+    const pattern = `(${ADDRESS_REGEX})|(${BLOCK_REGEX})|(${IP_ADDRESS_REGEX})|(${BLOCK_NUMBER_REGEX})`;
     this.form = this.formBuilder.group({
-      searchField: [null, [Validators.required, Validators.pattern(`(${ADDRESS_REGEX})|(${BLOCK_REGEX})|(${IP_ADDRESS_REGEX})`)]],
+      searchField: [null, [Validators.required, Validators.pattern(pattern)]],
     });
   }
 
@@ -70,13 +72,15 @@ export class FinderComponent implements OnInit {
           response => this.navigatorService.masternodeDetails(searchField),
           response => this.onNothingFound()
         );
+    } else if (new RegExp(BLOCK_NUMBER_REGEX).test(searchField)) {
+      this.lookForBlock(searchField);
     }
   }
 
-  private lookForBlock(blockhash: string) {
-    this.blocksService.get(blockhash)
+  private lookForBlock(query: string) {
+    this.blocksService.get(query)
       .subscribe(
-        response => this.navigatorService.blockDetails(blockhash),
+      response => this.navigatorService.blockDetails(query),
         response => this.onNothingFound()
       );
   }
