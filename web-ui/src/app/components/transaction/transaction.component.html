@@ -1,0 +1,13 @@
+<div>
+  <div class="row">
+    <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.transaction' | translate}}</h2>
+  </div>
+  <tabset class="col-xs-12 col-sm-12 col-md-12 col-xs-12">
+    <tab heading="{{'label.details' | translate}}" (select)="selectView('details')">
+      <app-transaction-details *ngIf="isSelected('details')"></app-transaction-details>
+    </tab>
+    <tab heading="{{'label.raw' | translate}}" (select)="selectView('raw')">
+      <app-transaction-raw *ngIf="isSelected('raw')"></app-transaction-raw>
+    </tab>
+  </tabset>
+</div>

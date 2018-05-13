@@ -115,7 +115,9 @@ export class AppComponent {
       'label.status': 'Status',
       'label.lastSeen': 'Last seen',
       'label.payee': 'Payee',
-      'label.active': 'Active'
+      'label.active': 'Active',
+      'label.details': 'Details',
+      'label.raw': 'Raw'
     };
   }
 }

@@ -1,0 +1,8 @@
+<div>
+  <div [hidden]="transaction != null">
+    <alert>{{'message.transactionNotFound' | translate}}</alert>
+  </div>
+  <div *ngIf="transaction != null">
+    <pre>{{transaction | json}}</pre>
+  </div>
+</div>

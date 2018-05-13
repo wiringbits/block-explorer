@@ -21,4 +21,9 @@ export class TransactionsService {
     const url = `${this.baseUrl}/${txid}`;
     return this.http.get<Transaction>(url);
   }
+
+  getRaw(txid: string): Observable<any> {
+    const url = `${this.baseUrl}/${txid}/raw`;
+    return this.http.get<any>(url);
+  }
 }

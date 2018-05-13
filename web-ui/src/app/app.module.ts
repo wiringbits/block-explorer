@@ -40,6 +40,8 @@ import { TickerComponent } from './components/ticker/ticker.component';
 import { RichestAddressesComponent } from './components/richest-addresses/richest-addresses.component';
 import { MasternodesComponent } from './components/masternodes/masternodes.component';
 import { MasternodeDetailsComponent } from './components/masternode-details/masternode-details.component';
+import { TransactionRawComponent } from './components/transaction-raw/transaction-raw.component';
+import { TransactionComponent } from './components/transaction/transaction.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +57,9 @@ import { MasternodeDetailsComponent } from './components/masternode-details/mast
     TickerComponent,
     RichestAddressesComponent,
     MasternodesComponent,
-    MasternodeDetailsComponent
+    MasternodeDetailsComponent,
+    TransactionRawComponent,
+    TransactionComponent
   ],
   imports: [
     AppRoutingModule,

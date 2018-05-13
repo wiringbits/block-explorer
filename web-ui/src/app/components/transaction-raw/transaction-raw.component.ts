@@ -10,13 +10,13 @@ import { NavigatorService } from '../../services/navigator.service';
 import { TransactionsService } from '../../services/transactions.service';
 
 @Component({
-  selector: 'app-transaction-details',
-  templateUrl: './transaction-details.component.html',
-  styleUrls: ['./transaction-details.component.css']
+  selector: 'app-transaction-raw',
+  templateUrl: './transaction-raw.component.html',
+  styleUrls: ['./transaction-raw.component.css']
 })
-export class TransactionDetailsComponent implements OnInit {
+export class TransactionRawComponent implements OnInit {
 
-  transaction: Transaction;
+  transaction: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -30,30 +30,17 @@ export class TransactionDetailsComponent implements OnInit {
   }
 
   private onTransactionId(txid: string) {
-    this.transactionsService.get(txid).subscribe(
+    this.transactionsService.getRaw(txid).subscribe(
       response => this.onTransactionRetrieved(response),
       response => this.onError(response)
     );
   }
 
-  private onTransactionRetrieved(response: Transaction) {
+  private onTransactionRetrieved(response: any) {
     this.transaction = response;
   }
 
   private onError(response: any) {
     this.errorService.renderServerErrors(null, response);
-  }
-
-  getFee(tx: Transaction): number {
-    const vout = tx.output.map(t => t.value).reduce((a, b) => a + b, 0);
-    return Math.max(0, this.getVIN(tx) - vout);
-  }
-
-  private getVIN(tx): number {
-    if (tx.input == null || tx.input.length === 0) {
-      return 0;
-    } else {
-      return tx.input.map(t => t.value).reduce((a, b) => a + b, 0);
-    }
   }
 }
