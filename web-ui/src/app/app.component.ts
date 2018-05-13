@@ -45,18 +45,19 @@ export class AppComponent {
       'message.transactionNotFound': 'Transaction not found',
       'message.addressNotFound': 'Address not found',
       'message.blockNotFound': 'Block not found',
+      'message.masternodeNotFound': 'Masternode not found',
       'message.loadingLatestBlocks': 'Loading latest blocks...',
       'message.loadingRichestAddresses': 'Loading richest addresses...',
 
       // error messages
-      'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction',
+      'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction or ip address',
 
       // actions
       'action.find': 'Find',
 
       // labels
       'label.coinName': 'XSN',
-      'label.searchField': 'Transaction id or Blockhash or Address',
+      'label.searchField': 'Transaction id, Blockhash, Address, IP address',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',
@@ -90,7 +91,7 @@ export class AppComponent {
       'label.transactions': 'Transactions',
       'label.rewards': 'Rewards',
       'label.coinstake': 'Coinstake',
-      'label.masternode': 'Master node',
+      'label.masternode': 'Masternode',
       'label.amount': 'Amount',
       'label.blockReward': 'Block reward',
 

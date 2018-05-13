@@ -22,4 +22,9 @@ export class MasternodesService {
     const url = `${this.baseUrl}?offset=${offset}&limit=${limit}&orderBy=${orderBy}`;
     return this.http.get<PaginatedResult<Masternode>>(url);
   }
+
+  getByIP(ip: string): Observable<Masternode> {
+    const url = `${this.baseUrl}/${ip}`;
+    return this.http.get<Masternode>(url);
+  }
 }

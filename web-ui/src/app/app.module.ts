@@ -39,6 +39,7 @@ import { LatestBlocksComponent } from './components/latest-blocks/latest-blocks.
 import { TickerComponent } from './components/ticker/ticker.component';
 import { RichestAddressesComponent } from './components/richest-addresses/richest-addresses.component';
 import { MasternodesComponent } from './components/masternodes/masternodes.component';
+import { MasternodeDetailsComponent } from './components/masternode-details/masternode-details.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { MasternodesComponent } from './components/masternodes/masternodes.compo
     LatestBlocksComponent,
     TickerComponent,
     RichestAddressesComponent,
-    MasternodesComponent
+    MasternodesComponent,
+    MasternodeDetailsComponent
   ],
   imports: [
     AppRoutingModule,
