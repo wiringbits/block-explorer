@@ -100,6 +100,24 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       }
     }
 
+    "handle transaction having no blocktime, nor time" in {
+      // TODO: Remove this test when https://github.com/X9Developers/XSN/issues/72 is fixed.
+      val txid = createTransactionId("f24cd135c34ebb9032f8bc5b45599f1424980d34583df2847c4a4db584c94e97")
+      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      whenReady(service.getTransaction(txid)) { result =>
+        result.isGood mustEqual true
+
+        val tx = result.get
+        tx.id mustEqual txid
+      }
+    }
+
     "handle transaction not found" in {
       val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
       val responseBody = createRPCErrorResponse(-5, "No information available about transaction")
