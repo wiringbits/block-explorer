@@ -40,15 +40,20 @@ class SQSSeederTask @Inject() (
   def run(): Unit = {
     logger.info("Starting seeder")
 
-    SqsSource(config.queueUrl, settings)
-        .runWith(Sink.foreach(handleMessage))
-        .onComplete {
-          case Failure(ex) =>
-            logger.error("Failed to stream SQS messages", ex)
+    def f(): Unit = {
+      SqsSource(config.queueUrl, settings)
+          .runWith(Sink.foreach(handleMessage))
+          .onComplete {
+            case Failure(ex) =>
+              logger.error("Failed to stream SQS messages, restarting seeder", ex)
+              f()
 
-          case Success(_) =>
-            logger.info("SQS stream completed")
-        }
+            case Success(_) =>
+              logger.info("SQS stream completed")
+          }
+    }
+
+    f()
   }
 
   private def handleMessage(message: Message): Unit = {
