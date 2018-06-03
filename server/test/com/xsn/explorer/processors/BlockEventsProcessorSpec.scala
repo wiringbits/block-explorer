@@ -12,7 +12,7 @@ import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.models.{Blockhash, TransactionId}
-import com.xsn.explorer.processors.BlockEventsProcessor.{MissingBlockIgnored, NewBlockAppended, RechainDone, ReplacedByBlockHeight}
+import com.xsn.explorer.processors.BlockEventsProcessor._
 import com.xsn.explorer.services.TransactionService
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
@@ -288,6 +288,41 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
         // ensure block2 has been removed
         dataHandler.getBy(block2.hash) mustEqual Bad(BlockNotFoundError).accumulating
+      }
+    }
+
+    "keep the correct previous_blockhash on rare events" in {
+      // see https://github.com/X9Developers/block-explorer/issues/12
+      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val rareBlock3 = block3.copy(previousBlockhash = Some(block1.hash))
+
+      val xsnService = new FileBasedXSNService {
+        override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+          if (blockhash == block3.hash) {
+            Future.successful(Good(rareBlock3))
+          } else {
+            super.getBlock(blockhash)
+          }
+        }
+      }
+
+      val processor = new BlockEventsProcessor(
+        xsnService,
+        new TransactionService(xsnService)(Executors.globalEC),
+        new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
+        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+
+      List(block1, rareBlock3)
+          .map(_.hash)
+          .map(processor.processBlock)
+          .foreach { whenReady(_) { _.isGood mustEqual true } }
+
+      whenReady(processor.processBlock(block2.hash)) { result =>
+        result mustEqual Good(MissingBlockProcessed(block2))
+        val blocks = List(block1, block2, block3)
+        verifyBlockchain(blocks)
       }
     }
   }

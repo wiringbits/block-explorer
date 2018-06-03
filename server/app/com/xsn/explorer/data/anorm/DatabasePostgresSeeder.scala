@@ -71,6 +71,12 @@ class DatabasePostgresSeeder @Inject() (
           .setNextBlockhash(previousBlockhash, command.block.hash)
     }
 
+    // link next block (if possible)
+    command.block.nextBlockhash.foreach { nextBlockhash =>
+      blockPostgresDAO
+          .setPreviousBlockhash(nextBlockhash, command.block.hash)
+    }
+
     result
   }
 

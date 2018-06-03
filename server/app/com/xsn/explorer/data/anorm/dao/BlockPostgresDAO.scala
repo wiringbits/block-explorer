@@ -62,6 +62,25 @@ class BlockPostgresDAO {
     ).as(parseBlock.singleOpt).flatten
   }
 
+  def setPreviousBlockhash(
+      blockhash: Blockhash,
+      previousBlockhash: Blockhash)(
+      implicit conn: Connection): Option[Block] = {
+
+    SQL(
+      """
+        |UPDATE blocks
+        |SET previous_blockhash = {previous_blockhash}
+        |WHERE blockhash = {blockhash}
+        |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string,
+      'previous_blockhash -> previousBlockhash.string
+    ).as(parseBlock.singleOpt).flatten
+  }
+
   def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
     SQL(
       """
