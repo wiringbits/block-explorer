@@ -283,7 +283,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(ReplacedByBlockHeight)
-        val blocks = List(block1, block3)
+        val blocks = List(block1.copy(nextBlockhash = Some(block3.hash)), block3)
         verifyBlockchain(blocks)
 
         // ensure block2 has been removed

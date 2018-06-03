@@ -25,16 +25,6 @@ class DatabasePostgresSeeder @Inject() (
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   override def newBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
-    // link previous block (if possible)
-    command.block.previousBlockhash.foreach { previousBlockhash =>
-      blockPostgresDAO
-          .setNextBlockhash(previousBlockhash, command.block.hash)
-          .orElse {
-            logger.warn(s"Failed to link previous block = ${previousBlockhash.string} to ${command.block.hash.string} because it wasn't found")
-            None
-          }
-    }
-
     val result = for {
       _ <- upsertBlockCascade(command)
     } yield ()
@@ -58,7 +48,7 @@ class DatabasePostgresSeeder @Inject() (
   }
 
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {
-    for {
+    val result = for {
       // block
       _ <- deleteBlockCascade(command.block)
           .orElse(Some(()))
@@ -74,6 +64,14 @@ class DatabasePostgresSeeder @Inject() (
           .toList
           .everything
     } yield ()
+
+    // link previous block (if possible)
+    command.block.previousBlockhash.foreach { previousBlockhash =>
+      blockPostgresDAO
+          .setNextBlockhash(previousBlockhash, command.block.hash)
+    }
+
+    result
   }
 
   private def deleteBlockCascade(block: Block)(implicit conn: Connection): Option[Unit] = {
