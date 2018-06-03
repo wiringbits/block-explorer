@@ -7,8 +7,8 @@ import anorm._
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
+import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.{Address, Balance}
 import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
@@ -17,13 +17,9 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
 
   /**
    * create or update the balance for an address
-   *
-   * NOTE: ensure the connection has an open transaction, this is required
-   *       until the debug log is removed.
    */
   def upsert(partial: Balance)(implicit conn: Connection): Option[Balance] = {
-    val computedMaybe = computeBalance(partial.address)
-    val updatedBalance = SQL(
+    SQL(
       """
         |INSERT INTO balances
         |  (address, received, spent)
@@ -39,35 +35,6 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
       'received -> partial.received,
       'spent -> partial.spent,
     ).as(parseBalance.singleOpt).flatten
-
-    for {
-      balance <- updatedBalance
-      computed <- computedMaybe if computed != balance
-    } {
-      logger.warn(s"CORRUPTED_BALANCE, expected spent = ${computed.spent}, actual = ${balance.spent}, expected received = ${computed.received}, actual = ${balance.received}")
-    }
-
-    updatedBalance
-  }
-
-  private def computeBalance(address: Address)(implicit conn: Connection) = {
-    SQL(
-      """
-        |SELECT {address} AS address,
-        |       (
-        |         SELECT COALESCE(SUM(value), 0)
-        |         FROM transaction_inputs
-        |         WHERE address = {address}
-        |       ) AS spent,
-        |       (
-        |         SELECT COALESCE(SUM(value), 0)
-        |         FROM transaction_outputs
-        |         WHERE address = {address}
-        |       ) AS received
-      """.stripMargin
-    ).on(
-      'address -> address.string
-    ).as(parseBalance.single)
   }
 
   def get(
