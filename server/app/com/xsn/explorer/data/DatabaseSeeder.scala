@@ -11,27 +11,15 @@ trait DatabaseSeeder[F[_]] {
   import DatabaseSeeder._
 
   /**
-   * There are no blocks, we are adding the first one which could possibly
-   * not be the genesis block but the first one on our database.
+   * The database has some blocks, we are adding a new a block.
    */
-  def firstBlock(command: CreateBlockCommand): F[Unit]
-
-  /**
-   * The database has some blocks, we are appending a block to our latest block.
-   */
-  def newLatestBlock(command: CreateBlockCommand): F[Unit]
+  def newBlock(command: CreateBlockCommand): F[Unit]
 
   /**
    * The database has some blocks but there is a rechain happening, we need to
    * replace our current latest block with the new latest block.
    */
   def replaceBlock(command: ReplaceBlockCommand): F[Unit]
-
-  /**
-   * The database has some blocks but the chain is not complete, we are inserting
-   * a previous block that's missing in our chain.
-   */
-  def insertPendingBlock(command: CreateBlockCommand): F[Unit]
 }
 
 object DatabaseSeeder {

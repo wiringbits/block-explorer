@@ -58,7 +58,7 @@ class SQSSeederTask @Inject() (
 
   private def handleMessage(message: Message): Unit = {
     def onBlockhash(blockhash: Blockhash) = {
-      val result = blockEventsProcessor.newLatestBlock(blockhash)
+      val result = blockEventsProcessor.processBlock(blockhash)
 
       result.recover {
         case NonFatal(ex) =>

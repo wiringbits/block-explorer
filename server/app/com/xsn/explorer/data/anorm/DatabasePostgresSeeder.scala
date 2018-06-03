@@ -24,32 +24,24 @@ class DatabasePostgresSeeder @Inject() (
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def firstBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
-    val result = upsertBlockCascade(command)
-
-    result
-        .map(_ => Good(()))
-        .getOrElse(throw new RuntimeException("Unable to add the first block"))
-  }
-
-
-  override def newLatestBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
-    val result = for {
-      // link previous block
-      previousBlockhash <- command.block.previousBlockhash
-      _ <- blockPostgresDAO
+  override def newBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
+    // link previous block (if possible)
+    command.block.previousBlockhash.foreach { previousBlockhash =>
+      blockPostgresDAO
           .setNextBlockhash(previousBlockhash, command.block.hash)
           .orElse {
             logger.warn(s"Failed to link previous block = ${previousBlockhash.string} to ${command.block.hash.string} because it wasn't found")
             None
           }
+    }
 
+    val result = for {
       _ <- upsertBlockCascade(command)
     } yield ()
 
     result
         .map(Good(_))
-        .getOrElse(throw new RuntimeException("Unable to add the new latest block"))
+        .getOrElse(throw new RuntimeException("Unable to add the new block"))
   }
 
   override def replaceBlock(command: ReplaceBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
@@ -63,16 +55,6 @@ class DatabasePostgresSeeder @Inject() (
     result
         .map(Good(_))
         .getOrElse(throw new RuntimeException("Unable to replace latest block"))
-  }
-
-  override def insertPendingBlock(command: CreateBlockCommand): ApplicationResult[Unit] = withTransaction { implicit conn =>
-    val result = for {
-      _ <- upsertBlockCascade(command)
-    } yield ()
-
-    result
-        .map(Good(_))
-        .getOrElse(throw new RuntimeException("Unable to an old block"))
   }
 
   private def upsertBlockCascade(command: CreateBlockCommand)(implicit conn: Connection): Option[Unit] = {

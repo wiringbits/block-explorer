@@ -45,7 +45,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       // see https://github.com/X9Developers/XSN/issues/32
       val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
 
-      whenReady(processor.newLatestBlock(block0.hash)) { result =>
+      whenReady(processor.processBlock(block0.hash)) { result =>
         result mustEqual Good(MissingBlockIgnored)
       }
     }
@@ -53,7 +53,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     "process first block" in {
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
 
-      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+      whenReady(processor.processBlock(block1.hash)) { result =>
         result.isGood mustEqual true
       }
     }
@@ -65,7 +65,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
-      whenReady(processor.newLatestBlock(block3.hash)) { result =>
+      whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(NewBlockAppended(block3))
         val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
@@ -79,7 +79,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
-      whenReady(processor.newLatestBlock(block2.hash)) {
+      whenReady(processor.processBlock(block2.hash)) {
         case Good(RechainDone(orphanBlock, newBlock)) =>
           orphanBlock.hash mustEqual block3.hash
           newBlock.hash mustEqual block2.hash
@@ -98,7 +98,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
-      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+      whenReady(processor.processBlock(block1.hash)) { result =>
         result.isGood mustEqual true
         val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
@@ -112,7 +112,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
-      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+      whenReady(processor.processBlock(block1.hash)) { result =>
         result.isGood mustEqual true
         val blocks = List(block1, block2, block3)
         verifyBlockchain(blocks)
@@ -127,7 +127,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     "process a block without spent index on transactions" in {
       val block = BlockLoader.get("000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924")
 
-      whenReady(processor.newLatestBlock(block.hash)) { result =>
+      whenReady(processor.processBlock(block.hash)) { result =>
         result.isGood mustEqual true
 
         val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
@@ -149,10 +149,10 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2)
           .map(_.hash)
-          .map(processor.newLatestBlock)
+          .map(processor.processBlock)
           .foreach { whenReady(_) { _.isGood mustEqual true } }
 
-      whenReady(processor.newLatestBlock(block1.hash)) { result =>
+      whenReady(processor.processBlock(block1.hash)) { result =>
         result.isGood mustEqual true
         val blocks = List(block1)
         verifyBlockchain(blocks)
@@ -199,14 +199,14 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2)
           .map(_.hash)
-          .map(processor.newLatestBlock)
+          .map(processor.processBlock)
           .foreach { whenReady(_) { _.isGood mustEqual true } }
 
       /**
        * When processing the latest block, a rechain event has occurred in the rpc server which leads to
        * a case that we can't retrieve the block information, the block should be ignored.
        */
-      whenReady(processor.newLatestBlock(block3.hash)) { result =>
+      whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(MissingBlockIgnored)
         val blocks = List(block1, block2)
         verifyBlockchain(blocks)
@@ -238,14 +238,14 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2)
           .map(_.hash)
-          .map(processor.newLatestBlock)
+          .map(processor.processBlock)
           .foreach { whenReady(_) { _.isGood mustEqual true } }
 
       /**
        * When processing the latest block, a rechain event has occurred in the rpc server which leads to
        * a case that we can't retrieve a specific transaction, the block should be ignored.
        */
-      whenReady(processor.newLatestBlock(block3.hash)) { result =>
+      whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(MissingBlockIgnored)
         val blocks = List(block1, block2)
         verifyBlockchain(blocks)
@@ -278,10 +278,10 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       List(block1, block2)
           .map(_.hash)
-          .map(processor.newLatestBlock)
+          .map(processor.processBlock)
           .foreach { whenReady(_) { _.isGood mustEqual true } }
 
-      whenReady(processor.newLatestBlock(block3.hash)) { result =>
+      whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(ReplacedByBlockHeight)
         val blocks = List(block1, block3)
         verifyBlockchain(blocks)

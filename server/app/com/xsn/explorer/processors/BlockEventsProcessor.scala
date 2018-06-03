@@ -30,26 +30,34 @@ class BlockEventsProcessor @Inject() (
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * There is a new latest block in the blockchain, we need to sync our database.
+   * There is a possible new block in the blockchain, we need to sync our database.
    *
-   * The following scenarios are handled for the new latest block:
+   * The following scenarios are handled for the new block:
    *
-   * 1. It is new on our database, we just append it (possibly first block).
-   *    - current blocks = A -> B, new latest block = C, new blocks = A -> B -> C
-   *    - current blocks = empty, new latest block = A, new blocks = A
+   * 0. The block is already present, we ignore it.
+   *
+   * x. The block can not be fully retrieved from the rpc server, we ignore it.
+   *
+   * x. The first block in the database (not exactly the first block in the chain), we just add it.
+   *    - Example: current blocks = empty, new block = A, new blocks = A
+   *
+   * x. A new block on our database having a link to our latest block in the database:
+   *    - The new block is added.
+   *    - The next block from our latest block is set to the next block.
+   *    - Example: current blocks = A -> B, new block = C, new blocks = A -> B -> C
    *
    * 2. It is the previous block from our latest block (rechain).
    *    - current blocks = A -> B -> C, new latest block = B, new blocks = A -> B
    *
    * 3. None of previous cases, it is a block that might be missing in our chain.
    *
-   * @param blockhash the new latest block
+   * @param blockhash the blockhash to process
    */
-  def newLatestBlock(blockhash: Blockhash): FutureApplicationResult[Result] = {
+  def processBlock(blockhash: Blockhash): FutureApplicationResult[Result] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
-      r <- newLatestBlock(block, transactions).toFutureOr
+      r <- processBlock(block, transactions).toFutureOr
     } yield r
 
     result.toFuture.map {
@@ -60,7 +68,7 @@ class BlockEventsProcessor @Inject() (
     }
   }
 
-  private def newLatestBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Result] = {
+  private def processBlock(newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Result] = {
     def onRechain(orphanBlock: Block): FutureApplicationResult[Result] = {
       val command = DatabaseSeeder.ReplaceBlockCommand(
         orphanBlock = orphanBlock,
@@ -78,7 +86,7 @@ class BlockEventsProcessor @Inject() (
       logger.info(s"first block = ${newBlock.hash.string}")
 
       val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
-      databaseSeeder.firstBlock(command)
+      databaseSeeder.newBlock(command)
           .toFutureOr
           .map(_ => FirstBlockCreated(newBlock))
           .toFuture
@@ -89,7 +97,7 @@ class BlockEventsProcessor @Inject() (
 
       val command = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
       databaseSeeder
-          .newLatestBlock(command)
+          .newBlock(command)
           .toFutureOr
           .map(_ => NewBlockAppended(newBlock))
           .toFuture
@@ -121,7 +129,7 @@ class BlockEventsProcessor @Inject() (
             case Bad(One(BlockNotFoundError)) =>
               val createCommand = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
               databaseSeeder
-                  .insertPendingBlock(createCommand)
+                  .newBlock(createCommand)
                   .flatMap {
                     case Good(_) => Future.successful { Good(MissingBlockProcessed(newBlock)) }
                     case Bad(One(PostgresForeignKeyViolationError("height", _))) => onRepeatedBlockHeight()

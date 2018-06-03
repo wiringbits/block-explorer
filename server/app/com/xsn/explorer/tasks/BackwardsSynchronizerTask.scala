@@ -117,7 +117,7 @@ class BackwardsSynchronizerTask @Inject() (
       transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
 
       command = DatabaseSeeder.CreateBlockCommand(block, transactions)
-      _ <- databaseSeeder.insertPendingBlock(command).toFutureOr
+      _ <- databaseSeeder.newBlock(command).toFutureOr
       _ = logger.debug(s"Block ${block.height.int} saved")
 
       _ <- block

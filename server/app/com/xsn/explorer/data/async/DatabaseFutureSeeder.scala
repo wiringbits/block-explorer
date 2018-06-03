@@ -13,19 +13,11 @@ class DatabaseFutureSeeder @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends DatabaseSeeder[FutureApplicationResult] {
 
-  override def firstBlock(command: DatabaseSeeder.CreateBlockCommand): FutureApplicationResult[Unit] = Future {
-    blockingSeeder.firstBlock(command)
-  }
-
-  override def newLatestBlock(command: DatabaseSeeder.CreateBlockCommand): FutureApplicationResult[Unit] = Future {
-    blockingSeeder.newLatestBlock(command)
+  override def newBlock(command: DatabaseSeeder.CreateBlockCommand): FutureApplicationResult[Unit] = Future {
+    blockingSeeder.newBlock(command)
   }
 
   override def replaceBlock(command: DatabaseSeeder.ReplaceBlockCommand): FutureApplicationResult[Unit] = Future {
     blockingSeeder.replaceBlock(command)
-  }
-
-  override def insertPendingBlock(command: DatabaseSeeder.CreateBlockCommand): FutureApplicationResult[Unit] = Future {
-    blockingSeeder.insertPendingBlock(command)
   }
 }
