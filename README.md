@@ -1,2 +1,2 @@
-# Block-Explorer [![Build Status](https://travis-ci.org/X9Developers/block-explorer.svg?branch=master)](https://travis-ci.org/X9Developers/block-explorer)
+# Block-Explorer [![Build Status](https://travis-ci.org/X9Developers/block-explorer.svg?branch=master)](https://travis-ci.org/X9Developers/block-explorer) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/96a6179dc4c645bd96f9473fa069250d)](https://www.codacy.com/app/AlexITC/block-explorer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=X9Developers/block-explorer&amp;utm_campaign=Badge_Grade)
 XSN Block Explorer
