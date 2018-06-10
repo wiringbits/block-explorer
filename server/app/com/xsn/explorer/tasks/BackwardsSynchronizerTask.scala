@@ -4,11 +4,11 @@ import javax.inject.{Inject, Singleton}
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
-import com.xsn.explorer.data.DatabaseSeeder
-import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
+import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}
+import com.xsn.explorer.processors.BlockOps
 import com.xsn.explorer.services.{TransactionService, XSNService}
 import org.scalactic.{Bad, Good, One, Or}
 import org.slf4j.LoggerFactory
@@ -18,7 +18,7 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 /**
- * As the dababse sync process is slow, it's useful to fill it using a fast server and then, release to the
+ * As the database sync process is slow, it's useful to fill it using a fast server and then, release to the
  * production server, in this case might have a database updated until block N while the SQS messages started
  * at N + X, leaving X missing blocks, this task, syncs the database from block N + X to block N.
  */
@@ -27,7 +27,7 @@ class BackwardsSynchronizerTask @Inject() (
     xsnService: XSNService,
     transactionService: TransactionService,
     blockDataHandler: BlockFutureDataHandler,
-    databaseSeeder: DatabaseFutureSeeder) {
+    blockOps: BlockOps) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val lock = new Object
@@ -116,8 +116,7 @@ class BackwardsSynchronizerTask @Inject() (
       block <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
 
-      command = DatabaseSeeder.CreateBlockCommand(block, transactions)
-      _ <- databaseSeeder.newBlock(command).toFutureOr
+      _ <- blockOps.createBlock(block, transactions).toFutureOr
       _ = logger.debug(s"Block ${block.height.int} saved")
 
       _ <- block
