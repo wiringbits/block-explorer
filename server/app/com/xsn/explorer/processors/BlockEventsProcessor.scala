@@ -23,7 +23,8 @@ class BlockEventsProcessor @Inject() (
     xsnService: XSNService,
     transactionService: TransactionService,
     databaseSeeder: DatabaseFutureSeeder,
-    blockDataHandler: BlockFutureDataHandler) {
+    blockDataHandler: BlockFutureDataHandler,
+    blockOps: BlockOps) {
 
   import BlockEventsProcessor._
 
@@ -103,21 +104,6 @@ class BlockEventsProcessor @Inject() (
           .toFuture
     }
 
-    def onRepeatedBlockHeight(): FutureApplicationResult[Result] = {
-      val result = for {
-        orphanBlock <- blockDataHandler.getBy(newBlock.height).toFutureOr
-
-        replaceCommand = DatabaseSeeder.ReplaceBlockCommand(
-          orphanBlock = orphanBlock,
-          newBlock = newBlock,
-          newTransactions = newTransactions)
-
-        _ <- databaseSeeder.replaceBlock(replaceCommand).toFutureOr
-      } yield ReplacedByBlockHeight
-
-      result.toFuture
-    }
-
     def onMissingBlock(): FutureApplicationResult[Result] = {
       blockDataHandler
           .getBy(newBlock.hash)
@@ -127,13 +113,12 @@ class BlockEventsProcessor @Inject() (
               Future.successful { Good(ExistingBlockIgnored(newBlock)) }
 
             case Bad(One(BlockNotFoundError)) =>
-              val createCommand = DatabaseSeeder.CreateBlockCommand(newBlock, newTransactions)
-              databaseSeeder
-                  .newBlock(createCommand)
-                  .flatMap {
-                    case Good(_) => Future.successful { Good(MissingBlockProcessed(newBlock)) }
-                    case Bad(One(PostgresForeignKeyViolationError("height", _))) => onRepeatedBlockHeight()
-                    case Bad(errors) => Future.successful(Bad(errors))
+              blockOps
+                  .createBlock(newBlock, newTransactions)
+                  .map {
+                    case Good(BlockOps.Result.BlockCreated) => Good(MissingBlockProcessed(newBlock))
+                    case Good(BlockOps.Result.BlockReplacedByHeight) => Good(ReplacedByBlockHeight)
+                    case Bad(errors) => Bad(errors)
                   }
 
             case Bad(errors) =>

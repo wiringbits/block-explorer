@@ -30,11 +30,17 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   lazy val xsnService = new FileBasedXSNService
+
+  lazy val blockOps = new BlockOps(
+    new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
+    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+
   lazy val processor = new BlockEventsProcessor(
     xsnService,
     new TransactionService(xsnService)(Executors.globalEC),
     new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+    blockOps)
 
   before {
     clearDatabase()
@@ -194,7 +200,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         xsnService,
         new TransactionService(xsnService)(Executors.globalEC),
         new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+        blockOps)
 
 
       List(block1, block2)
@@ -233,7 +240,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         xsnService,
         new TransactionService(xsnService)(Executors.globalEC),
         new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+        blockOps)
 
 
       List(block1, block2)
@@ -274,7 +282,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         xsnService,
         new TransactionService(xsnService)(Executors.globalEC),
         new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+        blockOps)
 
       List(block1, block2)
           .map(_.hash)
@@ -312,7 +321,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         xsnService,
         new TransactionService(xsnService)(Executors.globalEC),
         new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+        blockOps)
 
       List(block1, rareBlock3)
           .map(_.hash)
