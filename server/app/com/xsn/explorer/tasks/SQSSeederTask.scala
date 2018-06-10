@@ -22,7 +22,6 @@ import scala.util.{Failure, Success}
 class SQSSeederTask @Inject() (
     config: SeederConfig,
     blockEventsProcessor: BlockEventsProcessor,
-    firstBlockSynchronizerTask: FirstBlockSynchronizerTask,
     backwardsSynchronizerTask: BackwardsSynchronizerTask)(
     implicit sqs: AmazonSQSAsync,
     materializer: Materializer) {
@@ -92,14 +91,12 @@ class SQSSeederTask @Inject() (
   }
 
   private def onBlockResult(eventResult: BlockEventsProcessor.Result) = eventResult match {
-    case BlockEventsProcessor.FirstBlockCreated(_) =>
-      firstBlockSynchronizerTask.sync()
+    case BlockEventsProcessor.FirstBlockCreated(block) =>
+      backwardsSynchronizerTask.sync(block)
 
-    case BlockEventsProcessor.NewBlockAppended(_) =>
-      firstBlockSynchronizerTask.sync()
+    case BlockEventsProcessor.NewBlockAppended(_) => ()
 
     case BlockEventsProcessor.RechainDone(_, newBlock) =>
-      firstBlockSynchronizerTask.sync()
       backwardsSynchronizerTask.sync(newBlock)
 
     case BlockEventsProcessor.MissingBlockProcessed(block) =>
