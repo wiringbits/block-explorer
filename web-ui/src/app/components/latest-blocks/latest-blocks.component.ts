@@ -26,7 +26,7 @@ import { ErrorService } from '../../services/error.service';
 export class LatestBlocksComponent implements OnInit, OnDestroy {
 
   blocks: Block[];
-  private newBlocks: Block[];
+  private latestBlockHeight: number;
   private subscription$: Subscription;
 
   constructor(
@@ -71,16 +71,8 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
   }
 
   private onBlockRetrieved(response: Block[]) {
-    this.newBlocks = this.getNewBlocks(response);
+    this.latestBlockHeight = this.blocks ? this.blocks[0].height : 0;
     this.blocks = response;
-  }
-
-  private getNewBlocks(newBlocks: Block[]): Block[] {
-    if (!this.blocks) {
-      return [];
-    }
-
-    return newBlocks.filter(newBlock => newBlock.height > this.blocks[0].height);
   }
 
   private onError(response: any) {
@@ -104,6 +96,6 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
   }
 
   isBlockRecent(item: Block): boolean {
-    return this.newBlocks.some(newBlock => newBlock.height === item.height);
+    return item.height > this.latestBlockHeight;
   }
 }
