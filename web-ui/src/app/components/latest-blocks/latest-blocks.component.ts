@@ -25,8 +25,8 @@ import { ErrorService } from '../../services/error.service';
 })
 export class LatestBlocksComponent implements OnInit, OnDestroy {
 
-  blocks: Block[];
-  private latestBlockHeight: number;
+  blocks: Block[] = [];
+  private latestBlockHeight = 0;
   private subscription$: Subscription;
 
   constructor(
@@ -71,7 +71,7 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
   }
 
   private onBlockRetrieved(response: Block[]) {
-    this.latestBlockHeight = this.blocks ? this.blocks[0].height : 0;
+    this.latestBlockHeight = this.blocks.reduce((max, block) => Math.max(block.height, max), 0);
     this.blocks = response;
   }
 
