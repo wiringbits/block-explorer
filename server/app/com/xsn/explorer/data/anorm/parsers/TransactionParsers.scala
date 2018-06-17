@@ -2,7 +2,7 @@ package com.xsn.explorer.data.anorm.parsers
 
 import anorm.SqlParser.{get, str}
 import anorm.~
-import com.xsn.explorer.models.{Address, Transaction, TransactionId}
+import com.xsn.explorer.models.{Address, Transaction, TransactionId, TransactionWithValues}
 
 object TransactionParsers {
 
@@ -11,6 +11,7 @@ object TransactionParsers {
   val parseTransactionId = str("txid").map(TransactionId.from)
   val parseReceived = get[BigDecimal]("received")
   val parseSpent = get[BigDecimal]("spent")
+  val parseSent = get[BigDecimal]("sent")
 
   val parseIndex = get[Int]("index")
   val parseValue = get[BigDecimal]("value")
@@ -24,6 +25,21 @@ object TransactionParsers {
         txid <- txidMaybe
         blockhash <- blockhashMaybe
       } yield Transaction(txid, blockhash, time, size, List.empty, List.empty)
+  }
+
+  val parseTransactionWithValues = (
+      parseTransactionId ~
+          parseBlockhash ~
+          parseTime ~
+          parseSize ~
+          parseSent ~
+          parseReceived).map {
+
+    case txidMaybe ~ blockhashMaybe ~ time ~ size ~ sent ~ received =>
+      for {
+        txid <- txidMaybe
+        blockhash <- blockhashMaybe
+      } yield TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
   val parseTransactionInput = (parseIndex ~ parseValue.? ~ parseAddress.?).map { case index ~ value ~ address =>

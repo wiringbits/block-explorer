@@ -3,8 +3,9 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
+import com.alexitc.playsonify.models.{Count, PaginatedQuery}
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models.{Blockhash, Transaction, TransactionId}
+import com.xsn.explorer.models._
 
 class TransactionPostgresDAO {
 
@@ -61,6 +62,60 @@ class TransactionPostgresDAO {
 
       tx.copy(inputs = inputs, outputs = outputs)
     }
+  }
+
+  def getBy(address: Address, paginatedQuery: PaginatedQuery)(implicit conn: Connection): List[TransactionWithValues] = {
+    /**
+     * TODO: The query is very slow while aggregating the spent and received values,
+     *       it might be worth creating an index-like table to get the accumulated
+     *       values directly.
+     */
+    SQL(
+      """
+        |SELECT t.txid, blockhash, time, size,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM transactions t
+        |WHERE t.txid IN (
+        |  SELECT txid
+        |  FROM transaction_inputs
+        |  WHERE address = {address}
+        |) OR t.txid IN (
+        |  SELECT txid
+        |  FROM transaction_outputs
+        |  WHERE address = {address}
+        |)
+        |ORDER BY time DESC
+        |OFFSET {offset}
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'address -> address.string,
+      'offset -> paginatedQuery.offset.int,
+      'limit -> paginatedQuery.limit.int
+    ).as(parseTransactionWithValues.*).flatten
+  }
+
+  def countBy(address: Address)(implicit conn: Connection): Count = {
+    val result = SQL(
+      """
+        |SELECT COUNT(*)
+        |FROM transactions
+        |WHERE txid IN (
+        |  SELECT txid
+        |  FROM transaction_inputs
+        |  WHERE address = {address}
+        |) OR txid IN (
+        |  SELECT txid
+        |  FROM transaction_outputs
+        |  WHERE address = {address}
+        |)
+      """.stripMargin
+    ).on(
+      'address -> address.string
+    ).as(SqlParser.scalar[Int].single)
+
+    Count(result)
   }
 
   private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
