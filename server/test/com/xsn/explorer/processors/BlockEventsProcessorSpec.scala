@@ -2,10 +2,11 @@ package com.xsn.explorer.processors
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.models._
+import com.alexitc.playsonify.validators.PaginatedQueryValidator
+import com.xsn.explorer.data.anorm._
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, StatisticsPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, BlockPostgresDataHandler, DatabasePostgresSeeder, StatisticsPostgresDataHandler}
-import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder}
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, DatabaseFutureSeeder, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
@@ -13,7 +14,7 @@ import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.models.{Blockhash, TransactionId}
 import com.xsn.explorer.processors.BlockEventsProcessor._
-import com.xsn.explorer.services.TransactionService
+import com.xsn.explorer.services.{TransactionService, XSNService}
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -23,24 +24,10 @@ import scala.concurrent.Future
 class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures with BeforeAndAfter {
 
   lazy val dataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
-  lazy val dataSeeder = new DatabasePostgresSeeder(
-    database,
-    new BlockPostgresDAO,
-    new TransactionPostgresDAO,
-    new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val transactionDataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO)
 
   lazy val xsnService = new FileBasedXSNService
-
-  lazy val blockOps = new BlockOps(
-    new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
-
-  lazy val processor = new BlockEventsProcessor(
-    xsnService,
-    new TransactionService(xsnService)(Executors.globalEC),
-    new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-    new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
-    blockOps)
+  lazy val processor = blockEventsProcessor()
 
   before {
     clearDatabase()
@@ -196,14 +183,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         }
       }
 
-      val processor = new BlockEventsProcessor(
-        xsnService,
-        new TransactionService(xsnService)(Executors.globalEC),
-        new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
-        blockOps)
-
-
+      val processor = blockEventsProcessor(xsn = xsnService)
+      
       List(block1, block2)
           .map(_.hash)
           .map(processor.processBlock)
@@ -236,13 +217,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         }
       }
 
-      val processor = new BlockEventsProcessor(
-        xsnService,
-        new TransactionService(xsnService)(Executors.globalEC),
-        new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
-        blockOps)
-
+      val processor = blockEventsProcessor(xsn = xsnService)
 
       List(block1, block2)
           .map(_.hash)
@@ -278,12 +253,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         }
       }
 
-      val processor = new BlockEventsProcessor(
-        xsnService,
-        new TransactionService(xsnService)(Executors.globalEC),
-        new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
-        blockOps)
+      val processor = blockEventsProcessor(xsn = xsnService)
 
       List(block1, block2)
           .map(_.hash)
@@ -317,12 +287,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
         }
       }
 
-      val processor = new BlockEventsProcessor(
-        xsnService,
-        new TransactionService(xsnService)(Executors.globalEC),
-        new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
-        new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
-        blockOps)
+      val processor = blockEventsProcessor(xsn = xsnService)
 
       List(block1, rareBlock3)
           .map(_.hash)
@@ -350,5 +315,29 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     database.withConnection { implicit conn =>
       _root_.anorm.SQL("""SELECT COUNT(*) FROM blocks""").as(_root_.anorm.SqlParser.scalar[Int].single)
     }
+  }
+
+  private def blockEventsProcessor(xsn: XSNService = xsnService) = {
+    val dataSeeder = new DatabasePostgresSeeder(
+      database,
+      new BlockPostgresDAO,
+      new TransactionPostgresDAO,
+      new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+
+    val blockOps = new BlockOps(
+      new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
+      new BlockFutureDataHandler(dataHandler)(Executors.databaseEC))
+
+    val transactionService = new TransactionService(
+      new PaginatedQueryValidator,
+      xsn,
+      new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC))(Executors.globalEC)
+
+    new BlockEventsProcessor(
+      xsn,
+      transactionService,
+      new DatabaseFutureSeeder(dataSeeder)(Executors.databaseEC),
+      new BlockFutureDataHandler(dataHandler)(Executors.databaseEC),
+      blockOps)
   }
 }

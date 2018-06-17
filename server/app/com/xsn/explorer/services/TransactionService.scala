@@ -2,17 +2,24 @@ package com.xsn.explorer.services
 
 import javax.inject.Inject
 
-import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
-import com.xsn.explorer.errors.{TransactionFormatError, TransactionNotFoundError}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.models.PaginatedQuery
+import com.alexitc.playsonify.validators.PaginatedQueryValidator
+import com.xsn.explorer.data.async.TransactionFutureDataHandler
+import com.xsn.explorer.errors.{AddressFormatError, TransactionFormatError, TransactionNotFoundError}
+import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
-import com.xsn.explorer.models.{Transaction, TransactionDetails, TransactionId, TransactionValue}
 import org.scalactic.{Bad, Good, One, Or}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TransactionService @Inject() (xsnService: XSNService)(implicit ec: ExecutionContext) {
+class TransactionService @Inject() (
+    paginatedQueryValidator: PaginatedQueryValidator,
+    xsnService: XSNService,
+    transactionFutureDataHandler: TransactionFutureDataHandler)(
+    implicit ec: ExecutionContext) {
 
   def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
     val result = for {
@@ -61,6 +68,23 @@ class TransactionService @Inject() (xsnService: XSNService)(implicit ec: Executi
 
       rpcTransaction = tx.copy(vin = transactionVIN)
     } yield Transaction.fromRPC(rpcTransaction)
+
+    result.toFuture
+  }
+
+  def getTransactions(
+      addressString: String,
+      paginatedQuery: PaginatedQuery): FuturePaginatedResult[TransactionWithValues] = {
+
+    val result = for {
+      address <- {
+        val maybe = Address.from(addressString)
+        Or.from(maybe, One(AddressFormatError)).toFutureOr
+      }
+
+      paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
+      transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery).toFutureOr
+    } yield transactions
 
     result.toFuture
   }

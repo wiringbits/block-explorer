@@ -8,7 +8,8 @@ GET   /health                controllers.HealthController.check()
 GET   /transactions/:txid        controllers.TransactionsController.getTransaction(txid: String)
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
 
-GET   /addresses/:address    controllers.AddressesController.getDetails(address: String)
+GET   /addresses/:address                 controllers.AddressesController.getDetails(address: String)
+GET   /addresses/:address/transactions    controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10)
 
 GET   /blocks                controllers.BlocksController.getLatestBlocks()
 GET   /blocks/:query         controllers.BlocksController.getDetails(query: String)
