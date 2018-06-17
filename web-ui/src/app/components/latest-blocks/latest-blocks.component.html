@@ -26,7 +26,7 @@
           </thead>
 
           <tbody>
-            <tr *ngFor="let item of blocks; let i = index" [ngClass]="{ 'latest-block': isBlockRecent(i) }">
+            <tr *ngFor="let item of blocks" [ngClass]="{ 'latest-block': isBlockRecent(item) }">
               <td>
                 <a routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
               </td>

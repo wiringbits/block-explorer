@@ -26,8 +26,7 @@ import { ErrorService } from '../../services/error.service';
 export class LatestBlocksComponent implements OnInit, OnDestroy {
 
   blocks: Block[];
-  private totalNewestBlocks: number;
-  private latestBlock: Block;
+  private newBlocks: Block[];
   private subscription$: Subscription;
 
   constructor(
@@ -72,28 +71,16 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
   }
 
   private onBlockRetrieved(response: Block[]) {
-    this.countNewestBlocks(response);
-    this.latestBlock = response[0];
+    this.newBlocks = this.getNewBlocks(response);
     this.blocks = response;
   }
 
-  private countNewestBlocks(newBlocks: Block[]) {
+  private getNewBlocks(newBlocks: Block[]): Block[] {
     if (!this.blocks) {
-      return;
+      return [];
     }
 
-    const lastestBlockHash: string = this.latestBlock.hash;
-    let totalNewBlocks = 0;
-
-    for (let i = 0; i < newBlocks.length; i++) {
-      if (newBlocks[i].hash === lastestBlockHash) {
-        break;
-      }
-
-      totalNewBlocks++;
-    }
-
-    this.totalNewestBlocks = totalNewBlocks;
+    return newBlocks.filter(newBlock => newBlock.height > this.blocks[0].height);
   }
 
   private onError(response: any) {
@@ -116,7 +103,7 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  isBlockRecent(index: number): boolean {
-    return index < this.totalNewestBlocks;
+  isBlockRecent(item: Block): boolean {
+    return this.newBlocks.some(newBlock => newBlock.height === item.height);
   }
 }
