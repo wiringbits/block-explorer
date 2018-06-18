@@ -7,11 +7,11 @@ import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResu
 import com.alexitc.playsonify.models.PaginatedQuery
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
-import com.xsn.explorer.errors.{AddressFormatError, TransactionFormatError, TransactionNotFoundError}
+import com.xsn.explorer.errors.{AddressFormatError, InvalidRawTransactionError, TransactionFormatError, TransactionNotFoundError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import org.scalactic.{Bad, Good, One, Or}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -85,6 +85,15 @@ class TransactionService @Inject() (
       paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
       transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery).toFutureOr
     } yield transactions
+
+    result.toFuture
+  }
+
+  def sendRawTransaction(hexString: String): FutureApplicationResult[JsValue] = {
+    val result = for {
+      hex <- Or.from(HexString.from(hexString), One(InvalidRawTransactionError)).toFutureOr
+      _ <- xsnService.sendRawTransaction(hex).toFutureOr
+    } yield JsObject.empty + ("hex" -> JsString(hex.string))
 
     result.toFuture
   }

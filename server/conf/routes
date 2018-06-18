@@ -7,6 +7,7 @@ GET   /health                controllers.HealthController.check()
 
 GET   /transactions/:txid        controllers.TransactionsController.getTransaction(txid: String)
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
+POST  /transactions              controllers.TransactionsController.sendRawTransaction()
 
 GET   /addresses/:address                 controllers.AddressesController.getDetails(address: String)
 GET   /addresses/:address/transactions    controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10)
