@@ -544,4 +544,42 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       }
     }
   }
+
+  "getUnspentOutputs" should {
+    "get the results" in {
+      val content =
+        """
+          |[
+          |    {
+          |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
+          |        "height": 22451,
+          |        "outputIndex": 0,
+          |        "satoshis": 1500000000000,
+          |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
+          |        "txid": "ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"
+          |    },
+          |    {
+          |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
+          |        "height": 25093,
+          |        "outputIndex": 3,
+          |        "satoshis": 2250000000,
+          |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
+          |        "txid": "96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"
+          |    }
+          |]
+        """.stripMargin
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      when(response.status).thenReturn(200)
+      when(response.json).thenReturn(json)
+      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+
+      val address = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+      whenReady(service.getUnspentOutputs(address)) { result =>
+        result mustEqual Good(Json.parse(content))
+      }
+    }
+  }
 }

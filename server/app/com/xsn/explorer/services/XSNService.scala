@@ -41,6 +41,8 @@ trait XSNService {
   def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]]
 
   def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode]
+
+  def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -314,6 +316,29 @@ class XSNServiceRPCImpl @Inject() (
                 case Bad(errors) => Bad(errors)
               }
 
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "getaddressutxos",
+                  |  "params": [
+                  |    { "addresses": ["${address.string}"] }
+                  |  ]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[JsValue](response)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
