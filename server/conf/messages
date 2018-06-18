@@ -4,6 +4,8 @@ xsn.server.unexpectedError=Unexpected error from the XSN network
 
 error.transaction.format=Invalid transaction format
 error.transaction.notFound=Transaction not found
+error.rawTransaction.invalid=The transaction is invalid
+error.rawTransaction.repeated=The transaction is already in the network
 
 error.address.format=Invalid address format
 

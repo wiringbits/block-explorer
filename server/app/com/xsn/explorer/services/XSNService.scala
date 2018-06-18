@@ -43,6 +43,8 @@ trait XSNService {
   def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode]
 
   def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
+
+  def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit]
 }
 
 class XSNServiceRPCImpl @Inject() (
@@ -339,6 +341,34 @@ class XSNServiceRPCImpl @Inject() (
         .post(body)
         .map { response =>
           val maybe = getResult[JsValue](response)
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
+  override def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit] = {
+    val errorCodeMapper = Map(
+      -26 -> InvalidRawTransactionError,
+      -22 -> InvalidRawTransactionError,
+      -27 -> RawTransactionAlreadyExistsError)
+
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "sendrawtransaction",
+                  |  "params": ["${hex.string}"]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[String](response, errorCodeMapper)
+              .map { _.map(_ => ()) }
+
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 

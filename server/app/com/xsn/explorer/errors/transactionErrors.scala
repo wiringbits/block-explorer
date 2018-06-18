@@ -1,6 +1,6 @@
 package com.xsn.explorer.errors
 
-import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError, ServerError}
+import com.alexitc.playsonify.models._
 import play.api.i18n.{Lang, MessagesApi}
 
 sealed trait TransactionError
@@ -28,4 +28,22 @@ case object TransactionUnknownError extends TransactionError with ServerError {
   override def cause: Option[Throwable] = None
 
   override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
+}
+
+case object InvalidRawTransactionError extends TransactionError with InputValidationError {
+
+  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
+    val message = messagesApi("error.rawTransaction.invalid")
+    val error = FieldValidationError("hex", message)
+    List(error)
+  }
+}
+
+case object RawTransactionAlreadyExistsError extends TransactionError with ConflictError {
+
+  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
+    val message = messagesApi("error.rawTransaction.repeated")
+    val error = FieldValidationError("hex", message)
+    List(error)
+  }
 }
