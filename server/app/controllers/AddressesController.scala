@@ -21,4 +21,8 @@ class AddressesController @Inject() (
 
     transactionService.getTransactions(address, paginatedQuery)
   }
+
+  def getUnspentOutputs(address: String) = publicNoInput { _ =>
+    addressService.getUnspentOutputs(address)
+  }
 }

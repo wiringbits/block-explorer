@@ -8,9 +8,9 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.AddressBalance
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.{One, Or}
+import org.scalactic.{Good, One, Or}
 import play.api.inject.bind
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
@@ -29,6 +29,29 @@ class AddressesControllerSpec extends MyAPISpec {
     )
   )
 
+  val addressForUtxos = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+  val utxosResponse =
+    """
+      |[
+      |    {
+      |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
+      |        "height": 22451,
+      |        "outputIndex": 0,
+      |        "satoshis": 1500000000000,
+      |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
+      |        "txid": "ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"
+      |    },
+      |    {
+      |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
+      |        "height": 25093,
+      |        "outputIndex": 3,
+      |        "satoshis": 2250000000,
+      |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
+      |        "txid": "96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"
+      |    }
+      |]
+    """.stripMargin
+
   val customXSNService = new DummyXSNService {
     val map = Map(
       "Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw" -> addressEmpty,
@@ -45,6 +68,15 @@ class AddressesControllerSpec extends MyAPISpec {
       val maybe = map.get(address.string).map(_.transactions)
       val result = Or.from(maybe, One(AddressFormatError))
       Future.successful(result)
+    }
+
+    override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
+      if (address == addressForUtxos) {
+        val result = Good(Json.parse(utxosResponse))
+        Future.successful(result)
+      } else {
+        super.getUnspentOutputs(address)
+      }
     }
   }
 
@@ -80,6 +112,17 @@ class AddressesControllerSpec extends MyAPISpec {
 
       (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "address"
+    }
+  }
+
+  "GET /addresses/:address/utxos" should {
+    def url(address: String) = s"/addresses/$address/utxos"
+
+    "return an array with the result" in {
+      val response = GET(url(addressForUtxos.string))
+
+      status(response) mustEqual OK
+      contentAsJson(response) mustEqual Json.parse(utxosResponse)
     }
   }
 }

@@ -10,6 +10,7 @@ GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransa
 
 GET   /addresses/:address                 controllers.AddressesController.getDetails(address: String)
 GET   /addresses/:address/transactions    controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10)
+GET   /addresses/:address/utxos           controllers.AddressesController.getUnspentOutputs(address: String)
 
 GET   /blocks                controllers.BlocksController.getLatestBlocks()
 GET   /blocks/:query         controllers.BlocksController.getDetails(query: String)
