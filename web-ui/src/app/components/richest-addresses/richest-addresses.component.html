@@ -23,7 +23,14 @@
             </td>
             <td>{{item.available}} {{'label.coinName' | translate}}</td>
             <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'message.unavailable' | translate}}</td>
-            <td *ngIf="ticker != null && ticker.circulatingSupply != null">{{getPercent(item)}} %</td>
+            <td *ngIf="ticker != null && ticker.circulatingSupply != null">
+              <div
+                with="100%"
+                [ngStyle]="{'background': 'linear-gradient(to right, rgb(240, 237, 255) ' + (getPercent(item)) + '%, rgba(0,0,0,0) 0%)'}"
+              >
+                {{getPercent(item) | number:'1.2-2'}} %
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
