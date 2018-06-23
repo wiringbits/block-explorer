@@ -7,8 +7,13 @@ class FieldOrderingSQLInterpreter {
   def toOrderByClause[A](fieldOrdering: FieldOrdering[A])(implicit columnNameResolver: ColumnNameResolver[A]) = {
     val field = columnNameResolver.getColumnName(fieldOrdering.field)
     val condition = getCondition(fieldOrdering.orderingCondition)
+    val uniqueField = columnNameResolver.getUniqueColumnName
 
-    s"ORDER BY $field $condition"
+    if (field == uniqueField) {
+      s"ORDER BY $field $condition"
+    } else {
+      s"ORDER BY $field $condition, $uniqueField"
+    }
   }
 
   private def getCondition(ordering: OrderingCondition) = ordering match {
