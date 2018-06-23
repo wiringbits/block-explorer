@@ -85,14 +85,15 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     val address = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
     val inputs = List(
       Transaction.Input(0, None, None),
-      Transaction.Input(1, Some(BigDecimal(100)), Some(address))
+      Transaction.Input(1, Some(BigDecimal(100)), Some(address)),
+      Transaction.Input(2, Some(BigDecimal(200)), Some(createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F")))
     )
 
     val outputs = List(
       Transaction.Output(0, BigDecimal(50), address, None, None),
       Transaction.Output(
         1,
-        BigDecimal(150),
+        BigDecimal(250),
         createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
         None, None)
     )
@@ -118,7 +119,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val transactionWithValues = TransactionWithValues(
         transaction.id, transaction.blockhash, transaction.time, transaction.size,
         sent = 100,
-        received = 200)
+        received = 50)
 
       val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
       dataHandler.upsert(transaction).isGood mustEqual true

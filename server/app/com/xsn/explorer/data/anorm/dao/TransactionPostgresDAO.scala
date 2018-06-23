@@ -83,8 +83,8 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     SQL(
       s"""
         |SELECT t.txid, blockhash, time, size,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid AND address = {address}) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid AND address = {address}) AS received
         |FROM transactions t
         |WHERE t.txid IN (
         |  SELECT txid
