@@ -1,11 +1,12 @@
 package com.xsn.explorer.data
 
+import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.anorm.TransactionPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.DataHelper._
-import com.xsn.explorer.models.{Size, Transaction}
+import com.xsn.explorer.models.{Size, Transaction, TransactionWithValues}
 import org.scalactic.{Bad, Good}
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
@@ -74,6 +75,53 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val result = dataHandler.deleteBy(transaction.blockhash)
       result.isGood mustEqual true
       result.get mustEqual List(transaction)
+    }
+  }
+
+  "getBy address" should {
+    val address = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
+    val inputs = List(
+      Transaction.Input(0, None, None),
+      Transaction.Input(1, Some(BigDecimal(100)), Some(address))
+    )
+
+    val outputs = List(
+      Transaction.Output(0, BigDecimal(50), address, None, None),
+      Transaction.Output(
+        1,
+        BigDecimal(150),
+        createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        None, None)
+    )
+
+    val transaction = Transaction(
+      createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+      createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+      12312312L,
+      Size(1000),
+      inputs,
+      outputs)
+
+    val query = PaginatedQuery(Offset(0), Limit(10))
+
+    "find no results" in {
+      val expected = PaginatedResult(query.offset, query.limit, Count(0), List.empty)
+      val result = dataHandler.getBy(address, query)
+
+      result mustEqual Good(expected)
+    }
+
+    "find the right values" in {
+      val transactionWithValues = TransactionWithValues(
+        transaction.id, transaction.blockhash, transaction.time, transaction.size,
+        sent = 100,
+        received = 200)
+
+      val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
+      dataHandler.upsert(transaction).isGood mustEqual true
+
+      val result = dataHandler.getBy(address, query)
+      result mustEqual Good(expected)
     }
   }
 }
