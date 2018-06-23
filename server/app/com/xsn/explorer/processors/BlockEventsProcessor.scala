@@ -117,7 +117,7 @@ class BlockEventsProcessor @Inject() (
                   .createBlock(newBlock, newTransactions)
                   .map {
                     case Good(BlockOps.Result.BlockCreated) => Good(MissingBlockProcessed(newBlock))
-                    case Good(BlockOps.Result.BlockReplacedByHeight) => Good(ReplacedByBlockHeight)
+                    case Good(BlockOps.Result.BlockReplacedByHeight) => Good(ReplacedByBlockHeight(newBlock))
                     case Bad(errors) => Bad(errors)
                   }
 
@@ -171,5 +171,5 @@ object BlockEventsProcessor {
   case class NewBlockAppended(block: Block) extends Result
   case class RechainDone(orphanBlock: Block, newBlock: Block) extends Result
   case object MissingBlockIgnored extends Result
-  case object ReplacedByBlockHeight extends Result
+  case class ReplacedByBlockHeight(newBlock: Block) extends Result
 }

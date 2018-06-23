@@ -56,6 +56,9 @@ class PollingSeederTask @Inject() (
     case BlockEventsProcessor.MissingBlockProcessed(block) =>
       backwardsSynchronizerTask.sync(block)
 
+    case BlockEventsProcessor.ReplacedByBlockHeight(newBlock) =>
+      backwardsSynchronizerTask.sync(newBlock)
+
     case _ => ()
   }
 }
