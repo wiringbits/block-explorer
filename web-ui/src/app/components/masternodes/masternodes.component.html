@@ -1,5 +1,5 @@
 <div>
-  <div class="row">
+  <div class="row visible-xs">
     <h2 class="col-xs-12">{{'label.masternodes' | translate}}</h2>
   </div>
 
@@ -14,7 +14,7 @@
                 <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
                  -->
           <th class="col-xs-2 col-md-1">{{'label.active' | translate}}</th>
-          <th class="col-xs-3 col-md-2">{{'label.lastSeen' | translate}}</th>
+          <th class="col-xs-2">{{'label.lastSeen' | translate}}</th>
           <th class="col-xs-2 col-md-1">{{'label.payee' | translate}}</th>
         </tr>
       </thead>
@@ -28,7 +28,7 @@
                 <td>{{item.status}}</td>
                 -->
           <td>{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
-          <td>{{item.lastSeen * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+          <td>{{item.lastSeen * 1000 | amTimeAgo}}</td>
           <td>
             <a routerLink="/addresses/{{item.payee}}">{{item.payee}}</a>
           </td>

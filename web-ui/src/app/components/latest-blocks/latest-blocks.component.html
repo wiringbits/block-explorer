@@ -1,5 +1,5 @@
 <div>
-  <div class="row">
+  <div class="row visible-xs">
     <div class="col-xs-12">
       <h2>{{'label.latestBlocks' | translate}}</h2>
     </div>
@@ -31,7 +31,7 @@
             </td>
             <td>{{item.time * 1000 | amTimeAgo}}</td>
             <td>{{item.transactions.length}}</td>
-            <td>{{item.difficulty}}</td>
+            <td>{{item.difficulty | number:'1.2-2'}}</td>
             <td>{{extractedBy(item) | translate}}</td>
           </tr>
         </tbody>
