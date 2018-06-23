@@ -1,43 +1,44 @@
 <div>
   <div class="row">
-    <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.richestAddresses' | translate}}</h2>
+    <h2 class="col-xs-12">{{'label.richestAddresses' | translate}}</h2>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-condensed table-bordered table-striped table-hover">
+      <thead>
+        <tr>
+          <th class="col-xs-1">#</th>
+          <th class="col-xs-2 col-md-1">{{'label.address' | translate}}</th>
+          <th class="col-xs-2 col-md-1">{{'label.amount' | translate}}</th>
+          <th class="col-xs-2 col-md-1">{{'label.percentOfCoins' | translate}}</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'richestAddresses', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+          <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
+          <td>
+            <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+          </td>
+          <td>{{item.available}} {{'label.coinName' | translate}}</td>
+          <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'message.unavailable' | translate}}</td>
+          <td *ngIf="ticker != null && ticker.circulatingSupply != null">
+            <div
+            with="100%"
+            [ngStyle]="{'background': 'linear-gradient(to right, rgb(240, 237, 255) ' + (getPercent(item)) + '%, rgba(0,0,0,0) 0%)'}"
+            >
+              {{getPercent(item) | number:'1.2-2'}} %
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <thead>
-          <tr>
-            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">#</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.amount' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.percentOfCoins' | translate}}</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'richestAddresses', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
-            <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
-            <td>
-              <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
-            </td>
-            <td>{{item.available}} {{'label.coinName' | translate}}</td>
-            <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'message.unavailable' | translate}}</td>
-            <td *ngIf="ticker != null && ticker.circulatingSupply != null">
-              <div
-                with="100%"
-                [ngStyle]="{'background': 'linear-gradient(to right, rgb(240, 237, 255) ' + (getPercent(item)) + '%, rgba(0,0,0,0) 0%)'}"
-              >
-                {{getPercent(item) | number:'1.2-2'}} %
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="has-text-centered">
-        <pagination-controls (pageChange)="getPage($event)" id="richestAddresses"></pagination-controls>
-      </div>
+    <div class="col-xs-11 col-xs-offset-1 col-sm-5 col-sm-offset-4">
+      <pagination-controls (pageChange)="getPage($event)" id="richestAddresses" previousLabel="" nextLabel="">
+      </pagination-controls>
     </div>
   </div>
 </div>

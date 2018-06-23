@@ -1,43 +1,41 @@
 <div>
   <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="col-xs-12">
       <h2>{{'label.latestBlocks' | translate}}</h2>
     </div>
   </div>
 
   <div class="row" *ngIf="blocks == null">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="col-xs-12">
       <h4>{{'message.loadingLatestBlocks' | translate}}</h4>
     </div>
   </div>
 
   <div *ngIf="blocks != null">
-    <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <table class="table table-condensed table-bordered table-striped table-hover">
-          <thead>
-            <tr>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.height' | translate}}</th>
-              <th class="col-xs-4 col-sm-4 col-md-2 col-lg-2">{{'label.blocktime' | translate}}</th>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}}</th>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.difficulty' | translate}}</th>
-              <th class="col-xs-2 col-sm-2 col-md-2 col-lg-2">{{'label.extractedBy' | translate}}</th>
-            </tr>
-          </thead>
+    <div class="table-responsive">
+      <table class="table table-condensed table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th class="col-xs-2 col-md-1">{{'label.height' | translate}}</th>
+            <th class="col-xs-4 col-md-2">{{'label.blocktime' | translate}}</th>
+            <th class="col-xs-2 col-md-1">{{'label.transactions' | translate}}</th>
+            <th class="col-xs-2 col-md-1">{{'label.difficulty' | translate}}</th>
+            <th class="col-xs-2 col-md-2">{{'label.extractedBy' | translate}}</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            <tr *ngFor="let item of blocks" [ngClass]="{ 'latest-block': isBlockRecent(item) }">
-              <td>
-                <a routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
-              </td>
-              <td>{{item.time * 1000 | amTimeAgo}}</td>
-              <td>{{item.transactions.length}}</td>
-              <td>{{item.difficulty}}</td>
-              <td>{{extractedBy(item) | translate}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <tbody>
+          <tr *ngFor="let item of blocks" [ngClass]="{ 'latest-block': isBlockRecent(item) }">
+            <td>
+              <a routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
+            </td>
+            <td>{{item.time * 1000 | amTimeAgo}}</td>
+            <td>{{item.transactions.length}}</td>
+            <td>{{item.difficulty}}</td>
+            <td>{{extractedBy(item) | translate}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
