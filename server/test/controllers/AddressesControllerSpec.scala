@@ -2,11 +2,12 @@ package controllers
 
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
-import com.alexitc.playsonify.models.{Count, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.AddressFormatError
 import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.AddressBalance
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -100,7 +101,7 @@ class AddressesControllerSpec extends MyAPISpec {
 
     override def deleteBy(blockhash: Blockhash): ApplicationResult[List[Transaction]] = ???
 
-    override def getBy(address: Address, paginatedQuery: PaginatedQuery): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
+    override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
       if (address == addressForTransactions) {
         Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(1), List(addressTransaction)))
       } else {

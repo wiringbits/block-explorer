@@ -3,15 +3,18 @@ package com.xsn.explorer.data
 import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.anorm.TransactionPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.DataHelper._
+import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.{Size, Transaction, TransactionWithValues}
 import org.scalactic.{Bad, Good}
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
-  lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO)
+  lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
+  val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
 
   val inputs = List(
     Transaction.Input(0, None, None),
@@ -106,7 +109,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     "find no results" in {
       val expected = PaginatedResult(query.offset, query.limit, Count(0), List.empty)
-      val result = dataHandler.getBy(address, query)
+      val result = dataHandler.getBy(address, query, defaultOrdering)
 
       result mustEqual Good(expected)
     }
@@ -120,7 +123,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
       dataHandler.upsert(transaction).isGood mustEqual true
 
-      val result = dataHandler.getBy(address, query)
+      val result = dataHandler.getBy(address, query, defaultOrdering)
       result mustEqual Good(expected)
     }
   }

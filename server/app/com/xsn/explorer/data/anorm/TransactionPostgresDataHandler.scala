@@ -3,11 +3,12 @@ package com.xsn.explorer.data.anorm
 import javax.inject.Inject
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.{PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.errors.{TransactionNotFoundError, TransactionUnknownError}
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.fields.TransactionField
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 
@@ -34,9 +35,10 @@ class TransactionPostgresDataHandler @Inject() (
 
   override def getBy(
       address: Address,
-      paginatedQuery: PaginatedQuery): ApplicationResult[PaginatedResult[TransactionWithValues]] = withConnection { implicit conn =>
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = withConnection { implicit conn =>
 
-    val transactions = transactionPostgresDAO.getBy(address, paginatedQuery)
+    val transactions = transactionPostgresDAO.getBy(address, paginatedQuery, ordering)
     val total = transactionPostgresDAO.countBy(address)
     val result = PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, total, transactions)
 

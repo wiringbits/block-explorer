@@ -4,12 +4,13 @@ import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models.PaginatedQuery
+import com.alexitc.playsonify.models.{OrderingQuery, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.{AddressFormatError, InvalidRawTransactionError, TransactionFormatError, TransactionNotFoundError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
+import com.xsn.explorer.parsers.TransactionOrderingParser
 import org.scalactic.{Bad, Good, One, Or}
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
@@ -17,6 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
+    transactionOrderingParser: TransactionOrderingParser,
     xsnService: XSNService,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
@@ -74,7 +76,8 @@ class TransactionService @Inject() (
 
   def getTransactions(
       addressString: String,
-      paginatedQuery: PaginatedQuery): FuturePaginatedResult[TransactionWithValues] = {
+      paginatedQuery: PaginatedQuery,
+      orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
 
     val result = for {
       address <- {
@@ -83,7 +86,8 @@ class TransactionService @Inject() (
       }
 
       paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
-      transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery).toFutureOr
+      ordering <- transactionOrderingParser.from(orderingQuery).toFutureOr
+      transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery, ordering).toFutureOr
     } yield transactions
 
     result.toFuture

@@ -1,13 +1,16 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
+import javax.inject.Inject
 
 import anorm._
-import com.alexitc.playsonify.models.{Count, PaginatedQuery}
+import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.fields.TransactionField
 
-class TransactionPostgresDAO {
+class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   /**
    * NOTE: Ensure the connection has an open transaction.
@@ -64,14 +67,21 @@ class TransactionPostgresDAO {
     }
   }
 
-  def getBy(address: Address, paginatedQuery: PaginatedQuery)(implicit conn: Connection): List[TransactionWithValues] = {
+  def getBy(
+      address: Address,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField])(
+      implicit conn: Connection): List[TransactionWithValues] = {
+
+    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
+
     /**
      * TODO: The query is very slow while aggregating the spent and received values,
      *       it might be worth creating an index-like table to get the accumulated
      *       values directly.
      */
     SQL(
-      """
+      s"""
         |SELECT t.txid, blockhash, time, size,
         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
@@ -85,7 +95,7 @@ class TransactionPostgresDAO {
         |  FROM transaction_outputs
         |  WHERE address = {address}
         |)
-        |ORDER BY time DESC
+        |$orderBy
         |OFFSET {offset}
         |LIMIT {limit}
       """.stripMargin

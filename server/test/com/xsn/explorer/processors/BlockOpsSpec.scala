@@ -20,7 +20,7 @@ class BlockOpsSpec extends PostgresDataHandlerSpec with ScalaFutures with Before
   lazy val dataSeeder = new DatabasePostgresSeeder(
     database,
     new BlockPostgresDAO,
-    new TransactionPostgresDAO,
+    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   lazy val xsnService = new FileBasedXSNService

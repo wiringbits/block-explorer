@@ -13,6 +13,7 @@ import com.xsn.explorer.helpers.{BlockLoader, Executors, FileBasedXSNService}
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.models.{Blockhash, TransactionId}
+import com.xsn.explorer.parsers.TransactionOrderingParser
 import com.xsn.explorer.processors.BlockEventsProcessor._
 import com.xsn.explorer.services.{TransactionService, XSNService}
 import org.scalactic.{Bad, Good}
@@ -24,7 +25,9 @@ import scala.concurrent.Future
 class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures with BeforeAndAfter {
 
   lazy val dataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
-  lazy val transactionDataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO)
+  lazy val transactionDataHandler = new TransactionPostgresDataHandler(
+    database,
+    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
 
   lazy val xsnService = new FileBasedXSNService
   lazy val processor = blockEventsProcessor()
@@ -321,7 +324,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     val dataSeeder = new DatabasePostgresSeeder(
       database,
       new BlockPostgresDAO,
-      new TransactionPostgresDAO,
+      new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
       new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
     val blockOps = new BlockOps(
@@ -330,6 +333,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
     val transactionService = new TransactionService(
       new PaginatedQueryValidator,
+      new TransactionOrderingParser,
       xsn,
       new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC))(Executors.globalEC)
 
