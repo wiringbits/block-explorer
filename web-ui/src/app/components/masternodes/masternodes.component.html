@@ -1,45 +1,46 @@
 <div>
   <div class="row">
-    <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.masternodes' | translate}}</h2>
+    <h2 class="col-xs-12">{{'label.masternodes' | translate}}</h2>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-condensed table-bordered table-striped table-hover">
+      <thead>
+        <tr>
+          <th class="col-xs-1">#</th>
+          <th class="col-xs-1">{{'label.address' | translate}}</th>
+          <th class="col-xs-1">{{'label.protocol' | translate}}</th>
+          <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
+                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
+                 -->
+          <th class="col-xs-2 col-md-1">{{'label.active' | translate}}</th>
+          <th class="col-xs-3 col-md-2">{{'label.lastSeen' | translate}}</th>
+          <th class="col-xs-2 col-md-1">{{'label.payee' | translate}}</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'masternodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+          <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
+          <td>{{item.ip}}</td>
+          <td>{{item.protocol}}</td>
+          <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
+                <td>{{item.status}}</td>
+                -->
+          <td>{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
+          <td>{{item.lastSeen * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+          <td>
+            <a routerLink="/addresses/{{item.payee}}">{{item.payee}}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <thead>
-          <tr>
-            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">#</th>
-            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">{{'label.address' | translate}}</th>
-            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">{{'label.protocol' | translate}}</th>
-            <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
-             -->
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.active' | translate}}</th>
-            <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.lastSeen' | translate}}</th>
-            <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.payee' | translate}}</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'masternodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
-            <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
-            <td>{{item.ip}}</td>
-            <td>{{item.protocol}}</td>
-            <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
-            <td>{{item.status}}</td>
-            -->
-            <td>{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
-            <td>{{item.lastSeen * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
-            <td>
-              <a routerLink="/addresses/{{item.payee}}">{{item.payee}}</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="has-text-centered">
-        <pagination-controls (pageChange)="getPage($event)" id="masternodes"></pagination-controls>
-      </div>
+    <div class="col-xs-11 col-xs-offset-1 col-sm-5 col-sm-offset-4">
+      <pagination-controls (pageChange)="getPage($event)" id="masternodes" previousLabel="" nextLabel="">
+      </pagination-controls>
     </div>
   </div>
 </div>
