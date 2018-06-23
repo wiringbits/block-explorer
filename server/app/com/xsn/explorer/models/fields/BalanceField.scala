@@ -1,31 +1,26 @@
 package com.xsn.explorer.models.fields
 
 import com.xsn.explorer.data.anorm.interpreters.ColumnNameResolver
+import enumeratum._
 
-sealed abstract class BalanceField(val string: String)
+sealed abstract class BalanceField(override val entryName: String) extends EnumEntry
 
-object BalanceField {
+object BalanceField extends Enum[BalanceField] {
+
+  val values = findValues
 
   case object Available extends BalanceField("available")
   case object Received extends BalanceField("received")
   case object Spent extends BalanceField("spent")
   case object Address extends BalanceField("address")
 
-  def from(string: String): Option[BalanceField] = string match {
-    case Available.string => Some(Available)
-    case Received.string => Some(Received)
-    case Spent.string => Some(Spent)
-    case Address.string => Some(Address)
-    case _ => None
-  }
-
   implicit val columnNameResolver: ColumnNameResolver[BalanceField] = new ColumnNameResolver[BalanceField] {
 
-    override def getUniqueColumnName: String = Address.string
+    override def getUniqueColumnName: String = Address.entryName
 
     override def getColumnName(field: BalanceField): String = field match {
-      case Available => s"(${Received.string} - ${Spent.string})"
-      case f => f.string
+      case Available => s"(${Received.entryName} - ${Spent.entryName})"
+      case f => f.entryName
     }
   }
 }
