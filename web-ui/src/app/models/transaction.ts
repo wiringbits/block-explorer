@@ -8,6 +8,8 @@ export class Transaction {
   confirmations: number;
   input: TransactionValue[];
   output: TransactionValue[];
+  sent: number;
+  received: number;
 }
 
 class TransactionValue {

@@ -32,7 +32,7 @@
               </tr>
               <tr>
                 <td>{{'label.spent' | translate}}</td>
-                <td>{{getSent(address)}} {{'label.coinName' | translate}}</td>
+                <td>{{address.spent}} {{'label.coinName' | translate}}</td>
               </tr>
             </tbody>
           </table>
@@ -67,7 +67,7 @@
             </td>
             <td>{{item.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
             <td>{{item.received >= item.sent ? '+' : ''}}{{item.received - item.sent}} {{'label.coinName' | translate}}</td>
-            <td>{{item.size}}</td>
+            <td>{{item.size}} bytes</td>
           </tr>
         </tbody>
       </table>

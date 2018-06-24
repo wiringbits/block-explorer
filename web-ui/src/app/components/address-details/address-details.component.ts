@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -8,7 +8,6 @@ import { Transaction } from '../../models/transaction';
 
 import { AddressesService } from '../../services/addresses.service';
 import { ErrorService } from '../../services/error.service';
-import { NavigatorService } from '../../services/navigator.service';
 
 @Component({
   selector: 'app-address-details',
@@ -28,8 +27,6 @@ export class AddressDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private navigatorService: NavigatorService,
     private addressesService: AddressesService,
     private errorService: ErrorService) { }
 
@@ -60,9 +57,5 @@ export class AddressDetailsComponent implements OnInit {
 
   private onError(response: any) {
     this.errorService.renderServerErrors(null, response);
-  }
-
-  getSent(address: Balance): number {
-    return address.received - address.available;
   }
 }
