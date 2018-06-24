@@ -1,7 +1,7 @@
 package com.xsn.explorer.helpers
 
-import com.xsn.explorer.models.rpc.{AddressBalance, ScriptPubKey, TransactionVOUT}
-import com.xsn.explorer.models.{Address, AddressDetails, Blockhash, TransactionId}
+import com.xsn.explorer.models.rpc.{ScriptPubKey, TransactionVOUT}
+import com.xsn.explorer.models.{Address, Blockhash, TransactionId}
 
 object DataHelper {
 
@@ -24,9 +24,5 @@ object DataHelper {
 
   def createScriptPubKey(scriptType: String, asm: String, address: Option[Address] = None) = {
     ScriptPubKey(scriptType, asm, address.toList)
-  }
-
-  def createAddressDetails(balance: Int, received: Int, transactions: List[TransactionId]) = {
-    AddressDetails(AddressBalance(BigDecimal(balance), BigDecimal(received)), transactions)
   }
 }

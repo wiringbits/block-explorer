@@ -12,8 +12,8 @@ class AddressesController @Inject() (
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
-  def getDetails(address: String) = publicNoInput { _ =>
-    addressService.getDetails(address)
+  def getBy(address: String) = publicNoInput { _ =>
+    addressService.getBy(address)
   }
 
   def getTransactions(address: String, offset: Int, limit: Int, ordering: String) = publicNoInput { _ =>

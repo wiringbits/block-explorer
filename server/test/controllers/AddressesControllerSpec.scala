@@ -3,15 +3,13 @@ package controllers
 import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery, PaginatedResult}
-import com.xsn.explorer.data.TransactionBlockingDataHandler
-import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.helpers.{DataHelper, DummyXSNService}
+import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDataHandler}
+import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, DummyXSNService, TransactionDummyDataHandler}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import com.xsn.explorer.models.rpc.AddressBalance
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.{Good, One, Or}
+import org.scalactic.Good
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
@@ -22,15 +20,8 @@ class AddressesControllerSpec extends MyAPISpec {
 
   import DataHelper._
 
-  val addressEmpty = createAddressDetails(0, 0, List())
-  val addressFilled = createAddressDetails(
-    100,
-    200,
-    List(
-      createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"),
-      createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
-    )
-  )
+  val addressWithBalance = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+  val addressBalance = Balance(addressWithBalance, spent = 100, received = 200)
 
   val addressForUtxos = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
   val utxosResponse =
@@ -66,22 +57,6 @@ class AddressesControllerSpec extends MyAPISpec {
 
 
   val customXSNService = new DummyXSNService {
-    val map = Map(
-      "Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw" -> addressEmpty,
-      "XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp6" -> addressFilled
-    )
-
-    override def getAddressBalance(address: Address): FutureApplicationResult[AddressBalance] = {
-      val maybe = map.get(address.string).map(_.balance)
-      val result = Or.from(maybe, One(AddressFormatError))
-      Future.successful(result)
-    }
-
-    override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = {
-      val maybe = map.get(address.string).map(_.transactions)
-      val result = Or.from(maybe, One(AddressFormatError))
-      Future.successful(result)
-    }
 
     override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
       if (address == addressForUtxos) {
@@ -93,13 +68,7 @@ class AddressesControllerSpec extends MyAPISpec {
     }
   }
 
-  private val customTransactionDataHandler = new TransactionBlockingDataHandler {
-
-    override def upsert(transaction: Transaction): ApplicationResult[Transaction] = ???
-
-    override def delete(transactionId: TransactionId): ApplicationResult[Transaction] = ???
-
-    override def deleteBy(blockhash: Blockhash): ApplicationResult[List[Transaction]] = ???
+  private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
     override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
       if (address == addressForTransactions) {
@@ -110,27 +79,36 @@ class AddressesControllerSpec extends MyAPISpec {
     }
   }
 
+  private val customBalanceDataHandler = new BalanceDummyDataHandler {
+    override def getBy(address: Address): ApplicationResult[Balance] = {
+      if (address == addressWithBalance) {
+        Good(addressBalance)
+      } else {
+        Good(Balance(address))
+      }
+    }
+  }
+
   override val application = guiceApplicationBuilder
       .overrides(bind[XSNService].to(customXSNService))
       .overrides(bind[TransactionBlockingDataHandler].to(customTransactionDataHandler))
+      .overrides(bind[BalanceBlockingDataHandler].to(customBalanceDataHandler))
       .build()
 
   "GET /addresses/:address" should {
     def url(address: String) = s"/addresses/$address"
 
     "retrieve address information" in {
-      val address = addressFilled
-      val response = GET(url("XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp6"))
+      val address = addressWithBalance
+      val response = GET(url(address.string))
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
-      (json \ "balance").as[BigDecimal] mustEqual address.balance.balance
-      (json \ "received").as[BigDecimal] mustEqual address.balance.received
-      (json \ "transactions").as[List[String]].size mustEqual address.transactions.size
+      (json \ "spent").as[BigDecimal] mustEqual addressBalance.spent
+      (json \ "received").as[BigDecimal] mustEqual addressBalance.received
     }
 
     "fail on bad address format" in {
-
       val address = "XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp"
       val response = GET(url(address))
 

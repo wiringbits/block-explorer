@@ -9,7 +9,7 @@ GET   /transactions/:txid        controllers.TransactionsController.getTransacti
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
 POST  /transactions              controllers.TransactionsController.sendRawTransaction()
 
-GET   /addresses/:address                 controllers.AddressesController.getDetails(address: String)
+GET   /addresses/:address                 controllers.AddressesController.getBy(address: String)
 GET   /addresses/:address/transactions    controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /addresses/:address/utxos           controllers.AddressesController.getUnspentOutputs(address: String)
 

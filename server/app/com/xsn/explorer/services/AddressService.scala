@@ -4,21 +4,24 @@ import javax.inject.Inject
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.xsn.explorer.data.async.BalanceFutureDataHandler
 import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.models.{Address, AddressDetails}
+import com.xsn.explorer.models.{Address, Balance}
 import org.scalactic.{One, Or}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.ExecutionContext
 
-class AddressService @Inject() (xsnService: XSNService)(implicit ec: ExecutionContext) {
+class AddressService @Inject() (
+    xsnService: XSNService,
+    balanceFutureDataHandler: BalanceFutureDataHandler)(
+    implicit ec: ExecutionContext) {
 
-  def getDetails(addressString: String): FutureApplicationResult[AddressDetails] = {
+  def getBy(addressString: String): FutureApplicationResult[Balance] = {
     val result = for {
       address <- getAddress(addressString).toFutureOr
-      balance <- xsnService.getAddressBalance(address).toFutureOr
-      transactions <- xsnService.getTransactions(address).toFutureOr
-    } yield AddressDetails(balance, transactions)
+      balance <- balanceFutureDataHandler.getBy(address).toFutureOr
+    } yield balance
 
     result.toFuture
   }
