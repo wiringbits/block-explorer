@@ -4,57 +4,79 @@
   </div>
   <div *ngIf="address != null">
     <div class="row">
-      <h2 class="col-xs-12 col-sm-12 col-md-12 col-lg-12">{{'label.address' | translate}}</h2>
+      <h2 class="col-xs-12">{{'label.address' | translate}}</h2>
     </div>
     <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-        <table class="table table-condensed table-bordered table-striped table-hover">
-          <thead>
-            <tr>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.summary' | translate}}</th>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1"></th>
-            </tr>
-          </thead>
+      <div class="col-xs-12 col-md-4">
+        <div class="table-responsive">
+          <table class="table table-condensed table-bordered table-striped table-hover">
+            <thead>
+              <tr>
+                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.summary' | translate}}</th>
+                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1"></th>
+              </tr>
+            </thead>
 
-          <tbody>
-            <tr>
-              <td>{{'label.address' | translate}}</td>
-              <td>{{addressString}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.balance' | translate}}</td>
-              <td>{{address.balance}} {{'label.coinName' | translate}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.received' | translate}}</td>
-              <td>{{address.received}} {{'label.coinName' | translate}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.spent' | translate}}</td>
-              <td>{{getSent(address)}} {{'label.coinName' | translate}}</td>
-            </tr>
-          </tbody>
-        </table>
+            <tbody>
+              <tr>
+                <td>{{'label.address' | translate}}</td>
+                <td>{{addressString}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.balance' | translate}}</td>
+                <td>{{address.available}} {{'label.coinName' | translate}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.received' | translate}}</td>
+                <td>{{address.received}} {{'label.coinName' | translate}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.spent' | translate}}</td>
+                <td>{{getSent(address)}} {{'label.coinName' | translate}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-        <table class="table table-condensed table-bordered table-striped table-hover">
-          <thead>
-            <tr>
-              <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}} ({{address.transactions.length}})</th>
-            </tr>
-          </thead>
+      <h2 class="col-xs-12">{{'label.transactions' | translate}}</h2>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-condensed table-bordered table-striped table-hover">
+        <thead>
+          <tr>
+            <th class="col-xs-1">#</th>
+            <th class="col-xs-2">{{'label.transaction' | translate}}</th>
+            <th class="col-xs-2">{{'label.blockhash' | translate}}</th>
+            <th class="col-xs-2">{{'label.date' | translate}}</th>
+            <th class="col-xs-3">{{'label.value' | translate}}</th>
+            <th class="col-xs-2">{{'label.size' | translate}}</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            <tr *ngFor="let item of address.transactions">
-              <td>
-                <a routerLink="/transactions/{{item}}">{{item}}</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <tbody>
+          <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'transactions', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+            <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
+            <td>
+              <a routerLink="/transactions/{{item.id}}">{{item.id | slice:0:15}}...</a>
+            </td>
+            <td>
+              <a routerLink="/blocks/{{item.blockhash}}">{{item.blockhash | slice:0:15}}...</a>
+            </td>
+            <td>{{item.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>{{item.received >= item.sent ? '+' : ''}}{{item.received - item.sent}} {{'label.coinName' | translate}}</td>
+            <td>{{item.size}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-11 col-xs-offset-1 col-sm-5 col-sm-offset-4">
+        <pagination-controls (pageChange)="getPage($event)" id="transactions" previousLabel="" nextLabel="">
+        </pagination-controls>
       </div>
     </div>
   </div>

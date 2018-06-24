@@ -4,7 +4,9 @@ import { Observable } from 'rxjs/Observable';
 
 import { environment } from '../../environments/environment';
 
-import { Address } from '../models/address';
+import { Balance } from '../models/balance';
+import { PaginatedResult } from '../models/paginated-result';
+import { Transaction } from '../models/transaction';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,8 +19,13 @@ export class AddressesService {
 
   constructor(private http: HttpClient) { }
 
-  get(address: string): Observable<Address> {
+  get(address: string): Observable<Balance> {
     const url = `${this.baseUrl}/${address}`;
-    return this.http.get<Address>(url);
+    return this.http.get<Balance>(url);
+  }
+
+  getTransactions(address: string, offset: number = 0, limit: number = 10, orderBy: string = ''): Observable<PaginatedResult<Transaction>> {
+    const url = `${this.baseUrl}/${address}/transactions?offset=${offset}&limit=${limit}&orderBy=${orderBy}`;
+    return this.http.get<PaginatedResult<Transaction>>(url);
   }
 }

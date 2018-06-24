@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs/Observable';
 
-import { Address } from '../../models/address';
+import { Balance } from '../../models/balance';
+import { Transaction } from '../../models/transaction';
 
 import { AddressesService } from '../../services/addresses.service';
 import { ErrorService } from '../../services/error.service';
@@ -16,8 +17,14 @@ import { NavigatorService } from '../../services/navigator.service';
 })
 export class AddressDetailsComponent implements OnInit {
 
-  address: Address;
+  address: Balance;
   addressString: string;
+
+  // pagination
+  total = 0;
+  currentPage = 1;
+  pageSize = 10;
+  asyncItems: Observable<Transaction[]>;
 
   constructor(
     private route: ActivatedRoute,
@@ -32,17 +39,30 @@ export class AddressDetailsComponent implements OnInit {
       response => this.onAddressRetrieved(response),
       response => this.onError(response)
     );
+    this.getPage(this.currentPage);
   }
 
-  private onAddressRetrieved(response: Address) {
+  private onAddressRetrieved(response: Balance) {
     this.address = response;
+  }
+
+  getPage(page: number) {
+    const offset = (page - 1) * this.pageSize;
+    const limit = this.pageSize;
+    const order = 'time:desc';
+
+    this.asyncItems = this.addressesService
+      .getTransactions(this.addressString, offset, limit, order)
+      .do(response => this.total = response.total)
+      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
+      .map(response => response.data);
   }
 
   private onError(response: any) {
     this.errorService.renderServerErrors(null, response);
   }
 
-  getSent(address: Address): number {
-    return address.received - address.balance;
+  getSent(address: Balance): number {
+    return address.received - address.available;
   }
 }

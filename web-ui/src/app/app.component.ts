@@ -117,7 +117,8 @@ export class AppComponent {
       'label.payee': 'Payee',
       'label.active': 'Active',
       'label.details': 'Details',
-      'label.raw': 'Raw'
+      'label.raw': 'Raw',
+      'label.date': 'Date'
     };
   }
 }
