@@ -89,6 +89,25 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
+  "getBy address" should {
+    "return empty values for unknown address" in {
+      val address = DataHelper.createAddress("XxQ7j37LfuXGSld5DZAwFKhT3s2ZMkW85F")
+      val expected = Balance(address)
+
+      val result = dataHandler.getBy(address)
+      result mustEqual Good(expected)
+    }
+
+    "return the balance" in {
+      val address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAWfKhT3s2ZMkW85F")
+      val balance = Balance(address, 1000, 500)
+
+      dataHandler.upsert(balance).isGood mustEqual true
+      val result = dataHandler.getBy(address)
+      result mustEqual Good(balance)
+    }
+  }
+
   "getNonZeroBalances" should {
     val balances = List(
       Balance(

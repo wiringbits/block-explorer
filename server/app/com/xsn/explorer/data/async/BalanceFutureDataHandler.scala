@@ -6,8 +6,8 @@ import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResu
 import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.{BalanceBlockingDataHandler, BalanceDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.{Address, Balance}
 
 import scala.concurrent.Future
 
@@ -22,6 +22,10 @@ class BalanceFutureDataHandler @Inject() (
 
   override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] = Future {
     blockingDataHandler.get(query, ordering)
+  }
+
+  override def getBy(address: Address): FutureApplicationResult[Balance] = Future {
+    blockingDataHandler.getBy(address)
   }
 
   override def getNonZeroBalances(

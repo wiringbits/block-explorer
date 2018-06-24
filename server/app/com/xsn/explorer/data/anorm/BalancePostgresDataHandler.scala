@@ -7,8 +7,8 @@ import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedRe
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.{Address, Balance}
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 
@@ -33,6 +33,14 @@ class BalancePostgresDataHandler @Inject() (
     val result = PaginatedResult(query.offset, query.limit, total, balances)
 
     Good(result)
+  }
+
+  override def getBy(address: Address): ApplicationResult[Balance] = withConnection { implicit conn =>
+    val maybe = balancePostgresDAO.getBy(address)
+
+    // unknown addresses are the same as address with empty balances
+    val balance = maybe.getOrElse { Balance(address, 0, 0) }
+    Good(balance)
   }
 
   override def getNonZeroBalances(

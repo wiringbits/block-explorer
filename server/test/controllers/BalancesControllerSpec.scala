@@ -4,8 +4,8 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models._
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.helpers.DataHelper
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.{Address, Balance}
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
@@ -42,6 +42,8 @@ class BalancesControllerSpec extends MyAPISpec {
     override def upsert(balance: Balance): ApplicationResult[Balance] = ???
 
     override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = ???
+
+    override def getBy(address: Address): ApplicationResult[Balance] = ???
 
     override def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
       val filtered = balances.filter(_.available > 0)

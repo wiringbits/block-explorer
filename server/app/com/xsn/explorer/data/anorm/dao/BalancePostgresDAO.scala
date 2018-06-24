@@ -7,8 +7,8 @@ import anorm._
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.{Address, Balance}
 import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
@@ -98,6 +98,18 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     ).as(SqlParser.scalar[Int].single)
 
     Count(result)
+  }
+
+  def getBy(address: Address)(implicit conn: Connection): Option[Balance] = {
+    SQL(
+      s"""
+         |SELECT address, received, spent
+         |FROM balances
+         |wHERE address = {address}
+      """.stripMargin
+    ).on(
+      'address -> address.string
+    ).as(parseBalance.singleOpt).flatten
   }
 
   def countNonZeroBalances(implicit conn: Connection): Count = {
