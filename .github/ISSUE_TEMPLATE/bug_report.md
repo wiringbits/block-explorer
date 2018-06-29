@@ -1,3 +1,9 @@
+---
+name: Bug report
+about: Create a report to help us improve the project
+
+---
+
 One line summary of the issue here.
 
 ### Expected behavior
