@@ -35,15 +35,15 @@ class BlockOpsSpec extends PostgresDataHandlerSpec with ScalaFutures with Before
 
   "createBlock" should {
     "create a new block" in {
-      whenReady(blockOps.createBlock(block1, List.empty)) { result =>
+      whenReady(blockOps.createBlock(block1.copy(previousBlockhash = None), List.empty)) { result =>
         result mustEqual Good(BlockOps.Result.BlockCreated)
       }
     }
 
     "replace a block if the height already exist" in {
-      whenReady(blockOps.createBlock(block1, List.empty)) { _.isGood mustEqual true }
+      whenReady(blockOps.createBlock(block1.copy(previousBlockhash = None), List.empty)) { _.isGood mustEqual true }
 
-      whenReady(blockOps.createBlock(block2.copy(height = block1.height), List.empty)) { result =>
+      whenReady(blockOps.createBlock(block2.copy(height = block1.height, previousBlockhash = None), List.empty)) { result =>
         result mustEqual Good(BlockOps.Result.BlockReplacedByHeight)
       }
     }

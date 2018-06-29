@@ -1,20 +1,42 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.models._
-import com.xsn.explorer.data.anorm.TransactionPostgresDataHandler
-import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
+import com.xsn.explorer.data.anorm.dao.{BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
+import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.DataHelper._
+import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import com.xsn.explorer.models.{Size, Transaction, TransactionWithValues}
+import com.xsn.explorer.models.rpc.Block
 import org.scalactic.{Bad, Good}
+import org.scalatest.BeforeAndAfter
 
-class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
+class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
   val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
+
+  val block = Block(
+    hash = createBlockhash("ad92f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+    previousBlockhash = None,
+    nextBlockhash = None,
+    merkleRoot = createBlockhash("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+    transactions = List.empty,
+    confirmations = Confirmations(0),
+    size = Size(10),
+    height = Height(0),
+    version = 0,
+    time = 0,
+    medianTime = 0,
+    nonce = 0,
+    bits = "abcdef",
+    chainwork = "abcdef",
+    difficulty = 12.2,
+    tposContract = None
+  )
 
   val inputs = List(
     Transaction.Input(0, None, None),
@@ -33,11 +55,15 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   val transaction = Transaction(
     createTransactionId("99c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
-    createBlockhash("ad92f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+    block.hash,
     12312312L,
     Size(1000),
     inputs,
     outputs)
+
+  before {
+    blockDataHandler.insert(block)
+  }
 
   "upsert" should {
     "add a new transaction" in {
@@ -47,7 +73,6 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     "update an existing transaction" in {
       val newTransaction = transaction.copy(
-        blockhash = createBlockhash("99c51e4fe89466faa734d6207a7ef6115fa1dd32f7156b006fafc6bb85a79eb8"),
         time = 2313121L,
         size = Size(2000))
 
@@ -76,6 +101,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       dataHandler.upsert(transaction).isGood mustEqual true
 
       val result = dataHandler.deleteBy(transaction.blockhash)
+      println(result)
       result.isGood mustEqual true
       result.get mustEqual List(transaction)
     }
@@ -100,7 +126,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     val transaction = Transaction(
       createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
-      createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+      block.hash,
       12312312L,
       Size(1000),
       inputs,

@@ -22,6 +22,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     "add a new block" in {
       // PoS block
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+          .copy(previousBlockhash = None)
 
       val result = dataHandler.insert(block)
       result.isGood mustEqual true
@@ -30,6 +31,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
     "fail on existing blockhash" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+          .copy(previousBlockhash = None)
       dataHandler.insert(block).isGood mustEqual true
 
       val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
@@ -40,6 +42,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
     "fail on existing height" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+          .copy(previousBlockhash = None)
       dataHandler.insert(block).isGood mustEqual true
 
       val newBlock = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
@@ -52,6 +55,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
   "getBy blockhash" should {
     "return a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+          .copy(previousBlockhash = None)
 
       dataHandler.insert(block)
 
@@ -71,8 +75,9 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
   "getBy height" should {
     "return a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+          .copy(previousBlockhash = None)
 
-      dataHandler.insert(block)
+      dataHandler.insert(block).isGood mustEqual true
 
       val result = dataHandler.getBy(block.height)
       result.isGood mustEqual true
@@ -90,7 +95,8 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
   "delete" should {
     "delete a block" in {
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-      dataHandler.insert(block)
+          .copy(previousBlockhash = None)
+      dataHandler.insert(block).isGood mustEqual true
 
       val result = dataHandler.delete(block.hash)
       result.isGood mustEqual true
@@ -110,10 +116,11 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       clearDatabase()
 
       val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+          .copy(previousBlockhash = None)
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
 
-      List(block1, block2, block0).foreach(dataHandler.insert)
+      List(block0, block1, block2).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       val result = dataHandler.getLatestBlock()
       result.isGood mustEqual true
@@ -133,10 +140,11 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       clearDatabase()
 
       val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+          .copy(previousBlockhash = None)
       val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
       val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
 
-      List(block1, block2, block0).map(dataHandler.insert).foreach(_.isGood mustEqual true)
+      List(block0, block1, block2).map(dataHandler.insert).foreach(_.isGood mustEqual true)
 
       val result = dataHandler.getFirstBlock()
       result.isGood mustEqual true

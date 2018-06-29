@@ -49,7 +49,24 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
    * NOTE: Ensure the connection has an open transaction.
    */
   def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Transaction] = {
-    val transactions = SQL(
+    val expectedTransactions = SQL(
+      """
+        |SELECT txid, blockhash, time, size
+        |FROM transactions
+        |WHERE blockhash = {blockhash}
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string
+    ).as(parseTransaction.*).flatten
+
+    val result = expectedTransactions.map { tx =>
+      val inputs = deleteInputs(tx.id)
+      val outputs = deleteOutputs(tx.id)
+
+      tx.copy(inputs = inputs, outputs = outputs)
+    }
+
+    val deletedTransactions = SQL(
       """
         |DELETE FROM transactions
         |WHERE blockhash = {blockhash}
@@ -59,12 +76,10 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       'blockhash -> blockhash.string
     ).as(parseTransaction.*).flatten
 
-    transactions.map { tx =>
-      val inputs = deleteInputs(tx.id)
-      val outputs = deleteOutputs(tx.id)
-
-      tx.copy(inputs = inputs, outputs = outputs)
-    }
+    Option(deletedTransactions)
+        .filter(_.size == expectedTransactions.size)
+        .map(_ => result)
+        .getOrElse { throw new RuntimeException("Failed to delete transactions consistently")} // this should not happen
   }
 
   def getBy(
