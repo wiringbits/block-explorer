@@ -47,11 +47,26 @@ trait XSNService {
   def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit]
 }
 
+object XSNService {
+
+  val GenesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+
+  def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
+    // the genesis transaction is not available, see https://github.com/X9Developers/XSN/issues/32
+    Option(block)
+        .filter(_.hash == GenesisBlockhash)
+        .map(_.copy(transactions = List.empty))
+        .getOrElse(block)
+  }
+}
+
 class XSNServiceRPCImpl @Inject() (
     ws: WSClient,
     rpcConfig: RPCConfig)(
     implicit ec: ExternalServiceExecutionContext)
     extends XSNService {
+
+  import XSNService._
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -155,7 +170,12 @@ class XSNServiceRPCImpl @Inject() (
         .map { response =>
 
           val maybe = getResult[rpc.Block](response, errorCodeMapper)
-          maybe.getOrElse {
+          maybe
+              .map {
+                case Good(block) => Good(cleanGenesisBlock(block))
+                case x => x
+              }
+              .getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
@@ -219,7 +239,12 @@ class XSNServiceRPCImpl @Inject() (
                 .getOrElse(Bad(XSNUnexpectedResponseError).accumulating)
                 .toFutureOr
 
-            block <- getBlock(blockhash).toFutureOr
+            block <- getBlock(blockhash).
+                map {
+                  case Good(block) => Good(cleanGenesisBlock(block))
+                  case x => x
+                }
+                .toFutureOr
           } yield block
 
           result.toFuture

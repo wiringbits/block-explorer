@@ -3,6 +3,7 @@ package com.xsn.explorer.helpers
 import java.io.File
 
 import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.services.XSNService
 import play.api.libs.json.{JsValue, Json}
 
 object BlockLoader {
@@ -10,7 +11,8 @@ object BlockLoader {
   private val BasePath = "blocks"
 
   def get(blockhash: String): Block = {
-    json(blockhash).as[Block]
+    val block = json(blockhash).as[Block]
+    XSNService.cleanGenesisBlock(block)
   }
 
   def json(blockhash: String): JsValue = {
