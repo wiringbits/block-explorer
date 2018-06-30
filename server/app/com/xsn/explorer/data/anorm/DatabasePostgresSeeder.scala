@@ -81,12 +81,11 @@ class DatabasePostgresSeeder @Inject() (
   }
 
   private def deleteBlockCascade(block: Block)(implicit conn: Connection): Option[Unit] = {
+    // transactions
+    val deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
     for {
       // block
       _ <- blockPostgresDAO.delete(block.hash)
-
-      // transactions
-      deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
 
       // balances
       _ <- balances(deletedTransactions)

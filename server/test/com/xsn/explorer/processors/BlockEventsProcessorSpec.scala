@@ -30,99 +30,86 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
 
   lazy val xsnService = new FileBasedXSNService
-  lazy val processor = blockEventsProcessor()
+  lazy val processor = blockEventsProcessor(xsnService)
+
+  val blockList = List(
+    BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),
+    BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7"),
+    BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8"),
+    BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+  )
 
   before {
     clearDatabase()
   }
 
   "newLatestBlock" should {
-    "fail on genesis block due to the missing transaction" in {
-      // see https://github.com/X9Developers/XSN/issues/32
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
-
-      whenReady(processor.processBlock(block0.hash)) { result =>
-        result mustEqual Good(MissingBlockIgnored)
-      }
-    }
-
-    "process first block" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-
-      whenReady(processor.processBlock(block1.hash)) { result =>
-        result.isGood mustEqual true
+    "process genesis block" in {
+      val block = blockList.head
+      whenReady(processor.processBlock(block.hash)) { result =>
+        result mustEqual Good(FirstBlockCreated(block))
       }
     }
 
     "process a new block" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
 
-      List(block1, block2).map(dataHandler.insert).foreach(_.isGood mustEqual true)
+      createBlocks(processor, block0, block1)
 
-      whenReady(processor.processBlock(block3.hash)) { result =>
-        result mustEqual Good(NewBlockAppended(block3))
-        val blocks = List(block1, block2, block3)
+      whenReady(processor.processBlock(block2.hash)) { result =>
+        result mustEqual Good(NewBlockAppended(block2))
+        val blocks = List(block0, block1, block2)
         verifyBlockchain(blocks)
       }
     }
 
     "process a rechain" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
 
-      List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
+      createBlocks(processor, block0, block1, block2)
 
-      whenReady(processor.processBlock(block2.hash)) {
+      whenReady(processor.processBlock(block1.hash)) {
         case Good(RechainDone(orphanBlock, newBlock)) =>
-          orphanBlock.hash mustEqual block3.hash
-          newBlock.hash mustEqual block2.hash
+          orphanBlock.hash mustEqual block2.hash
+          newBlock.hash mustEqual block1.hash
 
-          val blocks = List(block1, block2)
+          val blocks = List(block0, block1)
           verifyBlockchain(blocks)
 
-        case _ => fail()
+        case e => fail()
       }
     }
 
-    "process a missing block" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+    "process a repeated block without affecting the balances" in {
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
 
-      List(block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
+      createBlocks(processor, block0, block1, block2)
 
-      whenReady(processor.processBlock(block1.hash)) { result =>
+      val statsDataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
+      val expectedStats = statsDataHandler.getStatistics().get
+
+      whenReady(processor.processBlock(block0.hash)) { result =>
         result.isGood mustEqual true
-        val blocks = List(block1, block2, block3)
-        verifyBlockchain(blocks)
-      }
-    }
-
-    "processing a repeated missing block doesn't affect the balance" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
-
-      List(block1, block2, block3).map(dataHandler.insert).foreach(_.isGood mustEqual true)
-
-      whenReady(processor.processBlock(block1.hash)) { result =>
-        result.isGood mustEqual true
-        val blocks = List(block1, block2, block3)
+        val blocks = List(block0, block1, block2)
         verifyBlockchain(blocks)
 
-        val statsDataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
         val stats = statsDataHandler.getStatistics().get
-        stats.totalSupply.isEmpty mustEqual true
-        stats.circulatingSupply.isEmpty mustEqual true
+        stats.totalSupply mustEqual expectedStats.totalSupply
+        stats.circulatingSupply mustEqual expectedStats.circulatingSupply
       }
     }
 
     "process a block without spent index on transactions" in {
       val block = BlockLoader.get("000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924")
+          .copy(previousBlockhash = None)
 
+      val processor = blockEventsProcessor(block)
       whenReady(processor.processBlock(block.hash)) { result =>
         result.isGood mustEqual true
 
@@ -140,17 +127,15 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     }
 
     "process a rechain without corrupting the balances table" in {
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
 
-      List(block1, block2)
-          .map(_.hash)
-          .map(processor.processBlock)
-          .foreach { whenReady(_) { _.isGood mustEqual true } }
+      createBlocks(processor, block0, block1, block2)
 
       whenReady(processor.processBlock(block1.hash)) { result =>
         result.isGood mustEqual true
-        val blocks = List(block1)
+        val blocks = List(block0, block1)
         verifyBlockchain(blocks)
 
         val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
@@ -169,12 +154,12 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       }
     }
 
-    // TODO: failed once on travis, might not be stable
     "ignore orphan block on rare rechain events when the rpc server doesn't have the block anymore" in {
       // see https://github.com/X9Developers/block-explorer/issues/6
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
+      val block3 = blockList(3)
 
       val xsnService = new FileBasedXSNService {
         override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
@@ -187,11 +172,8 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
       }
 
       val processor = blockEventsProcessor(xsn = xsnService)
-      
-      List(block1, block2)
-          .map(_.hash)
-          .map(processor.processBlock)
-          .foreach { whenReady(_) { _.isGood mustEqual true } }
+
+      createBlocks(processor, block0, block1, block2)
 
       /**
        * When processing the latest block, a rechain event has occurred in the rpc server which leads to
@@ -199,16 +181,17 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
        */
       whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(MissingBlockIgnored)
-        val blocks = List(block1, block2)
+        val blocks = List(block0, block1, block2)
         verifyBlockchain(blocks)
       }
     }
 
     "ignore orphan block on rare rechain events when the rpc server doesn't have the a transaction from the block anymore" in {
       // see https://github.com/X9Developers/block-explorer/issues/6
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
+      val block3 = blockList(3)
 
       val xsnService = new FileBasedXSNService {
         override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
@@ -222,10 +205,7 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
       val processor = blockEventsProcessor(xsn = xsnService)
 
-      List(block1, block2)
-          .map(_.hash)
-          .map(processor.processBlock)
-          .foreach { whenReady(_) { _.isGood mustEqual true } }
+      createBlocks(processor, block0, block1, block2)
 
       /**
        * When processing the latest block, a rechain event has occurred in the rpc server which leads to
@@ -233,39 +213,27 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
        */
       whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(MissingBlockIgnored)
-        val blocks = List(block1, block2)
+        val blocks = List(block0, block1, block2)
         verifyBlockchain(blocks)
       }
     }
 
     "remove orphan block on rare rechain events when the block height already exists" in {
       // see https://github.com/X9Developers/block-explorer/issues/6
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
+      val block3 = blockList(3)
           .copy(height = block2.height)
           .copy(previousBlockhash = block2.previousBlockhash)
 
-      val xsnService = new FileBasedXSNService {
-        override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
-          if (blockhash == block3.hash) {
-            Future.successful(Good(block3))
-          } else {
-            super.getBlock(blockhash)
-          }
-        }
-      }
+      val processor = blockEventsProcessor(block3)
 
-      val processor = blockEventsProcessor(xsn = xsnService)
-
-      List(block1, block2)
-          .map(_.hash)
-          .map(processor.processBlock)
-          .foreach { whenReady(_) { _.isGood mustEqual true } }
+      createBlocks(processor, block0, block1, block2)
 
       whenReady(processor.processBlock(block3.hash)) { result =>
         result mustEqual Good(ReplacedByBlockHeight(block3))
-        val blocks = List(block1.copy(nextBlockhash = Some(block3.hash)), block3)
+        val blocks = List(block0, block1.copy(nextBlockhash = Some(block3.hash)), block3)
         verifyBlockchain(blocks)
 
         // ensure block2 has been removed
@@ -275,31 +243,19 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
 
     "keep the correct previous_blockhash on rare events" in {
       // see https://github.com/X9Developers/block-explorer/issues/12
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val block3 = BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd")
-      val rareBlock3 = block3.copy(previousBlockhash = Some(block1.hash))
+      val block0 = blockList(0)
+      val block1 = blockList(1)
+      val block2 = blockList(2)
+      val block3 = blockList(3)
+      val rareBlock3 = block3.copy(previousBlockhash = block2.previousBlockhash)
 
-      val xsnService = new FileBasedXSNService {
-        override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
-          if (blockhash == block3.hash) {
-            Future.successful(Good(rareBlock3))
-          } else {
-            super.getBlock(blockhash)
-          }
-        }
-      }
+      val processor = blockEventsProcessor(rareBlock3)
 
-      val processor = blockEventsProcessor(xsn = xsnService)
-
-      List(block1, rareBlock3)
-          .map(_.hash)
-          .map(processor.processBlock)
-          .foreach { whenReady(_) { _.isGood mustEqual true } }
+      createBlocks(processor, block0, block1, rareBlock3)
 
       whenReady(processor.processBlock(block2.hash)) { result =>
         result mustEqual Good(MissingBlockProcessed(block2))
-        val blocks = List(block1, block2, block3)
+        val blocks = List(block0, block1, block2, block3)
         verifyBlockchain(blocks)
       }
     }
@@ -320,7 +276,30 @@ class BlockEventsProcessorSpec extends PostgresDataHandlerSpec with ScalaFutures
     }
   }
 
-  private def blockEventsProcessor(xsn: XSNService = xsnService) = {
+  private def createBlocks(processor: BlockEventsProcessor, blocks: Block*) = {
+    blocks
+        .map(_.hash)
+        .foreach { block =>
+          whenReady(processor.processBlock(block)) { result =>
+            result.isGood mustEqual true
+          }
+        }
+  }
+
+  private def blockEventsProcessor(blocks: Block*): BlockEventsProcessor = {
+    val xsn = new FileBasedXSNService {
+      override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+        blocks
+            .find(_.hash == blockhash)
+            .map { block => Future.successful(Good(block)) }
+            .getOrElse(super.getBlock(blockhash))
+      }
+    }
+
+    blockEventsProcessor(xsn)
+  }
+
+  private def blockEventsProcessor(xsn: XSNService): BlockEventsProcessor = {
     val dataSeeder = new DatabasePostgresSeeder(
       database,
       new BlockPostgresDAO,
