@@ -2,8 +2,8 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
-import com.xsn.explorer.models.{Blockhash, TransactionId}
 import com.xsn.explorer.models.rpc.{Block, Transaction}
+import com.xsn.explorer.models.{Blockhash, TransactionId}
 import org.scalactic.{Good, One, Or}
 
 import scala.concurrent.Future

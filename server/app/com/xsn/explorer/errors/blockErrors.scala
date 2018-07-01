@@ -27,13 +27,3 @@ case object BlockUnknownError extends BlockError with ServerError {
   override def cause: Option[Throwable] = None
   override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
 }
-
-case object RepeatedBlockhashError extends BlockError with ServerError {
-  override def cause: Option[Throwable] = None
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
-}
-
-case object RepeatedBlockHeightError extends BlockError with ServerError {
-  override def cause: Option[Throwable] = None
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
-}
