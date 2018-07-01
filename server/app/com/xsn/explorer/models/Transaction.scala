@@ -22,6 +22,12 @@ object Transaction {
       tposOwnerAddress: Option[Address],
       tposMerchantAddress: Option[Address])
 
+  /**
+   * Please note that the inputs might not be accurate.
+   *
+   * If the rpc transaction might not be complete, get the input value and address using
+   * the utxo index or the getTransaction method from the TransactionService..
+   */
   def fromRPC(tx: rpc.Transaction): Transaction = {
     val inputs = tx.vin.zipWithIndex.map { case (vin, index) =>
       Transaction.Input(index, vin.value, vin.address)
