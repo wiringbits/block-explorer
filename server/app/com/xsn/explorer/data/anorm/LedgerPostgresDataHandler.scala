@@ -108,12 +108,7 @@ class LedgerPostgresDataHandler @Inject() (
     transactions
         .map(_.inputs)
         .flatMap { inputs =>
-          inputs.flatMap { input =>
-            for {
-              address <- input.address
-              value <- input.value
-            } yield address -> value
-          }
+          inputs.map { input => input.address -> input.value }
         }
         .groupBy(_._1)
         .mapValues { list => list.map(_._2).sum }

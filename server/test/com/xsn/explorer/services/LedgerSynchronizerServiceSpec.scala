@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
+import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -167,21 +167,6 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       whenReady(synchronizer.synchronize(newBlock2.hash)) { result =>
         result mustEqual Good(())
         verifyLedger(finalBlocks: _*)
-      }
-    }
-
-    "process a block without spent index on transactions" in {
-      val block = BlockLoader.get("000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924")
-          .copy(previousBlockhash = None, height = Height(0))
-
-      val synchronizer = ledgerSynchronizerService(block)
-      whenReady(synchronizer.synchronize(block.hash)) { result =>
-        result.isGood mustEqual true
-
-        val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
-        val balance = balanceDataHandler.getBy(DataHelper.createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"))
-
-        balance.get.spent mustEqual BigDecimal("76500000.000000000000000")
       }
     }
   }

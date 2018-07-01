@@ -2,19 +2,22 @@ package com.xsn.explorer.data.anorm.parsers
 
 import anorm.SqlParser.{get, str}
 import anorm.~
-import com.xsn.explorer.models.{Address, Transaction, TransactionId, TransactionWithValues}
+import com.xsn.explorer.models._
 
 object TransactionParsers {
 
   import CommonParsers._
 
   val parseTransactionId = str("txid").map(TransactionId.from)
+  val parseFromTxid = str("from_txid").map(TransactionId.from)
+  val parseFromOutputIndex = get[Int]("from_output_index")
   val parseReceived = get[BigDecimal]("received")
   val parseSpent = get[BigDecimal]("spent")
   val parseSent = get[BigDecimal]("sent")
 
   val parseIndex = get[Int]("index")
   val parseValue = get[BigDecimal]("value")
+  val parseHexString = get[String]("hex_script").map(HexString.from)
 
   val parseTposOwnerAddress = str("tpos_owner_address").map(Address.from)
   val parseTposMerchantAddress = str("tpos_merchant_address").map(Address.from)
@@ -42,19 +45,24 @@ object TransactionParsers {
       } yield TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
-  val parseTransactionInput = (parseIndex ~ parseValue.? ~ parseAddress.?).map { case index ~ value ~ address =>
-    Transaction.Input(index, value, address.flatten)
-  }
+  val parseTransactionInput = (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddress)
+      .map { case fromTxidMaybe ~ fromOutputIndex ~ index ~ value ~ addressMaybe =>
+        for {
+          from <- fromTxidMaybe
+          address <- addressMaybe
+        } yield Transaction.Input(from, fromOutputIndex, index, value, address)
+      }
 
   val parseTransactionOutput = (
       parseIndex ~
           parseValue ~
           parseAddress ~
+          parseHexString ~
           parseTposOwnerAddress.? ~
           parseTposMerchantAddress.?).map {
 
-    case index ~ value ~ addressMaybe ~ tposOwnerAddress ~ tposMerchantAddress =>
-      for (address <- addressMaybe)
-        yield Transaction.Output(index, value, address, tposOwnerAddress.flatten, tposMerchantAddress.flatten)
+    case index ~ value ~ addressMaybe ~ scriptMaybe ~ tposOwnerAddress ~ tposMerchantAddress =>
+      for (address <- addressMaybe; script <- scriptMaybe)
+        yield Transaction.Output(index, value, address, script, tposOwnerAddress.flatten, tposMerchantAddress.flatten)
   }
 }

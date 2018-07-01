@@ -14,6 +14,10 @@ object Extensions {
     def fromSatoshis: BigDecimal = {
       inner / SatoshiScale
     }
+
+    def toSatoshis: BigInt = {
+      (inner * SatoshiScale).toBigInt()
+    }
   }
 
   implicit class ListOptionExt[+A](val inner: List[Option[A]]) extends AnyVal {

@@ -1,12 +1,13 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.{Address, HexString}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Reads, __}
 
 case class ScriptPubKey(
     `type`: String,
     asm: String,
+    hex: HexString,
     addresses: List[Address]) {
 
   /**
@@ -27,7 +28,7 @@ case class ScriptPubKey(
         .filter(_.size >= 4) // relax size check
         .map(_.toList)
         .flatMap {
-          case op :: owner :: merchant :: commission if op == "OP_RETURN" =>
+          case op :: owner :: merchant :: _ if op == "OP_RETURN" =>
             for {
               ownerAddress <- Address.fromHex(owner)
               merchantAddress <- Address.fromHex(merchant)
@@ -40,13 +41,16 @@ case class ScriptPubKey(
 
 object ScriptPubKey {
 
-  implicit val reads: Reads[ScriptPubKey] = {
+  implicit val reads: Reads[Option[ScriptPubKey]] = {
     val builder = (__ \ 'type).read[String] and
         (__ \ 'asm).read[String] and
+        (__ \ 'hex).read[String].map(HexString.from) and
         (__ \ 'addresses).readNullable[List[Address]].map(_ getOrElse List.empty)
 
-    builder.apply { (t, asm, addresses) =>
-      ScriptPubKey(t, asm, addresses)
+    builder.apply { (t, asm, hexString, addresses) =>
+      for {
+        hex <- hexString
+      } yield ScriptPubKey(t, asm = asm, hex = hex, addresses = addresses)
     }
   }
 }

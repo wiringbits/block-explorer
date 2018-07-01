@@ -17,7 +17,7 @@ object TransactionVOUT {
   implicit val reads: Reads[TransactionVOUT] = {
     val builder = (__ \ 'value).read[BigDecimal] and
         (__ \ 'n).read[Int] and
-        (__ \ 'scriptPubKey).readNullable[ScriptPubKey]
+        (__ \ 'scriptPubKey).read[Option[ScriptPubKey]]
 
     builder.apply { (value, n, script) =>
       TransactionVOUT(value, n, script)

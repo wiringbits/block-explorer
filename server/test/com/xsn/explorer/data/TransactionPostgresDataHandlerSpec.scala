@@ -38,17 +38,26 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     tposContract = None
   )
 
+  val dummyTransaction = Transaction(
+    createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+    block.hash,
+    12312312L,
+    Size(1000),
+    List.empty,
+    List.empty
+  )
+
   val inputs = List(
-    Transaction.Input(0, None, None),
-    Transaction.Input(1, Some(BigDecimal(100)), Some(createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F")))
+    Transaction.Input(dummyTransaction.id, 0, 1, BigDecimal(100), createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"))
   )
 
   val outputs = List(
-    Transaction.Output(0, BigDecimal(50), createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"), None, None),
+    Transaction.Output(0, BigDecimal(50), createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"), HexString.from("00").get, None, None),
     Transaction.Output(
       1,
       BigDecimal(150),
       createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+      HexString.from("00").get,
       Some(createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")),
       Some(createAddress("XjfNeGJhLgW3egmsZqdbpCNGfysPs7jTNm")))
   )
@@ -61,7 +70,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     inputs,
     outputs)
 
-  before {
+  private def prepareBlock(block: Block) = {
     val dao = new BlockPostgresDAO
     try {
       database.withConnection { implicit conn =>
@@ -71,6 +80,20 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     } catch {
       case _ => ()
     }
+  }
+
+  private def prepareTransaction(transaction: Transaction) = {
+    try {
+      dataHandler.upsert(transaction)
+    } catch {
+      case _ => ()
+    }
+  }
+
+  before {
+    clearDatabase()
+    prepareBlock(block)
+    prepareTransaction(dummyTransaction)
   }
 
   "upsert" should {
@@ -109,26 +132,25 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       dataHandler.upsert(transaction).isGood mustEqual true
 
       val result = dataHandler.deleteBy(transaction.blockhash)
-      println(result)
       result.isGood mustEqual true
-      result.get mustEqual List(transaction)
+      result.get.contains(transaction) mustEqual true
     }
   }
 
   "getBy address" should {
     val address = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
     val inputs = List(
-      Transaction.Input(0, None, None),
-      Transaction.Input(1, Some(BigDecimal(100)), Some(address)),
-      Transaction.Input(2, Some(BigDecimal(200)), Some(createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F")))
+      Transaction.Input(dummyTransaction.id, 0, 1, 100, address),
+      Transaction.Input(dummyTransaction.id, 0, 2, 200, createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F"))
     )
 
     val outputs = List(
-      Transaction.Output(0, BigDecimal(50), address, None, None),
+      Transaction.Output(0, BigDecimal(50), address, HexString.from("00").get, None, None),
       Transaction.Output(
         1,
         BigDecimal(250),
         createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        HexString.from("00").get,
         None, None)
     )
 

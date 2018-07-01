@@ -188,20 +188,24 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     SQL(
       """
         |INSERT INTO transaction_inputs
-        |  (txid, index, value, address)
+        |  (txid, index, from_txid, from_output_index, value, address)
         |VALUES
-        |  ({txid}, {index}, {value}, {address})
+        |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {address})
         |ON CONFLICT (txid, index) DO UPDATE
         |  SET value = EXCLUDED.value,
-        |      address = EXCLUDED.address
-        |RETURNING index, value, address
+        |      address = EXCLUDED.address,
+        |      from_txid = EXCLUDED.from_txid,
+        |      from_output_index = EXCLUDED.from_output_index
+        |RETURNING txid, index, from_txid, from_output_index, value, address
       """.stripMargin
     ).on(
       'txid -> transactionId.string,
       'index -> input.index,
+      'from_txid -> input.fromTxid.string,
+      'from_output_index -> input.fromOutputIndex,
       'value -> input.value,
-      'address -> input.address.map(_.string)
-    ).as(parseTransactionInput.singleOpt)
+      'address -> input.address.string
+    ).as(parseTransactionInput.singleOpt).flatten
   }
 
   private def upsertOutputs(
@@ -228,21 +232,23 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     SQL(
       """
         |INSERT INTO transaction_outputs
-        |  (txid, index, value, address, tpos_owner_address, tpos_merchant_address)
+        |  (txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address)
         |VALUES
-        |  ({txid}, {index}, {value}, {address}, {tpos_owner_address}, {tpos_merchant_address})
+        |  ({txid}, {index}, {value}, {address}, {hex_script}, {tpos_owner_address}, {tpos_merchant_address})
         |ON CONFLICT (txid, index) DO UPDATE
         |  SET value = EXCLUDED.value,
         |      address = EXCLUDED.address,
+        |      hex_script = EXCLUDED.hex_script,
         |      tpos_owner_address = EXCLUDED.tpos_owner_address,
         |      tpos_merchant_address = EXCLUDED.tpos_merchant_address
-        |RETURNING index, value, address, tpos_owner_address, tpos_merchant_address
+        |RETURNING txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address
       """.stripMargin
     ).on(
       'txid -> transactionId.string,
       'index -> output.index,
       'value -> output.value,
       'address -> output.address.string,
+      'hex_script -> output.script.string,
       'tpos_owner_address -> output.tposOwnerAddress.map(_.string),
       'tpos_merchant_address -> output.tposMerchantAddress.map(_.string)
     ).as(parseTransactionOutput.singleOpt).flatten
@@ -253,11 +259,11 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       """
         |DELETE FROM transaction_inputs
         |WHERE txid = {txid}
-        |RETURNING index, value, address
+        |RETURNING txid, index, from_txid, from_output_index, value, address
       """.stripMargin
     ).on(
       'txid -> txid.string
-    ).as(parseTransactionInput.*)
+    ).as(parseTransactionInput.*).flatten
   }
 
   private def deleteOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
@@ -265,7 +271,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       """
         |DELETE FROM transaction_outputs
         |WHERE txid = {txid}
-        |RETURNING index, value, address, tpos_owner_address, tpos_merchant_address
+        |RETURNING txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
       """.stripMargin
     ).on(
       'txid -> txid.string

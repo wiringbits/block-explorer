@@ -10,15 +10,21 @@ case class Transaction(
 
 object Transaction {
 
+  /**
+   * The coins where generated on the given output index of the given txid (from).
+   */
   case class Input(
+      fromTxid: TransactionId,
+      fromOutputIndex: Int,
       index: Int,
-      value: Option[BigDecimal],
-      address: Option[Address])
+      value: BigDecimal,
+      address: Address)
 
   case class Output(
       index: Int,
       value: BigDecimal,
       address: Address,
+      script: HexString,
       tposOwnerAddress: Option[Address],
       tposMerchantAddress: Option[Address])
 
@@ -29,15 +35,20 @@ object Transaction {
    * the utxo index or the getTransaction method from the TransactionService..
    */
   def fromRPC(tx: rpc.Transaction): Transaction = {
-    val inputs = tx.vin.zipWithIndex.map { case (vin, index) =>
-      Transaction.Input(index, vin.value, vin.address)
+    val inputs = tx.vin.zipWithIndex.flatMap { case (vin, index) =>
+      for {
+        value <- vin.value
+        address <- vin.address
+      } yield Transaction.Input(vin.txid, vin.voutIndex, index, value, address)
     }
 
     val outputs = tx.vout.flatMap { vout =>
       val tposAddresses = vout.scriptPubKey.flatMap(_.getTPoSAddresses)
+      val scriptMaybe = vout.scriptPubKey.map(_.hex)
       for {
         address <- vout.address
-      } yield Transaction.Output(vout.n, vout.value, address, tposAddresses.map(_._1), tposAddresses.map(_._2))
+        script <- scriptMaybe
+      } yield Transaction.Output(vout.n, vout.value, address, script, tposAddresses.map(_._1), tposAddresses.map(_._2))
     }
 
     Transaction(
