@@ -10,7 +10,6 @@ class DataHandlerModule extends AbstractModule {
     bind(classOf[BlockBlockingDataHandler]).to(classOf[BlockPostgresDataHandler])
     bind(classOf[BalanceBlockingDataHandler]).to(classOf[BalancePostgresDataHandler])
     bind(classOf[StatisticsBlockingDataHandler]).to(classOf[StatisticsPostgresDataHandler])
-    bind(classOf[DatabaseBlockingSeeder]).to(classOf[DatabasePostgresSeeder])
     bind(classOf[TransactionBlockingDataHandler]).to(classOf[TransactionPostgresDataHandler])
     bind(classOf[LedgerBlockingDataHandler]).to(classOf[LedgerPostgresDataHandler])
   }

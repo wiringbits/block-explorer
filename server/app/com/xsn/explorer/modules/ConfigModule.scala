@@ -7,7 +7,6 @@ class ConfigModule extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig])
-    bind(classOf[SeederConfig]).to(classOf[PlaySeederConfig])
     bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig])
   }
 }
