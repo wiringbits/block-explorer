@@ -1,7 +1,7 @@
 package controllers.common
 
 import com.alexitc.playsonify.test.PlayAPISpec
-import com.xsn.explorer.modules.{PollingSeederModule, SeederModule}
+import com.xsn.explorer.modules.{PollerSynchronizerModule, PollingSeederModule, SeederModule}
 import org.slf4j.LoggerFactory
 import play.api.db.{DBApi, Database, Databases}
 import play.api.inject.bind
@@ -48,6 +48,7 @@ trait MyAPISpec extends PlayAPISpec {
       .in(Mode.Test)
       .disable(classOf[SeederModule])
       .disable(classOf[PollingSeederModule])
+      .disable(classOf[PollerSynchronizerModule])
       .overrides(bind[Database].to(dummyDB))
       .overrides(bind[DBApi].to(dummyDBApi))
 }
