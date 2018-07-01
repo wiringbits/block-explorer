@@ -1,7 +1,6 @@
 
 # --- !Ups
 
--- the next_blockhash doesn't have a foreign key on purpose, it can cause issues while deleting blocks.
 CREATE TABLE blocks(
   blockhash BLOCKHASH_TYPE NOT NULL,
   previous_blockhash BLOCKHASH_TYPE NULL,
@@ -20,7 +19,8 @@ CREATE TABLE blocks(
   -- constraints
   CONSTRAINT blocks_blockhash_pk PRIMARY KEY (blockhash),
   CONSTRAINT blocks_height_unique UNIQUE (height),
-  CONSTRAINT blocks_previous_blockhash_fk FOREIGN KEY (previous_blockhash) REFERENCES blocks (blockhash)
+  CONSTRAINT blocks_previous_blockhash_fk FOREIGN KEY (previous_blockhash) REFERENCES blocks (blockhash),
+  CONSTRAINT blocks_next_blockhash_fk FOREIGN KEY (next_blockhash) REFERENCES blocks (blockhash) ON DELETE SET NULL
 );
 
 CREATE INDEX blocks_time_index ON blocks USING BTREE (time);

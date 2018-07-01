@@ -17,21 +17,6 @@ class BlockPostgresDataHandler @Inject() (
     extends BlockBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def insert(block: Block): ApplicationResult[Block] = {
-    val result = withConnection { implicit conn =>
-      val maybe = blockPostgresDAO.insert(block)
-      Or.from(maybe, One(BlockUnknownError))
-    }
-
-    result.badMap { errors =>
-      errors.map {
-        case PostgresForeignKeyViolationError("blockhash", _) => RepeatedBlockhashError
-        case PostgresForeignKeyViolationError("height", _) => RepeatedBlockHeightError
-        case e => e
-      }
-    }
-  }
-
   override def getBy(blockhash: Blockhash): ApplicationResult[Block] = database.withConnection { implicit conn =>
     val maybe = blockPostgresDAO.getBy(blockhash)
     Or.from(maybe, One(BlockNotFoundError))

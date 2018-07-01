@@ -5,12 +5,12 @@ import com.xsn.explorer.data.anorm.dao.{BlockPostgresDAO, TransactionPostgresDAO
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.DataHelper._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.Block
-import org.scalactic.{Bad, Good}
+import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
@@ -62,7 +62,15 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     outputs)
 
   before {
-    blockDataHandler.insert(block)
+    val dao = new BlockPostgresDAO
+    try {
+      database.withConnection { implicit conn =>
+        val maybe = dao.insert(block)
+        Or.from(maybe, One(BlockNotFoundError))
+      }
+    } catch {
+      case _ => ()
+    }
   }
 
   "upsert" should {

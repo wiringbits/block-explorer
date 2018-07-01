@@ -15,10 +15,6 @@ class BlockFutureDataHandler @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends BlockDataHandler[FutureApplicationResult] {
 
-  override def insert(block: Block): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.insert(block)
-  }
-
   override def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getBy(blockhash)
   }
