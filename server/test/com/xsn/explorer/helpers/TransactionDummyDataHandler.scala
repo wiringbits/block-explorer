@@ -8,11 +8,5 @@ import com.xsn.explorer.models.fields.TransactionField
 
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
-  override def upsert(transaction: Transaction): ApplicationResult[Transaction] = ???
-
-  override def delete(transactionId: TransactionId): ApplicationResult[Transaction] = ???
-
-  override def deleteBy(blockhash: Blockhash): ApplicationResult[List[Transaction]] = ???
-
   override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
 }

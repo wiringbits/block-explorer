@@ -44,7 +44,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     12312312L,
     Size(1000),
     List.empty,
-    List.empty
+    List(
+      Transaction.Output(0, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None)
+    )
   )
 
   val inputs = List(
@@ -84,9 +86,33 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   private def prepareTransaction(transaction: Transaction) = {
     try {
-      dataHandler.upsert(transaction)
+      upsertTransaction(transaction)
     } catch {
       case _ => ()
+    }
+  }
+
+  private def upsertTransaction(transaction: Transaction) = {
+    val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
+    database.withConnection { implicit conn =>
+      val maybe = dao.upsert(transaction)
+      Or.from(maybe, One(TransactionNotFoundError))
+    }
+  }
+
+  private def delete(txid: TransactionId) = {
+    val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
+    database.withConnection { implicit conn =>
+      val maybe = dao.delete(txid)
+      Or.from(maybe, One(TransactionNotFoundError))
+    }
+  }
+
+  private def deleteBy(blockhash: Blockhash) = {
+    val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
+    database.withConnection { implicit conn =>
+      val result = dao.deleteBy(blockhash)
+      Good(result)
     }
   }
 
@@ -98,7 +124,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   "upsert" should {
     "add a new transaction" in {
-      val result = dataHandler.upsert(transaction)
+      val result = upsertTransaction(transaction)
       result mustEqual Good(transaction)
     }
 
@@ -107,31 +133,31 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         time = 2313121L,
         size = Size(2000))
 
-      dataHandler.upsert(transaction).isGood mustEqual true
-      val result = dataHandler.upsert(newTransaction)
+      upsertTransaction(transaction).isGood mustEqual true
+      val result = upsertTransaction(newTransaction)
       result mustEqual Good(newTransaction)
     }
   }
 
   "delete" should {
     "delete a transaction" in {
-      dataHandler.upsert(transaction).isGood mustEqual true
-      val result = dataHandler.delete(transaction.id)
+      upsertTransaction(transaction).isGood mustEqual true
+      val result = delete(transaction.id)
       result mustEqual Good(transaction)
     }
 
     "fail to delete a non-existent transaction" in {
-      dataHandler.delete(transaction.id)
-      val result = dataHandler.delete(transaction.id)
+      delete(transaction.id)
+      val result = delete(transaction.id)
       result mustEqual Bad(TransactionNotFoundError).accumulating
     }
   }
 
   "deleteBy blockhash" should {
     "delete the transactions related to a block" in {
-      dataHandler.upsert(transaction).isGood mustEqual true
+      upsertTransaction(transaction).isGood mustEqual true
 
-      val result = dataHandler.deleteBy(transaction.blockhash)
+      val result = deleteBy(transaction.blockhash)
       result.isGood mustEqual true
       result.get.contains(transaction) mustEqual true
     }
@@ -178,7 +204,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         received = 50)
 
       val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
-      dataHandler.upsert(transaction).isGood mustEqual true
+      upsertTransaction(transaction).isGood mustEqual true
 
       val result = dataHandler.getBy(address, query, defaultOrdering)
       result mustEqual Good(expected)

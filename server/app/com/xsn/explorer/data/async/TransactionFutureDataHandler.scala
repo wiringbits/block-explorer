@@ -16,18 +16,6 @@ class TransactionFutureDataHandler @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends TransactionDataHandler[FutureApplicationResult] {
 
-  override def upsert(transaction: Transaction): FutureApplicationResult[Transaction] = Future {
-    blockingDataHandler.upsert(transaction)
-  }
-
-  override def delete(transactionId: TransactionId): FutureApplicationResult[Transaction] = Future {
-    blockingDataHandler.delete(transactionId)
-  }
-
-  override def deleteBy(blockhash: Blockhash): FutureApplicationResult[List[Transaction]] = Future {
-    blockingDataHandler.deleteBy(blockhash)
-  }
-
   override def getBy(
       address: Address,
       paginatedQuery: PaginatedQuery,
