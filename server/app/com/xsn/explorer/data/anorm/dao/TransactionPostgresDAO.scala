@@ -20,7 +20,31 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       partialTx <- upsertTransaction(transaction)
       inputs <- upsertInputs(transaction.id, transaction.inputs)
       outputs <- upsertOutputs(transaction.id, transaction.outputs)
+      _ <- spend(transaction.id, inputs)
     } yield partialTx.copy(inputs = inputs, outputs = outputs)
+  }
+
+  private def spend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
+    val result = inputs.flatMap { input => spend(txid, input) }
+    Option(result)
+        .filter(_.size == inputs.size)
+        .map(_ => ())
+  }
+
+  private def spend(txid: TransactionId, input: Transaction.Input)(implicit conn: Connection): Option[Transaction.Output] = {
+    SQL(
+      """
+        |UPDATE transaction_outputs
+        |SET spent_on = {spent_on}
+        |WHERE txid = {output_txid} AND
+        |      index = {output_index}
+        |RETURNING txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+      """.stripMargin
+    ).on(
+      'spent_on -> txid.string,
+      'output_txid -> input.fromTxid.string,
+      'output_index -> input.fromOutputIndex
+    ).as(parseTransactionOutput.single)
   }
 
   /**
