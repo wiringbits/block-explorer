@@ -54,15 +54,19 @@ object TransactionParsers {
       }
 
   val parseTransactionOutput = (
-      parseIndex ~
+      parseTransactionId ~
+          parseIndex ~
           parseValue ~
           parseAddress ~
           parseHexString ~
           parseTposOwnerAddress.? ~
           parseTposMerchantAddress.?).map {
 
-    case index ~ value ~ addressMaybe ~ scriptMaybe ~ tposOwnerAddress ~ tposMerchantAddress =>
-      for (address <- addressMaybe; script <- scriptMaybe)
-        yield Transaction.Output(index, value, address, script, tposOwnerAddress.flatten, tposMerchantAddress.flatten)
+    case txidMaybe ~ index ~ value ~ addressMaybe ~ scriptMaybe ~ tposOwnerAddress ~ tposMerchantAddress =>
+      for {
+        txid <- txidMaybe
+        address <- addressMaybe
+        script <- scriptMaybe
+      } yield Transaction.Output(txid, index, value, address, script, tposOwnerAddress.flatten, tposMerchantAddress.flatten)
   }
 }

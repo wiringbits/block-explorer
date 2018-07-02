@@ -1,6 +1,9 @@
 package com.xsn.explorer.models
 
-class HexString private (val string: String) extends AnyVal
+class HexString private (val string: String) extends AnyVal {
+
+  override def toString: String = string
+}
 
 object HexString {
 

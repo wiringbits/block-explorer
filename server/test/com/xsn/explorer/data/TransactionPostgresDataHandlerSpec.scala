@@ -1,12 +1,13 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.models._
-import com.xsn.explorer.data.anorm.dao.{BlockPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, TransactionPostgresDataHandler}
+import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.DataHelper._
+import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.Block
@@ -16,6 +17,12 @@ import org.scalatest.BeforeAndAfter
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val ledgerDataHandler = new LedgerPostgresDataHandler(
+    database,
+    new BlockPostgresDAO,
+    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
+    new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+
   lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
   val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
 
@@ -45,7 +52,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     Size(1000),
     List.empty,
     List(
-      Transaction.Output(0, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None)
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None)
     )
   )
 
@@ -54,8 +61,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   )
 
   val outputs = List(
-    Transaction.Output(0, BigDecimal(50), createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"), HexString.from("00").get, None, None),
+    Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, BigDecimal(50), createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"), HexString.from("00").get, None, None),
     Transaction.Output(
+      createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
       1,
       BigDecimal(150),
       createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
@@ -70,7 +78,16 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     12312312L,
     Size(1000),
     inputs,
-    outputs)
+    outputs.map(_.copy(txid = createTransactionId("99c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"))))
+
+  val blockList = List(
+    BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),
+    BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7"),
+    BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8"),
+    BlockLoader.get("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd"),
+    BlockLoader.get("00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32"),
+    BlockLoader.get("00000267225f7dba55d9a3493740e7f0dde0f28a371d2c3b42e7676b5728d020")
+  )
 
   private def prepareBlock(block: Block) = {
     val dao = new BlockPostgresDAO
@@ -171,8 +188,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val outputs = List(
-      Transaction.Output(0, BigDecimal(50), address, HexString.from("00").get, None, None),
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, BigDecimal(50), address, HexString.from("00").get, None, None),
       Transaction.Output(
+        createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
         1,
         BigDecimal(250),
         createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
@@ -209,5 +227,39 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val result = dataHandler.getBy(address, query, defaultOrdering)
       result mustEqual Good(expected)
     }
+  }
+
+  "getUnspentOutputs" should {
+    "return non-zero results" in {
+      clearDatabase()
+      val blocks = blockList.take(3)
+      blocks.map(createBlock)
+
+      val expected = Transaction.Output(
+        address = createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
+        txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"),
+        index = 0,
+        value = BigDecimal(76500000),
+        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get,
+        tposMerchantAddress = None,
+        tposOwnerAddress = None
+      )
+
+      val result = dataHandler.getUnspentOutputs(expected.address).get
+      result.size mustEqual 1
+
+      result mustEqual List(expected)
+    }
+  }
+
+  private def createBlock(block: Block) = {
+    val transactions = block.transactions
+        .map(_.string)
+        .map(TransactionLoader.get)
+        .map(Transaction.fromRPC)
+
+    val result = ledgerDataHandler.push(block, transactions)
+
+    result.isGood mustEqual true
   }
 }

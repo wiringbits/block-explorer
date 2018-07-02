@@ -9,4 +9,6 @@ import com.xsn.explorer.models.fields.TransactionField
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
   override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
+
+  override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = ???
 }

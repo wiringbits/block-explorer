@@ -21,6 +21,7 @@ object Transaction {
       address: Address)
 
   case class Output(
+      txid: TransactionId,
       index: Int,
       value: BigDecimal,
       address: Address,
@@ -48,7 +49,7 @@ object Transaction {
       for {
         address <- vout.address
         script <- scriptMaybe
-      } yield Transaction.Output(vout.n, vout.value, address, script, tposAddresses.map(_._1), tposAddresses.map(_._2))
+      } yield Transaction.Output(tx.id, vout.n, vout.value, address, script, tposAddresses.map(_._1), tposAddresses.map(_._2))
     }
 
     Transaction(

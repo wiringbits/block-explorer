@@ -13,6 +13,8 @@ trait TransactionDataHandler[F[_]] {
       address: Address,
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
+
+  def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

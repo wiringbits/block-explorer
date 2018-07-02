@@ -167,6 +167,20 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     Count(result)
   }
 
+  def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
+    SQL(
+      """
+        |SELECT txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address
+        |FROM transaction_outputs
+        |WHERE address = {address} AND
+        |      spent_on IS NULL AND
+        |      value > 0
+      """.stripMargin
+    ).on(
+      'address -> address.string
+    ).as(parseTransactionOutput.*).flatten
+  }
+
   private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """

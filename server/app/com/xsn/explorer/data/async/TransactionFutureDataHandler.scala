@@ -23,4 +23,8 @@ class TransactionFutureDataHandler @Inject() (
 
     blockingDataHandler.getBy(address, paginatedQuery, ordering)
   }
+
+  override def getUnspentOutputs(address: Address): FutureApplicationResult[List[Transaction.Output]] = Future {
+    blockingDataHandler.getUnspentOutputs(address)
+  }
 }

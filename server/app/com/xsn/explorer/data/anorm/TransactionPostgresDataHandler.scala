@@ -28,4 +28,9 @@ class TransactionPostgresDataHandler @Inject() (
 
     Good(result)
   }
+
+  def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
+    val result = transactionPostgresDAO.getUnspentOutputs(address)
+    Good(result)
+  }
 }
