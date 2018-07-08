@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -13,7 +12,7 @@ import { MasternodesService } from '../../services/masternodes.service';
 
 const BLOCK_REGEX = '^[A-Fa-f0-9]{64}$';
 const BLOCK_NUMBER_REGEX = '^(\\d{1,10})$';
-const ADDRESS_REGEX = '^[a-zA-Z0-9]{34}$';
+const ADDRESS_REGEX = '(^[a-zA-Z0-9]{34}$)|(^[a-zA-Z0-9]{42}$)';
 const IP_ADDRESS_REGEX = '^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$';
 
 @Component({
