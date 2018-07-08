@@ -18,7 +18,7 @@ CREATE INDEX transactions_time_index ON transactions USING BTREE (time);
 CREATE TABLE transaction_outputs(
   txid TXID_TYPE NOT NULL,
   index NON_NEGATIVE_INT_TYPE NOT NULL,
-  value DECIMAL(30, 15) NOT NULL,
+  value AMOUNT_TYPE NOT NULL,
   address ADDRESS_TYPE NOT NULL,
   hex_script TEXT NOT NULL,
   spent_on TXID_TYPE NULL,
@@ -39,7 +39,7 @@ CREATE TABLE transaction_inputs(
   index NON_NEGATIVE_INT_TYPE NOT NULL,
   from_txid TXID_TYPE NOT NULL,
   from_output_index NON_NEGATIVE_INT_TYPE NOT NULL,
-  value DECIMAL(30, 15) NULL,
+  value AMOUNT_TYPE NULL,
   address ADDRESS_TYPE NULL,
   -- constraints
   CONSTRAINT transaction_inputs_txid_index_pk PRIMARY KEY (txid, index),

@@ -5,8 +5,8 @@
 -- simpler queries while requiring addresses and the available amounts.
 CREATE TABLE balances(
   address ADDRESS_TYPE NOT NULL,
-  received DECIMAL(30, 15) NOT NULL,
-  spent DECIMAL(30, 15) NOT NULL,
+  received AMOUNT_TYPE NOT NULL,
+  spent AMOUNT_TYPE NOT NULL,
   -- constraints
   CONSTRAINT balances_address_pk PRIMARY KEY (address)
 );
