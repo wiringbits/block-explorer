@@ -1,20 +1,18 @@
 package controllers
 
 import com.alexitc.playsonify.PublicErrorRenderer
-import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDataHandler}
-import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, DummyXSNService, TransactionDummyDataHandler}
+import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, TransactionDummyDataHandler}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.test.Helpers._
-
-import scala.concurrent.Future
 
 class AddressesControllerSpec extends MyAPISpec {
 
@@ -24,27 +22,26 @@ class AddressesControllerSpec extends MyAPISpec {
   val addressBalance = Balance(addressWithBalance, spent = 100, received = 200)
 
   val addressForUtxos = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
-  val utxosResponse =
-    """
-      |[
-      |    {
-      |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
-      |        "height": 22451,
-      |        "outputIndex": 0,
-      |        "satoshis": 1500000000000,
-      |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
-      |        "txid": "ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"
-      |    },
-      |    {
-      |        "address": "XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp",
-      |        "height": 25093,
-      |        "outputIndex": 3,
-      |        "satoshis": 2250000000,
-      |        "script": "76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac",
-      |        "txid": "96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"
-      |    }
-      |]
-    """.stripMargin
+  val utxosResponse = List(
+    Transaction.Output(
+      address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
+      index = 0,
+      value = BigDecimal("1500000000000").fromSatoshis,
+      script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
+      txid = createTransactionId("ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"),
+      tposMerchantAddress = None,
+      tposOwnerAddress = None
+    ),
+    Transaction.Output(
+      address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
+      index = 3,
+      value = BigDecimal("2250000000").fromSatoshis,
+      script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
+      txid = createTransactionId("96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"),
+      tposMerchantAddress = None,
+      tposOwnerAddress = None
+    )
+  )
 
   val addressForTransactions = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
   val addressTransaction = TransactionWithValues(
@@ -55,19 +52,6 @@ class AddressesControllerSpec extends MyAPISpec {
     sent = 50,
     received = 200)
 
-
-  val customXSNService = new DummyXSNService {
-
-    override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
-      if (address == addressForUtxos) {
-        val result = Good(Json.parse(utxosResponse))
-        Future.successful(result)
-      } else {
-        super.getUnspentOutputs(address)
-      }
-    }
-  }
-
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
     override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
@@ -75,6 +59,14 @@ class AddressesControllerSpec extends MyAPISpec {
         Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(1), List(addressTransaction)))
       } else {
         Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(0), List.empty))
+      }
+    }
+
+    override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = {
+      if (address == addressForUtxos) {
+        Good(utxosResponse)
+      } else {
+        super.getUnspentOutputs(address)
       }
     }
   }
@@ -90,7 +82,6 @@ class AddressesControllerSpec extends MyAPISpec {
   }
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[XSNService].to(customXSNService))
       .overrides(bind[TransactionBlockingDataHandler].to(customTransactionDataHandler))
       .overrides(bind[BalanceBlockingDataHandler].to(customBalanceDataHandler))
       .build()
@@ -127,11 +118,20 @@ class AddressesControllerSpec extends MyAPISpec {
   "GET /addresses/:address/utxos" should {
     def url(address: String) = s"/addresses/$address/utxos"
 
+    def matches(json: JsValue, output: Transaction.Output) = {
+      (json \ "address").as[String] mustEqual output.address.string
+      (json \ "txid").as[String] mustEqual output.txid.string
+      (json \ "outputIndex").as[Int] mustEqual output.index
+      (json \ "script").as[String] mustEqual output.script.string
+      (json \ "satoshis").as[BigDecimal] mustEqual BigDecimal(output.value.toSatoshis)
+    }
+
     "return an array with the result" in {
       val response = GET(url(addressForUtxos.string))
 
       status(response) mustEqual OK
-      contentAsJson(response) mustEqual Json.parse(utxosResponse)
+      val result = contentAsJson(response).as[List[JsValue]]
+      result.zip(utxosResponse).foreach { case (json, output) => matches(json, output) }
     }
   }
 
