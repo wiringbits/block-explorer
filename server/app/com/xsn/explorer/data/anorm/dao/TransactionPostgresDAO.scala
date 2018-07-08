@@ -50,28 +50,6 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   /**
    * NOTE: Ensure the connection has an open transaction.
    */
-  def delete(txid: TransactionId)(implicit conn: Connection): Option[Transaction] = {
-    val inputs = deleteInputs(txid)
-    val outputs = deleteOutputs(txid)
-
-    val txMaybe = SQL(
-      """
-        |DELETE FROM transactions
-        |WHERE txid = {txid}
-        |RETURNING txid, blockhash, time, size
-      """.stripMargin
-    ).on(
-      'txid -> txid.string
-    ).as(parseTransaction.singleOpt)
-
-    for {
-      tx <- txMaybe.flatten
-    } yield tx.copy(inputs = inputs, outputs = outputs)
-  }
-
-  /**
-   * NOTE: Ensure the connection has an open transaction.
-   */
   def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Transaction] = {
     val expectedTransactions = SQL(
       """

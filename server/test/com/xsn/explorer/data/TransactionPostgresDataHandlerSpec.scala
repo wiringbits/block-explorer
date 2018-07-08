@@ -11,7 +11,7 @@ import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.Block
-import org.scalactic.{Bad, Good, One, Or}
+import org.scalactic.{Good, One, Or}
 import org.scalatest.BeforeAndAfter
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
@@ -52,7 +52,8 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     Size(1000),
     List.empty,
     List(
-      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None)
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None),
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 1, 1000, createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7Dkpss"), HexString.from("00").get, None, None)
     )
   )
 
@@ -117,74 +118,17 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  private def delete(txid: TransactionId) = {
-    val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
-    database.withConnection { implicit conn =>
-      val maybe = dao.delete(txid)
-      Or.from(maybe, One(TransactionNotFoundError))
-    }
-  }
-
-  private def deleteBy(blockhash: Blockhash) = {
-    val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
-    database.withConnection { implicit conn =>
-      val result = dao.deleteBy(blockhash)
-      Good(result)
-    }
-  }
-
   before {
     clearDatabase()
     prepareBlock(block)
     prepareTransaction(dummyTransaction)
   }
 
-  "upsert" should {
-    "add a new transaction" in {
-      val result = upsertTransaction(transaction)
-      result mustEqual Good(transaction)
-    }
-
-    "update an existing transaction" in {
-      val newTransaction = transaction.copy(
-        time = 2313121L,
-        size = Size(2000))
-
-      upsertTransaction(transaction).isGood mustEqual true
-      val result = upsertTransaction(newTransaction)
-      result mustEqual Good(newTransaction)
-    }
-  }
-
-  "delete" should {
-    "delete a transaction" in {
-      upsertTransaction(transaction).isGood mustEqual true
-      val result = delete(transaction.id)
-      result mustEqual Good(transaction)
-    }
-
-    "fail to delete a non-existent transaction" in {
-      delete(transaction.id)
-      val result = delete(transaction.id)
-      result mustEqual Bad(TransactionNotFoundError).accumulating
-    }
-  }
-
-  "deleteBy blockhash" should {
-    "delete the transactions related to a block" in {
-      upsertTransaction(transaction).isGood mustEqual true
-
-      val result = deleteBy(transaction.blockhash)
-      result.isGood mustEqual true
-      result.get.contains(transaction) mustEqual true
-    }
-  }
-
   "getBy address" should {
     val address = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
     val inputs = List(
       Transaction.Input(dummyTransaction.id, 0, 1, 100, address),
-      Transaction.Input(dummyTransaction.id, 0, 2, 200, createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F"))
+      Transaction.Input(dummyTransaction.id, 1, 2, 200, createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F"))
     )
 
     val outputs = List(
