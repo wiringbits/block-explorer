@@ -7,7 +7,6 @@ The following steps are for setting up the rpc server that runs on system startu
 ## Set up a new user
 - create the user: `sudo adduser --system rpc`
 - switch to the new user: `sudo su -s /bin/bash - rpc`
-- set aws credentials: `aws configure`
 - create the folder for xsn data: `mkdir /home/rpc/.xsncore`
 - set the xsn config (see [xsn.conf](/infra/misc/xsn.conf)): `vim /home/rpc/.xsncore/xsn.conf`
 
@@ -17,9 +16,6 @@ The following steps are for setting up the rpc server that runs on system startu
 - unpack the file: `tar -zxvf xsn.tar.gz`
 - create a folder for the executables: `mkdir /home/rpc/xsn`
 - move the executables: `mv xsncore-1.0.9/bin/xsn* xsn/`
-- add the script for new blocks: `vim xsn/script.sh`
-- set the script as executable (see [script.sh](/infra/misc/script.sh)): `chmod +x xsn/script.sh`
-- test the script: `./xsn/script.sh working`
 
 ## Add the systemd service (as super user)
 - create the service file (see [xsn-rpc.service](/infra/systemd-services/xsn-rpc.service)): `sudo cp xsn-rpc.service /etc/systemd/system/xsn-rpc.service`
