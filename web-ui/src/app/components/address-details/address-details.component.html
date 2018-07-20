@@ -65,7 +65,7 @@
             <td>
               <a routerLink="/blocks/{{item.blockhash}}">{{item.blockhash | slice:0:15}}...</a>
             </td>
-            <td>{{item.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>{{item.time * 1000 | explorerDatetime}}</td>
             <td>{{item.received >= item.sent ? '+' : ''}}{{item.received - item.sent}} {{'label.coinName' | translate}}</td>
             <td>{{item.size}} bytes</td>
           </tr>
