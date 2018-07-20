@@ -16,7 +16,7 @@
           </tr>
           <tr>
             <td>{{'label.lastSeen' | translate}}</td>
-            <td>{{masternode.lastSeen * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>{{masternode.lastSeen * 1000 | explorerDatetime}}</td>
           </tr>
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
           <tr>

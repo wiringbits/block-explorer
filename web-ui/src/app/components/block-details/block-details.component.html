@@ -64,11 +64,11 @@
           </tr>
           <tr>
             <td>{{'label.blocktime' | translate}}</td>
-            <td>{{blockDetails.block.time * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>{{blockDetails.block.time * 1000 | explorerDatetime}}</td>
           </tr>
           <tr>
             <td>{{'label.medianTime' | translate}}</td>
-            <td>{{blockDetails.block.medianTime * 1000 | date:'MMMM d, y, h:mm:ss a'}}</td>
+            <td>{{blockDetails.block.medianTime * 1000 | explorerDatetime}}</td>
           </tr>
           <tr>
             <td></td>
@@ -102,7 +102,7 @@
               <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{blockDetails.rewards.reward.value}} {{'label.coinName' | translate}}</th>
             </tr>
           </thead>
-        
+
           <tbody>
             <tr>
               <td>{{'label.address' | translate}}</td>
@@ -121,7 +121,7 @@
               <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{getPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
             </tr>
           </thead>
-        
+
           <tbody>
             <tr>
               <td></td>
@@ -172,7 +172,7 @@
               <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{getTPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
             </tr>
           </thead>
-        
+
           <tbody>
             <tr>
               <td></td>
@@ -249,7 +249,7 @@
             <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.transactions' | translate}}</th>
           </tr>
         </thead>
-      
+
         <tbody>
           <tr *ngFor="let item of blockDetails.block.transactions">
             <td>
