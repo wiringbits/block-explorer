@@ -43,8 +43,9 @@ object Masternode {
 
   private def parseTxid(key: String): Option[TransactionId] = {
     key
-        .split("\\-")
+        .split("\\,")
         .headOption
+        .flatMap(_.split("\\(").lift(1))
         .flatMap(TransactionId.from)
   }
 

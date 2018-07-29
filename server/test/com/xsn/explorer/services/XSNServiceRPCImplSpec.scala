@@ -65,9 +65,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         result.isGood mustEqual true
@@ -85,9 +83,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         result.isGood mustEqual true
@@ -106,9 +102,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         result.isGood mustEqual true
@@ -122,9 +116,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
       val responseBody = createRPCErrorResponse(-5, "No information available about transaction")
       val json = Json.parse(responseBody)
-      when(response.status).thenReturn(500)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(500, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         result mustEqual Bad(TransactionNotFoundError).accumulating
@@ -137,9 +129,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCErrorResponse(-32600, errorMessage)
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         val error = XSNMessageError(errorMessage)
@@ -150,9 +140,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     "handle non successful status" in {
       val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
 
-      when(response.status).thenReturn(403)
-      when(response.json).thenReturn(JsNull)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(403, JsNull)
 
       whenReady(service.getTransaction(txid)) { result =>
         result mustEqual Bad(XSNUnexpectedResponseError).accumulating
@@ -165,9 +153,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = """{"result":null,"error":{},"id":null}"""
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
         result mustEqual Bad(XSNUnexpectedResponseError).accumulating
@@ -183,9 +169,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getRawTransaction(txid)) { result =>
         result mustEqual Good(expected)
@@ -211,9 +195,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getAddressBalance(address)) { result =>
         result.isGood mustEqual true
@@ -230,9 +212,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getAddressBalance(address)) { result =>
         result mustEqual Bad(AddressFormatError).accumulating
@@ -265,9 +245,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransactions(address)) { result =>
         result.isGood mustEqual true
@@ -282,9 +260,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getTransactions(address)) { result =>
         result mustEqual Bad(AddressFormatError).accumulating
@@ -300,9 +276,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlock(blockhash)) { result =>
         result.isGood mustEqual true
@@ -320,9 +294,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlock(blockhash)) { result =>
         result.isGood mustEqual true
@@ -340,9 +312,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlock(blockhash)) { result =>
         result.isGood mustEqual true
@@ -360,9 +330,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlock(blockhash)) { result =>
         result mustEqual Bad(BlockNotFoundError).accumulating
@@ -378,9 +346,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getRawBlock(blockhash)) { result =>
         result mustEqual Good(block)
@@ -395,9 +361,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlockhash(Height(3))) { result =>
         result mustEqual Good(blockhash)
@@ -409,9 +373,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getBlockhash(Height(-1))) { result =>
         result mustEqual Bad(BlockNotFoundError).accumulating
@@ -437,9 +399,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getServerStatistics()) { result =>
         result.isGood mustEqual true
@@ -459,9 +419,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getMasternodeCount()) { result =>
         result mustEqual Good(10)
@@ -474,8 +432,8 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val content =
         """
           |{
-          |  "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01-0": "  WATCHDOG_EXPIRED 70208 XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2 1524349009   513323 1524297814  63936 45.77.136.212:62583",
-          |  "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01-1": "  ENABLED          70208 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1524349028   777344 1524312645  64183 45.32.148.13:62583"
+          |  "COutPoint(c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01, 0)": "           WATCHDOG_EXPIRED 70209 XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2 1532897292        0          0      0 45.77.136.212:62583",
+          |  "COutPoint(b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01, 1)": "           ENABLED 70209 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1532905050     6010 1532790407 202522 45.32.148.13:62583"
           |}
         """.stripMargin
 
@@ -483,27 +441,25 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
         Masternode(
           txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
           ip = "45.77.136.212:62583",
-          protocol = "70208",
+          protocol = "70209",
           status = "WATCHDOG_EXPIRED",
-          activeSeconds = 513323,
-          lastSeen = 1524349009,
+          activeSeconds = 0,
+          lastSeen = 1532897292,
           Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get),
 
         Masternode(
           txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
           ip = "45.32.148.13:62583",
-          protocol = "70208",
+          protocol = "70209",
           status = "ENABLED",
-          activeSeconds = 777344,
-          lastSeen = 1524349028,
+          activeSeconds = 6010,
+          lastSeen = 1532905050,
           Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
       )
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       whenReady(service.getMasternodes()) { result =>
         result.isGood mustEqual true
@@ -519,25 +475,23 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val content =
         """
           |{
-          |  "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01-1": "  ENABLED          70208 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1524349028   777344 1524312645  64183 45.32.148.13:62583"
+          |  "COutPoint(b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01, 1)": "           ENABLED 70209 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 1532905050     6010 1532790407 202522 45.32.148.13:62583"
           |}
         """.stripMargin
 
       val expected = Masternode(
         txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
         ip = "45.32.148.13:62583",
-        protocol = "70208",
+        protocol = "70209",
         status = "ENABLED",
-        activeSeconds = 777344,
-        lastSeen = 1524349028,
+        activeSeconds = 6010,
+        lastSeen = 1532905050,
         Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
 
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       val ip = IPAddress.from("45.32.148.13").get
       whenReady(service.getMasternode(ip)) { result =>
@@ -554,9 +508,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       val ip = IPAddress.from("45.32.148.13").get
       whenReady(service.getMasternode(ip)) { result =>
@@ -592,14 +544,18 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
 
-      when(response.status).thenReturn(200)
-      when(response.json).thenReturn(json)
-      when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+      mockRequest(request, response)(200, json)
 
       val address = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
       whenReady(service.getUnspentOutputs(address)) { result =>
         result mustEqual Good(Json.parse(content))
       }
     }
+  }
+
+  private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
+    when(response.status).thenReturn(200)
+    when(response.json).thenReturn(body)
+    when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
   }
 }
