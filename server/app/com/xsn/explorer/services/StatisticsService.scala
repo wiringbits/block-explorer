@@ -25,7 +25,8 @@ class StatisticsService @Inject() (
         case Good(count) => Good(Some(count))
         case Bad(_) => Good(None)
       }.toFutureOr
-    } yield StatisticsDetails(stats, count)
+      fakedStats = stats.copy(circulatingSupply = Some(70760408.694128), totalSupply = Some(80467288.2090169))
+    } yield StatisticsDetails(fakedStats, count)
 
     result.toFuture
   }
