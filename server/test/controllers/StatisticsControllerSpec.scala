@@ -37,8 +37,6 @@ class StatisticsControllerSpec extends MyAPISpec {
 
   "GET /stats" should {
     "return the server statistics" in {
-      pending
-
       val response = GET("/stats")
 
       status(response) mustEqual OK
