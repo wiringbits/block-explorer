@@ -1,10 +1,13 @@
 package controllers
 
 import com.alexitc.playsonify.PublicErrorRenderer
-import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery, PaginatedResult}
+import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
-import com.xsn.explorer.helpers.{BlockLoader, DummyXSNService, TransactionLoader}
+import com.xsn.explorer.helpers.{BlockLoader, DummyXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -106,8 +109,38 @@ class BlocksControllerSpec extends MyAPISpec {
     }
   }
 
+  val transactionDataHandler = new TransactionDummyDataHandler {
+    // TODO: Handle ordering
+    override def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
+      val transactions = BlockLoader
+          .get(blockhash.string)
+          .transactions
+          .map(_.string)
+          .map(TransactionLoader.get)
+          .map { tx =>
+            TransactionWithValues(
+              id = tx.id,
+              blockhash = blockhash,
+              time = tx.time,
+              size = tx.size,
+              sent = tx.vin.flatMap(_.value).sum,
+              received = tx.vout.map(_.value).sum
+            )
+          }
+
+      val page = PaginatedResult(
+        paginatedQuery.offset,
+        paginatedQuery.limit,
+        Count(transactions.size),
+        transactions.drop(paginatedQuery.offset.int).take(paginatedQuery.limit.int))
+
+      Good(page)
+    }
+  }
+
   override val application = guiceApplicationBuilder
       .overrides(bind[XSNService].to(customXSNService))
+      .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandler))
       .build()
 
   "GET /blocks/:query" should {
@@ -392,6 +425,23 @@ class BlocksControllerSpec extends MyAPISpec {
 
       val json = contentAsJson(response)
       json mustEqual BlockLoader.json(block.hash.string)
+    }
+  }
+
+  "GET /blocks/:blockhash/transactions" should {
+    "return the transactions for the given block" in {
+      val blockhash = "000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7"
+      val response = GET(s"/blocks/$blockhash/transactions?offset=0&limit=5&orderBy=time:desc")
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      (json \ "total").as[Int] mustEqual 1
+      (json \ "offset").as[Int] mustEqual 0
+      (json \ "limit").as[Int] mustEqual 5
+
+      val data = (json \ "data").as[List[JsValue]]
+      data.size mustEqual 1
     }
   }
 }

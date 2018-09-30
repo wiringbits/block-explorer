@@ -7,7 +7,7 @@ import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResu
 import com.alexitc.playsonify.models.{OrderingQuery, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
-import com.xsn.explorer.errors.{AddressFormatError, InvalidRawTransactionError, TransactionFormatError, TransactionNotFoundError}
+import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.parsers.TransactionOrderingParser
@@ -22,6 +22,8 @@ class TransactionService @Inject() (
     xsnService: XSNService,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
+
+  private val maxTransactionsPerQuery = 100
 
   def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
     val result = for {
@@ -85,7 +87,7 @@ class TransactionService @Inject() (
         Or.from(maybe, One(AddressFormatError)).toFutureOr
       }
 
-      paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
+      paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
       ordering <- transactionOrderingParser.from(orderingQuery).toFutureOr
       transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery, ordering).toFutureOr
     } yield transactions
@@ -102,6 +104,16 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
+  def getByBlockhash(blockhashString: String, paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
+    val result = for {
+      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
+      order <- transactionOrderingParser.from(orderingQuery).toFutureOr
+      r <- transactionFutureDataHandler.getByBlockhash(blockhash, validatedQuery, order).toFutureOr
+    } yield r
+
+    result.toFuture
+  }
   private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
     val valueMaybe = for {
       value <- vin.value

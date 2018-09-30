@@ -13,9 +13,10 @@ GET   /addresses/:address                 controllers.AddressesController.getBy(
 GET   /addresses/:address/transactions    controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /addresses/:address/utxos           controllers.AddressesController.getUnspentOutputs(address: String)
 
-GET   /blocks                controllers.BlocksController.getLatestBlocks()
-GET   /blocks/:query         controllers.BlocksController.getDetails(query: String)
-GET   /blocks/:query/raw     controllers.BlocksController.getRawBlock(query: String)
+GET   /blocks                            controllers.BlocksController.getLatestBlocks()
+GET   /blocks/:query                     controllers.BlocksController.getDetails(query: String)
+GET   /blocks/:query/raw                 controllers.BlocksController.getRawBlock(query: String)
+GET   /blocks/:blockhash/transactions    controllers.BlocksController.getTransactions(blockhash: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 
 GET   /stats                 controllers.StatisticsController.getStatus()
 
