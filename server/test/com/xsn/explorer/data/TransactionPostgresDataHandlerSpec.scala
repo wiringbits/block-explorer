@@ -196,12 +196,118 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
+  "getByBlockhash" should {
+    val blockhash = createBlockhash("0000000000bdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+    val inputs = List(
+      Transaction.Input(dummyTransaction.id, 0, 1, 100, createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")),
+      Transaction.Input(dummyTransaction.id, 1, 2, 200, createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F"))
+    )
+
+    val outputs = List(
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, BigDecimal(50), createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"), HexString.from("00").get, None, None),
+      Transaction.Output(
+        createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+        1,
+        BigDecimal(250),
+        createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        HexString.from("00").get,
+        None, None)
+    )
+
+    val transactions = List(
+      Transaction(
+        createTransactionId("00051e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        blockhash,
+        12312312L,
+        Size(1000),
+        inputs,
+        outputs),
+      Transaction(
+        createTransactionId("02c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        blockhash,
+        12312302L,
+        Size(900),
+        inputs.map(x => x.copy(value = x.value * 2)),
+        outputs.map(x => x.copy(value = x.value * 2))),
+      Transaction(
+        createTransactionId("00c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        blockhash,
+        12312310L,
+        Size(100),
+        inputs.map(x => x.copy(value = x.value / 2)),
+        outputs.map(x => x.copy(value = x.value / 2)))
+    )
+
+    val block = this.block.copy(
+      hash = blockhash,
+      height = Height(10),
+      transactions = transactions.map(_.id))
+
+    "find no results" in {
+      val blockhash = createBlockhash("021d335a910f6780bdf48f9efd751b162074367eeb6740ac205223496430260f")
+      val query = PaginatedQuery(Offset(0), Limit(10))
+      val expected = PaginatedResult(query.offset, query.limit, Count(0), List.empty)
+      val result = dataHandler.getByBlockhash(blockhash, query, defaultOrdering)
+
+      result mustEqual Good(expected)
+    }
+
+    "find the right values" in {
+      createBlock(block, transactions)
+
+      val query = PaginatedQuery(Offset(0), Limit(10))
+      val result = dataHandler.getByBlockhash(blockhash, query, defaultOrdering).get
+
+      result.total mustEqual Count(transactions.size)
+      result.offset mustEqual query.offset
+      result.limit mustEqual query.limit
+      result.data.size mustEqual transactions.size
+    }
+
+    def testOrdering[B](field: TransactionField)(sortBy: Transaction => B)(implicit order: Ordering[B]) = {
+      createBlock(block, transactions)
+
+      val ordering = FieldOrdering(field, OrderingCondition.AscendingOrder)
+      val query = PaginatedQuery(Offset(0), Limit(10))
+
+      val expected = transactions.sortBy(sortBy)(order).map(_.id)
+      val result = dataHandler.getByBlockhash(blockhash, query, ordering).get.data
+      result.map(_.id) mustEqual expected
+
+      val expectedReverse = expected.reverse
+      val resultReverse = dataHandler.getByBlockhash(blockhash, query, ordering.copy(orderingCondition = OrderingCondition.DescendingOrder)).get.data
+      resultReverse.map(_.id) mustEqual expectedReverse
+    }
+
+    "allow to sort by txid" in {
+      testOrdering(TransactionField.TransactionId)(_.id.string)
+    }
+
+    "allow to sort by time" in {
+      testOrdering(TransactionField.Time)(_.time)
+    }
+
+    "allow to sort by sent" in {
+      testOrdering(TransactionField.Sent)(_.inputs.map(_.value).sum)
+    }
+
+    "allow to sort by received" in {
+      testOrdering(TransactionField.Received)(_.outputs.map(_.value).sum)
+    }
+  }
+
   private def createBlock(block: Block) = {
     val transactions = block.transactions
         .map(_.string)
         .map(TransactionLoader.get)
         .map(Transaction.fromRPC)
 
+    val result = ledgerDataHandler.push(block, transactions)
+
+    result.isGood mustEqual true
+  }
+
+  private def createBlock(block: Block, transactions: List[Transaction]) = {
     val result = ledgerDataHandler.push(block, transactions)
 
     result.isGood mustEqual true

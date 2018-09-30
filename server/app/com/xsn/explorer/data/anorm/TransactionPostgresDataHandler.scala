@@ -29,8 +29,20 @@ class TransactionPostgresDataHandler @Inject() (
     Good(result)
   }
 
-  def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
+  override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
     val result = transactionPostgresDAO.getUnspentOutputs(address)
+    Good(result)
+  }
+
+  override def getByBlockhash(
+      blockhash: Blockhash,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = withConnection { implicit conn =>
+
+    val transactions = transactionPostgresDAO.getByBlockhash(blockhash, paginatedQuery, ordering)
+    val total = transactionPostgresDAO.countByBlockhash(blockhash)
+    val result = PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, total, transactions)
+
     Good(result)
   }
 }

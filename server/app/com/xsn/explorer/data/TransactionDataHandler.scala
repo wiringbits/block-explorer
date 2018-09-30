@@ -15,6 +15,11 @@ trait TransactionDataHandler[F[_]] {
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
 
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
+
+  def getByBlockhash(
+      blockhash: Blockhash,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

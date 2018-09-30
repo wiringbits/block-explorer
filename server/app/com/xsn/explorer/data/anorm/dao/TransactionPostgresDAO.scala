@@ -145,6 +145,51 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     Count(result)
   }
 
+  def getByBlockhash(
+      blockhash: Blockhash,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField])(
+      implicit conn: Connection): List[TransactionWithValues] = {
+
+    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
+
+    /**
+     * TODO: The query is very slow while aggregating the spent and received values,
+     *       it might be worth creating an index-like table to get the accumulated
+     *       values directly.
+     */
+    SQL(
+      s"""
+         |SELECT t.txid, blockhash, t.time, t.size,
+         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+         |FROM transactions t JOIN blocks USING (blockhash)
+         |WHERE blockhash = {blockhash}
+         |$orderBy
+         |OFFSET {offset}
+         |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string,
+      'offset -> paginatedQuery.offset.int,
+      'limit -> paginatedQuery.limit.int
+    ).as(parseTransactionWithValues.*).flatten
+  }
+
+  def countByBlockhash(blockhash: Blockhash)(implicit conn: Connection): Count = {
+    val result = SQL(
+      """
+        |SELECT COUNT(*)
+        |FROM blocks JOIN transactions USING (blockhash)
+        |WHERE blockhash = {blockhash}
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string
+    ).as(SqlParser.scalar[Int].single)
+
+    Count(result)
+  }
+
   def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
