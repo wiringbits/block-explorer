@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-
-import { Observable } from 'rxjs/Observable';
+import { ActivatedRoute } from '@angular/router';
 
 import { BlockDetails } from '../../models/block';
 import { Transaction } from '../../models/transaction';
 
 import { BlocksService } from '../../services/blocks.service';
 import { ErrorService } from '../../services/error.service';
-import { NavigatorService } from '../../services/navigator.service';
+import { PaginatedResult } from '../../models/paginated-result';
 
 @Component({
   selector: 'app-block-details',
@@ -24,27 +22,23 @@ export class BlockDetailsComponent implements OnInit {
   total = 0;
   currentPage = 1;
   pageSize = 10;
-  asyncItems: Observable<Transaction[]>;
+  transactions: Transaction[] = null;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private navigatorService: NavigatorService,
     private blocksService: BlocksService,
     private errorService: ErrorService) { }
 
   ngOnInit() {
-    this.route.params.forEach(params => this.onBlockhash(params['query']));
+    this.route.params.forEach(params => this.onQuery(params['query']));
   }
 
-  private onBlockhash(blockhash: string) {
+  private onQuery(query: string) {
     this.clearCurrentValues();
-    this.blockhash = blockhash;
-    this.blocksService.get(blockhash).subscribe(
+    this.blocksService.get(query).subscribe(
       response => this.onBlockRetrieved(response),
       response => this.onError(response)
     );
-    this.getPage(this.currentPage);
   }
 
   private clearCurrentValues() {
@@ -53,23 +47,29 @@ export class BlockDetailsComponent implements OnInit {
     this.total = 0;
     this.currentPage = 1;
     this.pageSize = 10;
-    this.asyncItems = null;
+    this.transactions = null;
   }
 
   private onBlockRetrieved(response: BlockDetails) {
     this.blockDetails = response;
+    this.blockhash = response.block.hash;
+    this.loadPage(this.currentPage);
   }
 
-  getPage(page: number) {
+  loadPage(page: number) {
     const offset = (page - 1) * this.pageSize;
     const limit = this.pageSize;
     const order = 'time:desc';
 
-    this.asyncItems = this.blocksService
+    this.blocksService
       .getTransactions(this.blockhash, offset, limit, order)
-      .do(response => this.total = response.total)
-      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
-      .map(response => response.data)
+      .subscribe(response => this.onTransactionsResponse(response));
+  }
+
+  private onTransactionsResponse(response: PaginatedResult<Transaction>) {
+    this.total = response.total;
+    this.currentPage = 1 + (response.offset / this.pageSize);
+    this.transactions = response.data;
   }
 
   private onError(response: any) {

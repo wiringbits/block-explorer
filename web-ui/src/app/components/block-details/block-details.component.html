@@ -252,7 +252,13 @@
       </div>
 
       <!-- transactions -->
-      <div class="col-xs-12 col-md-offset-2 col-md-8">
+      <!-- still no transactions -->
+      <div *ngIf="transactions == null" class="col-xs-12 col-md-offset-2 col-md-8">
+        <alert>{{'message.transactionsNotAvailable' | translate}}</alert>
+      </div>
+
+      <!-- paginated transactions -->
+      <div *ngIf="transactions != null && transactions.length != 0" class="col-xs-12 col-md-offset-2 col-md-8">
         <div class="table-responsive">
           <table class="table table-condensed table-bordered table-striped table-hover">
             <thead>
@@ -266,7 +272,7 @@
             </thead>
 
             <tbody>
-              <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'transactions', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+              <tr *ngFor="let index = index; let item of transactions | paginate: { id: 'transactions', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
                 <td>{{(currentPage - 1) * pageSize + index + 1}}</td>
                 <td>
                   <a routerLink="/transactions/{{item.id}}">{{item.id | slice:0:35}}...</a>
@@ -281,9 +287,32 @@
 
         <div class="row">
           <div class="col-xs-11 col-xs-offset-1 col-sm-5 col-sm-offset-4">
-            <pagination-controls (pageChange)="getPage($event)" id="transactions" previousLabel="" nextLabel="">
+            <pagination-controls (pageChange)="loadPage($event)" id="transactions" previousLabel="" nextLabel="">
             </pagination-controls>
           </div>
+        </div>
+      </div>
+
+      <!-- transaction list only -->
+      <div *ngIf="transactions != null && transactions.length == 0" class="col-xs-12 col-md-offset-2 col-md-8">
+        <div class="table-responsive">
+          <table class="table table-condensed table-bordered table-striped table-hover">
+            <thead>
+              <tr>
+                <th class="col-xs-1">#</th>
+                <th class="col-xs-4">{{'label.transaction' | translate}}</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let index = index; let item of blockDetails.block.transactions">
+                <td>{{index + 1}}</td>
+                <td>
+                  <a routerLink="/transactions/{{item}}">{{item | slice:0:35}}...</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

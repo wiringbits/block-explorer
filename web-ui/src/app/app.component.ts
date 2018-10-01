@@ -48,6 +48,7 @@ export class AppComponent {
       'message.masternodeNotFound': 'Masternode not found',
       'message.loadingLatestBlocks': 'Loading latest blocks...',
       'message.loadingRichestAddresses': 'Loading richest addresses...',
+      'message.transactionsNotAvailable': 'The transactions are not available, please try again in some minutes',
 
       // error messages
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction or ip address',
