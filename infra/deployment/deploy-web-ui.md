@@ -15,5 +15,5 @@ These steps should be run in a place where you have cloned the repository, like 
 
 ## Server
 - login. `ssh xsnexplorer.io`
-- unzip the project: `unzip ~/web-ui.zip -d ~/``
+- unzip the project: `unzip ~/web-ui.zip -d ~/`
 - move the files: `sudo rsync -a ~/dist/ /var/www/html/ --remove-source-files`
