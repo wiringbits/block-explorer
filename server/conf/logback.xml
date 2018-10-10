@@ -16,13 +16,13 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+            <pattern>%date [%level] from %logger in %thread - %message%n%rEx%xException </pattern>
         </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%coloredLevel %logger{15} - %message%n%xException{10}</pattern>
+            <pattern>%coloredLevel %logger{15} - %message%n%rEx%xException{10} </pattern>
         </encoder>
     </appender>
 
