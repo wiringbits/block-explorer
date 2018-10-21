@@ -1,13 +1,17 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
+import javax.inject.Inject
 
 import anorm._
+import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
+import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
+import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}
 
-class BlockPostgresDAO {
+class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   def insert(block: Block)(implicit conn: Connection): Option[Block] = {
     SQL(
@@ -86,6 +90,38 @@ class BlockPostgresDAO {
     ).on(
       "height" -> height.int
     ).as(parseBlock.singleOpt).flatten
+  }
+
+  def getBy(
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[BlockField])(
+      implicit conn: Connection): List[Block] = {
+
+    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
+    SQL(
+      s"""
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |FROM blocks
+        |$orderBy
+        |OFFSET {offset}
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'offset -> paginatedQuery.offset.int,
+      'limit -> paginatedQuery.limit.int
+    ).as(parseBlock.*).flatten
+  }
+
+  def count(implicit conn: Connection): Count = {
+    val total = SQL(
+      s"""
+         |SELECT COUNT(*)
+         |FROM blocks
+      """.stripMargin
+    ).as(SqlParser.scalar[Int].single)
+
+    Count(total)
   }
 
   def delete(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {

@@ -19,11 +19,11 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
   lazy val ledgerDataHandler = new LedgerPostgresDataHandler(
     database,
-    new BlockPostgresDAO,
+    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
-  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
+  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO(new FieldOrderingSQLInterpreter))
   val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
 
   val block = Block(
@@ -91,7 +91,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   )
 
   private def prepareBlock(block: Block) = {
-    val dao = new BlockPostgresDAO
+    val dao = new BlockPostgresDAO(new FieldOrderingSQLInterpreter)
     try {
       database.withConnection { implicit conn =>
         val maybe = dao.insert(block)
