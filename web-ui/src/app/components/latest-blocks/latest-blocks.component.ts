@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 
@@ -9,9 +8,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/switchMap';
 
-import 'rxjs/add/observable/of';
-
-import { TranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
 
 import { Block } from '../../models/block';
 
@@ -55,8 +52,7 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
     const interval = 50000;
 
     // polling based on https://stackoverflow.com/a/42659054/3211175
-    this.subscription$ = Observable
-      .of(null)
+    this.subscription$ = of(null)
       .merge(polling$)
       .switchMap(_ =>
         this.blocksService.getLatest()
