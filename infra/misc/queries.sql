@@ -6,6 +6,14 @@ SELECT AVG(b.time - a.time) AS new_block_avg_time
 FROM (SELECT height, time FROM blocks) a JOIN
      (SELECT height, time FROM blocks) b ON (a.height + 1 = b.height);
 
+-- print the number of transactions per block and count how many blocks have that number
+SELECT txcount, COUNT(*) AS times
+FROM (
+  SELECT COUNT(txid) AS txcount, height
+  FROM blocks LEFT JOIN transactions USING (blockhash)
+  GROUP BY height) tmp
+GROUP BY txcount
+ORDER BY txcount;
 
 -- find corrupted balances
 SELECT address, one.available AS one, (two.received - two.spent) AS two
