@@ -20,6 +20,8 @@ trait TransactionDataHandler[F[_]] {
       blockhash: Blockhash,
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
+
+  def getLatestTransactionBy(addresses: List[Address]): F[Map[String, String]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

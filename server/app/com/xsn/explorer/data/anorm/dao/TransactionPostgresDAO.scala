@@ -206,6 +206,30 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransactionOutput.*).flatten
   }
 
+  def getLatestTransactionBy(addresses: List[Address])(implicit conn: Connection): Map[String, String] = {
+
+    import SqlParser._
+
+    val result = SQL(
+      s"""
+        |SELECT address, (
+        |  SELECT txid
+        |  FROM address_transaction_details
+        |  WHERE address = a.address
+        |  ORDER BY time DESC
+        |  LIMIT 1
+        |) AS txid
+        |FROM address_transaction_details a
+        |GROUP BY address
+        |HAVING address IN ({addresses});
+      """.stripMargin
+    ).on(
+      'addresses -> addresses.map(_.string)
+    ).as((str("address") ~ str("txid")).map(flatten).*)
+
+    result.toMap
+  }
+
   private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """
