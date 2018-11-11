@@ -11,7 +11,7 @@ class StatisticsPostgresDAO {
   import StatisticsPostgresDAO._
 
   def getStatistics(implicit conn: Connection): Statistics = {
-    SQL(
+    val result = SQL(
       s"""
         |SELECT
         |  (
@@ -26,6 +26,11 @@ class StatisticsPostgresDAO {
         |  (SELECT COALESCE(MAX(height), 0) FROM blocks) AS blocks
       """.stripMargin
     ).as(StatisticsParsers.parseStatistics.single)
+
+    val shiftBy = BigDecimal(6000000)
+    val totalSupply = result.totalSupply.map(x => (x - shiftBy) max 0)
+    val circulatingSupply = result.circulatingSupply.map(x => (x - shiftBy) max 0)
+    result.copy(totalSupply = totalSupply, circulatingSupply = circulatingSupply)
   }
 }
 
