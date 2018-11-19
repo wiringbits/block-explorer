@@ -3,7 +3,7 @@ package com.xsn.explorer.helpers
 import java.io.File
 
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.models.{Blockhash, rpc}
 import play.api.libs.json.{JsValue, Json}
 
 object BlockLoader {
@@ -12,7 +12,7 @@ object BlockLoader {
 
   def get(blockhash: String): Block = {
     val block = json(blockhash).as[Block]
-    XSNService.cleanGenesisBlock(block)
+    cleanGenesisBlock(block)
   }
 
   def json(blockhash: String): JsValue = {
@@ -32,5 +32,14 @@ object BlockLoader {
         .toList
         .map(_.getName)
         .map(get)
+  }
+
+  def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
+    val genesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+
+    Option(block)
+      .filter(_.hash == genesisBlockhash)
+      .map(_.copy(transactions = List.empty))
+      .getOrElse(block)
   }
 }

@@ -1,14 +1,13 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.alexitc.playsonify.models.ApplicationError
-import com.xsn.explorer.config.RPCConfig
+import com.xsn.explorer.config.{ExplorerConfig, RPCConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
+import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsNull, JsValue, Reads}
@@ -45,28 +44,24 @@ trait XSNService {
   def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
 
   def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit]
-}
-
-object XSNService {
-
-  val GenesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
 
   def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
-    // the genesis transaction is not available, see https://github.com/X9Developers/XSN/issues/32
     Option(block)
-        .filter(_.hash == GenesisBlockhash)
-        .map(_.copy(transactions = List.empty))
-        .getOrElse(block)
+      .filter(_.hash == genesisBlockhash)
+      .map(_.copy(transactions = List.empty))
+      .getOrElse(block)
   }
+
+  def genesisBlockhash: Blockhash
+
 }
 
 class XSNServiceRPCImpl @Inject() (
     ws: WSClient,
-    rpcConfig: RPCConfig)(
+    rpcConfig: RPCConfig,
+    explorerConfig: ExplorerConfig)(
     implicit ec: ExternalServiceExecutionContext)
     extends XSNService {
-
-  import XSNService._
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -450,4 +445,7 @@ class XSNServiceRPCImpl @Inject() (
           .map { e => Bad(e).accumulating }
     }
   }
+
+  override val genesisBlockhash: Blockhash = explorerConfig.genesisBlock
+
 }
