@@ -8,6 +8,7 @@ import play.api.libs.json.JsValue
 
 class DummyXSNService extends XSNService {
 
+  override def genesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction] = ???
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = ???
   override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = ???

@@ -206,14 +206,14 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
         blocks
             .find(_.hash == blockhash)
-            .map { block => Future.successful(Good(XSNService.cleanGenesisBlock(block))) }
+            .map { block => Future.successful(Good(cleanGenesisBlock(block))) }
             .getOrElse {
               Future.successful(Bad(BlockNotFoundError).accumulating)
             }
       }
 
       override def getLatestBlock(): FutureApplicationResult[Block] = {
-        val block = XSNService.cleanGenesisBlock(blocks.maxBy(_.height.int))
+        val block = cleanGenesisBlock(blocks.maxBy(_.height.int))
         Future.successful(Good(block))
       }
 

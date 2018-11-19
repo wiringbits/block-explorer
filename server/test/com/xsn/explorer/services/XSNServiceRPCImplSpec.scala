@@ -1,6 +1,6 @@
 package com.xsn.explorer.services
 
-import com.xsn.explorer.config.RPCConfig
+import com.xsn.explorer.config.{ExplorerConfig, RPCConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models._
@@ -22,10 +22,14 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
 
   val ws = mock[WSClient]
   val ec = Executors.externalServiceEC
-  val config = new RPCConfig {
+  val rpcConfig = new RPCConfig {
     override def password: RPCConfig.Password = RPCConfig.Password("pass")
     override def host: RPCConfig.Host = RPCConfig.Host("localhost")
     override def username: RPCConfig.Username = RPCConfig.Username("user")
+  }
+
+  val explorerConfig = new ExplorerConfig {
+    override def genesisBlock: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
   }
 
   val request = mock[WSRequest]
@@ -34,7 +38,7 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
   when(request.withAuth(anyString(), anyString(), any())).thenReturn(request)
   when(request.withHttpHeaders(any())).thenReturn(request)
 
-  val service = new XSNServiceRPCImpl(ws, config)(ec)
+  val service = new XSNServiceRPCImpl(ws, rpcConfig, explorerConfig)(ec)
 
   def createRPCSuccessfulResponse(result: JsValue): String = {
     s"""
