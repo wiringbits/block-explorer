@@ -22,7 +22,7 @@ case class Block(
     version: Int,
     time: Long,
     medianTime: Long,
-    nonce: Int,
+    nonce: Long,
     bits: String,
     chainwork: String,
     difficulty: BigDecimal,
@@ -57,7 +57,7 @@ object Block {
         (__ \ 'version).read[Int] and
         (__ \ 'time).read[Long] and
         (__ \ 'mediantime).read[Long] and
-        (__ \ 'nonce).read[Int] and
+        (__ \ 'nonce).read[Long] and
         (__ \ 'bits).read[String] and
         (__ \ 'chainwork).read[String] and
         (__ \ 'difficulty).read[BigDecimal] and

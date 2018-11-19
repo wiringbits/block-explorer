@@ -19,11 +19,11 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   lazy val dataHandler = new TransactionPostgresDataHandler(database, new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
   lazy val ledgerDataHandler = new LedgerPostgresDataHandler(
     database,
-    new BlockPostgresDAO,
+    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
-  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
+  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO(new FieldOrderingSQLInterpreter))
   val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
 
   val block = Block(
@@ -91,7 +91,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   )
 
   private def prepareBlock(block: Block) = {
-    val dao = new BlockPostgresDAO
+    val dao = new BlockPostgresDAO(new FieldOrderingSQLInterpreter)
     try {
       database.withConnection { implicit conn =>
         val maybe = dao.insert(block)
@@ -293,6 +293,27 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
     "allow to sort by received" in {
       testOrdering(TransactionField.Received)(_.outputs.map(_.value).sum)
+    }
+  }
+
+  "getLatestTransactionBy" should {
+    "return the relation address -> latest txid" in {
+      clearDatabase()
+      val blocks = blockList
+      blocks.map(createBlock)
+
+      val expected = Map(
+        "XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG53" -> "41e315108dc2df60caddbc7e8740a5614217f996c96898019e69b3195fd7ee10",
+        "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9" -> "1e591eae200f719344fc5df0c4286e3fb191fb8a645bdf054f9b36a856fce41e"
+      )
+
+      val addresses = List(
+        createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
+        createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG53"),
+        createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG54"),
+      )
+      val result = dataHandler.getLatestTransactionBy(addresses).get
+      result mustEqual expected
     }
   }
 

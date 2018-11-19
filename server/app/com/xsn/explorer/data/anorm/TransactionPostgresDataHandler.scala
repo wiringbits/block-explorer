@@ -45,4 +45,10 @@ class TransactionPostgresDataHandler @Inject() (
 
     Good(result)
   }
+
+  def getLatestTransactionBy(addresses: List[Address]): ApplicationResult[Map[String, String]] = withConnection { implicit conn =>
+    val result = transactionPostgresDAO.getLatestTransactionBy(addresses)
+
+    Good(result)
+  }
 }

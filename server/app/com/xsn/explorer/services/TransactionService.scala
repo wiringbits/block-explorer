@@ -114,6 +114,11 @@ class TransactionService @Inject() (
 
     result.toFuture
   }
+
+  def getLatestTransactionBy(addresses: List[Address]): FutureApplicationResult[Map[String, String]] = {
+    transactionFutureDataHandler.getLatestTransactionBy(addresses)
+  }
+
   private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
     val valueMaybe = for {
       value <- vin.value

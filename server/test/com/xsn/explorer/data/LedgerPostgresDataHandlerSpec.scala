@@ -15,7 +15,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
   lazy val dataHandler = new LedgerPostgresDataHandler(
     database,
-    new BlockPostgresDAO,
+    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 

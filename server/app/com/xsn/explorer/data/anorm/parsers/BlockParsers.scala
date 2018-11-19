@@ -17,7 +17,7 @@ object BlockParsers {
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
   val parseMedianTime = long("median_time")
-  val parseNonce = int("nonce")
+  val parseNonce = long("nonce")
   val parseBits = str("bits")
   val parseChainwork = str("chainwork")
   val parseDifficulty = get[BigDecimal]("difficulty")

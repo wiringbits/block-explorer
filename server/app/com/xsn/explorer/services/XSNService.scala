@@ -171,7 +171,7 @@ class XSNServiceRPCImpl @Inject() (
                 case x => x
               }
               .getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
+            logger.warn(s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }
@@ -188,7 +188,7 @@ class XSNServiceRPCImpl @Inject() (
 
           val maybe = getResult[JsValue](response, errorCodeMapper)
           maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
+            logger.warn(s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }
@@ -205,7 +205,7 @@ class XSNServiceRPCImpl @Inject() (
 
           val maybe = getResult[Blockhash](response, errorCodeMapper)
           maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${height.int}, status = ${response.status}, response = ${response.body}")
+            logger.warn(s"Unexpected response from XSN Server, blockhash = ${height.int}, status = ${response.status}, response = ${response.body}")
 
             Bad(XSNUnexpectedResponseError).accumulating
           }

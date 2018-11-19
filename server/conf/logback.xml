@@ -16,14 +16,20 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+            <pattern>%date [%level] from %logger in %thread - %message%n%rEx%xException </pattern>
         </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%coloredLevel %logger{15} - %message%n%xException{10}</pattern>
+            <pattern>%coloredLevel %logger{15} - %message%n%rEx%xException{10} </pattern>
         </encoder>
+    </appender>
+
+    <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
     </appender>
 
     <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
@@ -46,6 +52,7 @@
     <root level="INFO">
         <appender-ref ref="ASYNCFILE" />
         <appender-ref ref="ASYNCSTDOUT" />
+        <appender-ref ref="SENTRY" />
     </root>
 
 </configuration>

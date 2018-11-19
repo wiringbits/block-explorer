@@ -11,7 +11,7 @@ import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 
-import { NgHttpLoaderModule } from 'ng-http-loader/ng-http-loader.module';
+import { NgHttpLoaderModule } from 'ng-http-loader';
 import { NgxPaginationModule } from 'ngx-pagination';
 
 import { MomentModule } from 'ngx-moment';

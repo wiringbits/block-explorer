@@ -21,6 +21,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       inputs <- upsertInputs(transaction.id, transaction.inputs)
       outputs <- upsertOutputs(transaction.id, transaction.outputs)
       _ <- spend(transaction.id, inputs)
+      _ = insertDetails(transaction)
     } yield partialTx.copy(inputs = inputs, outputs = outputs)
   }
 
@@ -64,6 +65,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     val result = expectedTransactions.map { tx =>
       val inputs = deleteInputs(tx.id)
       val outputs = deleteOutputs(tx.id)
+      val _ = deleteDetails(tx.id)
 
       tx.copy(inputs = inputs, outputs = outputs)
     }
@@ -204,6 +206,30 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransactionOutput.*).flatten
   }
 
+  def getLatestTransactionBy(addresses: List[Address])(implicit conn: Connection): Map[String, String] = {
+
+    import SqlParser._
+
+    val result = SQL(
+      s"""
+        |SELECT address, (
+        |  SELECT txid
+        |  FROM address_transaction_details
+        |  WHERE address = a.address
+        |  ORDER BY time DESC
+        |  LIMIT 1
+        |) AS txid
+        |FROM address_transaction_details a
+        |GROUP BY address
+        |HAVING address IN ({addresses});
+      """.stripMargin
+    ).on(
+      'addresses -> addresses.map(_.string)
+    ).as((str("address") ~ str("txid")).map(flatten).*)
+
+    result.toMap
+  }
+
   private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """
@@ -339,5 +365,63 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransactionOutput.*)
 
     result.flatten
+  }
+
+  private def insertDetails(transaction: Transaction)(implicit conn: Connection): List[AddressTransactionDetails] = {
+    val received = transaction
+        .outputs
+        .groupBy(_.address)
+        .mapValues { outputs => outputs.map(_.value).sum }
+        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value) }
+
+    val sent = transaction
+        .inputs
+        .groupBy(_.address)
+        .mapValues { inputs => inputs.map(_.value).sum }
+        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value) }
+
+    val result = (received ++ sent)
+        .groupBy(_.address)
+        .mapValues {
+          case head :: list => list.foldLeft(head) { (acc, current) =>
+            current.copy(received = current.received + acc.received, sent = current.sent + acc.sent)
+          }
+        }
+        .values
+        .map(d => insertDetails(d))
+
+    result.toList
+  }
+
+  private def insertDetails(details: AddressTransactionDetails)(implicit conn: Connection): AddressTransactionDetails = {
+    SQL(
+      """
+        |INSERT INTO address_transaction_details
+        |  (address, txid, received, sent, time)
+        |VALUES
+        |  ({address}, {txid}, {received}, {sent}, {time})
+        |RETURNING address, txid, received, sent, time
+      """.stripMargin
+    ).on(
+      'address  -> details.address.string,
+      'txid -> details.txid.string,
+      'received -> details.received,
+      'sent -> details.sent,
+      'time -> details.time
+    ).as(parseAddressTransactionDetails.single)
+  }
+
+  private def deleteDetails(txid: TransactionId)(implicit conn: Connection): List[AddressTransactionDetails] = {
+    val result = SQL(
+      """
+        |DELETE FROM address_transaction_details
+        |WHERE txid = {txid}
+        |RETURNING address, txid, received, sent, time
+      """.stripMargin
+    ).on(
+      'txid -> txid.string
+    ).as(parseAddressTransactionDetails.*)
+
+    result
   }
 }

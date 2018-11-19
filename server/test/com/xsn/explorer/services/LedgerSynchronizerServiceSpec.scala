@@ -22,7 +22,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
 
   lazy val dataHandler = new LedgerPostgresDataHandler(
     database,
-    new BlockPostgresDAO,
+    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
     new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
@@ -30,7 +30,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
     database,
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
 
-  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO)
+  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO(new FieldOrderingSQLInterpreter))
 
   val blockList = List(
     BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),
