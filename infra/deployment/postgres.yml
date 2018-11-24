@@ -1,0 +1,79 @@
+---
+- hosts: postgres
+  gather_facts: no
+  roles:
+    - role: ubuntu-16-04
+
+  vars:
+    xsn_postgres_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      36636164633939356361373762383565633463656366363739383662376663626663383234393964
+      6164663837363533353636396239303563396531383838330a613737373738313034303835393661
+      36646335346338363136666232333361303030663566613263326332336639633932623333353963
+      3537383666303335630a376566343631613261363836666234616265663266643333636565336636
+      62616431316539323039316632626233353937666635353030393134303530663434396131386435
+      3736633437613238663137396533353639376661666635306365
+
+  tasks:
+    - name: Install add-apt-repostory
+      become: yes
+      apt:
+        name: software-properties-common
+        state: latest
+
+    - name: Add postgres repository
+      become: yes
+      apt_repository:
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main
+        state: present
+
+    - name: Update repositories
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Install postgres
+      become: yes
+      apt:
+        name: postgresql-9.6
+        state: present
+        allow_unauthenticated: yes
+
+    - name: Install psycopg2 (for managing postgres)
+      become: yes
+      apt:
+        name: python-psycopg2
+        state: present
+        allow_unauthenticated: yes
+
+    - name: Create the blockchain database
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: blockchain
+        encoding: UTF-8
+        lc_collate: en_US.UTF-8
+        lc_ctype: en_US.UTF-8
+
+    - name: Create the user for postgres
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        db=blockchain
+        priv=ALL
+        name=xsn
+        password={{ xsn_postgres_password }}
+
+    - name: Set the pg_hba config
+      become: yes
+      copy:
+        src: config/pg_hba.conf
+        dest: /etc/postgresql/9.6/main/pg_hba.conf
+        owner: postgres
+        group: postgres
+
+    - name: Reload the postgres config
+      become: yes
+      systemd:
+        name: postgresql
+        state: reloaded
