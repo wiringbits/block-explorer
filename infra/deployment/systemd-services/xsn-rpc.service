@@ -1,0 +1,15 @@
+[Unit]
+Description=XSN RPC Server
+
+[Service]
+Type=simple
+WorkingDirectory=/home/xsn/
+StandardOutput=tty
+StandardError=tty
+User=xsn
+ExecStart=/home/xsn/app/xsnd
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
