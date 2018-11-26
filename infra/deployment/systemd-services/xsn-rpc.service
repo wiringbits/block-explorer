@@ -7,6 +7,7 @@ WorkingDirectory=/home/xsn/
 StandardOutput=tty
 StandardError=tty
 User=xsn
+LimitNOFILE=65535
 ExecStart=/home/xsn/app/xsnd
 
 Restart=on-failure
