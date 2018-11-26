@@ -94,11 +94,6 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
 
-    /**
-     * TODO: The query is very slow while aggregating the spent and received values,
-     *       it might be worth creating an index-like table to get the accumulated
-     *       values directly.
-     */
     SQL(
       s"""
         |SELECT t.txid, blockhash, time, size,
@@ -147,16 +142,11 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
 
-    /**
-     * TODO: The query is very slow while aggregating the spent and received values,
-     *       it might be worth creating an index-like table to get the accumulated
-     *       values directly.
-     */
     SQL(
       s"""
          |SELECT t.txid, blockhash, t.time, t.size,
-         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
-         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+         |       (SELECT COALESCE(SUM(sent), 0) FROM address_transaction_details WHERE txid = t.txid) AS sent,
+         |       (SELECT COALESCE(SUM(received), 0) FROM address_transaction_details WHERE txid = t.txid) AS received
          |FROM transactions t JOIN blocks USING (blockhash)
          |WHERE blockhash = {blockhash}
          |$orderBy
