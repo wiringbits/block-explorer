@@ -102,16 +102,12 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     SQL(
       s"""
         |SELECT t.txid, blockhash, time, size,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid AND address = {address}) AS sent,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid AND address = {address}) AS received
+        |       (SELECT COALESCE(SUM(sent), 0) FROM address_transaction_details  WHERE txid = t.txid AND address = {address}) AS sent,
+        |       (SELECT COALESCE(SUM(received), 0) FROM address_transaction_details  WHERE txid = t.txid AND address = {address}) AS received
         |FROM transactions t
         |WHERE t.txid IN (
         |  SELECT txid
-        |  FROM transaction_inputs
-        |  WHERE address = {address}
-        |) OR t.txid IN (
-        |  SELECT txid
-        |  FROM transaction_outputs
+        |  FROM address_transaction_details
         |  WHERE address = {address}
         |)
         |$orderBy
@@ -132,11 +128,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |FROM transactions
         |WHERE txid IN (
         |  SELECT txid
-        |  FROM transaction_inputs
-        |  WHERE address = {address}
-        |) OR txid IN (
-        |  SELECT txid
-        |  FROM transaction_outputs
+        |  FROM address_transaction_details
         |  WHERE address = {address}
         |)
       """.stripMargin
