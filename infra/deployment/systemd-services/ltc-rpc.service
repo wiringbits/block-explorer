@@ -7,6 +7,7 @@ WorkingDirectory=/home/ltc/
 StandardOutput=tty
 StandardError=tty
 User=ltc
+LimitNOFILE=65535
 ExecStart=/home/ltc/app/litecoind
 
 Restart=on-failure
