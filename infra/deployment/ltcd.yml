@@ -10,7 +10,7 @@
     - ltc_home: /home/ltc
     - ltc_config_dir: /home/ltc/.litecoin
     - ltc_download_url: https://download.litecoin.org/litecoin-0.16.3/linux/litecoin-0.16.3-x86_64-linux-gnu.tar.gz
-    - ltc_download_dest: /home/dummy/ltc.tar.gz
+    - ltc_download_dest: /home/ubuntu/ltc.tar.gz
     - ltc_download_checksum: sha1:963e958bf5dd045fd70d787d6830f64962ae977d
     - ltc_unarchive_dest: /home/ltc/app
 

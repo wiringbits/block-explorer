@@ -10,7 +10,7 @@
     - xsn_home: /home/xsn
     - xsn_config_dir: /home/xsn/.xsncore
     - xsn_download_url: https://github.com/X9Developers/XSN/releases/download/v1.0.17/xsn-1.0.17-x86_64-linux-gnu.tar.gz
-    - xsn_download_dest: /home/dummy/xsn.tar.gz
+    - xsn_download_dest: /home/ubuntu/xsn.tar.gz
     - xsn_download_checksum: sha1:550e5b2e8f2d19a88915c167e333c732ecfef542
     - xsn_unarchive_dest: /home/xsn/app
 
