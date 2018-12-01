@@ -1,14 +1,13 @@
 package com.xsn.explorer.data.anorm
 
 import javax.inject.Inject
-
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import org.scalactic.Good
+import org.scalactic.{Every, Good}
 import play.api.db.Database
 
 class TransactionPostgresDataHandler @Inject() (
@@ -46,7 +45,7 @@ class TransactionPostgresDataHandler @Inject() (
     Good(result)
   }
 
-  def getLatestTransactionBy(addresses: List[Address]): ApplicationResult[Map[String, String]] = withConnection { implicit conn =>
+  def getLatestTransactionBy(addresses: Every[Address]): ApplicationResult[Map[String, String]] = withConnection { implicit conn =>
     val result = transactionPostgresDAO.getLatestTransactionBy(addresses)
 
     Good(result)

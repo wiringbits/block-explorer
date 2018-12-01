@@ -1,14 +1,15 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
-import javax.inject.Inject
 
+import javax.inject.Inject
 import anorm._
 import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
 import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import org.scalactic.Every
 
 class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
@@ -184,7 +185,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransactionOutput.*).flatten
   }
 
-  def getLatestTransactionBy(addresses: List[Address])(implicit conn: Connection): Map[String, String] = {
+  def getLatestTransactionBy(addresses: Every[Address])(implicit conn: Connection): Map[String, String] = {
 
     import SqlParser._
 
@@ -202,7 +203,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |HAVING address IN ({addresses});
       """.stripMargin
     ).on(
-      'addresses -> addresses.map(_.string)
+      'addresses -> addresses.map(_.string).toList
     ).as((str("address") ~ str("txid")).map(flatten).*)
 
     result.toMap

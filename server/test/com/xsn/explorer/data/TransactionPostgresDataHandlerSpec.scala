@@ -11,7 +11,7 @@ import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.Block
-import org.scalactic.{Good, One, Or}
+import org.scalactic.{Every, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
@@ -307,7 +307,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9" -> "1e591eae200f719344fc5df0c4286e3fb191fb8a645bdf054f9b36a856fce41e"
       )
 
-      val addresses = List(
+      val addresses = Every(
         createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
         createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG53"),
         createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG54"),
