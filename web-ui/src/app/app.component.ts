@@ -1,25 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+
+import { Router, NavigationEnd } from '@angular/router';
+
+import 'rxjs/add/operator/distinctUntilChanged';
 
 import { TranslateService } from '@ngx-translate/core';
 
 import { DEFAULT_LANG, LanguageService } from './services/language.service';
+
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   constructor(
     private translate: TranslateService,
-    private languageService: LanguageService) {
+    private languageService: LanguageService,
+    private router: Router) {
 
     translate.setDefaultLang(DEFAULT_LANG);
     translate.use(languageService.getLang());
 
     // define langs
     translate.setTranslation('en', this.englishLang());
+  }
+
+  ngOnInit() {
+    // integrate google analytics via gtag - based on https://stackoverflow.com/a/47658214/3211175
+    this.router.events.distinctUntilChanged((previous: any, current: any) => {
+      // Subscribe to any `NavigationEnd` events where the url has changed
+      if (current instanceof NavigationEnd) {
+        return previous.url === current.url;
+      }
+
+      return true;
+    }).subscribe((x: any) => {
+      const dirtyUrl: string = x.url || '';
+      const url = this.removeQueryParams(dirtyUrl);
+      console.log('reporting: ' + url);
+      (<any>window).gtag('config', environment.gtag.id, { 'page_path': url });
+    });
+  }
+
+  private removeQueryParams(url: string): string {
+    const index = url.indexOf('?');
+    if (index >= 0) {
+      return url.substring(0, index);
+    } else {
+      return url;
+    }
   }
 
   englishLang(): Object {

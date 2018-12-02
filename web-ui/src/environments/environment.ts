@@ -7,5 +7,9 @@ export const environment = {
   production: false,
   api: {
     url: 'http://localhost:9000'
+  },
+  gtag: {
+    // don't track events on dev
+    id: 'UA-XXXXXXXXX-X'
   }
 };
