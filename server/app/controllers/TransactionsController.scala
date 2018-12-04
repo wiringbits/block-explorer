@@ -1,19 +1,17 @@
 package controllers
 
 import javax.inject.Inject
+
 import com.alexitc.playsonify.models.PublicContextWithModel
-import com.xsn.explorer.models.Address
-import com.xsn.explorer.models.request.SendRawTransactionRequest
+import com.xsn.explorer.models.request.{GetLatestTransactionRequest, SendRawTransactionRequest}
 import com.xsn.explorer.services.TransactionService
-import controllers.common.{Codecs,MyJsonController, MyJsonControllerComponents}
-import org.scalactic.Every
+import controllers.common.{MyJsonController, MyJsonControllerComponents}
 
 class TransactionsController @Inject() (
     transactionService: TransactionService,
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
-  import Codecs._
   def getTransaction(txid: String) = publicNoInput { _ =>
     transactionService.getTransactionDetails(txid)
   }
@@ -26,7 +24,7 @@ class TransactionsController @Inject() (
     transactionService.sendRawTransaction(ctx.model.hex)
   }
 
-  def getLatestByAddresses() = publicWithInput { ctx: PublicContextWithModel[Every[Address]] =>
-    transactionService.getLatestTransactionBy(ctx.model)
+  def getLatestByAddresses() = publicWithInput { ctx: PublicContextWithModel[GetLatestTransactionRequest] =>
+    transactionService.getLatestTransactionBy(ctx.model.addresses)
   }
 }

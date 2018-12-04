@@ -230,20 +230,20 @@ class TransactionsControllerSpec extends MyAPISpec {
 
     "return the latest transactions for the addresses" in {
 
-      val body = List(firstAddress.string, secondAddress.string, "3rdaddress")
+      val addresses = List(firstAddress.string, secondAddress.string, "3rdaddress")
         .map(x => s""" "$x" """)
         .mkString("[", ",", "]")
+      val body = s"""{ "addresses": $addresses }"""
       val expected = Json.obj(firstAddress.string -> firstTxId, secondAddress.string -> secondTxId)
 
       val response = POST(url, Some(body))
-
       status(response) mustEqual OK
       val json = contentAsJson(response)
       json mustEqual expected
     }
 
     "fail while passing no addresses" in {
-      val body = """[]"""
+      val body = """{ "addresses": [] }"""
       val response = POST(url, Some(body))
 
       status(response) mustEqual BAD_REQUEST
@@ -255,7 +255,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       val error = errorList.head
 
       (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
-      (error \ "field").as[String].nonEmpty mustEqual false
+      (error \ "field").as[String] mustEqual "addresses"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
   }
