@@ -41,7 +41,6 @@ export class AppComponent implements OnInit {
     }).subscribe((x: any) => {
       const dirtyUrl: string = x.url || '';
       const url = this.removeQueryParams(dirtyUrl);
-      console.log('reporting: ' + url);
       (<any>window).gtag('config', environment.gtag.id, { 'page_path': url });
     });
   }
