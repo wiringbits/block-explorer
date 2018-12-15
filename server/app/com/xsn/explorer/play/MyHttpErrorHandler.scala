@@ -1,9 +1,8 @@
 package com.xsn.explorer.play
 
+import com.alexitc.playsonify.models.{ErrorId, InternalError, PublicError}
+import com.alexitc.playsonify.play.PublicErrorRenderer
 import javax.inject.Inject
-
-import com.alexitc.playsonify.PublicErrorRenderer
-import com.alexitc.playsonify.models.{ErrorId, PublicError}
 import org.slf4j.LoggerFactory
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.Json
@@ -29,7 +28,7 @@ class MyHttpErrorHandler @Inject() (errorRenderer: PublicErrorRenderer) extends 
 
   def onServerError(request: RequestHeader, exception: Throwable) = {
     val errorId = ErrorId.create
-    val error = errorRenderer.renderPrivateError(errorId)
+    val error = errorRenderer.renderPublicError(InternalError(errorId, "Internal error"))
     val json = Json.obj(
       "errors" -> Json.arr(error)
     )

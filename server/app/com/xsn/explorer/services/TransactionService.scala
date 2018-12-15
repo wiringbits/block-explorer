@@ -1,15 +1,16 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models.{OrderingQuery, PaginatedQuery}
+import com.alexitc.playsonify.models.ordering.OrderingQuery
+import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.parsers.TransactionOrderingParser
+import javax.inject.Inject
 import org.scalactic._
 import play.api.libs.json.{JsObject, JsString, JsValue}
 

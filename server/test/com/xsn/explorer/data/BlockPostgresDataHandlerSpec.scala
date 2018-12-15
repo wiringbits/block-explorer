@@ -1,9 +1,10 @@
 package com.xsn.explorer.data
 
-import com.alexitc.playsonify.models._
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
+import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
-import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.BlockLoader

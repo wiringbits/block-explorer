@@ -1,9 +1,11 @@
 package com.xsn.explorer.errors
 
-import com.alexitc.playsonify.models.ServerError
+import com.alexitc.playsonify.models.{ErrorId, ServerError}
 import org.postgresql.util.PSQLException
 
 sealed trait PostgresError extends ServerError {
+
+  val id = ErrorId.create
 
   def psqlException: PSQLException
 

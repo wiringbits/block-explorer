@@ -1,7 +1,7 @@
 package controllers
 
-import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.errors.MasternodeNotFoundError
 import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models.rpc.Masternode

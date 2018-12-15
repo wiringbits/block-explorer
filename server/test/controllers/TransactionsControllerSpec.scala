@@ -1,7 +1,7 @@
 package controllers
 
-import com.alexitc.playsonify.PublicErrorRenderer
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.{DataHelper, DummyXSNService, TransactionDummyDataHandler, TransactionLoader}

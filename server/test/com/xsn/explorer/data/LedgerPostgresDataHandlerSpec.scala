@@ -1,8 +1,8 @@
 package com.xsn.explorer.data
 
+import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.LedgerPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}

@@ -1,14 +1,14 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.FuturePaginatedResult
-import com.alexitc.playsonify.models.{OrderingQuery, PaginatedQuery}
+import com.alexitc.playsonify.models.ordering.OrderingQuery
+import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.BalanceFutureDataHandler
 import com.xsn.explorer.models.Balance
 import com.xsn.explorer.parsers.BalanceOrderingParser
+import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 

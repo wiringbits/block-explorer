@@ -1,12 +1,12 @@
 package controllers
 
-import javax.inject.Inject
-
-import com.alexitc.playsonify.models.{Limit, Offset, OrderingQuery, PaginatedQuery}
+import com.alexitc.playsonify.models.ordering.OrderingQuery
+import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.models.Transaction
 import com.xsn.explorer.services.{AddressService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
-import controllers.common.{MyJsonController, MyJsonControllerComponents}
+import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
+import javax.inject.Inject
 import play.api.libs.json._
 
 class AddressesController @Inject() (
@@ -15,11 +15,13 @@ class AddressesController @Inject() (
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
-  def getBy(address: String) = publicNoInput { _ =>
+  import Codecs._
+
+  def getBy(address: String) = public { _ =>
     addressService.getBy(address)
   }
 
-  def getTransactions(address: String, offset: Int, limit: Int, ordering: String) = publicNoInput { _ =>
+  def getTransactions(address: String, offset: Int, limit: Int, ordering: String) = public { _ =>
     val paginatedQuery = PaginatedQuery(Offset(offset), Limit(limit))
 
     transactionService.getTransactions(address, paginatedQuery, OrderingQuery(ordering))
@@ -40,7 +42,7 @@ class AddressesController @Inject() (
     JsObject.apply(values)
   }
 
-  def getUnspentOutputs(address: String) = publicNoInput { _ =>
+  def getUnspentOutputs(address: String) = public { _ =>
     addressService.getUnspentOutputs(address)
   }
 }

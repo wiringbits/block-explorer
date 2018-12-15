@@ -1,16 +1,18 @@
 package com.xsn.explorer.errors
 
-import com.alexitc.playsonify.models.{GenericPublicError, PublicError, ServerError}
-import play.api.i18n.{Lang, MessagesApi}
+import com.alexitc.playsonify.core.I18nService
+import com.alexitc.playsonify.models.{ErrorId, GenericPublicError, PublicError, ServerError}
 
 sealed trait XSNServerError extends ServerError {
+
+  val id = ErrorId.create
 
   override def cause: Option[Throwable] = Option.empty
 }
 
 case class XSNMessageError(message: String) extends XSNServerError {
 
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
     val error = GenericPublicError(message)
     List(error)
   }
@@ -18,16 +20,16 @@ case class XSNMessageError(message: String) extends XSNServerError {
 
 case object XSNUnexpectedResponseError extends XSNServerError {
 
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
-    val message = messagesApi("xsn.server.unexpectedError")
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("xsn.server.unexpectedError")
     val error = GenericPublicError(message)
     List(error)
   }
 }
 
 case object XSNWorkQueueDepthExceeded extends XSNServerError {
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
-    val message = messagesApi("xsn.server.unexpectedError")
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("xsn.server.unexpectedError")
     val error = GenericPublicError(message)
     List(error)
   }

@@ -1,7 +1,8 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}

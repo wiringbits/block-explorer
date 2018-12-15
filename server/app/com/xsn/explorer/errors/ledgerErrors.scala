@@ -1,11 +1,11 @@
 package com.xsn.explorer.errors
 
+import com.alexitc.playsonify.core.I18nService
 import com.alexitc.playsonify.models.{ApplicationError, PublicError}
-import play.api.i18n.{Lang, MessagesApi}
 
 trait LedgerError extends ApplicationError {
 
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = List.empty
 }
 
 case object PreviousBlockMissingError extends LedgerError

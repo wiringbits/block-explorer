@@ -1,14 +1,15 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
-import javax.inject.Inject
 
 import anorm._
-import com.alexitc.playsonify.models.{Count, FieldOrdering, PaginatedQuery}
-import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
+import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery}
+import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.{Address, Balance}
+import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {

@@ -1,6 +1,6 @@
 package com.xsn.explorer.parsers
 
-import com.alexitc.playsonify.models.OrderingCondition
+import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.parsers.FieldOrderingParser
 import com.xsn.explorer.models.fields.TransactionField
 

@@ -1,15 +1,16 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
-import javax.inject.Inject
 
 import anorm._
-import com.alexitc.playsonify.models._
-import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
+import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}
+import javax.inject.Inject
 
 class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 

@@ -1,14 +1,14 @@
 package com.xsn.explorer.data.anorm
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.{Address, Balance}
+import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 

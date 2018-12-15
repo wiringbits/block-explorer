@@ -1,16 +1,16 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models._
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition, OrderingQuery}
+import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.errors.IPAddressFormatError
 import com.xsn.explorer.models.IPAddress
 import com.xsn.explorer.models.fields.MasternodeField
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.parsers.MasternodeOrderingParser
+import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 
 import scala.concurrent.ExecutionContext

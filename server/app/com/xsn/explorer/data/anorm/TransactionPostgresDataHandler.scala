@@ -1,12 +1,13 @@
 package com.xsn.explorer.data.anorm
 
-import javax.inject.Inject
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import javax.inject.Inject
 import org.scalactic.{Every, Good}
 import play.api.db.Database
 

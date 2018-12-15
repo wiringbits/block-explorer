@@ -1,8 +1,7 @@
 package com.xsn.explorer.models
 
-import javax.xml.bind.DatatypeConverter
-
 import com.alexitc.playsonify.models.WrappedString
+import javax.xml.bind.DatatypeConverter
 import play.api.libs.json._
 
 import scala.util.Try

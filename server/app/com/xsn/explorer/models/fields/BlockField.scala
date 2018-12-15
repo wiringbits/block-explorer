@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.fields
 
-import com.xsn.explorer.data.anorm.interpreters.ColumnNameResolver
+import com.alexitc.playsonify.sql.ColumnNameResolver
 import enumeratum.{Enum, EnumEntry}
 
 sealed abstract class BlockField(override val entryName: String) extends EnumEntry

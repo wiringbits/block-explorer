@@ -1,9 +1,9 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.data.anorm.interpreters.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec

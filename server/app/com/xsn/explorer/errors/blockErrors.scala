@@ -1,14 +1,14 @@
 package com.xsn.explorer.errors
 
-import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError, ServerError}
-import play.api.i18n.{Lang, MessagesApi}
+import com.alexitc.playsonify.core.I18nService
+import com.alexitc.playsonify.models._
 
 sealed trait BlockError
 
 case object BlockhashFormatError extends BlockError with InputValidationError {
 
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
-    val message = messagesApi("error.block.format")
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("error.block.format")
     val error = FieldValidationError("blockhash", message)
     List(error)
   }
@@ -16,14 +16,15 @@ case object BlockhashFormatError extends BlockError with InputValidationError {
 
 case object BlockNotFoundError extends BlockError with InputValidationError {
 
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
-    val message = messagesApi("error.block.notFound")
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("error.block.notFound")
     val error = FieldValidationError("blockhash", message)
     List(error)
   }
 }
 
 case object BlockUnknownError extends BlockError with ServerError {
+  val id = ErrorId.create
   override def cause: Option[Throwable] = None
-  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = List.empty
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = List.empty
 }

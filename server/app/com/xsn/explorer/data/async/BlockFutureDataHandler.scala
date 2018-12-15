@@ -1,14 +1,14 @@
 package com.xsn.explorer.data.async
 
-import javax.inject.Inject
-
-import com.alexitc.playsonify.core.FutureApplicationResult
-import com.alexitc.playsonify.models.{FieldOrdering, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}
+import javax.inject.Inject
 
 import scala.concurrent.Future
 
@@ -25,7 +25,7 @@ class BlockFutureDataHandler @Inject() (
     blockBlockingDataHandler.getBy(height)
   }
 
-  override def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField]): FutureApplicationResult[PaginatedResult[Block]] = Future {
+  override def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField]): FuturePaginatedResult[Block] = Future {
     blockBlockingDataHandler.getBy(paginatedQuery, ordering)
   }
 

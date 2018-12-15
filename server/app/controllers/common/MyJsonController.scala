@@ -1,25 +1,20 @@
 package controllers.common
 
-import com.alexitc.playsonify.AbstractJsonController
-import com.alexitc.playsonify.models.{ErrorId, ServerError}
+import com.alexitc.playsonify.models.ServerError
+import com.alexitc.playsonify.play.AbstractJsonController
 import org.slf4j.LoggerFactory
 
 abstract class MyJsonController(cc: MyJsonControllerComponents) extends AbstractJsonController[Nothing](cc) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-  override def onServerError(error: ServerError, errorId: ErrorId): Unit = {
-    val message = s"Unexpected server error, id = ${errorId.string}, error = $error"
+  override protected def onServerError(error: ServerError): Unit = {
+    error.cause match {
+      case Some(cause) =>
+        logger.error(s"Unexpected internal error, id = ${error.id.string}, error = $error", cause)
 
-    error
-        .cause
-        .orElse {
-          logger.warn(message)
-          None
-        }
-        .foreach { cause =>
-          // we'll log as error when there is an exception involved
-          logger.error(message, cause)
-        }
+      case None =>
+        logger.error(s"Unexpected internal error, id = ${error.id.string}, error = $error}")
+    }
   }
 }
