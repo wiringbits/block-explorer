@@ -443,13 +443,22 @@ class XSNServiceRPCImpl @Inject() (
               }
         }
 
-    // if there is no result nor error, it is probably that the server returned non 200 status
-    maybe.orElse {
-      Try(response.json)
-          .toOption
-          .flatMap { json => mapError(json, errorCodeMapper) }
-          .map { e => Bad(e).accumulating }
-    }
+    maybe
+        .orElse {
+          // if there is no result nor error, it is probably that the server returned non 200 status
+          Try(response.json)
+              .toOption
+              .flatMap { json => mapError(json, errorCodeMapper) }
+              .map { e => Bad(e).accumulating }
+        }
+        .orElse {
+          // if still there is no error, the response might not be a json
+          Try(response.body)
+              .collect {
+                case "Work queue depth exceeded" => Bad(XSNWorkQueueDepthExceeded).accumulating
+              }
+              .toOption
+        }
   }
 
   override val genesisBlockhash: Blockhash = explorerConfig.genesisBlock

@@ -8,8 +8,10 @@ import com.xsn.explorer.models.rpc.Masternode
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.{Bad, Good}
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
@@ -173,6 +175,19 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
       mockRequest(request, response)(200, json)
 
       whenReady(service.getTransaction(txid)) { result =>
+        result mustEqual Bad(XSNWorkQueueDepthExceeded).accumulating
+      }
+    }
+
+    "handle work queue depth exceeded (no json)" in {
+      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+
+      val responseBody = "Work queue depth exceeded"
+
+      mockRequestString(request, response)(500, responseBody)
+
+      val timeout = Timeout(Span(5, Seconds))
+      whenReady(service.getTransaction(txid), timeout) { result =>
         result mustEqual Bad(XSNWorkQueueDepthExceeded).accumulating
       }
     }
@@ -571,8 +586,15 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
   }
 
   private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
-    when(response.status).thenReturn(200)
+    when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
+    when(response.body).thenReturn(body.toString())
+    when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+  }
+
+  private def mockRequestString(request: WSRequest, response: WSResponse)(status: Int, body: String) = {
+    when(response.status).thenReturn(status)
+    when(response.body).thenReturn(body)
     when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
   }
 }
