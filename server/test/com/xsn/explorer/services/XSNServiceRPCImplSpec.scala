@@ -163,6 +163,19 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
         result mustEqual Bad(XSNUnexpectedResponseError).accumulating
       }
     }
+
+    "handle work queue depth exceeded" in {
+      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+
+      val responseBody = createRPCErrorResponse(-1, "Work queue depth exceeded")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.getTransaction(txid)) { result =>
+        result mustEqual Bad(XSNWorkQueueDepthExceeded).accumulating
+      }
+    }
   }
 
   "getRawTransaction" should {

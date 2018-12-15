@@ -402,7 +402,7 @@ class XSNServiceRPCImpl @Inject() (
         .asOpt[JsValue]
         .filter(_ != JsNull)
 
-    jsonErrorMaybe
+    val errorMaybe = jsonErrorMaybe
         .flatMap { jsonError =>
           // from error code if possible
           (jsonError \ "code")
@@ -416,6 +416,12 @@ class XSNServiceRPCImpl @Inject() (
                     .map(XSNMessageError.apply)
               }
         }
+
+    errorMaybe
+        .collect {
+          case XSNMessageError("Work queue depth exceeded") => XSNWorkQueueDepthExceeded
+        }
+        .orElse(errorMaybe)
   }
 
   private def getResult[A](

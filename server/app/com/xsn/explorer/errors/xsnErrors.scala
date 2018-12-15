@@ -24,3 +24,11 @@ case object XSNUnexpectedResponseError extends XSNServerError {
     List(error)
   }
 }
+
+case object XSNWorkQueueDepthExceeded extends XSNServerError {
+  override def toPublicErrorList(messagesApi: MessagesApi)(implicit lang: Lang): List[PublicError] = {
+    val message = messagesApi("xsn.server.unexpectedError")
+    val error = GenericPublicError(message)
+    List(error)
+  }
+}
