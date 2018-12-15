@@ -4,6 +4,7 @@
 /dist
 /tmp
 /out-tsc
+web-ui.zip
 
 # dependencies
 /node_modules
