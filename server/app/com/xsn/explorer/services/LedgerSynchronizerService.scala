@@ -1,14 +1,13 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OptionOps}
+import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height, Transaction}
 import com.xsn.explorer.util.Extensions.FutureOrExt
+import javax.inject.Inject
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
@@ -33,7 +32,7 @@ class LedgerSynchronizerService @Inject() (
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
-      transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
+      transactions <- transactionService.getTransactions(block.transactions).toFutureOr
       _ <- synchronize(block, transactions).toFutureOr
     } yield ()
 
@@ -98,7 +97,7 @@ class LedgerSynchronizerService @Inject() (
       val result = for {
         blockhash <- newBlock.previousBlockhash.toFutureOr(BlockNotFoundError)
         previousBlock <- xsnService.getBlock(blockhash).toFutureOr
-        previousTransactions <- previousBlock.transactions.map(transactionService.getTransaction).toFutureOr
+        previousTransactions <- transactionService.getTransactions(previousBlock.transactions).toFutureOr
         _ <- synchronize(previousBlock, previousTransactions).toFutureOr
         _ <- synchronize(newBlock, newTransactions).toFutureOr
       } yield ()
@@ -149,7 +148,7 @@ class LedgerSynchronizerService @Inject() (
         _ <- previous.toFutureOr
         blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
         block <- xsnService.getBlock(blockhash).toFutureOr
-        transactions <- block.transactions.map(transactionService.getTransaction).toFutureOr
+        transactions <- transactionService.getTransactions(block.transactions).toFutureOr
         _ <- synchronize(block, transactions).toFutureOr
       } yield ()
 

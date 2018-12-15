@@ -1,7 +1,7 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
-import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
@@ -10,8 +10,10 @@ import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.parsers.TransactionOrderingParser
+import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic._
+import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,6 +24,8 @@ class TransactionService @Inject() (
     xsnService: XSNService,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val maxTransactionsPerQuery = 100
 
@@ -74,6 +78,27 @@ class TransactionService @Inject() (
     } yield Transaction.fromRPC(rpcTransaction)
 
     result.toFuture
+  }
+
+  def getTransactions(ids: List[TransactionId]): FutureApplicationResult[List[Transaction]] = {
+    def loadTransactionsSlowly(pending: List[TransactionId]): FutureOr[List[Transaction]] = pending match {
+      case x :: xs =>
+        for {
+          tx <- getTransaction(x).toFutureOr
+          next <- loadTransactionsSlowly(xs)
+        } yield tx :: next
+
+      case _ => Future.successful(Good(List.empty)).toFutureOr
+    }
+
+    ids
+        .map(getTransaction)
+        .toFutureOr
+        .recoverWith(XSNWorkQueueDepthExceeded) {
+          logger.warn("Unable to load transaction due to server overload, loading them slowly")
+          loadTransactionsSlowly(ids)
+        }
+        .toFuture
   }
 
   def getTransactions(

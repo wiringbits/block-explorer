@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.FutureOr
 import com.alexitc.playsonify.models.ApplicationError
 import org.scalactic.{Bad, Good, One}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 object Extensions {
 
@@ -36,6 +36,16 @@ object Extensions {
         case Good(result) => Good(result)
         case Bad(One(e)) if e == error => Good(f)
         case Bad(errors) => Bad(errors)
+      }
+
+      new FutureOr(future)
+    }
+
+    def recoverWith[B >: A](error: ApplicationError)(f: => FutureOr[B])(implicit ec: ExecutionContext): FutureOr[B] = {
+      val future = inner.toFuture.flatMap {
+        case Good(result) => Future.successful(Good(result))
+        case Bad(One(e)) if e == error => f.toFuture
+        case Bad(errors) => Future.successful(Bad(errors))
       }
 
       new FutureOr(future)
