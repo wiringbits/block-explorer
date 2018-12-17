@@ -24,8 +24,8 @@ class TransactionsControllerSpec extends MyAPISpec {
   val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
   val nonCoinbasePreviousTx = TransactionLoader.get("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9")
   val severalInputsTx = TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
-  val firstAddress = createAddress("fygsydgfygsdyfgsdyg")
-  val secondAddress = createAddress("56wedf5wedweedw")
+  val firstAddress = createAddress("Xvjue2ZLnJwTrSLUBx7DTHaSHTdpWrxtLF")
+  val secondAddress = createAddress("bc1qzhayf65p2j4h3pfw22aujgr5w42xfqzx5uvddt")
   val firstTxId = DataHelper.createTransactionId("a3c43d223658a8656a31a6e5c407df4bbb0f565cb9c5a1acc90efa056b52c0eb")
   val secondTxId = DataHelper.createTransactionId("8a865656b5a3c43d22b00f565cb9c5a1a3bba31a6e5c65407df4cc90efa2c0eb")
 
@@ -230,7 +230,7 @@ class TransactionsControllerSpec extends MyAPISpec {
 
     "return the latest transactions for the addresses" in {
 
-      val addresses = List(firstAddress.string, secondAddress.string, "3rdaddress")
+      val addresses = List(firstAddress.string, secondAddress.string, s"3rd${secondAddress.string}")
         .map(x => s""" "$x" """)
         .mkString("[", ",", "]")
       val body = s"""{ "addresses": $addresses }"""
