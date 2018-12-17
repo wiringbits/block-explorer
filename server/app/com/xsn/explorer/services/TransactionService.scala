@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsObject, JsString, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 class TransactionService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
@@ -63,21 +64,44 @@ class TransactionService @Inject() (
   def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
     val result = for {
       tx <- xsnService.getTransaction(txid).toFutureOr
-      transactionVIN <- tx.vin.map { vin =>
-        getTransactionValue(vin)
-            .map {
-              case Good(transactionValue) =>
-                val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
-                Good(newVIN)
-
-              case Bad(_) => Good(vin)
-            }
-      }.toFutureOr
-
+      transactionVIN <- getTransactionVIN(tx.vin).toFutureOr
       rpcTransaction = tx.copy(vin = transactionVIN)
     } yield Transaction.fromRPC(rpcTransaction)
 
     result.toFuture
+  }
+
+  private def getTransactionVIN(list: List[TransactionVIN]): FutureApplicationResult[List[TransactionVIN]] = {
+    def getVIN(vin: TransactionVIN) = {
+      getTransactionValue(vin)
+          .map {
+            case Good(transactionValue) =>
+              val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
+              Good(newVIN)
+
+            case Bad(_) => Good(vin)
+          }
+    }
+
+    def loadVINSequentially(pending: List[TransactionVIN]): FutureOr[List[TransactionVIN]] = pending match {
+      case x :: xs =>
+        for {
+          tx <- getVIN(x).toFutureOr
+          next <- loadVINSequentially(xs)
+        } yield tx :: next
+
+      case _ => Future.successful(Good(List.empty)).toFutureOr
+    }
+
+    list
+        .map(getVIN)
+        .toFutureOr
+        .toFuture
+        .recoverWith {
+          case NonFatal(ex) =>
+            logger.warn(s"Failed to load VIN, trying sequentially, error = ${ex.getMessage}")
+            loadVINSequentially(list).toFuture
+        }
   }
 
   def getTransactions(ids: List[TransactionId]): FutureApplicationResult[List[Transaction]] = {
@@ -99,6 +123,11 @@ class TransactionService @Inject() (
           loadTransactionsSlowly(ids)
         }
         .toFuture
+        .recoverWith {
+          case NonFatal(ex) =>
+            logger.warn(s"Unable to load transactions due to server error, loading them sequentially, error = ${ex.getMessage}")
+            loadTransactionsSlowly(ids).toFuture
+        }
   }
 
   def getTransactions(
