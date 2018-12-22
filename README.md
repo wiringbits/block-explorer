@@ -14,5 +14,8 @@ The web-ui is the frontend application that interacts with the `server` project 
 ## infra
 The infra project contains all stuff related to the required infrastructure, like deployment steps and hopefully deployment scripts (TODO).
 
+# Public JSON API
+See the [api_docs](api_docs.md).
+
 # Contributing
 We are happy to accept contributions, please read the [CONTRIBUTING.md](CONTRIBUTING.md) file to see our rules.
