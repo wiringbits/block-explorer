@@ -2,7 +2,7 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.LedgerPostgresDataHandler
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}
@@ -17,7 +17,8 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     database,
     new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
-    new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+    new BalancePostgresDAO(new FieldOrderingSQLInterpreter),
+    new AggregatedAmountPostgresDAO)
 
   val blockList = List(
     BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),

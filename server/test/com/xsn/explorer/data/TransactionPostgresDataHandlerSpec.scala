@@ -3,7 +3,7 @@ package com.xsn.explorer.data
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
@@ -22,7 +22,8 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     database,
     new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
     new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
-    new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+    new BalancePostgresDAO(new FieldOrderingSQLInterpreter),
+    new AggregatedAmountPostgresDAO)
 
   lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO(new FieldOrderingSQLInterpreter))
   val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)

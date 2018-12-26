@@ -1,16 +1,16 @@
 package com.xsn.explorer.data.anorm
 
 import java.sql.Connection
-import javax.inject.Inject
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Address, Balance, Transaction}
 import com.xsn.explorer.util.Extensions.ListOptionExt
+import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database
 
@@ -18,7 +18,8 @@ class LedgerPostgresDataHandler @Inject() (
     override val database: Database,
     blockPostgresDAO: BlockPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
-    balancePostgresDAO: BalancePostgresDAO)
+    balancePostgresDAO: BalancePostgresDAO,
+    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO)
     extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
@@ -73,10 +74,16 @@ class LedgerPostgresDataHandler @Inject() (
       _ <- transactions.map(tx => transactionPostgresDAO.upsert(tx)).everything
 
       // balances
-      _ <- balances(transactions)
+      balanceList = balances(transactions)
+
+      _ <- balanceList
           .map { b => balancePostgresDAO.upsert(b) }
           .toList
           .everything
+
+      // compute aggregated amount
+      delta = balanceList.map(_.available).sum
+      _ = aggregatedAmountPostgresDAO.updateAvailableCoins(delta)
     } yield ()
 
     // link previous block (if possible)
@@ -96,11 +103,16 @@ class LedgerPostgresDataHandler @Inject() (
       _ <- blockPostgresDAO.delete(block.hash)
 
       // balances
-      _ <- balances(deletedTransactions)
+      balanceList = balances(deletedTransactions)
+      _ <- balanceList
           .map { b => b.copy(spent = -b.spent, received = -b.received) }
           .map { b => balancePostgresDAO.upsert(b) }
           .toList
           .everything
+
+      // compute aggregated amount
+      delta = balanceList.map(_.available).sum
+      _ = aggregatedAmountPostgresDAO.updateAvailableCoins(-delta)
     } yield ()
   }
 
