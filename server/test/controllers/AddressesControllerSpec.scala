@@ -101,8 +101,6 @@ class AddressesControllerSpec extends MyAPISpec {
     }
 
     "fail on bad address format" in {
-      pending
-
       val address = "XnH3bC9NruJ4wnu4Dgi8F3wemmJtcxpKp"
       val response = GET(url(address))
 
