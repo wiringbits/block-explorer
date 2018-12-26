@@ -13,16 +13,15 @@ class StatisticsPostgresDAO {
   def getStatistics(implicit conn: Connection): Statistics = {
     val result = SQL(
       s"""
-        |SELECT
-        |  (
-        |    SELECT SUM(received - spent) FROM balances
-        |    WHERE address <> '$BurnAddress'
+        |SELECT (
+        |    (SELECT value FROM aggregated_amounts WHERE name = 'available_coins') -
+        |    (SELECT COALESCE(SUM(received - spent), 0) FROM balances WHERE address = '$BurnAddress')
         |  ) AS total_supply,
         |  (
-        |    SELECT SUM(received - spent) FROM balances
-        |    WHERE address NOT IN (SELECT address FROM hidden_addresses)
+        |    (SELECT value FROM aggregated_amounts WHERE name = 'available_coins') -
+        |    (SELECT COALESCE(SUM(received - spent), 0) FROM balances WHERE address IN (SELECT address FROM hidden_addresses))
         |  ) AS circulating_supply,
-        |  (SELECT COUNT(*) FROM transactions) AS transactions,
+        |  (SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = 'transactions') AS transactions,
         |  (SELECT COALESCE(MAX(height), 0) FROM blocks) AS blocks
       """.stripMargin
     ).as(StatisticsParsers.parseStatistics.single)

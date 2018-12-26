@@ -6,6 +6,7 @@ import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgr
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
 import com.xsn.explorer.models.{Address, Balance}
+import org.scalatest.OptionValues._
 
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
@@ -20,7 +21,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     "exclude hidden_addresses from the circulating supply" in {
       val hiddenAddress = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
-      val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply
+      val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
 
       database.withConnection { implicit conn =>
         _root_.anorm.SQL(
@@ -35,19 +36,19 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
-      result.circulatingSupply mustEqual circulatingSupply
+      result.circulatingSupply.value mustEqual circulatingSupply
     }
 
     "exclude the burn address from the total supply" in {
       val burnAddress = Address.from(StatisticsPostgresDAO.BurnAddress).get
 
-      val totalSupply = dataHandler.getStatistics().get.totalSupply
+      val totalSupply = dataHandler.getStatistics().get.totalSupply.getOrElse(0)
 
       val balance = Balance(burnAddress, received = BigDecimal(1000), spent = BigDecimal(500))
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
-      result.totalSupply mustEqual totalSupply
+      result.totalSupply.value mustEqual totalSupply
     }
   }
 }
