@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
@@ -86,6 +86,22 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         .filter(_.size == expectedTransactions.size)
         .map(_ => result)
         .getOrElse { throw new RuntimeException("Failed to delete transactions consistently")} // this should not happen
+  }
+
+  def getBy(address: Address, before: Long, limit: Limit)(implicit conn: Connection): List[Transaction] = {
+    SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size
+        |FROM transactions t JOIN address_transaction_details USING (txid)
+        |WHERE t.time < {before} AND address = {address}
+        |ORDER BY time DESC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'address -> address.string,
+      'limit -> limit.int,
+      'before -> before
+    ).as(parseTransaction.*).flatten
   }
 
   def getBy(

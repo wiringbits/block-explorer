@@ -2,7 +2,7 @@ package com.xsn.explorer.data.async
 
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.PaginatedQuery
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery}
 import com.xsn.explorer.data.{TransactionBlockingDataHandler, TransactionDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
@@ -23,6 +23,14 @@ class TransactionFutureDataHandler @Inject() (
       ordering: FieldOrdering[TransactionField]): FuturePaginatedResult[TransactionWithValues] = Future {
 
     blockingDataHandler.getBy(address, paginatedQuery, ordering)
+  }
+
+  override def getBy(
+      address: Address,
+      before: Long,
+      limit: Limit): FutureApplicationResult[List[Transaction]] = Future {
+
+    blockingDataHandler.getBy(address, before, limit)
   }
 
   override def getUnspentOutputs(address: Address): FutureApplicationResult[List[Transaction.Output]] = Future {

@@ -2,7 +2,7 @@ package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.models._
@@ -27,6 +27,11 @@ class TransactionPostgresDataHandler @Inject() (
     val result = PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, total, transactions)
 
     Good(result)
+  }
+
+  def getBy(address: Address, before: Long, limit: Limit): ApplicationResult[List[Transaction]] = withConnection { implicit conn =>
+    val transactions = transactionPostgresDAO.getBy(address, before, limit)
+    Good(transactions)
   }
 
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>

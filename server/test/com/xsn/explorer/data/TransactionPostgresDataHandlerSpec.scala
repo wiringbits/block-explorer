@@ -319,6 +319,12 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
+  "getBy keyset pagination" should {
+    "work" in {
+      pending
+    }
+  }
+
   private def createBlock(block: Block) = {
     val transactions = block.transactions
         .map(_.string)
