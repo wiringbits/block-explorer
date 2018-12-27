@@ -53,6 +53,8 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.5.13"
 )
 
+libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
+
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 libraryDependencies += "org.mockito" % "mockito-core" % "2.15.0" % Test
 
