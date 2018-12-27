@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.OrderingQuery
-import com.alexitc.playsonify.models.pagination.PaginatedQuery
+import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors._
@@ -11,6 +11,7 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.parsers.TransactionOrderingParser
 import com.xsn.explorer.util.Extensions.FutureOrExt
+import io.scalaland.chimney.dsl._
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -145,6 +146,47 @@ class TransactionService @Inject() (
       ordering <- transactionOrderingParser.from(orderingQuery).toFutureOr
       transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery, ordering).toFutureOr
     } yield transactions
+
+    result.toFuture
+  }
+
+  def getLightWalletTransactions(addressString: String, before: Long, limit: Limit): FutureApplicationResult[List[LightWalletTransaction]] = {
+    def buildData(address: Address, txValues: Transaction) = {
+      val result = for {
+        plain <- xsnService.getTransaction(txValues.id).toFutureOr
+        vin <- getTransactionVIN(plain.vin).toFutureOr
+      } yield {
+        val inputs = vin
+            .filter(_.address contains address)
+            .map { _.into[LightWalletTransaction.Input].withFieldRenamed(_.voutIndex, _.index).transform }
+
+        val outputs = plain
+            .vout
+            .filter(_.address contains address)
+            .map { _.into[LightWalletTransaction.Output].withFieldRenamed(_.n, _.index).transform }
+
+        txValues
+            .into[LightWalletTransaction]
+            .withFieldConst(_.inputs, inputs)
+            .withFieldConst(_.outputs, outputs)
+            .transform
+      }
+
+      result.toFuture
+    }
+
+    val paginatedQuery = PaginatedQuery(Offset(0), limit)
+    val result = for {
+      address <- {
+        val maybe = Address.from(addressString)
+        Or.from(maybe, One(AddressFormatError)).toFutureOr
+      }
+
+      _ <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
+
+      transactions <- transactionFutureDataHandler.getBy(address, before, limit).toFutureOr
+      data <- transactions.map { transaction => buildData(address, transaction) }.toFutureOr
+    } yield data
 
     result.toFuture
   }
