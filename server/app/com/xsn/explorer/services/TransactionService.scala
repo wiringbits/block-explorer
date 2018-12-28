@@ -150,7 +150,7 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
-  def getLightWalletTransactions(addressString: String, before: Long, limit: Limit): FutureApplicationResult[List[LightWalletTransaction]] = {
+  def getLightWalletTransactions(addressString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[List[LightWalletTransaction]] = {
     def buildData(address: Address, txValues: Transaction) = {
       val result = for {
         plain <- xsnService.getTransaction(txValues.id).toFutureOr
@@ -175,16 +175,23 @@ class TransactionService @Inject() (
       result.toFuture
     }
 
-    val paginatedQuery = PaginatedQuery(Offset(0), limit)
     val result = for {
       address <- {
         val maybe = Address.from(addressString)
         Or.from(maybe, One(AddressFormatError)).toFutureOr
       }
 
-      _ <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
-      transactions <- transactionFutureDataHandler.getBy(address, before, limit).toFutureOr
+      lastSeenTxid <- {
+        lastSeenTxidString
+            .map(TransactionId.from)
+            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
+            .getOrElse(Good(Option.empty))
+            .toFutureOr
+      }
+
+      transactions <- transactionFutureDataHandler.getLatestBy(address, limit, lastSeenTxid).toFutureOr
       data <- transactions.map { transaction => buildData(address, transaction) }.toFutureOr
     } yield data
 

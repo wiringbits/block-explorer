@@ -12,7 +12,7 @@ POST  /transactions/latest       controllers.TransactionsController.getLatestByA
 
 GET   /addresses/:address                            controllers.AddressesController.getBy(address: String)
 GET   /addresses/:address/transactions               controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
-GET   /addresses/:address/lightWalletTransactions    controllers.AddressesController.getLightWalletTransactions(address: String, limit: Int ?= 10, before: Option[Long])
+GET   /addresses/:address/lightWalletTransactions    controllers.AddressesController.getLightWalletTransactions(address: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 GET   /addresses/:address/utxos                      controllers.AddressesController.getUnspentOutputs(address: String)
 
 GET   /blocks                            controllers.BlocksController.getLatestBlocks()

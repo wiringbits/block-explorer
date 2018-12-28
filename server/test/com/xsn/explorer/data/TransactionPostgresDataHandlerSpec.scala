@@ -319,9 +319,83 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  "getBy keyset pagination" should {
-    "work" in {
-      pending
+  "getLatestBy" should {
+    val address = createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F")
+    val blockhash = createBlockhash("0000000000bdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+    val inputs = List(
+      Transaction.Input(dummyTransaction.id, 0, 1, 100, address),
+      Transaction.Input(dummyTransaction.id, 1, 2, 200, address)
+    )
+
+    val outputs = List(
+      Transaction.Output(createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"), 0, BigDecimal(50), createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"), HexString.from("00").get, None, None),
+      Transaction.Output(
+        createTransactionId("ad9320dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+        1,
+        BigDecimal(250),
+        createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        HexString.from("00").get,
+        None, None)
+    )
+
+    val transaction = Transaction(
+      createTransactionId("00051e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+      blockhash,
+      321,
+      Size(1000),
+      inputs,
+      outputs)
+
+    val transactions = List(
+      transaction,
+      transaction.copy(
+        id = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        time = 320),
+      transaction.copy(
+        id = createTransactionId("00c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        time = 319),
+      transaction.copy(
+        id = createTransactionId("02c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+        time = 319))
+        .sortWith { case (a, b) =>
+          if (a.time > b.time) true
+          else if (a.time < b.time) false
+          else if (a.id.string < b.id.string) true
+          else false
+        }
+
+    val block = this.block.copy(
+      hash = blockhash,
+      height = Height(10),
+      transactions = transactions.map(_.id))
+
+    def prepare() = {
+      createBlock(block, transactions)
+    }
+
+    "return the newest elements" in {
+      prepare()
+      val expected = transactions.head
+      val result = dataHandler.getLatestBy(address, Limit(1), None).get
+      result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
+    }
+
+    "return the next elements given the last seen tx" in {
+      prepare()
+
+      val lastSeenTxid = transactions.head.id
+      val expected = transactions(1)
+      val result = dataHandler.getLatestBy(address, Limit(1), Option(lastSeenTxid)).get
+      result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
+    }
+
+    "return the element with the same time breaking ties by txid" in {
+      prepare()
+
+      val lastSeenTxid = transactions(2).id
+      val expected = transactions(3)
+      val result = dataHandler.getLatestBy(address, Limit(1), Option(lastSeenTxid)).get
+      result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
     }
   }
 

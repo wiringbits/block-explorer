@@ -88,20 +88,65 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         .getOrElse { throw new RuntimeException("Failed to delete transactions consistently")} // this should not happen
   }
 
-  def getBy(address: Address, before: Long, limit: Limit)(implicit conn: Connection): List[Transaction] = {
+  /**
+   * Get the latest transactions by the given address.
+   */
+  def getLatestBy(address: Address, limit: Limit)(implicit conn: Connection): List[Transaction] = {
     SQL(
       """
         |SELECT t.txid, t.blockhash, t.time, t.size
         |FROM transactions t JOIN address_transaction_details USING (txid)
-        |WHERE t.time < {before} AND address = {address}
+        |WHERE address = {address}
+        |ORDER BY time DESC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'address -> address.string,
+      'limit -> limit.int
+    ).as(parseTransaction.*).flatten
+  }
+
+  /**
+   * Get the latest transactions by the given address that occurred before the last seen transaction.
+   */
+  def getLatestBy(
+      address: Address,
+      lastSeenTxid: TransactionId,
+      limit: Limit)(
+      implicit conn: Connection): List[Transaction] = {
+
+    /**
+     * TODO: Update query to:
+WITH CTE AS (
+  SELECT time AS lastSeenTime
+  FROM transactions
+  WHERE txid = {lastSeenTxid}
+)
+SELECT t.txid, t.blockhash, t.time, t.size
+FROM CTE CROSS JOIN transactions t
+         JOIN address_transaction_details USING (txid)
+WHERE address = {address} AND
+      (t.time < lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
+ORDER BY time DESC
+LIMIT {limit}
+     */
+    SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size
+        |FROM transactions t
+        |     JOIN address_transaction_details USING (txid)
+        |WHERE address = {address} AND
+        |      (t.time < (SELECT time AS lastSeenTime FROM transactions WHERE txid = {lastSeenTxid}) OR
+        |        (t.time = (SELECT time AS lastSeenTime FROM transactions WHERE txid = {lastSeenTxid}) AND
+        |         t.txid > {lastSeenTxid}))
         |ORDER BY time DESC
         |LIMIT {limit}
       """.stripMargin
     ).on(
       'address -> address.string,
       'limit -> limit.int,
-      'before -> before
-    ).as(parseTransaction.*).flatten
+      'lastSeenTxid -> lastSeenTxid.string
+    ).executeQuery().as(parseTransaction.*).flatten
   }
 
   def getBy(

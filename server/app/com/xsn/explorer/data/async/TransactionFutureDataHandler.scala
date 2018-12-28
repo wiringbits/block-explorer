@@ -25,12 +25,9 @@ class TransactionFutureDataHandler @Inject() (
     blockingDataHandler.getBy(address, paginatedQuery, ordering)
   }
 
-  override def getBy(
-      address: Address,
-      before: Long,
-      limit: Limit): FutureApplicationResult[List[Transaction]] = Future {
+  override def getLatestBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId]): FutureApplicationResult[List[Transaction]] = Future {
 
-    blockingDataHandler.getBy(address, before, limit)
+    blockingDataHandler.getLatestBy(address, limit, lastSeenTxid)
   }
 
   override def getUnspentOutputs(address: Address): FutureApplicationResult[List[Transaction.Output]] = Future {

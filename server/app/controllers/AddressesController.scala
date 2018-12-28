@@ -27,11 +27,11 @@ class AddressesController @Inject() (
     transactionService.getTransactions(address, paginatedQuery, OrderingQuery(ordering))
   }
 
-  def getLightWalletTransactions(address: String, limit: Int, before: Option[Long]) = public { _ =>
+  def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getLightWalletTransactions(
       address,
-      before.getOrElse(java.lang.System.currentTimeMillis()),
-      Limit(limit))
+      Limit(limit),
+      lastSeenTxid)
   }
 
   /**
