@@ -157,8 +157,10 @@ class TransactionService @Inject() (
         vin <- getTransactionVIN(plain.vin).toFutureOr
       } yield {
         val inputs = vin
-            .filter(_.address contains address)
-            .map { _.into[LightWalletTransaction.Input].withFieldRenamed(_.voutIndex, _.index).transform }
+            .collect {
+              case TransactionVIN(txid, index, Some(value), Some(a)) if a == address =>
+                LightWalletTransaction.Input(txid, index, value)
+            }
 
         val outputs = plain
             .vout

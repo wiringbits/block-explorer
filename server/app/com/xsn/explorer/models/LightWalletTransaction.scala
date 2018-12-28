@@ -12,7 +12,7 @@ case class LightWalletTransaction(
 
 object LightWalletTransaction {
 
-  case class Input(txid: TransactionId, index: Int)
+  case class Input(txid: TransactionId, index: Int, value: BigDecimal)
   case class Output(index: Int, value: BigDecimal)
 
   implicit val inputWrites: Writes[Input] = Json.writes[Input]
