@@ -4,7 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BalanceParsers._
 import com.xsn.explorer.models.fields.BalanceField
@@ -126,5 +126,49 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     ).as(SqlParser.scalar[Int].single)
 
     Count(result)
+  }
+
+  /**
+   * Get the highest balances (excluding hidden_addresses).
+   */
+  def getHighestBalances(limit: Limit)(implicit conn: Connection): List[Balance] = {
+    SQL(
+      """
+        |SELECT address, received, spent
+        |FROM balances
+        |WHERE address NOT IN (SELECT address FROM hidden_addresses)
+        |ORDER BY (received - spent) DESC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int
+    ).as(parseBalance.*).flatten
+  }
+
+  /**
+   * Get the highest balances excluding the balances until the given address (excluding hidden_addresses).
+   *
+   * Note, the results across calls might not be stable if the given address changes its balance drastically.
+   */
+  def getHighestBalances(lastSeenAddress: Address, limit: Limit)(implicit conn: Connection): List[Balance] = {
+    SQL(
+      """
+        |WITH CTE AS (
+        |  SELECT (received - spent) AS lastSeenAvailable
+        |  FROM balances
+        |  WHERE address = {lastSeenAddress}
+        |)
+        |SELECT address, received, spent
+        |FROM CTE CROSS JOIN balances
+        |WHERE ((received - spent) < lastSeenAvailable OR
+        |      ((received - spent) = lastSeenAvailable AND address > {lastSeenAddress})) AND
+        |      address NOT IN (SELECT address FROM hidden_addresses)
+        |ORDER BY (received - spent) DESC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int,
+      'lastSeenAddress -> lastSeenAddress.string
+    ).as(parseBalance.*).flatten
   }
 }

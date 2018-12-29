@@ -13,6 +13,8 @@ import org.scalactic.Good
 
 class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
+  import DataHelper._
+
   lazy val dataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   val defaultOrdering = FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder)
@@ -124,6 +126,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
           .map(dataHandler.upsert)
           .foreach(_.isGood mustEqual true)
     }
+
     "ignore addresses with balance = 0" in {
       prepare()
       val query = PaginatedQuery(Offset(0), Limit(1))
@@ -132,6 +135,76 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val result = dataHandler.getNonZeroBalances(query, defaultOrdering)
       result.map(_.data) mustEqual Good(expected)
       result.get.total.int mustEqual balances.size - 1
+    }
+  }
+
+  "getHighestBalances" should {
+
+    val balances = List(
+      Balance(createAddress("XiHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 1000),
+      Balance(createAddress("XjHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 900),
+      Balance(createAddress("XkHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 900, spent = 100),
+      Balance(createAddress("XlHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 800),
+      Balance(createAddress("XmmmmSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 700),
+      Balance(createAddress("XnHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 600),
+      Balance(createAddress("XxxxxSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 2000),
+    )
+
+    def prepare() = {
+      clearDatabase()
+
+      balances.foreach(dataHandler.upsert(_).isGood mustEqual true)
+      database.withConnection { implicit conn =>
+        _root_.anorm
+            .SQL(
+              s"""
+                 |INSERT INTO hidden_addresses (address) VALUES
+                 |  ('${balances(4).address.string}'),
+                 |  ('${balances(6).address.string}')
+                 |""".stripMargin)
+            .executeUpdate()
+      }
+    }
+
+    "return the highest balances" in {
+      prepare()
+
+      val expected = balances.head
+      val result = dataHandler.getHighestBalances(Limit(1), None).get
+      result mustEqual List(expected)
+    }
+
+    "return the next elements given the last seen address" in {
+      prepare()
+
+      val lastSeenAddress = balances.head.address
+      val expected = balances(1)
+      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      result mustEqual List(expected)
+    }
+
+    "return the element with the same time breaking ties by address" in {
+      prepare()
+
+      val lastSeenAddress = balances(2).address
+      val expected = balances(3)
+      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      result mustEqual List(expected)
+    }
+
+    "return the no elements on unknown lastSeenTransaction" in {
+      val lastSeenAddress = createAddress("XmHW7SR56uPHeXKwcpeVsE4nUfkHv5Rq12")
+      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      result must be(empty)
+    }
+
+    "exclude hidden_addresses" in {
+      prepare()
+
+      val lastSeenAddress = balances(3).address
+      val expected = balances(5)
+      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      result mustEqual List(expected)
     }
   }
 

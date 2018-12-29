@@ -4,9 +4,9 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.BalanceBlockingDataHandler
-import com.xsn.explorer.helpers.DataHelper
+import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper}
+import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.{Address, Balance}
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind
@@ -38,13 +38,7 @@ class BalancesControllerSpec extends MyAPISpec {
       .sortBy(_.available)
       .reverse
 
-  val dataHandler = new BalanceBlockingDataHandler {
-
-    override def upsert(balance: Balance): ApplicationResult[Balance] = ???
-
-    override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = ???
-
-    override def getBy(address: Address): ApplicationResult[Balance] = ???
+  val dataHandler = new BalanceDummyDataHandler {
 
     override def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
       val filtered = balances.filter(_.available > 0)
@@ -57,8 +51,8 @@ class BalancesControllerSpec extends MyAPISpec {
 
       Good(result)
     }
-
   }
+
   val application = guiceApplicationBuilder
       .overrides(bind[BalanceBlockingDataHandler].to(dataHandler))
       .build()

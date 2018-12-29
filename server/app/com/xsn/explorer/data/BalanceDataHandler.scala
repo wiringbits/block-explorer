@@ -2,7 +2,7 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.{Address, Balance}
 
@@ -17,6 +17,8 @@ trait BalanceDataHandler[F[_]] {
   def getBy(address: Address): F[Balance]
 
   def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): F[PaginatedResult[Balance]]
+
+  def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): F[List[Balance]]
 }
 
 trait BalanceBlockingDataHandler extends BalanceDataHandler[ApplicationResult]

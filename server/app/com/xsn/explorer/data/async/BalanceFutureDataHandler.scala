@@ -2,6 +2,7 @@ package com.xsn.explorer.data.async
 
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BalanceBlockingDataHandler, BalanceDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
@@ -33,5 +34,9 @@ class BalanceFutureDataHandler @Inject() (
       ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] = Future {
 
     blockingDataHandler.getNonZeroBalances(query, ordering)
+  }
+
+  override def getHighestBalances(limit: pagination.Limit, lastSeenAddress: Option[Address]): FutureApplicationResult[List[Balance]] = Future {
+    blockingDataHandler.getHighestBalances(limit, lastSeenAddress)
   }
 }

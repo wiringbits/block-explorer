@@ -2,7 +2,7 @@ package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
@@ -50,6 +50,14 @@ class BalancePostgresDataHandler @Inject() (
     val balances = balancePostgresDAO.getNonZeroBalances(query, ordering)
     val total = balancePostgresDAO.countNonZeroBalances
     val result = PaginatedResult(query.offset, query.limit, total, balances)
+
+    Good(result)
+  }
+
+  override def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] = withConnection { implicit conn =>
+    val result = lastSeenAddress
+            .map { balancePostgresDAO.getHighestBalances(_, limit) }
+            .getOrElse { balancePostgresDAO.getHighestBalances(limit) }
 
     Good(result)
   }
