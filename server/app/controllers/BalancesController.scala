@@ -19,4 +19,8 @@ class BalancesController @Inject() (
 
     balanceService.get(paginatedQuery, orderingQuery)
   }
+
+  def getHighest(limit: Int, lastSeenAddress: Option[String]) = public { _ =>
+    balanceService.getHighest(Limit(limit), lastSeenAddress)
+  }
 }

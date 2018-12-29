@@ -23,6 +23,7 @@ GET   /blocks/:blockhash/transactions    controllers.BlocksController.getTransac
 GET   /stats                 controllers.StatisticsController.getStatus()
 
 GET   /balances              controllers.BalancesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
+GET   /v2/balances           controllers.BalancesController.getHighest(limit: Int ?= 10, lastSeenAddress: Option[String])
 
 GET   /masternodes           controllers.MasternodesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /masternodes/:ip       controllers.MasternodesController.getBy(ip: String)
