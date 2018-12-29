@@ -397,6 +397,12 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val result = dataHandler.getLatestBy(address, Limit(1), Option(lastSeenTxid)).get
       result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
     }
+
+    "return the no elements on unknown lastSeenTransaction" in {
+      val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
+      val result = dataHandler.getLatestBy(address, Limit(1), Option(lastSeenTxid)).get
+      result must be(empty)
+    }
   }
 
   private def createBlock(block: Block) = {
