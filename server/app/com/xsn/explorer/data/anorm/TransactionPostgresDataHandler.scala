@@ -29,10 +29,15 @@ class TransactionPostgresDataHandler @Inject() (
     Good(result)
   }
 
-  def getLatestBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId]): ApplicationResult[List[Transaction]] = withConnection { implicit conn =>
+  def getBy(
+      address: Address,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition): ApplicationResult[List[Transaction]] = withConnection { implicit conn =>
+
     val transactions = lastSeenTxid
-        .map { transactionPostgresDAO.getBy(address, _, limit, OrderingCondition.DescendingOrder) }
-        .getOrElse { transactionPostgresDAO.getBy(address, limit, OrderingCondition.DescendingOrder) }
+        .map { transactionPostgresDAO.getBy(address, _, limit, orderingCondition) }
+        .getOrElse { transactionPostgresDAO.getBy(address, limit, orderingCondition) }
 
     Good(transactions)
   }

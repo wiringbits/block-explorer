@@ -2,7 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr, FuturePaginatedResult}
-import com.alexitc.playsonify.models.ordering.OrderingQuery
+import com.alexitc.playsonify.models.ordering.{OrderingCondition, OrderingError, OrderingQuery}
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
@@ -150,7 +150,12 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
-  def getLightWalletTransactions(addressString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+  def getLightWalletTransactions(
+      addressString: String,
+      limit: Limit,
+      lastSeenTxidString: Option[String],
+      orderingConditionString: String): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+
     def buildData(address: Address, txValues: Transaction) = {
       val result = for {
         plain <- xsnService.getTransaction(txValues.id).toFutureOr
@@ -184,6 +189,7 @@ class TransactionService @Inject() (
       }
 
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+      orderingCondition <- getOrderingConditionResult(orderingConditionString).toFutureOr
 
       lastSeenTxid <- {
         lastSeenTxidString
@@ -193,7 +199,7 @@ class TransactionService @Inject() (
             .toFutureOr
       }
 
-      transactions <- transactionFutureDataHandler.getLatestBy(address, limit, lastSeenTxid).toFutureOr
+      transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
       data <- transactions.map { transaction => buildData(address, transaction) }.toFutureOr
     } yield WrappedResult(data)
 
@@ -250,5 +256,18 @@ class TransactionService @Inject() (
 
           result.toFuture
         }
+  }
+
+  /** TODO: Move to another file */
+  private def getOrderingConditionResult(unsafeOrderingCondition: String) = {
+    val maybe = parseOrderingCondition(unsafeOrderingCondition)
+    Or.from(maybe, One(OrderingError.InvalidCondition))
+  }
+
+  /** TODO: Move to another file */
+  private def parseOrderingCondition(unsafeOrderingCondition: String): Option[OrderingCondition] = unsafeOrderingCondition.toLowerCase match {
+    case "asc" => Some(OrderingCondition.AscendingOrder)
+    case "desc" => Some(OrderingCondition.DescendingOrder)
+    case _ => None
   }
 }

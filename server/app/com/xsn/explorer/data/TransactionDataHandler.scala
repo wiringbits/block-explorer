@@ -1,7 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
@@ -16,7 +16,7 @@ trait TransactionDataHandler[F[_]] {
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
 
-  def getLatestBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId]): F[List[Transaction]]
+  def getBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId], orderingCondition: OrderingCondition): F[List[Transaction]]
 
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 
