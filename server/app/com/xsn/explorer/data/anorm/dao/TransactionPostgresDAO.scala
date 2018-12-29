@@ -3,7 +3,7 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Count, Limit, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
@@ -89,15 +89,17 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   }
 
   /**
-   * Get the latest transactions by the given address.
+   * Get the transactions by the given address (sorted by time).
    */
-  def getLatestBy(address: Address, limit: Limit)(implicit conn: Connection): List[Transaction] = {
+  def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[Transaction] = {
+    val order = toSQL(orderingCondition)
+
     SQL(
-      """
+      s"""
         |SELECT t.txid, t.blockhash, t.time, t.size
         |FROM transactions t JOIN address_transaction_details USING (txid)
         |WHERE address = {address}
-        |ORDER BY time DESC
+        |ORDER BY time $order
         |LIMIT {limit}
       """.stripMargin
     ).on(
@@ -107,16 +109,26 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   }
 
   /**
-   * Get the latest transactions by the given address that occurred before the last seen transaction.
+   * Get the transactions by the given address (sorted by time).
+   *
+   * - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are retrieved.
+   * - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are retrieved.
    */
-  def getLatestBy(
+  def getBy(
       address: Address,
       lastSeenTxid: TransactionId,
-      limit: Limit)(
+      limit: Limit,
+      orderingCondition: OrderingCondition)(
       implicit conn: Connection): List[Transaction] = {
 
+    val order = toSQL(orderingCondition)
+    val comparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => "<"
+      case OrderingCondition.AscendingOrder => ">"
+    }
+
     SQL(
-      """
+      s"""
         |WITH CTE AS (
         |  SELECT time AS lastSeenTime
         |  FROM transactions
@@ -126,8 +138,8 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |FROM CTE CROSS JOIN transactions t
         |         JOIN address_transaction_details USING (txid)
         |WHERE address = {address} AND
-        |      (t.time < lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
-        |ORDER BY time DESC
+        |      (t.time $comparator lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
+        |ORDER BY time $order
         |LIMIT {limit}
       """.stripMargin
     ).on(
@@ -452,5 +464,10 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseAddressTransactionDetails.*)
 
     result
+  }
+
+  private def toSQL(condition: OrderingCondition): String = condition match {
+    case OrderingCondition.AscendingOrder => "ASC"
+    case OrderingCondition.DescendingOrder => "DESC"
   }
 }

@@ -1,7 +1,7 @@
 package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
@@ -31,8 +31,8 @@ class TransactionPostgresDataHandler @Inject() (
 
   def getLatestBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId]): ApplicationResult[List[Transaction]] = withConnection { implicit conn =>
     val transactions = lastSeenTxid
-        .map { transactionPostgresDAO.getLatestBy(address, _, limit) }
-        .getOrElse { transactionPostgresDAO.getLatestBy(address, limit) }
+        .map { transactionPostgresDAO.getBy(address, _, limit, OrderingCondition.DescendingOrder) }
+        .getOrElse { transactionPostgresDAO.getBy(address, limit, OrderingCondition.DescendingOrder) }
 
     Good(transactions)
   }
