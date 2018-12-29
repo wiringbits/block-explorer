@@ -150,7 +150,7 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
-  def getLightWalletTransactions(addressString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[List[LightWalletTransaction]] = {
+  def getLightWalletTransactions(addressString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
     def buildData(address: Address, txValues: Transaction) = {
       val result = for {
         plain <- xsnService.getTransaction(txValues.id).toFutureOr
@@ -195,7 +195,7 @@ class TransactionService @Inject() (
 
       transactions <- transactionFutureDataHandler.getLatestBy(address, limit, lastSeenTxid).toFutureOr
       data <- transactions.map { transaction => buildData(address, transaction) }.toFutureOr
-    } yield data
+    } yield WrappedResult(data)
 
     result.toFuture
   }
