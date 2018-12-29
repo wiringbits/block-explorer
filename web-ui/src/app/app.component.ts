@@ -151,7 +151,8 @@ export class AppComponent implements OnInit {
       'label.active': 'Active',
       'label.details': 'Details',
       'label.raw': 'Raw',
-      'label.date': 'Date'
+      'label.date': 'Date',
+      'label.more': 'More'
     };
   }
 }

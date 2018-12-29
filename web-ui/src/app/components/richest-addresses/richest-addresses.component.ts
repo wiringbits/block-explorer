@@ -1,14 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
-
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 
 import { Balance } from '../../models/balance';
 
 import { BalancesService } from '../../services/balances.service';
-import { ErrorService } from '../../services/error.service';
 import { TickerService } from '../../services/ticker.service';
 import { ServerStats } from '../../models/ticker';
 
@@ -23,30 +20,28 @@ export class RichestAddressesComponent implements OnInit {
   ticker: ServerStats;
 
   // pagination
-  total = 0;
-  currentPage = 1;
-  pageSize = 10;
-  asyncItems: Observable<Balance[]>;
+  limit = 10;
+  items: Balance[] = [];
 
   constructor(
     private balancesService: BalancesService,
-    private tickerService: TickerService,
-    private errorService: ErrorService) { }
+    private tickerService: TickerService) { }
 
   ngOnInit() {
-    this.getPage(this.currentPage);
+    this.load();
     this.tickerService.get().subscribe(response => this.ticker = response);
   }
 
-  getPage(page: number) {
-    const offset = (page - 1) * this.pageSize;
-    const limit = this.pageSize;
+  load() {
+    let lastSeenAddress = '';
+    if (this.items.length > 0) {
+      lastSeenAddress = this.items[this.items.length - 1].address;
+    }
 
-    this.asyncItems = this.balancesService
-      .get(offset, limit, 'available:desc')
-      .do(response => this.total = response.total)
-      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
-      .map(response => response.data);
+    this.balancesService
+      .getHighest(this.limit, lastSeenAddress)
+      .do(response => this.items = this.items.concat(response.data))
+      .subscribe();
   }
 
   getPercent(balance: Balance): number {
