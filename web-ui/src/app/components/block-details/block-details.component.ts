@@ -19,10 +19,8 @@ export class BlockDetailsComponent implements OnInit {
   blockDetails: BlockDetails;
 
   // pagination
-  total = 0;
-  currentPage = 1;
-  pageSize = 10;
-  transactions: Transaction[] = null;
+  limit = 10;
+  transactions: Transaction[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -44,32 +42,25 @@ export class BlockDetailsComponent implements OnInit {
   private clearCurrentValues() {
     this.blockhash = null;
     this.blockDetails = null;
-    this.total = 0;
-    this.currentPage = 1;
-    this.pageSize = 10;
-    this.transactions = null;
+    this.transactions = [];
   }
 
   private onBlockRetrieved(response: BlockDetails) {
     this.blockDetails = response;
     this.blockhash = response.block.hash;
-    this.loadPage(this.currentPage);
+    this.load();
   }
 
-  loadPage(page: number) {
-    const offset = (page - 1) * this.pageSize;
-    const limit = this.pageSize;
-    const order = 'time:desc';
+  load() {
+    let lastSeenTxid = '';
+    if (this.transactions.length > 0) {
+      lastSeenTxid = this.transactions[this.transactions.length - 1].id;
+    }
 
     this.blocksService
-      .getTransactions(this.blockhash, offset, limit, order)
-      .subscribe(response => this.onTransactionsResponse(response));
-  }
-
-  private onTransactionsResponse(response: PaginatedResult<Transaction>) {
-    this.total = response.total;
-    this.currentPage = 1 + (response.offset / this.pageSize);
-    this.transactions = response.data;
+      .getTransactionsV2(this.blockhash, this.limit, lastSeenTxid)
+      .do(response => this.transactions = this.transactions.concat(response.data))
+      .subscribe();
   }
 
   private onError(response: any) {
