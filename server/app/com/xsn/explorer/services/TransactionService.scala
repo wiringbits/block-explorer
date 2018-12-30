@@ -226,6 +226,25 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
+  def getByBlockhash(blockhashString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[TransactionWithValues]]] = {
+    val result = for {
+      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+
+      lastSeenTxid <- {
+        lastSeenTxidString
+            .map(TransactionId.from)
+            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
+            .getOrElse(Good(Option.empty))
+            .toFutureOr
+      }
+
+      r <- transactionFutureDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid).toFutureOr
+    } yield WrappedResult(r)
+
+    result.toFuture
+  }
+
   def getLatestTransactionBy(addresses: Every[Address]): FutureApplicationResult[Map[String, String]] = {
     transactionFutureDataHandler.getLatestTransactionBy(addresses)
   }
