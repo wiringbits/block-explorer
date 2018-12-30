@@ -233,6 +233,42 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     Count(result)
   }
 
+  def getByBlockhash(blockhash: Blockhash, limit: Limit)(implicit conn: Connection): List[TransactionWithValues] = {
+    SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM transactions t JOIN blocks USING (blockhash)
+        |WHERE blockhash = {blockhash}
+        |ORDER BY t.txid ASC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int,
+      'blockhash -> blockhash.string
+    ).as(parseTransactionWithValues.*).flatten
+  }
+
+  def getByBlockhash(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[TransactionWithValues] = {
+    SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM transactions t JOIN blocks USING (blockhash)
+        |WHERE blockhash = {blockhash} AND
+        |      t.txid > {lastSeenTxid}
+        |ORDER BY t.txid ASC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int,
+      'blockhash -> blockhash.string,
+      'lastSeenTxid -> lastSeenTxid.string
+    ).as(parseTransactionWithValues.*).flatten
+  }
+
   def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """

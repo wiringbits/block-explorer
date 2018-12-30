@@ -25,6 +25,11 @@ trait TransactionDataHandler[F[_]] {
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
 
+  def getByBlockhash(
+      blockhash: Blockhash,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId]): F[List[TransactionWithValues]]
+
   def getLatestTransactionBy(addresses: Every[Address]): F[Map[String, String]]
 }
 

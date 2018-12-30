@@ -46,6 +46,14 @@ class TransactionFutureDataHandler @Inject() (
     blockingDataHandler.getByBlockhash(blockhash, paginatedQuery, ordering)
   }
 
+  override def getByBlockhash(
+      blockhash: Blockhash,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId]): FutureApplicationResult[List[TransactionWithValues]] = Future {
+
+    blockingDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid)
+  }
+
   override def getLatestTransactionBy(addresses: Every[Address]): FutureApplicationResult[Map[String, String]] = Future {
     blockingDataHandler.getLatestTransactionBy(addresses)
   }
