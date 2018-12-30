@@ -17,9 +17,9 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   /**
    * NOTE: Ensure the connection has an open transaction.
    */
-  def upsert(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
+  def upsert(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     for {
-      partialTx <- upsertTransaction(transaction)
+      partialTx <- upsertTransaction(index, transaction)
       inputs <- upsertInputs(transaction.id, transaction.inputs)
       outputs <- upsertOutputs(transaction.id, transaction.outputs)
       _ <- spend(transaction.id, inputs)
@@ -307,24 +307,26 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     result.toMap
   }
 
-  private def upsertTransaction(transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
+  private def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """
         |INSERT INTO transactions
-        |  (txid, blockhash, time, size)
+        |  (txid, blockhash, time, size, index)
         |VALUES
-        |  ({txid}, {blockhash}, {time}, {size})
+        |  ({txid}, {blockhash}, {time}, {size}, {index})
         |ON CONFLICT (txid) DO UPDATE
         |  SET blockhash = EXCLUDED.blockhash,
         |      time = EXCLUDED.time,
-        |      size = EXCLUDED.size
+        |      size = EXCLUDED.size,
+        |      index = EXCLUDED.index
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
       'txid -> transaction.id.string,
       'blockhash -> transaction.blockhash.string,
       'time -> transaction.time,
-      'size -> transaction.size.int
+      'size -> transaction.size.int,
+      'index -> index
     ).as(parseTransaction.singleOpt).flatten
   }
 

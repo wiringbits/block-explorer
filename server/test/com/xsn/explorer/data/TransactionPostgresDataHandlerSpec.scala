@@ -115,7 +115,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   private def upsertTransaction(transaction: Transaction) = {
     val dao = new TransactionPostgresDAO(new FieldOrderingSQLInterpreter)
     database.withConnection { implicit conn =>
-      val maybe = dao.upsert(transaction)
+      val maybe = dao.upsert(1, transaction)
       Or.from(maybe, One(TransactionNotFoundError))
     }
   }

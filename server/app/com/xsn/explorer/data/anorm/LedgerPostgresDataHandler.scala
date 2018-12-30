@@ -71,7 +71,10 @@ class LedgerPostgresDataHandler @Inject() (
       _ <- blockPostgresDAO.insert(block)
 
       // transactions
-      _ <- transactions.map(tx => transactionPostgresDAO.upsert(tx)).everything
+      _ <- transactions
+          .zipWithIndex
+          .map { case (tx, index) => transactionPostgresDAO.upsert(index, tx) }
+          .everything
 
       // balances
       balanceList = balances(transactions)
