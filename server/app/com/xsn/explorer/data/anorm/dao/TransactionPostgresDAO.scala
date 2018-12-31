@@ -59,6 +59,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |SELECT txid, blockhash, time, size
         |FROM transactions
         |WHERE blockhash = {blockhash}
+        |ORDER BY index DESC
       """.stripMargin
     ).on(
       'blockhash -> blockhash.string
