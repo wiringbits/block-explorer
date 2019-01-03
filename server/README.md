@@ -13,3 +13,6 @@
 
 ## Test
 Run the `sbt test` command to execute the tests.
+
+On linux based OS it can be executed `curl localhost:4243/containers/json` successfully
+In case it not work, try `DOCKER_HOST=localhost:4243 sbt test`
