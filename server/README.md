@@ -13,3 +13,7 @@
 
 ## Test
 Run the `sbt test` command to execute the tests.
+
+In case of failed tests, verify that:
+- The docker remote API is enabled (this command must succeed `curl localhost:4243/containers/json` on linux).
+- Try running `DOCKER_HOST=localhost:4243 sbt test` instead.
