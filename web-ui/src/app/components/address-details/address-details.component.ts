@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Observable } from 'rxjs/Observable';
-
 import { Balance } from '../../models/balance';
-import { Transaction } from '../../models/transaction';
-
 import { AddressesService } from '../../services/addresses.service';
 import { ErrorService } from '../../services/error.service';
+import { LightWalletTransaction } from '../..//models/light-wallet-transaction';
 
 @Component({
   selector: 'app-address-details',
@@ -20,10 +17,8 @@ export class AddressDetailsComponent implements OnInit {
   addressString: string;
 
   // pagination
-  total = 0;
-  currentPage = 1;
-  pageSize = 10;
-  asyncItems: Observable<Transaction[]>;
+  limit = 10;
+  items: LightWalletTransaction[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -36,26 +31,46 @@ export class AddressDetailsComponent implements OnInit {
       response => this.onAddressRetrieved(response),
       response => this.onError(response)
     );
-    this.getPage(this.currentPage);
   }
 
   private onAddressRetrieved(response: Balance) {
     this.address = response;
+    this.load();
   }
 
-  getPage(page: number) {
-    const offset = (page - 1) * this.pageSize;
-    const limit = this.pageSize;
-    const order = 'time:desc';
+  load() {
+    const order = 'desc';
+    let lastSeenTxid = '';
+    if (this.items.length > 0) {
+      lastSeenTxid = this.items[this.items.length - 1].id;
+    }
 
-    this.asyncItems = this.addressesService
-      .getTransactions(this.addressString, offset, limit, order)
-      .do(response => this.total = response.total)
-      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
-      .map(response => response.data);
+    this.addressesService
+      .getTransactionsV2(this.addressString, this.limit, lastSeenTxid, order)
+      .do(response => this.items = this.items.concat(response.data))
+      .subscribe();
   }
 
   private onError(response: any) {
     this.errorService.renderServerErrors(null, response);
+  }
+
+  renderValue(tx: LightWalletTransaction): string {
+    const spent = tx
+      .inputs
+      .map(input => input.value)
+      .reduce((a, b) => a + b, 0);
+
+    const received = tx
+      .outputs
+      .map(output => output.value)
+      .reduce((a, b) => a + b, 0);
+
+    const diff = Math.abs(received - spent);
+    if (received >= spent) {
+      return '+' + diff;
+    } else {
+      return '-' + diff;
+    }
   }
 }
