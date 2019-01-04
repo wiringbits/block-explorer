@@ -80,7 +80,7 @@ class TransactionService @Inject() (
               val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
               Good(newVIN)
 
-            case Bad(_) => Good(vin)
+            case Bad(e) => Bad(e)
           }
     }
 
