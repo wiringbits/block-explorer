@@ -392,7 +392,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         prepare()
         val expected = sorted.head
         val result = dataHandler.getBy(address, Limit(1), None, condition).get
-        result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
+        result.map(_.copy(inputs = List.empty, outputs = List.empty)) mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
       }
 
       s"[$tag] return the next elements given the last seen tx" in {
@@ -401,7 +401,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         val lastSeenTxid = sorted.head.id
         val expected = sorted(1)
         val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
-        result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
+        result.map(_.copy(inputs = List.empty, outputs = List.empty)) mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
       }
 
       s"[$tag] return the element with the same time breaking ties by txid" in {
@@ -410,7 +410,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         val lastSeenTxid = sorted(2).id
         val expected = sorted(3)
         val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
-        result mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
+        result.map(_.copy(inputs = List.empty, outputs = List.empty)) mustEqual List(expected.copy(inputs = List.empty, outputs = List.empty))
       }
 
       s"[$tag] return no elements on unknown lastSeenTransaction" in {

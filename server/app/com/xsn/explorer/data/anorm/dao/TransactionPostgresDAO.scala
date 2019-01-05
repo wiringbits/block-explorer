@@ -95,7 +95,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[Transaction] = {
     val order = toSQL(orderingCondition)
 
-    SQL(
+    val transactions = SQL(
       s"""
         |SELECT t.txid, t.blockhash, t.time, t.size
         |FROM transactions t JOIN address_transaction_details USING (txid)
@@ -107,6 +107,14 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       'address -> address.string,
       'limit -> limit.int
     ).as(parseTransaction.*).flatten
+
+    for {
+      tx <- transactions
+    } yield {
+      val inputs = getInputs(tx.id, address)
+      val outputs = getOutputs(tx.id, address)
+      tx.copy(inputs = inputs, outputs = outputs)
+    }
   }
 
   /**
@@ -128,7 +136,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       case OrderingCondition.AscendingOrder => ">"
     }
 
-    SQL(
+    val transactions = SQL(
       s"""
         |WITH CTE AS (
         |  SELECT time AS lastSeenTime
@@ -147,7 +155,15 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       'address -> address.string,
       'limit -> limit.int,
       'lastSeenTxid -> lastSeenTxid.string
-    ).executeQuery().as(parseTransaction.*).flatten
+    ).as(parseTransaction.*).flatten
+
+    for {
+      tx <- transactions
+    } yield {
+      val inputs = getInputs(tx.id, address)
+      val outputs = getOutputs(tx.id, address)
+      tx.copy(inputs = inputs, outputs = outputs)
+    }
   }
 
   def getBy(
@@ -503,6 +519,34 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseAddressTransactionDetails.*)
 
     result
+  }
+
+  private def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
+    SQL(
+      """
+        |SELECT txid, index, from_txid, from_output_index, value, address
+        |FROM transaction_inputs
+        |WHERE txid = {txid} AND
+        |      address = {address}
+      """.stripMargin
+    ).on(
+      'txid -> txid.string,
+      'address -> address.string
+    ).as(parseTransactionInput.*).flatten
+  }
+
+  private def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
+    SQL(
+      """
+        |SELECT txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+        |FROM transaction_outputs
+        |WHERE txid = {txid} AND
+        |      address = {address}
+      """.stripMargin
+    ).on(
+      'txid -> txid.string,
+      'address -> address.string
+    ).as(parseTransactionOutput.*).flatten
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

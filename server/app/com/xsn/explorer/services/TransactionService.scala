@@ -156,32 +156,6 @@ class TransactionService @Inject() (
       lastSeenTxidString: Option[String],
       orderingConditionString: String): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
 
-    def buildData(address: Address, txValues: Transaction) = {
-      val result = for {
-        plain <- xsnService.getTransaction(txValues.id).toFutureOr
-        vin <- getTransactionVIN(plain.vin).toFutureOr
-      } yield {
-        val inputs = vin
-            .collect {
-              case TransactionVIN(txid, index, Some(value), Some(a)) if a == address =>
-                LightWalletTransaction.Input(txid, index, value)
-            }
-
-        val outputs = plain
-            .vout
-            .filter(_.address contains address)
-            .map { _.into[LightWalletTransaction.Output].withFieldRenamed(_.n, _.index).transform }
-
-        txValues
-            .into[LightWalletTransaction]
-            .withFieldConst(_.inputs, inputs)
-            .withFieldConst(_.outputs, outputs)
-            .transform
-      }
-
-      result.toFuture
-    }
-
     val result = for {
       address <- {
         val maybe = Address.from(addressString)
@@ -200,8 +174,29 @@ class TransactionService @Inject() (
       }
 
       transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
-      data <- transactions.map { transaction => buildData(address, transaction) }.toFutureOr
-    } yield WrappedResult(data)
+    } yield {
+      val lightTxs = transactions.map { tx =>
+        val inputs = tx.inputs.map { input =>
+          input
+              .into[LightWalletTransaction.Input]
+              .withFieldRenamed(_.fromOutputIndex, _.index)
+              .withFieldRenamed(_.fromTxid, _.txid)
+              .transform
+        }
+
+        val outputs = tx.outputs.map { output =>
+          output.into[LightWalletTransaction.Output].transform
+        }
+
+        tx
+            .into[LightWalletTransaction]
+            .withFieldConst(_.inputs, inputs)
+            .withFieldConst(_.outputs, outputs)
+            .transform
+      }
+
+      WrappedResult(lightTxs)
+    }
 
     result.toFuture
   }
