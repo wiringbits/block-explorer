@@ -26,10 +26,7 @@ class StatisticsPostgresDAO {
       """.stripMargin
     ).as(StatisticsParsers.parseStatistics.single)
 
-    val shiftBy = BigDecimal(6000000)
-    val totalSupply = result.totalSupply.map(x => (x - shiftBy) max 0)
-    val circulatingSupply = result.circulatingSupply.map(x => (x - shiftBy) max 0)
-    result.copy(totalSupply = totalSupply, circulatingSupply = circulatingSupply)
+    result
   }
 }
 

@@ -33,6 +33,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       }
 
       val balance = Balance(hiddenAddress, received = BigDecimal(1000), spent = BigDecimal(500))
+      setAvailableCoins(balance.available)
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
@@ -45,10 +46,23 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val totalSupply = dataHandler.getStatistics().get.totalSupply.getOrElse(0)
 
       val balance = Balance(burnAddress, received = BigDecimal(1000), spent = BigDecimal(500))
+      setAvailableCoins(balance.available)
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
       result.totalSupply.value mustEqual totalSupply
+    }
+  }
+
+  private def setAvailableCoins(total: BigDecimal) = {
+    database.withConnection { implicit conn =>
+      _root_.anorm.SQL(
+        s"""
+           |UPDATE aggregated_amounts
+           |SET value = value + $total
+           |WHERE name = 'available_coins'
+          """.stripMargin
+      ).executeUpdate()
     }
   }
 }
