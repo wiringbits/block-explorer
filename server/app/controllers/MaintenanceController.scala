@@ -11,7 +11,7 @@ class MaintenanceController @Inject() (
     components: MyJsonControllerComponents)
     extends MyJsonController(components) {
 
-  def run() = public { _ =>
+  def run(query: String) = public { _ =>
     Future.successful(Good(JsObject.empty))
   }
 }

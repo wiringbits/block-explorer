@@ -4,7 +4,7 @@
 # ~~~~
 
 GET   /health                controllers.HealthController.check()
-# GET   /maintenance           controllers.MaintenanceController.run()
+# GET   /maintenance           controllers.MaintenanceController.run(query: String ?= "")
 
 GET   /transactions/:txid        controllers.TransactionsController.getTransaction(txid: String)
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
