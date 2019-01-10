@@ -12,7 +12,7 @@ export class Transaction {
   received: number;
 }
 
-class TransactionValue {
+export class TransactionValue {
   address: string;
   value: number;
 }

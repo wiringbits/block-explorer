@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { TranslateService } from '@ngx-translate/core';
 
-import { Transaction } from '../../models/transaction';
+import { Transaction, TransactionValue } from '../../models/transaction';
 
 import { ErrorService } from '../../services/error.service';
 import { NavigatorService } from '../../services/navigator.service';
@@ -17,6 +17,8 @@ import { TransactionsService } from '../../services/transactions.service';
 export class TransactionDetailsComponent implements OnInit {
 
   transaction: Transaction;
+  collapsedInput: TransactionValue[];
+  collapsedOutput: TransactionValue[];
 
   constructor(
     private route: ActivatedRoute,
@@ -38,10 +40,37 @@ export class TransactionDetailsComponent implements OnInit {
 
   private onTransactionRetrieved(response: Transaction) {
     this.transaction = response;
+    this.collapsedInput = this.collapseRepeatedRows(this.transaction.input);
+    this.collapsedOutput = this.collapseRepeatedRows(this.transaction.output);
   }
 
   private onError(response: any) {
     this.errorService.renderServerErrors(null, response);
+  }
+
+  private collapseRepeatedRows(rows: TransactionValue[]): TransactionValue[] {
+    const addresses = new Set(rows.map(r => r.address));
+    const collapsedRows = Array.from(addresses)
+      .map(address => {
+          const sum = rows
+            .filter(r => r.address === address)
+            .map(r => r.value)
+            .reduce((a, b) => a + b);
+
+          const newValue = new TransactionValue();
+          newValue.address = address;
+          newValue.value = sum;
+
+          return newValue;
+      });
+
+    return collapsedRows;
+  }
+
+  count(address: string, rows: TransactionValue[]): number {
+    return rows
+      .filter(r => r.address === address)
+      .length;
   }
 
   getFee(tx: Transaction): number {
