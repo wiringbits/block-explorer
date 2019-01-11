@@ -34,7 +34,7 @@
             </tr>
             <tr>
               <td>{{'label.fee' | translate}}</td>
-              <td>{{getFee(transaction)}} {{'label.coinName' | translate}}</td>
+              <td>{{getFee(transaction) | explorerCurrency}}</td>
             </tr>
           </tbody>
         </table>
@@ -68,7 +68,7 @@
               <td *ngIf="count(item.address, transaction.input) == 1">
                 <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
               </td>
-              <td>{{item.value}} {{'label.coinName' | translate}}</td>
+              <td>{{item.value | explorerCurrency}}</td>
             </tr>
             <tr>
               <td></td>
@@ -87,7 +87,7 @@
               <td *ngIf="count(item.address, transaction.output) == 1">
                 <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
               </td>
-              <td>{{item.value}} {{'label.coinName' | translate}}</td>
+              <td>{{item.value | explorerCurrency}}</td>
             </tr>
           </tbody>
         </table>

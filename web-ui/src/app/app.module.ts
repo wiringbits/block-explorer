@@ -45,6 +45,7 @@ import { TransactionComponent } from './components/transaction/transaction.compo
 import { BlockComponent } from './components/block/block.component';
 import { BlockRawComponent } from './components/block-raw/block-raw.component';
 import { ExplorerDatetimePipe } from './pipes/explorer-datetime.pipe';
+import { ExplorerCurrencyPipe } from './pipes/explorer-currency.pipe';
 
 @NgModule({
   declarations: [
@@ -65,7 +66,8 @@ import { ExplorerDatetimePipe } from './pipes/explorer-datetime.pipe';
     TransactionComponent,
     BlockComponent,
     BlockRawComponent,
-    ExplorerDatetimePipe
+    ExplorerDatetimePipe,
+    ExplorerCurrencyPipe
   ],
   imports: [
     AppRoutingModule,

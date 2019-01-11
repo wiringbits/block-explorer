@@ -20,7 +20,7 @@
           <td>
             <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
           </td>
-          <td>{{item.available}} {{'label.coinName' | translate}}</td>
+          <td>{{item.available | explorerCurrency}}</td>
           <td *ngIf="ticker == null || ticker.circulatingSupply == null">{{'message.unavailable' | translate}}</td>
           <td *ngIf="ticker != null && ticker.circulatingSupply != null">
             <div

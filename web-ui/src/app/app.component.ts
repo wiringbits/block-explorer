@@ -89,7 +89,6 @@ export class AppComponent implements OnInit {
       'action.find': 'Find',
 
       // labels
-      'label.coinName': 'XSN',
       'label.searchField': 'Transaction id, Blockhash, Block number, Address, IP address',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',

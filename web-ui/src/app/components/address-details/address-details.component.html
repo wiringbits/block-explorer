@@ -24,15 +24,15 @@
               </tr>
               <tr>
                 <td>{{'label.balance' | translate}}</td>
-                <td>{{address.available}} {{'label.coinName' | translate}}</td>
+                <td>{{address.available | explorerCurrency}}</td>
               </tr>
               <tr>
                 <td>{{'label.received' | translate}}</td>
-                <td>{{address.received}} {{'label.coinName' | translate}}</td>
+                <td>{{address.received | explorerCurrency}}</td>
               </tr>
               <tr>
                 <td>{{'label.spent' | translate}}</td>
-                <td>{{address.spent}} {{'label.coinName' | translate}}</td>
+                <td>{{address.spent | explorerCurrency}}</td>
               </tr>
             </tbody>
           </table>
@@ -66,7 +66,7 @@
               <a routerLink="/blocks/{{item.blockhash}}">{{item.blockhash | slice:0:15}}...</a>
             </td>
             <td>{{item.time * 1000 | explorerDatetime}}</td>
-            <td>{{renderValue(item)}} {{'label.coinName' | translate}}</td>
+            <td>{{renderValue(item) | explorerCurrency}}</td>
             <td>{{item.size}} bytes</td>
           </tr>
         </tbody>

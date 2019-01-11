@@ -11,7 +11,7 @@
             {{'message.unavailable' | translate}}
           </span>
           <span *ngIf="ticker != null && ticker.totalSupply != null">
-            {{ticker.totalSupply}} {{'label.coinName' | translate}}
+            {{ticker.totalSupply | explorerCurrency}}
           </span>
         </div>
       </div>
@@ -29,7 +29,7 @@
           </span>
 
           <span *ngIf="ticker != null && ticker.circulatingSupply != null">
-            {{ticker.circulatingSupply}} {{'label.coinName' | translate}}
+            {{ticker.circulatingSupply | explorerCurrency}}
           </span>
         </div>
       </div>

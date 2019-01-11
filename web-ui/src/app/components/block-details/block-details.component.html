@@ -102,7 +102,7 @@
               <thead>
                 <tr>
                   <th class="col-xs-2 col-md-1">{{'label.blockReward' | translate}}</th>
-                  <th class="col-xs-2 col-md-1">{{blockDetails.rewards.reward.value}} {{'label.coinName' | translate}}</th>
+                  <th class="col-xs-2 col-md-1">{{blockDetails.rewards.reward.value | explorerCurrency}}</th>
                 </tr>
               </thead>
 
@@ -123,7 +123,7 @@
               <thead>
                 <tr>
                   <th class="col-xs-2 col-md-1">{{'label.rewards' | translate}}</th>
-                  <th class="col-xs-2 col-md-1">{{getPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
+                  <th class="col-xs-2 col-md-1">{{getPoSTotalReward(blockDetails) | explorerCurrency}}</th>
                 </tr>
               </thead>
 
@@ -140,7 +140,7 @@
                 </tr>
                 <tr>
                   <td>{{'label.amount' | translate}}</td>
-                  <td>{{blockDetails.rewards.coinstake.value}} {{'label.coinName' | translate}}</td>
+                  <td>{{blockDetails.rewards.coinstake.value | explorerCurrency}}</td>
                 </tr>
                 <tr>
                   <td>{{'label.address' | translate}}</td>
@@ -160,7 +160,7 @@
                 </tr>
                 <tr *ngIf="blockDetails.rewards.masternode != null">
                   <td>{{'label.amount' | translate}}</td>
-                  <td>{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</td>
+                  <td>{{blockDetails.rewards.masternode.value | explorerCurrency}}</td>
                 </tr>
                 <tr *ngIf="blockDetails.rewards.masternode != null">
                   <td>{{'label.address' | translate}}</td>
@@ -178,7 +178,7 @@
               <thead>
                 <tr>
                   <th class="col-xs-2 col-md-1">{{'label.rewards' | translate}}</th>
-                  <th class="col-xs-2 col-md-1">{{getTPoSTotalReward(blockDetails)}} {{'label.coinName' | translate}}</th>
+                  <th class="col-xs-2 col-md-1">{{getTPoSTotalReward(blockDetails) | explorerCurrency}}</th>
                 </tr>
               </thead>
 
@@ -195,7 +195,7 @@
                 </tr>
                 <tr>
                   <td>{{'label.amount' | translate}}</td>
-                  <td>{{blockDetails.rewards.owner.value}} {{'label.coinName' | translate}}</td>
+                  <td>{{blockDetails.rewards.owner.value | explorerCurrency}}</td>
                 </tr>
                 <tr>
                   <td>{{'label.address' | translate}}</td>
@@ -216,7 +216,7 @@
                 </tr>
                 <tr>
                   <td>{{'label.amount' | translate}}</td>
-                  <td>{{blockDetails.rewards.merchant.value}} {{'label.coinName' | translate}}</td>
+                  <td>{{blockDetails.rewards.merchant.value | explorerCurrency}}</td>
                 </tr>
                 <tr>
                   <td>{{'label.address' | translate}}</td>
@@ -237,7 +237,7 @@
                 </tr>
                 <tr *ngIf="blockDetails.rewards.masternode != null">
                   <td>{{'label.amount' | translate}}</td>
-                  <td>{{blockDetails.rewards.masternode.value}} {{'label.coinName' | translate}}</td>
+                  <td>{{blockDetails.rewards.masternode.value | explorerCurrency}}</td>
                 </tr>
                 <tr *ngIf="blockDetails.rewards.masternode != null">
                   <td>{{'label.address' | translate}}</td>
@@ -278,7 +278,7 @@
                   <a routerLink="/transactions/{{item.id}}">{{item.id | slice:0:35}}...</a>
                 </td>
                 <td>{{item.time * 1000 | explorerDatetime}}</td>
-                <td>{{item.sent}} {{'label.coinName' | translate}}</td>
+                <td>{{item.sent | explorerCurrency}}</td>
                 <td>{{item.size}} bytes</td>
               </tr>
             </tbody>
