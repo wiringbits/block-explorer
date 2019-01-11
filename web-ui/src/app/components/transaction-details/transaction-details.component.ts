@@ -73,6 +73,10 @@ export class TransactionDetailsComponent implements OnInit {
       .length;
   }
 
+  getTotal(rows: TransactionValue[]): number {
+    return rows.map((row) => row.value).reduce((a, b) => a + b);
+  }
+
   getFee(tx: Transaction): number {
     const vout = tx.output.map(t => t.value).reduce((a, b) => a + b, 0);
     return Math.max(0, this.getVIN(tx) - vout);
