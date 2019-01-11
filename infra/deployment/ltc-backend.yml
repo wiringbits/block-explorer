@@ -54,6 +54,14 @@
         owner: play
         group: play
 
+    - name: Set the application routes
+      become: yes
+      copy:
+        src: config/ltc-routes
+        dest: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/routes
+        owner: play
+        group: play
+
     - name: Set the application files permissions
       become: yes
       file:
