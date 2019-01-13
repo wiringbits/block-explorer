@@ -62,6 +62,14 @@
         owner: play
         group: play
 
+    - name: Set the sentry config
+      become: yes
+      copy:
+        src: config/sentry-ltc.properties
+        dest: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/sentry.properties
+        owner: play
+        group: play
+
     - name: Set the application files permissions
       become: yes
       file:
