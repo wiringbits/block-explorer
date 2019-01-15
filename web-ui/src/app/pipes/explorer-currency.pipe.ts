@@ -6,6 +6,13 @@ import { Config } from '../config';
 })
 export class ExplorerCurrencyPipe implements PipeTransform {
   transform(currency: any): string {
-    return `${ currency } ${ Config.currentCurrency }`;
+    let currencyNumber: number;
+    if (typeof(currency) === 'number') {
+      currencyNumber = currency;
+    } else if (typeof(currency) === 'string') {
+      currencyNumber = parseFloat(currency);
+    }
+
+    return `${ currencyNumber.toFixed(8) } ${ Config.currentCurrency }`;
   }
 }
