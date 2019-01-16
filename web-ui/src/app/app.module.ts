@@ -16,6 +16,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
 
 import { MomentModule } from 'ngx-moment';
 
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
 import { BlocksService } from './services/blocks.service';
@@ -87,7 +89,8 @@ import { ExplorerCurrencyPipe } from './pipes/explorer-currency.pipe';
     TranslateModule.forRoot(),
     NgxPaginationModule,
     TabsModule.forRoot(),
-    MomentModule
+    MomentModule,
+    InfiniteScrollModule
   ],
   providers: [
     AddressesService,
