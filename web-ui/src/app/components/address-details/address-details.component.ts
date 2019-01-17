@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Balance } from '../../models/balance';
 import { AddressesService } from '../../services/addresses.service';
 import { ErrorService } from '../../services/error.service';
 import { LightWalletTransaction } from '../..//models/light-wallet-transaction';
+
+import { getNumberOfRowsForScreen } from '../../utils';
 
 @Component({
   selector: 'app-address-details',
@@ -17,7 +19,7 @@ export class AddressDetailsComponent implements OnInit {
   addressString: string;
 
   // pagination
-  limit = 10;
+  limit = 30;
   items: LightWalletTransaction[] = [];
 
   constructor(
@@ -26,6 +28,8 @@ export class AddressDetailsComponent implements OnInit {
     private errorService: ErrorService) { }
 
   ngOnInit() {
+    const height = this.getScreenSize();
+    this.limit = getNumberOfRowsForScreen(height);
     this.addressString = this.route.snapshot.paramMap.get('address');
     this.addressesService.get(this.addressString).subscribe(
       response => this.onAddressRetrieved(response),
@@ -47,8 +51,13 @@ export class AddressDetailsComponent implements OnInit {
 
     this.addressesService
       .getTransactionsV2(this.addressString, this.limit, lastSeenTxid, order)
-      .do(response => this.items = this.items.concat(response.data))
+      .do(response => this.items.push(...response.data))
       .subscribe();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  private getScreenSize(_?): number {
+    return window.innerHeight;
   }
 
   private onError(response: any) {

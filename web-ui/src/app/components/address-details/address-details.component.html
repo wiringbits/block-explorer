@@ -56,7 +56,12 @@
           </tr>
         </thead>
 
-        <tbody>
+        <tbody
+        infiniteScroll
+        [infiniteScrollDistance]="1"
+        [infiniteScrollThrottle]="300"
+        (scrolled)="load()"
+        [scrollWindow]="true">
           <tr *ngFor="let index = index; let item of items">
             <td>{{index + 1}}</td>
             <td>
@@ -71,12 +76,6 @@
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <div class="row">
-      <div class="col-xs-11 col-xs-offset-1 col-sm-5 col-sm-offset-4">
-        <button (click)="load()">{{'label.more' | translate}}</button>
-      </div>
     </div>
   </div>
 </div>
