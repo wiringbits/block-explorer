@@ -1,18 +1,26 @@
-services:
-  - docker
+matrix:
+  include:
+    - language: scala
+      scala:
+         - 2.12.2
+      services:
+        - docker
+      before_install:
+         - docker pull postgres:9.6
+      before_script:
+        - cd server
+      script:
+        - sbt clean coverage test coverageReport
+      after_success:
+        - sbt coverageAggregate codacyCoverage
 
-before_install:
-- docker pull postgres:9.6
-
-language: scala
-
-scala:
-   - 2.12.2
-
-before_script: cd server
-
-script:
-- sbt clean coverage test coverageReport
-
-after_success:
-- sbt coverageAggregate codacyCoverage
+    - language: node_js
+      node_js:
+        - 8.14.0
+      before_script:
+      - cd web-ui
+      - npm install -g @angular/cli
+      - npm install -g @angular-devkit/build-angular
+      - npm install
+      script:
+      - ng build --prod
