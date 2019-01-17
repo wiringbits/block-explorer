@@ -9,6 +9,8 @@ import { BalancesService } from '../../services/balances.service';
 import { TickerService } from '../../services/ticker.service';
 import { ServerStats } from '../../models/ticker';
 
+import { getNumberOfRowsForScreen } from '../../utils';
+
 @Component({
   selector: 'app-richest-addresses',
   templateUrl: './richest-addresses.component.html',
@@ -29,7 +31,7 @@ export class RichestAddressesComponent implements OnInit {
 
   ngOnInit() {
     const height = this.getScreenSize();
-    this.limit = this.getLimitForScreen(height);
+    this.limit = getNumberOfRowsForScreen(height);
     this.load();
     this.tickerService.get().subscribe(response => this.ticker = response);
   }
@@ -47,15 +49,8 @@ export class RichestAddressesComponent implements OnInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  private getScreenSize(event?): number {
+  private getScreenSize(_?): number {
     return window.innerHeight;
-  }
-
-  private getLimitForScreen(height: number): number {
-    if (height < 550) {
-      return 10;
-    }
-    return Math.min(10 + Math.ceil((height - 550) / 20), 100);
   }
 
   getPercent(balance: Balance): number {
