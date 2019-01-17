@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { BlockDetails } from '../../models/block';
@@ -7,6 +7,8 @@ import { Transaction } from '../../models/transaction';
 import { BlocksService } from '../../services/blocks.service';
 import { ErrorService } from '../../services/error.service';
 import { PaginatedResult } from '../../models/paginated-result';
+
+import { getNumberOfRowsForScreen } from '../../utils';
 
 @Component({
   selector: 'app-block-details',
@@ -19,7 +21,7 @@ export class BlockDetailsComponent implements OnInit {
   blockDetails: BlockDetails;
 
   // pagination
-  limit = 10;
+  limit = 30;
   transactions: Transaction[] = [];
 
   constructor(
@@ -28,6 +30,8 @@ export class BlockDetailsComponent implements OnInit {
     private errorService: ErrorService) { }
 
   ngOnInit() {
+    const height = this.getScreenSize();
+    this.limit = getNumberOfRowsForScreen(height);
     this.route.params.forEach(params => this.onQuery(params['query']));
   }
 
@@ -59,8 +63,13 @@ export class BlockDetailsComponent implements OnInit {
 
     this.blocksService
       .getTransactionsV2(this.blockhash, this.limit, lastSeenTxid)
-      .do(response => this.transactions = this.transactions.concat(response.data))
+      .do(response => this.transactions.push(...response.data))
       .subscribe();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  private getScreenSize(_?): number {
+    return window.innerHeight;
   }
 
   private onError(response: any) {
