@@ -1,3 +1,5 @@
+
+import {tap} from 'rxjs/operators';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -62,8 +64,8 @@ export class BlockDetailsComponent implements OnInit {
     }
 
     this.blocksService
-      .getTransactionsV2(this.blockhash, this.limit, lastSeenTxid)
-      .do(response => this.transactions.push(...response.data))
+      .getTransactionsV2(this.blockhash, this.limit, lastSeenTxid).pipe(
+      tap(response => this.transactions.push(...response.data)))
       .subscribe();
   }
 

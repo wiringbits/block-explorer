@@ -1,14 +1,9 @@
+
+import {tap, merge, switchMap} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
-
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/merge';
-import 'rxjs/add/operator/switchMap';
-
-import { of } from 'rxjs';
+import { Subscription ,  Subject ,  of } from 'rxjs';
 
 import { Block } from '../../models/block';
 
@@ -52,14 +47,14 @@ export class LatestBlocksComponent implements OnInit, OnDestroy {
     const interval = 50000;
 
     // polling based on https://stackoverflow.com/a/42659054/3211175
-    this.subscription$ = of(null)
-      .merge(polling$)
-      .switchMap(_ =>
-        this.blocksService.getLatest()
-          .do(_ => {
+    this.subscription$ = of(null).pipe(
+      merge(polling$),
+      switchMap(_ =>
+        this.blocksService.getLatest().pipe(
+          tap(_ => {
             setTimeout(_ => polling$.next(null), interval);
-          })
-      )
+          }))
+      ),)
       .subscribe(
         response => this.onBlockRetrieved(response),
         response => this.onError(response)

@@ -1,3 +1,5 @@
+
+import {tap} from 'rxjs/operators';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -50,8 +52,8 @@ export class AddressDetailsComponent implements OnInit {
     }
 
     this.addressesService
-      .getTransactionsV2(this.addressString, this.limit, lastSeenTxid, order)
-      .do(response => this.items.push(...response.data))
+      .getTransactionsV2(this.addressString, this.limit, lastSeenTxid, order).pipe(
+      tap(response => this.items.push(...response.data)))
       .subscribe();
   }
 

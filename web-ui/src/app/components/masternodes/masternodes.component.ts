@@ -1,9 +1,11 @@
+
+import {map, tap} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
+
+
 
 import { Masternode } from '../../models/masternode';
 
@@ -38,9 +40,9 @@ export class MasternodesComponent implements OnInit {
     const limit = this.pageSize;
 
     this.asyncItems = this.masternodesService
-      .get(offset, limit, 'activeSeconds:desc')
-      .do(response => this.total = response.total)
-      .do(response => this.currentPage = 1 + (response.offset / this.pageSize))
-      .map(response => response.data);
+      .get(offset, limit, 'activeSeconds:desc').pipe(
+      tap(response => this.total = response.total),
+      tap(response => this.currentPage = 1 + (response.offset / this.pageSize)),
+      map(response => response.data),);
   }
 }

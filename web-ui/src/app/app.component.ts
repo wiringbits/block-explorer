@@ -1,8 +1,10 @@
+
+import {distinctUntilChanged} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 
 import { Router, NavigationEnd } from '@angular/router';
 
-import 'rxjs/add/operator/distinctUntilChanged';
+
 
 import { TranslateService } from '@ngx-translate/core';
 
@@ -31,14 +33,14 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     // integrate google analytics via gtag - based on https://stackoverflow.com/a/47658214/3211175
-    this.router.events.distinctUntilChanged((previous: any, current: any) => {
+    this.router.events.pipe(distinctUntilChanged((previous: any, current: any) => {
       // Subscribe to any `NavigationEnd` events where the url has changed
       if (current instanceof NavigationEnd) {
         return previous.url === current.url;
       }
 
       return true;
-    }).subscribe((x: any) => {
+    })).subscribe((x: any) => {
       const dirtyUrl: string = x.url || '';
       const url = this.removeQueryParams(dirtyUrl);
       (<any>window).gtag('config', environment.gtag.id, { 'page_path': url });

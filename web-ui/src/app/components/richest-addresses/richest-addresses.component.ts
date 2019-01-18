@@ -1,7 +1,9 @@
+
+import {tap} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
+
+
 
 import { Balance } from '../../models/balance';
 
@@ -43,8 +45,8 @@ export class RichestAddressesComponent implements OnInit {
     }
 
     this.balancesService
-      .getHighest(this.limit, lastSeenAddress)
-      .do(response => this.items.push(...response.data))
+      .getHighest(this.limit, lastSeenAddress).pipe(
+      tap(response => this.items.push(...response.data)))
       .subscribe();
   }
 
