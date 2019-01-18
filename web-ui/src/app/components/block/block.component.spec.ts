@@ -2,13 +2,23 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BlockComponent } from './block.component';
 
+import { TranslateModule } from '@ngx-translate/core';
+
+import { NO_ERRORS_SCHEMA, } from '@angular/core';
+
 describe('BlockComponent', () => {
   let component: BlockComponent;
   let fixture: ComponentFixture<BlockComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BlockComponent ]
+      declarations: [
+        BlockComponent
+      ],
+      imports: [
+        TranslateModule.forRoot()
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
   }));
