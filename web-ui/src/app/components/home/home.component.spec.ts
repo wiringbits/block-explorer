@@ -1,6 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
 
-import { HomeComponent } from './home.component';
+import { APP_BASE_HREF } from '@angular/common';
+
+import { TabsModule } from 'ngx-bootstrap/tabs';
+import { TranslateModule } from '@ngx-translate/core';
+
+import { HomeComponent } from '../../components/home/home.component';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -8,9 +14,18 @@ describe('HomeComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ HomeComponent ]
-    })
-    .compileComponents();
+      declarations: [
+        HomeComponent
+      ],
+      imports: [
+        TranslateModule.forRoot(),
+        TabsModule.forRoot()
+      ],
+      providers: [
+        { provide: APP_BASE_HREF, useValue: '/' }
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    });
   }));
 
   beforeEach(() => {
