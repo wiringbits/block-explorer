@@ -8,7 +8,6 @@ import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
-import org.scalactic.Every
 
 import scala.concurrent.Future
 
@@ -52,9 +51,5 @@ class TransactionFutureDataHandler @Inject() (
       lastSeenTxid: Option[TransactionId]): FutureApplicationResult[List[TransactionWithValues]] = Future {
 
     blockingDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid)
-  }
-
-  override def getLatestTransactionBy(addresses: Every[Address]): FutureApplicationResult[Map[String, String]] = Future {
-    blockingDataHandler.getLatestTransactionBy(addresses)
   }
 }

@@ -1,6 +1,6 @@
 package controllers
 
-import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionNotFoundError
@@ -9,9 +9,9 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Transaction
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.{Bad, Every, Good}
+import org.scalactic.{Bad, Good}
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
@@ -59,18 +59,7 @@ class TransactionsControllerSpec extends MyAPISpec {
     }
   }
 
-  val transactionDataHandler = new TransactionDummyDataHandler {
-
-    val map: Map[Address, TransactionId] = Map(firstAddress -> firstTxId, secondAddress -> secondTxId)
-
-    override def getLatestTransactionBy(addresses: Every[Address]): ApplicationResult[Map[String, String]] = {
-      val result = map
-        .filterKeys(addresses contains _)
-        .map( x => x._1.string -> x._2.string )
-
-      Good(result)
-    }
-  }
+  val transactionDataHandler = new TransactionDummyDataHandler {}
 
   override val application = guiceApplicationBuilder
     .overrides(bind[XSNService].to(customXSNService))
@@ -222,41 +211,6 @@ class TransactionsControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
 
       json mustEqual expected
-    }
-  }
-
-  "POST /transactions/latest" should {
-    def url = s"/transactions/latest"
-
-    "return the latest transactions for the addresses" in {
-
-      val addresses = List(firstAddress.string, secondAddress.string, s"3rd${secondAddress.string}")
-        .map(x => s""" "$x" """)
-        .mkString("[", ",", "]")
-      val body = s"""{ "addresses": $addresses }"""
-      val expected = Json.obj(firstAddress.string -> firstTxId, secondAddress.string -> secondTxId)
-
-      val response = POST(url, Some(body))
-      status(response) mustEqual OK
-      val json = contentAsJson(response)
-      json mustEqual expected
-    }
-
-    "fail while passing no addresses" in {
-      val body = """{ "addresses": [] }"""
-      val response = POST(url, Some(body))
-
-      status(response) mustEqual BAD_REQUEST
-
-      val json = contentAsJson(response)
-      val errorList = (json \ "errors").as[List[JsValue]]
-
-      errorList.size mustEqual 1
-      val error = errorList.head
-
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
-      (error \ "field").as[String] mustEqual "addresses"
-      (error \ "message").as[String].nonEmpty mustEqual true
     }
   }
 }

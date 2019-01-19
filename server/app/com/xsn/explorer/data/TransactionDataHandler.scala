@@ -5,7 +5,6 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import org.scalactic.Every
 
 import scala.language.higherKinds
 
@@ -30,7 +29,6 @@ trait TransactionDataHandler[F[_]] {
       limit: Limit,
       lastSeenTxid: Option[TransactionId]): F[List[TransactionWithValues]]
 
-  def getLatestTransactionBy(addresses: Every[Address]): F[Map[String, String]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

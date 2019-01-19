@@ -1,6 +1,6 @@
 package controllers
 
-import com.xsn.explorer.models.request.{GetLatestTransactionRequest, SendRawTransactionRequest}
+import com.xsn.explorer.models.request.SendRawTransactionRequest
 import com.xsn.explorer.services.TransactionService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
@@ -22,9 +22,5 @@ class TransactionsController @Inject() (
 
   def sendRawTransaction() = publicInput { ctx: HasModel[SendRawTransactionRequest] =>
     transactionService.sendRawTransaction(ctx.model.hex)
-  }
-
-  def getLatestByAddresses() = publicInput { ctx: HasModel[GetLatestTransactionRequest] =>
-    transactionService.getLatestTransactionBy(ctx.model.addresses)
   }
 }

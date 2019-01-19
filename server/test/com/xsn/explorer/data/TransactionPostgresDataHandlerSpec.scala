@@ -299,27 +299,6 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  "getLatestTransactionBy" should {
-    "return the relation address -> latest txid" in {
-      clearDatabase()
-      val blocks = blockList
-      blocks.map(createBlock)
-
-      val expected = Map(
-        "XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG53" -> "41e315108dc2df60caddbc7e8740a5614217f996c96898019e69b3195fd7ee10",
-        "XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9" -> "1e591eae200f719344fc5df0c4286e3fb191fb8a645bdf054f9b36a856fce41e"
-      )
-
-      val addresses = Every(
-        createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
-        createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG53"),
-        createAddress("XcqpUChZhNkVDgQqFF9U4DdewDGUMWwG54"),
-      )
-      val result = dataHandler.getLatestTransactionBy(addresses).get
-      result mustEqual expected
-    }
-  }
-
   "getBy with scroll" should {
     val address = createAddress("XxQ7j37LfuXgsLD5DZAwFKhT3s2ZMkW86F")
     val blockhash = createBlockhash("0000000000bdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")

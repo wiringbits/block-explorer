@@ -7,7 +7,6 @@ import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import org.scalactic.Every
 
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
@@ -21,5 +20,4 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
   override def getByBlockhash(blockhash: Blockhash, limit: pagination.Limit, lastSeenTxid: Option[TransactionId]): ApplicationResult[List[TransactionWithValues]] = ???
 
-  override def getLatestTransactionBy(addresses: Every[Address]): ApplicationResult[Map[String, String]] = ???
 }

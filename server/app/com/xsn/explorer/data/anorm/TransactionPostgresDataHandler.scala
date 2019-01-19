@@ -8,7 +8,7 @@ import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
-import org.scalactic.{Every, Good}
+import org.scalactic.Good
 import play.api.db.Database
 
 class TransactionPostgresDataHandler @Inject() (
@@ -69,11 +69,5 @@ class TransactionPostgresDataHandler @Inject() (
         .getOrElse { transactionPostgresDAO.getByBlockhash(blockhash, limit) }
 
     Good(transactions)
-  }
-
-  def getLatestTransactionBy(addresses: Every[Address]): ApplicationResult[Map[String, String]] = withConnection { implicit conn =>
-    val result = transactionPostgresDAO.getLatestTransactionBy(addresses)
-
-    Good(result)
   }
 }
