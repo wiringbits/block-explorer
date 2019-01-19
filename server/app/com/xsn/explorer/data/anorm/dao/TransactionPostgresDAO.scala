@@ -20,8 +20,8 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   def upsert(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     for {
       partialTx <- upsertTransaction(index, transaction)
-      inputs <- upsertInputs(transaction.id, transaction.inputs)
-      outputs <- upsertOutputs(transaction.id, transaction.outputs)
+      inputs <- insertInputs(transaction.id, transaction.inputs)
+      outputs <- insertOutputs(transaction.id, transaction.outputs)
       _ <- spend(transaction.id, inputs)
       _ = insertDetails(transaction)
     } yield partialTx.copy(inputs = inputs, outputs = outputs)
@@ -347,94 +347,84 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransaction.singleOpt).flatten
   }
 
-  private def upsertInputs(
+  private def insertInputs(
       transactionId: TransactionId,
       inputs: List[Transaction.Input])(
       implicit conn: Connection): Option[List[Transaction.Input]] = {
 
-    val result = inputs.map { input =>
-      upsertInput(transactionId, input)
-    }
+    inputs match {
+      case Nil => Some(inputs)
 
-    if (result.forall(_.isDefined)) {
-      Some(result.flatten)
-    } else {
-      None
+      case _ =>
+        val params = inputs.map { input =>
+          List(
+            'txid -> transactionId.string: NamedParameter,
+            'index -> input.index: NamedParameter,
+            'from_txid -> input.fromTxid.string: NamedParameter,
+            'from_output_index -> input.fromOutputIndex: NamedParameter,
+            'value -> input.value: NamedParameter,
+            'address -> input.address.string: NamedParameter)
+        }
+
+        val batch = BatchSql(
+          """
+            |INSERT INTO transaction_inputs
+            |  (txid, index, from_txid, from_output_index, value, address)
+            |VALUES
+            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {address})
+          """.stripMargin,
+          params.head,
+          params.tail: _*
+        )
+
+        val success = batch.execute().forall(_ == 1)
+
+        if (success) {
+          Some(inputs)
+        } else {
+          None
+        }
     }
   }
 
-  private def upsertInput(
-      transactionId: TransactionId,
-      input: Transaction.Input)(
-      implicit conn: Connection): Option[Transaction.Input] = {
-
-    SQL(
-      """
-        |INSERT INTO transaction_inputs
-        |  (txid, index, from_txid, from_output_index, value, address)
-        |VALUES
-        |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {address})
-        |ON CONFLICT (txid, index) DO UPDATE
-        |  SET value = EXCLUDED.value,
-        |      address = EXCLUDED.address,
-        |      from_txid = EXCLUDED.from_txid,
-        |      from_output_index = EXCLUDED.from_output_index
-        |RETURNING txid, index, from_txid, from_output_index, value, address
-      """.stripMargin
-    ).on(
-      'txid -> transactionId.string,
-      'index -> input.index,
-      'from_txid -> input.fromTxid.string,
-      'from_output_index -> input.fromOutputIndex,
-      'value -> input.value,
-      'address -> input.address.string
-    ).as(parseTransactionInput.singleOpt).flatten
-  }
-
-  private def upsertOutputs(
+  private def insertOutputs(
       transactionId: TransactionId,
       outputs: List[Transaction.Output])(
       implicit conn: Connection): Option[List[Transaction.Output]] = {
 
-    val result = outputs.map { output =>
-      upsertOutput(transactionId, output)
+    outputs match {
+      case Nil => Some(outputs)
+      case _ =>
+        val params = outputs.map { output =>
+          List(
+            'txid -> transactionId.string: NamedParameter,
+            'index -> output.index: NamedParameter,
+            'value -> output.value: NamedParameter,
+            'address -> output.address.string: NamedParameter,
+            'hex_script -> output.script.string: NamedParameter,
+            'tpos_owner_address -> output.tposOwnerAddress.map(_.string): NamedParameter,
+            'tpos_merchant_address -> output.tposMerchantAddress.map(_.string): NamedParameter)
+        }
+
+        val batch = BatchSql(
+          """
+            |INSERT INTO transaction_outputs
+            |  (txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address)
+            |VALUES
+            |  ({txid}, {index}, {value}, {address}, {hex_script}, {tpos_owner_address}, {tpos_merchant_address})
+          """.stripMargin,
+          params.head,
+          params.tail: _*
+        )
+
+        val success = batch.execute().forall(_ == 1)
+
+        if (success) {
+          Some(outputs)
+        } else {
+          None
+        }
     }
-
-    if (result.forall(_.isDefined)) {
-      Some(result.flatten)
-    } else {
-      None
-    }
-  }
-
-  private def upsertOutput(
-      transactionId: TransactionId,
-      output: Transaction.Output)(
-      implicit conn: Connection): Option[Transaction.Output] = {
-
-    SQL(
-      """
-        |INSERT INTO transaction_outputs
-        |  (txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address)
-        |VALUES
-        |  ({txid}, {index}, {value}, {address}, {hex_script}, {tpos_owner_address}, {tpos_merchant_address})
-        |ON CONFLICT (txid, index) DO UPDATE
-        |  SET value = EXCLUDED.value,
-        |      address = EXCLUDED.address,
-        |      hex_script = EXCLUDED.hex_script,
-        |      tpos_owner_address = EXCLUDED.tpos_owner_address,
-        |      tpos_merchant_address = EXCLUDED.tpos_merchant_address
-        |RETURNING txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address
-      """.stripMargin
-    ).on(
-      'txid -> transactionId.string,
-      'index -> output.index,
-      'value -> output.value,
-      'address -> output.address.string,
-      'hex_script -> output.script.string,
-      'tpos_owner_address -> output.tposOwnerAddress.map(_.string),
-      'tpos_merchant_address -> output.tposMerchantAddress.map(_.string)
-    ).as(parseTransactionOutput.singleOpt).flatten
   }
 
   private def deleteInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
