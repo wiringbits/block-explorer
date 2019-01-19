@@ -27,29 +27,6 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     } yield partialTx.copy(inputs = inputs, outputs = outputs)
   }
 
-  private def spend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
-    val result = inputs.flatMap { input => spend(txid, input) }
-    Option(result)
-        .filter(_.size == inputs.size)
-        .map(_ => ())
-  }
-
-  private def spend(txid: TransactionId, input: Transaction.Input)(implicit conn: Connection): Option[Transaction.Output] = {
-    SQL(
-      """
-        |UPDATE transaction_outputs
-        |SET spent_on = {spent_on}
-        |WHERE txid = {output_txid} AND
-        |      index = {output_index}
-        |RETURNING txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
-      """.stripMargin
-    ).on(
-      'spent_on -> txid.string,
-      'output_txid -> input.fromTxid.string,
-      'output_index -> input.fromOutputIndex
-    ).as(parseTransactionOutput.single)
-  }
-
   /**
    * NOTE: Ensure the connection has an open transaction.
    */
@@ -537,6 +514,43 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       'txid -> txid.string,
       'address -> address.string
     ).as(parseTransactionOutput.*).flatten
+  }
+
+  private def spend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
+    inputs match {
+      case Nil => Option(())
+      case _ =>
+        val txidArray = inputs
+            .map { input => s"'${input.fromTxid.string}'" }
+            .mkString("[", ",", "]")
+
+        val indexArray = inputs.map(_.fromOutputIndex).mkString("[", ",", "]")
+
+        // Note: the TransactionId must meet a safe format, this approach speeds up the inserts
+        val result = SQL(
+          s"""
+             |UPDATE transaction_outputs t
+             |SET spent_on = tmp.spent_on
+             |FROM (
+             |  WITH CTE AS (
+             |    SELECT '${txid.string}' AS spent_on
+             |  )
+             |  SELECT spent_on, txid, index
+             |  FROM CTE CROSS JOIN (SELECT
+             |       UNNEST(array$indexArray) AS index,
+             |       UNNEST(array$txidArray) AS txid) x
+             |) AS tmp
+             |WHERE t.txid = tmp.txid AND
+             |      t.index = tmp.index
+        """.stripMargin
+        ).executeUpdate()
+
+        if (result == inputs.size) {
+          Option(())
+        } else {
+          None
+        }
+    }
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
