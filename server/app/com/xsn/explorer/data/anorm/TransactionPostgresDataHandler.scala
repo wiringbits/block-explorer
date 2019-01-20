@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
-import com.xsn.explorer.data.anorm.dao.TransactionPostgresDAO
+import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
@@ -13,6 +13,7 @@ import play.api.db.Database
 
 class TransactionPostgresDataHandler @Inject() (
     override val database: Database,
+    transactionOutputDAO: TransactionOutputPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO)
     extends TransactionBlockingDataHandler
         with AnormPostgresDataHandler {
@@ -43,7 +44,7 @@ class TransactionPostgresDataHandler @Inject() (
   }
 
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
-    val result = transactionPostgresDAO.getUnspentOutputs(address)
+    val result = transactionOutputDAO.getUnspentOutputs(address)
     Good(result)
   }
 

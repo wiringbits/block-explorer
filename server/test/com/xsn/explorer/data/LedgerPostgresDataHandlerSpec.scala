@@ -1,10 +1,8 @@
 package com.xsn.explorer.data
 
-import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.LedgerPostgresDataHandler
-import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
+import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.{BlockLoader, TransactionLoader}
 import com.xsn.explorer.models.Transaction
 import com.xsn.explorer.models.rpc.Block
@@ -13,12 +11,7 @@ import org.scalatest.BeforeAndAfter
 
 class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
-  lazy val dataHandler = new LedgerPostgresDataHandler(
-    database,
-    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
-    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
-    new BalancePostgresDAO(new FieldOrderingSQLInterpreter),
-    new AggregatedAmountPostgresDAO)
+  lazy val dataHandler = createLedgerDataHandler(database)
 
   val blockList = List(
     BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),
@@ -71,7 +64,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         dataHandler.pop()
         fail()
       } catch {
-        case _ => ()
+        case _: Throwable => ()
       }
     }
 

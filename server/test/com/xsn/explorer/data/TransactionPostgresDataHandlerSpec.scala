@@ -2,7 +2,6 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
-import com.xsn.explorer.data.anorm.TransactionPostgresDataHandler
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.helpers.DataHandlerObjects._
@@ -18,7 +17,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   import DataGenerator._
 
-  lazy val dataHandler = new TransactionPostgresDataHandler(database, transactionPostgresDAO)
+  lazy val dataHandler =  createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val blockDataHandler = createBlockDataHandler(database)
 

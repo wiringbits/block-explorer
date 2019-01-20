@@ -1,13 +1,11 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
-import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
+import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height}
@@ -20,18 +18,9 @@ import scala.concurrent.Future
 
 class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeAndAfter with ScalaFutures {
 
-  lazy val dataHandler = new LedgerPostgresDataHandler(
-    database,
-    new BlockPostgresDAO(new FieldOrderingSQLInterpreter),
-    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter),
-    new BalancePostgresDAO(new FieldOrderingSQLInterpreter),
-    new AggregatedAmountPostgresDAO)
-
-  lazy val transactionDataHandler = new TransactionPostgresDataHandler(
-    database,
-    new TransactionPostgresDAO(new FieldOrderingSQLInterpreter))
-
-  lazy val blockDataHandler = new BlockPostgresDataHandler(database, new BlockPostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val dataHandler = createLedgerDataHandler(database)
+  lazy val transactionDataHandler = createTransactionDataHandler(database)
+  lazy val blockDataHandler = createBlockDataHandler(database)
 
   val blockList = List(
     BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"),

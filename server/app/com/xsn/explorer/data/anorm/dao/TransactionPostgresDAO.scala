@@ -11,7 +11,11 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
 
-class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+class TransactionPostgresDAO @Inject() (
+    transactionInputDAO: TransactionInputPostgresDAO,
+    transactionOutputDAO: TransactionOutputPostgresDAO,
+    addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO,
+    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   /**
    * NOTE: Ensure the connection has an open transaction.
@@ -19,10 +23,10 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
   def upsert(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     for {
       partialTx <- upsertTransaction(index, transaction)
-      _ <- batchInsertOutputs(transaction.outputs)
-      _ <- batchInsertInputs(transaction.inputs.map(transaction.id -> _))
-      _ <- batchSpend(transaction.id, transaction.inputs)
-      _ <- batchInsertDetails(transaction)
+      _ <- transactionOutputDAO.batchInsertOutputs(transaction.outputs)
+      _ <- transactionInputDAO.batchInsertInputs(transaction.inputs.map(transaction.id -> _))
+      _ <- transactionOutputDAO.batchSpend(transaction.id, transaction.inputs)
+      _ <- addressTransactionDetailsDAO.batchInsertDetails(transaction)
     } yield partialTx.copy(inputs = transaction.inputs, outputs = transaction.outputs)
   }
 
@@ -31,15 +35,15 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       r <- batchInsert(transactions)
 
       outputs = transactions.flatMap(_.outputs)
-      _ <- batchInsertOutputs(outputs)
+      _ <- transactionOutputDAO.batchInsertOutputs(outputs)
 
       inputs = transactions.flatMap { tx => tx.inputs.map(tx.id -> _) }
-      _ <- batchInsertInputs(inputs)
+      _ <- transactionInputDAO.batchInsertInputs(inputs)
     } yield {
       val extra = for {
         tx <- transactions
-        _ <- batchInsertDetails(tx)
-        _ <- batchSpend(tx.id, tx.inputs)
+        _ <- addressTransactionDetailsDAO.batchInsertDetails(tx)
+        _ <- transactionOutputDAO.batchSpend(tx.id, tx.inputs)
       } yield tx
 
       assert(extra.size == transactions.size, "Not all transactions were inserted properly")
@@ -98,9 +102,9 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransaction.*).flatten
 
     val result = expectedTransactions.map { tx =>
-      val inputs = deleteInputs(tx.id)
-      val outputs = deleteOutputs(tx.id)
-      val _ = deleteDetails(tx.id)
+      val inputs = transactionInputDAO.deleteInputs(tx.id)
+      val outputs = transactionOutputDAO.deleteOutputs(tx.id)
+      val _ = addressTransactionDetailsDAO.deleteDetails(tx.id)
 
       tx.copy(inputs = inputs, outputs = outputs)
     }
@@ -143,8 +147,8 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     for {
       tx <- transactions
     } yield {
-      val inputs = getInputs(tx.id, address)
-      val outputs = getOutputs(tx.id, address)
+      val inputs = transactionInputDAO.getInputs(tx.id, address)
+      val outputs = transactionOutputDAO.getOutputs(tx.id, address)
       tx.copy(inputs = inputs, outputs = outputs)
     }
   }
@@ -192,8 +196,8 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     for {
       tx <- transactions
     } yield {
-      val inputs = getInputs(tx.id, address)
-      val outputs = getOutputs(tx.id, address)
+      val inputs = transactionInputDAO.getInputs(tx.id, address)
+      val outputs = transactionOutputDAO.getOutputs(tx.id, address)
       tx.copy(inputs = inputs, outputs = outputs)
     }
   }
@@ -318,20 +322,6 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
     ).as(parseTransactionWithValues.*).flatten
   }
 
-  def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
-    SQL(
-      """
-        |SELECT txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address
-        |FROM transaction_outputs
-        |WHERE address = {address} AND
-        |      spent_on IS NULL AND
-        |      value > 0
-      """.stripMargin
-    ).on(
-      'address -> address.string
-    ).as(parseTransactionOutput.*).flatten
-  }
-
   private def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """
@@ -353,248 +343,6 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
       'size -> transaction.size.int,
       'index -> index
     ).as(parseTransaction.singleOpt).flatten
-  }
-
-  private def batchInsertInputs(
-      inputs: List[(TransactionId, Transaction.Input)])(
-      implicit conn: Connection): Option[List[(TransactionId, Transaction.Input)]] = {
-
-    inputs match {
-      case Nil => Some(inputs)
-
-      case _ =>
-        val params = inputs.map { case (txid, input) =>
-          List(
-            'txid -> txid.string: NamedParameter,
-            'index -> input.index: NamedParameter,
-            'from_txid -> input.fromTxid.string: NamedParameter,
-            'from_output_index -> input.fromOutputIndex: NamedParameter,
-            'value -> input.value: NamedParameter,
-            'address -> input.address.string: NamedParameter)
-        }
-
-        val batch = BatchSql(
-          """
-            |INSERT INTO transaction_inputs
-            |  (txid, index, from_txid, from_output_index, value, address)
-            |VALUES
-            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {address})
-          """.stripMargin,
-          params.head,
-          params.tail: _*
-        )
-
-        val success = batch.execute().forall(_ == 1)
-
-        if (success) {
-          Some(inputs)
-        } else {
-          None
-        }
-    }
-  }
-
-  private def batchInsertOutputs(
-      outputs: List[Transaction.Output])(
-      implicit conn: Connection): Option[List[Transaction.Output]] = {
-
-    outputs match {
-      case Nil => Some(outputs)
-      case _ =>
-        val params = outputs.map { output =>
-          List(
-            'txid -> output.txid.string: NamedParameter,
-            'index -> output.index: NamedParameter,
-            'value -> output.value: NamedParameter,
-            'address -> output.address.string: NamedParameter,
-            'hex_script -> output.script.string: NamedParameter,
-            'tpos_owner_address -> output.tposOwnerAddress.map(_.string): NamedParameter,
-            'tpos_merchant_address -> output.tposMerchantAddress.map(_.string): NamedParameter)
-        }
-
-        val batch = BatchSql(
-          """
-            |INSERT INTO transaction_outputs
-            |  (txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address)
-            |VALUES
-            |  ({txid}, {index}, {value}, {address}, {hex_script}, {tpos_owner_address}, {tpos_merchant_address})
-          """.stripMargin,
-          params.head,
-          params.tail: _*
-        )
-
-        val success = batch.execute().forall(_ == 1)
-
-        if (success) {
-          Some(outputs)
-        } else {
-          None
-        }
-    }
-  }
-
-  private def deleteInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
-    SQL(
-      """
-        |DELETE FROM transaction_inputs
-        |WHERE txid = {txid}
-        |RETURNING txid, index, from_txid, from_output_index, value, address
-      """.stripMargin
-    ).on(
-      'txid -> txid.string
-    ).as(parseTransactionInput.*).flatten
-  }
-
-  private def deleteOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
-    val result = SQL(
-      """
-        |DELETE FROM transaction_outputs
-        |WHERE txid = {txid}
-        |RETURNING txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
-      """.stripMargin
-    ).on(
-      'txid -> txid.string
-    ).as(parseTransactionOutput.*)
-
-    result.flatten
-  }
-
-  private def batchInsertDetails(transaction: Transaction)(implicit conn: Connection): Option[Unit] = {
-    val received = transaction
-        .outputs
-        .groupBy(_.address)
-        .mapValues { outputs => outputs.map(_.value).sum }
-        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value) }
-
-    val sent = transaction
-        .inputs
-        .groupBy(_.address)
-        .mapValues { inputs => inputs.map(_.value).sum }
-        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value) }
-
-    val details = (received ++ sent)
-        .groupBy(_.address)
-        .mapValues {
-          case head :: list => list.foldLeft(head) { (acc, current) =>
-            current.copy(received = current.received + acc.received, sent = current.sent + acc.sent)
-          }
-        }
-        .values
-
-    batchInsertDetails(details.toList)
-  }
-
-  private def batchInsertDetails(details: List[AddressTransactionDetails])(implicit conn: Connection): Option[Unit] = {
-    details match {
-      case Nil => Some(())
-      case _ =>
-        val params = details.map { d =>
-          List(
-            'address  -> d.address.string: NamedParameter,
-            'txid -> d.txid.string: NamedParameter,
-            'received -> d.received: NamedParameter,
-            'sent -> d.sent: NamedParameter,
-            'time -> d.time: NamedParameter)
-        }
-
-        val batch = BatchSql(
-          """
-            |INSERT INTO address_transaction_details
-            |  (address, txid, received, sent, time)
-            |VALUES
-            |  ({address}, {txid}, {received}, {sent}, {time})
-          """.stripMargin,
-          params.head,
-          params.tail: _*
-        )
-
-        val success = batch.execute().forall(_ == 1)
-
-        if (success) {
-          Some(())
-        } else {
-          None
-        }
-    }
-  }
-
-  private def deleteDetails(txid: TransactionId)(implicit conn: Connection): List[AddressTransactionDetails] = {
-    val result = SQL(
-      """
-        |DELETE FROM address_transaction_details
-        |WHERE txid = {txid}
-        |RETURNING address, txid, received, sent, time
-      """.stripMargin
-    ).on(
-      'txid -> txid.string
-    ).as(parseAddressTransactionDetails.*)
-
-    result
-  }
-
-  private def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
-    SQL(
-      """
-        |SELECT txid, index, from_txid, from_output_index, value, address
-        |FROM transaction_inputs
-        |WHERE txid = {txid} AND
-        |      address = {address}
-      """.stripMargin
-    ).on(
-      'txid -> txid.string,
-      'address -> address.string
-    ).as(parseTransactionInput.*).flatten
-  }
-
-  private def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
-    SQL(
-      """
-        |SELECT txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
-        |FROM transaction_outputs
-        |WHERE txid = {txid} AND
-        |      address = {address}
-      """.stripMargin
-    ).on(
-      'txid -> txid.string,
-      'address -> address.string
-    ).as(parseTransactionOutput.*).flatten
-  }
-
-  private def batchSpend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
-    inputs match {
-      case Nil => Option(())
-      case _ =>
-        val txidArray = inputs
-            .map { input => s"'${input.fromTxid.string}'" }
-            .mkString("[", ",", "]")
-
-        val indexArray = inputs.map(_.fromOutputIndex).mkString("[", ",", "]")
-
-        // Note: the TransactionId must meet a safe format, this approach speeds up the inserts
-        val result = SQL(
-          s"""
-             |UPDATE transaction_outputs t
-             |SET spent_on = tmp.spent_on
-             |FROM (
-             |  WITH CTE AS (
-             |    SELECT '${txid.string}' AS spent_on
-             |  )
-             |  SELECT spent_on, txid, index
-             |  FROM CTE CROSS JOIN (SELECT
-             |       UNNEST(array$indexArray) AS index,
-             |       UNNEST(array$txidArray) AS txid) x
-             |) AS tmp
-             |WHERE t.txid = tmp.txid AND
-             |      t.index = tmp.index
-        """.stripMargin
-        ).executeUpdate()
-
-        if (result == inputs.size) {
-          Option(())
-        } else {
-          None
-        }
-    }
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
