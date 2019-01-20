@@ -6,7 +6,13 @@ case class Transaction(
     time: Long,
     size: Size,
     inputs: List[Transaction.Input],
-    outputs: List[Transaction.Output])
+    outputs: List[Transaction.Output]) {
+
+  require(
+    outputs.forall(_.txid == id),
+    "There are outputs that having a different txid"
+  )
+}
 
 object Transaction {
 
