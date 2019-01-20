@@ -70,11 +70,8 @@ class LedgerPostgresDataHandler @Inject() (
       _ <- deleteBlockCascade(block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block)
 
-      // transactions
-      _ <- transactions
-          .zipWithIndex
-          .map { case (tx, index) => transactionPostgresDAO.upsert(index, tx) }
-          .everything
+      // batch insert
+      _ <- transactionPostgresDAO.insert(transactions)
 
       // balances
       balanceList = balances(transactions)

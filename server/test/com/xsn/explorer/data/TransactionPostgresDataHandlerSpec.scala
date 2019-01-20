@@ -326,8 +326,18 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val transaction2 = transaction.copy(
         id = newTxid2,
         inputs = List(
-          Transaction.Input(fromTxid = transaction.id, fromOutputIndex = 0, index = 0, value = transaction.outputs(0).value, address = newAddress),
-          Transaction.Input(fromTxid = transaction.id, fromOutputIndex = 1, index = 1, value = transaction.outputs(1).value, address = newAddress)
+          Transaction.Input(
+            fromTxid = transaction.id,
+            fromOutputIndex = 0,
+            index = 0,
+            value = transaction.outputs(0).value,
+            address = newAddress),
+          Transaction.Input(
+            fromTxid = transaction.id,
+            fromOutputIndex = 1,
+            index = 1,
+            value = transaction.outputs(1).value,
+            address = newAddress)
         ),
         outputs = transaction.outputs.map(_.copy(txid = newTxid2))
       )
@@ -341,7 +351,6 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         transactions = transactions.map(_.id))
 
       createBlock(block, transactions)
-      val newTx = transactions(1)
 
       // check that the outputs are properly spent
       database.withConnection { implicit conn =>
@@ -355,7 +364,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
           """.stripMargin
         ).as(SqlParser.str("spent_on").*)
 
-        spentOn.foreach(_ mustEqual newTx.id.string)
+        spentOn.foreach(_ mustEqual transaction2.id.string)
       }
 
       // check that the inputs are linked to the correct output
@@ -366,7 +375,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
           s"""
              |SELECT from_txid, from_output_index
              |FROM transaction_inputs
-             |WHERE txid = '${newTx.id.string}'
+             |WHERE txid = '${transaction2.id.string}'
           """.stripMargin
         )
 
