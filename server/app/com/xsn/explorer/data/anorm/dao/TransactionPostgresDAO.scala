@@ -10,7 +10,6 @@ import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
-import org.scalactic.Every
 
 class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
@@ -77,7 +76,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |SELECT t.txid, t.blockhash, t.time, t.size
         |FROM transactions t JOIN address_transaction_details USING (txid)
         |WHERE address = {address}
-        |ORDER BY time $order
+        |ORDER BY time $order, txid
         |LIMIT {limit}
       """.stripMargin
     ).on(
@@ -125,7 +124,7 @@ class TransactionPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderi
         |         JOIN address_transaction_details USING (txid)
         |WHERE address = {address} AND
         |      (t.time $comparator lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
-        |ORDER BY time $order
+        |ORDER BY time $order, txid
         |LIMIT {limit}
       """.stripMargin
     ).on(
