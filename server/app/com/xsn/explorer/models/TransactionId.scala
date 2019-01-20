@@ -7,6 +7,8 @@ class TransactionId private (val string: String) extends AnyVal with WrappedStri
 
 object TransactionId {
 
+  val Length = 64
+
   private val pattern = "^[a-f0-9]{64}$".r.pattern
 
   def from(string: String): Option[TransactionId] = {

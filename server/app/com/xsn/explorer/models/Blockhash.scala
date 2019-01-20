@@ -6,6 +6,9 @@ import play.api.libs.json._
 class Blockhash private (val string: String) extends AnyVal with WrappedString
 
 object Blockhash {
+
+  val Length = 64
+
   private val pattern = "^[a-f0-9]{64}$".r.pattern
 
   def from(string: String): Option[Blockhash] = {
