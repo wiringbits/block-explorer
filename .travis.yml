@@ -23,4 +23,4 @@ matrix:
       - npm install -g @angular-devkit/build-angular
       - npm install
       script:
-      - ng build --prod
+      - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
