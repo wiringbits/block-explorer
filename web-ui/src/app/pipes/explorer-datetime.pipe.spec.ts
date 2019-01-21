@@ -18,7 +18,7 @@ describe('ExplorerDatetimePipe', () => {
 
   it('should return the parsed date when a Date object is sent', () => {
     const pipe = new ExplorerDatetimePipe('en');
-    const date = new Date('1990-02-25');
+    const date = new Date('1990-02-24T18:00:00');
 
     expect(pipe.transform(date)).toMatch('February 24, 1990, 6:00:00 PM');
   });
