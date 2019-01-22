@@ -31,8 +31,8 @@ class LedgerSynchronizerService @Inject() (
    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
-      block <- xsnService.getBlock(blockhash).toFutureOr
-      transactions <- transactionService.getTransactions(block.transactions).toFutureOr
+      x <- getRPCBlock(blockhash).toFutureOr
+      (block, transactions) = x
       _ <- synchronize(block, transactions).toFutureOr
     } yield ()
 
@@ -96,8 +96,8 @@ class LedgerSynchronizerService @Inject() (
       logger.info(s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}")
       val result = for {
         blockhash <- newBlock.previousBlockhash.toFutureOr(BlockNotFoundError)
-        previousBlock <- xsnService.getBlock(blockhash).toFutureOr
-        previousTransactions <- transactionService.getTransactions(previousBlock.transactions).toFutureOr
+        x <- getRPCBlock(blockhash).toFutureOr
+        (previousBlock, previousTransactions) = x
         _ <- synchronize(previousBlock, previousTransactions).toFutureOr
         _ <- synchronize(newBlock, newTransactions).toFutureOr
       } yield ()
@@ -147,13 +147,25 @@ class LedgerSynchronizerService @Inject() (
       val result = for {
         _ <- previous.toFutureOr
         blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-        block <- xsnService.getBlock(blockhash).toFutureOr
-        transactions <- transactionService.getTransactions(block.transactions).toFutureOr
+        x <- getRPCBlock(blockhash).toFutureOr
+        (block, transactions) = x
         _ <- synchronize(block, transactions).toFutureOr
       } yield ()
 
       result.toFuture
     }
+  }
+
+  private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = {
+    val start = System.currentTimeMillis()
+    val result = for {
+      block <- xsnService.getBlock(blockhash).toFutureOr
+      transactions <- transactionService.getTransactions(block.transactions).toFutureOr
+      took = System.currentTimeMillis() - start
+      _ = logger.info(s"Retrieving block = $blockhash, took $took ms")
+    } yield (block, transactions)
+
+    result.toFuture
   }
 
   /**

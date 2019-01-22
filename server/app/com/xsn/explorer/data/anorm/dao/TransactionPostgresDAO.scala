@@ -10,12 +10,15 @@ import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import javax.inject.Inject
+import org.slf4j.LoggerFactory
 
 class TransactionPostgresDAO @Inject() (
     transactionInputDAO: TransactionInputPostgresDAO,
     transactionOutputDAO: TransactionOutputPostgresDAO,
     addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO,
     fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * NOTE: Ensure the connection has an open transaction.
@@ -40,22 +43,37 @@ class TransactionPostgresDAO @Inject() (
       inputs = transactions.flatMap { tx => tx.inputs.map(tx.id -> _) }
       _ <- transactionInputDAO.batchInsertInputs(inputs)
     } yield {
-      val extra = for {
-        tx <- transactions
-        _ <- addressTransactionDetailsDAO.batchInsertDetails(tx)
-        _ <- transactionOutputDAO.batchSpend(tx.id, tx.inputs)
-      } yield tx
-
-      assert(extra.size == transactions.size, "Not all transactions were inserted properly")
-
+      insertDetails(transactions)
+      spend(transactions)
       r
     }
+  }
+
+  private def insertDetails(transactions: List[Transaction])(implicit conn: Connection): Unit = {
+    val start = System.currentTimeMillis()
+    val detailsResult = transactions.map(addressTransactionDetailsDAO.batchInsertDetails)
+    val took = System.currentTimeMillis() - start
+
+    logger.info(s"Inserting address details batch, size = ${transactions.size}, took = $took ms")
+
+    assert(detailsResult.forall(_.isDefined), "Inserting address details batch failed")
+  }
+
+  private def spend(transactions: List[Transaction])(implicit conn: Connection): Unit = {
+    val start = System.currentTimeMillis()
+    val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
+    val took = System.currentTimeMillis() - start
+
+    logger.info(s"Spending transaction batch, size = ${transactions.size}, took = $took ms")
+
+    assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
   }
 
   private def batchInsert(transactions: List[Transaction])(implicit conn: Connection): Option[List[Transaction]] = {
     transactions match {
       case Nil => Some(transactions)
       case _ =>
+        val start = System.currentTimeMillis()
         val params = transactions.zipWithIndex.map { case (transaction, index) =>
           List(
             'txid -> transaction.id.string: NamedParameter,
@@ -78,6 +96,8 @@ class TransactionPostgresDAO @Inject() (
 
         val success = batch.execute().forall(_ == 1)
 
+        val took = System.currentTimeMillis() - start
+        logger.info(s"Inserting transaction batch, size = ${transactions.size}, took = $took ms")
         if (success) {
           Some(transactions)
         } else {

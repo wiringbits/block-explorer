@@ -5,8 +5,11 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.{Address, Transaction, TransactionId}
+import org.slf4j.LoggerFactory
 
 class TransactionOutputPostgresDAO {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
@@ -29,6 +32,7 @@ class TransactionOutputPostgresDAO {
     outputs match {
       case Nil => Some(outputs)
       case _ =>
+        val start = System.currentTimeMillis()
         val params = outputs.map { output =>
           List(
             'txid -> output.txid.string: NamedParameter,
@@ -53,6 +57,8 @@ class TransactionOutputPostgresDAO {
 
         val success = batch.execute().forall(_ == 1)
 
+        val took = System.currentTimeMillis() - start
+        logger.info(s"Inserting output batch, size = ${outputs.size}, took = $took ms")
         if (success) {
           Some(outputs)
         } else {

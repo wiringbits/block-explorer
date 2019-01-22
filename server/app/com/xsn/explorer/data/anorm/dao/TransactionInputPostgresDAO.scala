@@ -5,8 +5,11 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.{Address, Transaction, TransactionId}
+import org.slf4j.LoggerFactory
 
 class TransactionInputPostgresDAO {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def batchInsertInputs(
       inputs: List[(TransactionId, Transaction.Input)])(
@@ -16,6 +19,8 @@ class TransactionInputPostgresDAO {
       case Nil => Some(inputs)
 
       case _ =>
+
+        val start = System.currentTimeMillis()
         val params = inputs.map { case (txid, input) =>
           List(
             'txid -> txid.string: NamedParameter,
@@ -38,6 +43,9 @@ class TransactionInputPostgresDAO {
         )
 
         val success = batch.execute().forall(_ == 1)
+
+        val took = System.currentTimeMillis() - start
+        logger.info(s"Inserting input batch, size = ${inputs.size}, took = $took ms")
 
         if (success) {
           Some(inputs)
