@@ -3,8 +3,9 @@ package com.xsn.explorer.helpers
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.models.rpc.{Block, Transaction}
-import com.xsn.explorer.models.{Blockhash, TransactionId}
+import com.xsn.explorer.models.{Blockhash, Height, TransactionId}
 import org.scalactic.{Good, One, Or}
+import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
 
@@ -15,6 +16,20 @@ class FileBasedXSNService extends DummyXSNService {
 
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
     val maybe = blockMap.get(blockhash)
+    val result = Or.from(maybe, One(BlockNotFoundError))
+    Future.successful(result)
+  }
+
+  override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+    val result = BlockLoader.json(blockhash.string)
+    Future.successful(Good(result))
+  }
+
+  override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+    val maybe = blockMap.collectFirst {
+      case (_, block) if block.height == height => block.hash
+    }
+
     val result = Or.from(maybe, One(BlockNotFoundError))
     Future.successful(result)
   }
