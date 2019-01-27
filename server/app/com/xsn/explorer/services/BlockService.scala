@@ -1,14 +1,14 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.errors.BlockNotFoundError
+import com.xsn.explorer.errors.BlockRewardsNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
-import org.scalactic.Good
+import com.xsn.explorer.util.Extensions.FutureOrExt
+import javax.inject.Inject
+import org.scalactic.{Bad, Good}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,12 +45,9 @@ class BlockService @Inject() (
       blockhash <- blockLogic
           .getBlockhash(blockhashString)
           .toFutureOr
-      block <- xsnService
-          .getBlock(blockhash)
-          .toFutureOr
 
-      rewards <- getBlockRewards(block).toFutureOr
-    } yield BlockDetails(block, rewards)
+      details <- getDetailsPrivate(blockhash).toFutureOr
+    } yield details
 
     result.toFuture
   }
@@ -61,11 +58,22 @@ class BlockService @Inject() (
           .getBlockhash(height)
           .toFutureOr
 
+      details <- getDetailsPrivate(blockhash).toFutureOr
+    } yield details
+
+    result.toFuture
+  }
+
+  private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
+    val result = for {
       block <- xsnService
           .getBlock(blockhash)
           .toFutureOr
 
-      rewards <- getBlockRewards(block).toFutureOr
+      rewards <- getBlockRewards(block)
+          .toFutureOr
+          .map(Option.apply)
+          .recoverFrom(BlockRewardsNotFoundError)(Option.empty)
     } yield BlockDetails(block, rewards)
 
     result.toFuture
@@ -93,7 +101,9 @@ class BlockService @Inject() (
   }
 
   private def getBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
-    if (block.isPoW) {
+    if (block.transactions.isEmpty) {
+      Future.successful(Bad(BlockRewardsNotFoundError).accumulating)
+    } else if (block.isPoW) {
       getPoWBlockRewards(block)
     } else if (block.isPoS) {
       getPoSBlockRewards(block)
@@ -107,8 +117,8 @@ class BlockService @Inject() (
       txid <- blockLogic.getPoWTransactionId(block).toFutureOr
       // TODO: handle tx not found
       tx <- xsnService.getTransaction(txid).toFutureOr
-      vout <- transactionLogic.getVOUT(0, tx, BlockNotFoundError).toFutureOr
-      address <- transactionLogic.getAddress(vout, BlockNotFoundError).toFutureOr
+      vout <- transactionLogic.getVOUT(0, tx, BlockRewardsNotFoundError).toFutureOr
+      address <- transactionLogic.getAddress(vout, BlockRewardsNotFoundError).toFutureOr
     } yield PoWBlockRewards(BlockReward(address, vout.value))
 
     result.toFuture
@@ -123,18 +133,18 @@ class BlockService @Inject() (
           .getTransaction(coinstakeTxId)
           .toFutureOr
       coinstakeTxVIN <- transactionLogic
-          .getVIN(coinstakeTx, BlockNotFoundError)
+          .getVIN(coinstakeTx, BlockRewardsNotFoundError)
           .toFutureOr
 
       previousToCoinstakeTx <- xsnService
           .getTransaction(coinstakeTxVIN.txid)
           .toFutureOr
       previousToCoinstakeVOUT <- transactionLogic
-          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockNotFoundError)
+          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
           .toFutureOr
 
       coinstakeAddress <- transactionLogic
-          .getAddress(previousToCoinstakeVOUT, BlockNotFoundError)
+          .getAddress(previousToCoinstakeVOUT, BlockRewardsNotFoundError)
           .toFutureOr
 
       rewards <- blockLogic
@@ -154,7 +164,7 @@ class BlockService @Inject() (
           .getTransaction(coinstakeTxId)
           .toFutureOr
       coinstakeTxVIN <- transactionLogic
-          .getVIN(coinstakeTx, BlockNotFoundError)
+          .getVIN(coinstakeTx, BlockRewardsNotFoundError)
           .toFutureOr
 
       coinstakeInput <- getCoinstakeInput(coinstakeTxVIN).toFutureOr
@@ -187,7 +197,7 @@ class BlockService @Inject() (
             .getTransaction(coinstakeTxVIN.txid)
             .toFutureOr
         previousToCoinstakeVOUT <- transactionLogic
-            .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockNotFoundError)
+            .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
             .toFutureOr
       } yield previousToCoinstakeVOUT.value
 

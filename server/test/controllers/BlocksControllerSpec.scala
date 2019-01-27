@@ -172,6 +172,18 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
     }
 
+    "retrieve the genesis block" in {
+      val block = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+
+      matchBlock(block, jsonBlock)
+    }
+
     "retrieve a block by height" in {
       val block = posBlock
       val response = GET(url(block.height.toString))

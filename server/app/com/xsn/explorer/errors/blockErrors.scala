@@ -23,6 +23,14 @@ case object BlockNotFoundError extends BlockError with InputValidationError {
   }
 }
 
+case object BlockRewardsNotFoundError extends BlockError with NotFoundError {
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("error.block.notFound")
+    val error = FieldValidationError("blockhash", message)
+    List(error)
+  }
+}
+
 case object BlockUnknownError extends BlockError with ServerError {
   val id = ErrorId.create
   override def cause: Option[Throwable] = None
