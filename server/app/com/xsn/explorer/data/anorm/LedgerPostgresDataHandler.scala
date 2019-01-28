@@ -11,6 +11,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Address, Balance, Transaction}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
 import play.api.db.Database
@@ -32,9 +33,8 @@ class LedgerPostgresDataHandler @Inject() (
    */
   override def push(
       block: Block,
-      transactions: List[Transaction]): ApplicationResult[Unit] = {
+      transactions: List[Transaction]): ApplicationResult[Unit] = timed("push-block-to-database") {
 
-    val start = System.currentTimeMillis()
     val result = withTransaction { implicit conn =>
       val result = for {
         _ <- upsertBlockCascade(block.copy(nextBlockhash = None), transactions)
@@ -51,8 +51,6 @@ class LedgerPostgresDataHandler @Inject() (
       case _ => e
     }
 
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Pushing block = ${block.hash}, took $took ms")
     result.badMap { _.map(fromError) }
   }
 
@@ -118,14 +116,10 @@ class LedgerPostgresDataHandler @Inject() (
     } yield ()
   }
 
-  private def insertBalanceBatch(balanceList: Iterable[Balance])(implicit conn: Connection) = {
-    val start = System.currentTimeMillis()
-    val result = balanceList.map { b => balancePostgresDAO.upsert(b) }
+  private def insertBalanceBatch(
+      balanceList: Iterable[Balance])(implicit conn: Connection) = timed("insert-balance-batch") {
 
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Inserting balance batch, size = ${balanceList.size}, took = $took ms")
-
-    result
+    balanceList.map { b => balancePostgresDAO.upsert(b) }
   }
 
   private def spendMap(transactions: List[Transaction]): Map[Address, BigDecimal] = {
@@ -150,8 +144,7 @@ class LedgerPostgresDataHandler @Inject() (
         .mapValues { list => list.map(_._2).sum }
   }
 
-  private def balances(transactions: List[Transaction]) = {
-    val start = System.currentTimeMillis()
+  private def balances(transactions: List[Transaction]) = timed("compute-balances-for-transactions") {
     val spentList = spendMap(transactions).map { case (address, spent) =>
       Balance(address, spent = spent)
     }
@@ -160,17 +153,21 @@ class LedgerPostgresDataHandler @Inject() (
       Balance(address, received = received)
     }
 
-    val result = (spentList ++ receiveList)
+    (spentList ++ receiveList)
         .groupBy(_.address)
         .mapValues { _.reduce(mergeBalances) }
         .values
-
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Computing balances for transaction batch, size = ${transactions.size}, took = $took ms")
-    result
   }
 
   private def mergeBalances(a: Balance, b: Balance): Balance = {
     Balance(a.address, spent = a.spent + b.spent, received = a.received + b.received)
+  }
+
+  private def timed[T](name: String)(f: => T): T = {
+    val timer = Kamon.timer(name).start()
+    val result = f
+
+    timer.stop()
+    result
   }
 }

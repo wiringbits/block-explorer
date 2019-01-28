@@ -55,6 +55,11 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
 
+libraryDependencies += "io.kamon" %% "kamon-core" % "1.1.0"
+libraryDependencies += "io.kamon" %% "kamon-prometheus" % "1.0.0"
+libraryDependencies += "io.kamon" %% "kamon-play-2.6" % "1.1.0"
+libraryDependencies += "io.kamon" %% "kamon-jdbc" % "1.0.0"
+
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 libraryDependencies += "org.mockito" % "mockito-core" % "2.15.0" % Test
 

@@ -5,6 +5,7 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.{Address, Transaction, TransactionId}
+import kamon.Kamon
 import org.slf4j.LoggerFactory
 
 class TransactionInputPostgresDAO {
@@ -18,9 +19,7 @@ class TransactionInputPostgresDAO {
     inputs match {
       case Nil => Some(inputs)
 
-      case _ =>
-
-        val start = System.currentTimeMillis()
+      case _ => timed("insert-input-batch") {
         val params = inputs.map { case (txid, input) =>
           List(
             'txid -> txid.string: NamedParameter,
@@ -43,15 +42,12 @@ class TransactionInputPostgresDAO {
         )
 
         val success = batch.execute().forall(_ == 1)
-
-        val took = System.currentTimeMillis() - start
-        logger.info(s"Inserting input batch, size = ${inputs.size}, took = $took ms")
-
         if (success) {
           Some(inputs)
         } else {
           None
         }
+      }
     }
   }
 
@@ -79,5 +75,11 @@ class TransactionInputPostgresDAO {
       'txid -> txid.string,
       'address -> address.string
     ).as(parseTransactionInput.*).flatten
+  }
+
+  private def timed[T](name: String)(f: => T): T = {
+    val timer = Kamon.timer(name).start()
+    try f
+    finally timer.stop()
   }
 }

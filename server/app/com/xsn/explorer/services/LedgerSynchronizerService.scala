@@ -8,6 +8,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.{Blockhash, Height, Transaction}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
@@ -157,13 +158,12 @@ class LedgerSynchronizerService @Inject() (
     }
   }
 
-  private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = {
-    val start = System.currentTimeMillis()
+  private def getRPCBlock(
+      blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = timed("get-block-from-rpc") {
+
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- transactionRPCService.getTransactions(block.transactions).toFutureOr
-      took = System.currentTimeMillis() - start
-      _ = logger.info(s"Retrieving block = $blockhash, took $took ms")
     } yield (block, transactions)
 
     result.toFuture
@@ -189,5 +189,16 @@ class LedgerSynchronizerService @Inject() (
         }
 
     result.toFuture
+  }
+
+  private def timed[T <: FutureApplicationResult[_]](name: String)(f: => T): T = {
+    val timer = Kamon.timer(name).start()
+    val result = f
+
+    result.onComplete { _ =>
+      timer.stop()
+    }
+
+    result
   }
 }
