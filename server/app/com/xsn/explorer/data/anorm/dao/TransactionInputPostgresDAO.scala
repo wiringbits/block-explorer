@@ -19,8 +19,6 @@ class TransactionInputPostgresDAO {
       case Nil => Some(inputs)
 
       case _ =>
-
-        val start = System.currentTimeMillis()
         val params = inputs.map { case (txid, input) =>
           List(
             'txid -> txid.string: NamedParameter,
@@ -43,10 +41,6 @@ class TransactionInputPostgresDAO {
         )
 
         val success = batch.execute().forall(_ == 1)
-
-        val took = System.currentTimeMillis() - start
-        logger.info(s"Inserting input batch, size = ${inputs.size}, took = $took ms")
-
         if (success) {
           Some(inputs)
         } else {

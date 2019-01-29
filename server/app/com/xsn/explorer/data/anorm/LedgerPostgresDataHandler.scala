@@ -34,7 +34,6 @@ class LedgerPostgresDataHandler @Inject() (
       block: Block,
       transactions: List[Transaction]): ApplicationResult[Unit] = {
 
-    val start = System.currentTimeMillis()
     val result = withTransaction { implicit conn =>
       val result = for {
         _ <- upsertBlockCascade(block.copy(nextBlockhash = None), transactions)
@@ -51,8 +50,6 @@ class LedgerPostgresDataHandler @Inject() (
       case _ => e
     }
 
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Pushing block = ${block.hash}, took $took ms")
     result.badMap { _.map(fromError) }
   }
 
@@ -119,13 +116,7 @@ class LedgerPostgresDataHandler @Inject() (
   }
 
   private def insertBalanceBatch(balanceList: Iterable[Balance])(implicit conn: Connection) = {
-    val start = System.currentTimeMillis()
-    val result = balanceList.map { b => balancePostgresDAO.upsert(b) }
-
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Inserting balance batch, size = ${balanceList.size}, took = $took ms")
-
-    result
+    balanceList.map { b => balancePostgresDAO.upsert(b) }
   }
 
   private def spendMap(transactions: List[Transaction]): Map[Address, BigDecimal] = {
@@ -151,7 +142,6 @@ class LedgerPostgresDataHandler @Inject() (
   }
 
   private def balances(transactions: List[Transaction]) = {
-    val start = System.currentTimeMillis()
     val spentList = spendMap(transactions).map { case (address, spent) =>
       Balance(address, spent = spent)
     }
@@ -165,8 +155,6 @@ class LedgerPostgresDataHandler @Inject() (
         .mapValues { _.reduce(mergeBalances) }
         .values
 
-    val took = System.currentTimeMillis() - start
-    logger.info(s"Computing balances for transaction batch, size = ${transactions.size}, took = $took ms")
     result
   }
 

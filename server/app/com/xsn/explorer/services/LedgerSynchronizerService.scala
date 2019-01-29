@@ -158,12 +158,9 @@ class LedgerSynchronizerService @Inject() (
   }
 
   private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = {
-    val start = System.currentTimeMillis()
     val result = for {
       block <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- transactionRPCService.getTransactions(block.transactions).toFutureOr
-      took = System.currentTimeMillis() - start
-      _ = logger.info(s"Retrieving block = $blockhash, took $took ms")
     } yield (block, transactions)
 
     result.toFuture

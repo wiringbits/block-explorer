@@ -50,21 +50,13 @@ class TransactionPostgresDAO @Inject() (
   }
 
   private def insertDetails(transactions: List[Transaction])(implicit conn: Connection): Unit = {
-    val start = System.currentTimeMillis()
     val detailsResult = transactions.map(addressTransactionDetailsDAO.batchInsertDetails)
-    val took = System.currentTimeMillis() - start
-
-    logger.info(s"Inserting address details batch, size = ${transactions.size}, took = $took ms")
 
     assert(detailsResult.forall(_.isDefined), "Inserting address details batch failed")
   }
 
   private def spend(transactions: List[Transaction])(implicit conn: Connection): Unit = {
-    val start = System.currentTimeMillis()
     val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
-    val took = System.currentTimeMillis() - start
-
-    logger.info(s"Spending transaction batch, size = ${transactions.size}, took = $took ms")
 
     assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
   }
@@ -73,7 +65,6 @@ class TransactionPostgresDAO @Inject() (
     transactions match {
       case Nil => Some(transactions)
       case _ =>
-        val start = System.currentTimeMillis()
         val params = transactions.zipWithIndex.map { case (transaction, index) =>
           List(
             'txid -> transaction.id.string: NamedParameter,
@@ -95,9 +86,6 @@ class TransactionPostgresDAO @Inject() (
         )
 
         val success = batch.execute().forall(_ == 1)
-
-        val took = System.currentTimeMillis() - start
-        logger.info(s"Inserting transaction batch, size = ${transactions.size}, took = $took ms")
         if (success) {
           Some(transactions)
         } else {
