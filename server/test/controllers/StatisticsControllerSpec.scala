@@ -28,6 +28,9 @@ class StatisticsControllerSpec extends MyAPISpec {
     override def getMasternodeCount(): FutureApplicationResult[Int] = {
       Future.successful(Good(1000))
     }
+    override def getDifficulty(): FutureApplicationResult[BigDecimal] = {
+      Future.successful(Good(129.1827211827212))
+    }
   }
 
   override val application = guiceApplicationBuilder
@@ -46,7 +49,7 @@ class StatisticsControllerSpec extends MyAPISpec {
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
       (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
       (json \ "masternodes").as[Int] mustEqual 1000
-      (json \ "difficulty").as[BigDecimal] mustEqual 1000
+      (json \ "difficulty").as[BigDecimal] mustEqual 129.1827211827212
     }
   }
 }
