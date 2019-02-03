@@ -9,7 +9,7 @@ object StatisticsDetails {
   implicit val writes: Writes[StatisticsDetails] = Writes { obj =>
     val values = Map(
       "blocks" -> JsNumber(obj.statistics.blocks),
-      "transactions" -> JsNumber(obj.statistics.transactions),
+      "transactions" -> JsNumber(obj.statistics.transactions))
 
     val extras = List(
       "totalSupply" -> obj.statistics.totalSupply.map(JsNumber.apply),
