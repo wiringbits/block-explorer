@@ -37,7 +37,7 @@ trait XSNService {
 
   def getMasternodeCount(): FutureApplicationResult[Int]
 
-  def getDifficulty(): FutureApplicationResult[Float]
+  def getDifficulty(): FutureApplicationResult[BigDecimal]
 
   def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]]
 
@@ -290,7 +290,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def getDifficulty(): FutureApplicationResult[Float] = {
+  override def getDifficulty(): FutureApplicationResult[BigDecimal] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -302,7 +302,7 @@ class XSNServiceRPCImpl @Inject() (
     server
       .post(body)
       .map { response =>
-        val maybe = getResult[Float](response)
+        val maybe = getResult[BigDecimal](response)
         maybe.getOrElse {
           logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 

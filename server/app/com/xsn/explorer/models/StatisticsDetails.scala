@@ -2,14 +2,14 @@ package com.xsn.explorer.models
 
 import play.api.libs.json._
 
-case class StatisticsDetails(statistics: Statistics, masternodes: Option[Int], difficulty: Option[Float])
+case class StatisticsDetails(statistics: Statistics, masternodes: Option[Int], difficulty: Option[BigDecimal])
 
 object StatisticsDetails {
 
   implicit val writes: Writes[StatisticsDetails] = Writes { obj =>
     val values = Map(
       "blocks" -> JsNumber(obj.statistics.blocks),
-      "transactions" -> JsNumber(obj.statistics.transactions),
+      "transactions" -> JsNumber(obj.statistics.transactions))
 
     val extras = List(
       "totalSupply" -> obj.statistics.totalSupply.map(JsNumber.apply),
