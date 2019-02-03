@@ -46,6 +46,7 @@ class StatisticsControllerSpec extends MyAPISpec {
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
       (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
       (json \ "masternodes").as[Int] mustEqual 1000
+      (json \ "difficulty").as[BigDecimal] mustEqual 1000
     }
   }
 }
