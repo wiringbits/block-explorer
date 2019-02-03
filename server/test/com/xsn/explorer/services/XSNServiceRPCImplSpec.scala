@@ -459,6 +459,21 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     }
   }
 
+  "getDifficulty" should {
+    "return the difficulty" in {
+      val content = "129.1827211827212"
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.getDifficulty()) { result =>
+        result mustEqual Good(129.1827211827212)
+      }
+    }
+  }
+
   "getMasternodes" should {
     "return the masternodes" in {
       val content =

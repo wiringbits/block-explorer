@@ -18,6 +18,7 @@ class StatisticsService @Inject() (
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val rpcStats = xsnService.getMasternodeCount()
+    val difficulty = xsnService.getDifficulty()
 
     val result = for {
       stats <- dbStats.toFutureOr
@@ -25,7 +26,11 @@ class StatisticsService @Inject() (
         case Good(count) => Good(Some(count))
         case Bad(_) => Good(None)
       }.toFutureOr
-    } yield StatisticsDetails(stats, count)
+      diff <- difficulty.map {
+        case Good(difficulty) => Good(Some(difficulty))
+        case Bad(_) => Good(None)
+      }.toFutureOr
+    } yield StatisticsDetails(stats, count, diff)
 
     result.toFuture
   }
