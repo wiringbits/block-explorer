@@ -1,12 +1,14 @@
 package controllers
 
-import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
-import com.xsn.explorer.helpers.DummyXSNService
+import com.xsn.explorer.errors.XSNUnexpectedResponseError
 import com.xsn.explorer.models.Statistics
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.Good
+import org.mockito.Mockito.{mock => _, _}
+import org.scalactic.{Bad, Good}
+import org.scalatest.mockito.MockitoSugar._
 import play.api.inject.bind
 import play.api.test.Helpers._
 
@@ -24,14 +26,7 @@ class StatisticsControllerSpec extends MyAPISpec {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
   }
 
-  val xsnService = new DummyXSNService {
-    override def getMasternodeCount(): FutureApplicationResult[Int] = {
-      Future.successful(Good(1000))
-    }
-    override def getDifficulty(): FutureApplicationResult[BigDecimal] = {
-      Future.successful(Good(129.1827211827212))
-    }
-  }
+  val xsnService = mock[XSNService]
 
   override val application = guiceApplicationBuilder
       .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
@@ -40,6 +35,11 @@ class StatisticsControllerSpec extends MyAPISpec {
 
   "GET /stats" should {
     "return the server statistics" in {
+      val masternodes = 1000
+      val difficulty = BigDecimal("129.1827211827212")
+      when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
+
       val response = GET("/stats")
 
       status(response) mustEqual OK
@@ -48,8 +48,64 @@ class StatisticsControllerSpec extends MyAPISpec {
       (json \ "transactions").as[Int] mustEqual stats.transactions
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
       (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
-      (json \ "masternodes").as[Int] mustEqual 1000
-      (json \ "difficulty").as[BigDecimal] mustEqual 129.1827211827212
+      (json \ "masternodes").as[Int] mustEqual masternodes
+      (json \ "difficulty").as[BigDecimal] mustEqual difficulty
     }
+
+    "return the stats even if getting masternodes throws an exception" in {
+      val difficulty = BigDecimal("129.1827211827212")
+      when(xsnService.getMasternodeCount()).thenReturn(Future.failed(new Exception))
+      when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
+
+      missingMasternodesTest(difficulty)
+    }
+
+    "return the stats even if the masternodes aren't available" in {
+      val difficulty = BigDecimal("129.1827211827212")
+      when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
+      when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
+
+      missingMasternodesTest(difficulty)
+    }
+
+    "return the stats even if getting the difficulty throws an exception" in {
+      val masternodes = 1000
+      when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(xsnService.getDifficulty()).thenReturn(Future.failed(new Exception))
+
+      missingDifficultyTest(masternodes)
+    }
+
+    "return the stats even if the difficulty isn't available" in {
+      val masternodes = 1000
+      when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(xsnService.getDifficulty()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
+
+      missingDifficultyTest(masternodes)
+    }
+  }
+
+  private def missingMasternodesTest(difficulty: BigDecimal) = {
+    val response = GET("/stats")
+
+    status(response) mustEqual OK
+    val json = contentAsJson(response)
+    (json \ "blocks").as[Int] mustEqual stats.blocks
+    (json \ "transactions").as[Int] mustEqual stats.transactions
+    (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
+    (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
+    (json \ "difficulty").as[BigDecimal] mustEqual difficulty
+  }
+
+  private def missingDifficultyTest(masternodes: Int) = {
+    val response = GET("/stats")
+
+    status(response) mustEqual OK
+    val json = contentAsJson(response)
+    (json \ "blocks").as[Int] mustEqual stats.blocks
+    (json \ "transactions").as[Int] mustEqual stats.transactions
+    (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
+    (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
+    (json \ "masternodes").as[Int] mustEqual masternodes
   }
 }
