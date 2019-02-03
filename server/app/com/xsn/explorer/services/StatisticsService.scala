@@ -26,7 +26,10 @@ class StatisticsService @Inject() (
         case Good(count) => Good(Some(count))
         case Bad(_) => Good(None)
       }.toFutureOr
-      diff <- difficulty.toFutureOr
+      diff <- difficulty.map {
+        case Good(difficulty) => Good(Some(difficulty))
+        case Bad(_) => Good(None)
+      }.toFutureOr
     } yield StatisticsDetails(stats, count, diff)
 
     result.toFuture
