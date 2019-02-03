@@ -2,7 +2,7 @@ package com.xsn.explorer.models
 
 import play.api.libs.json._
 
-case class StatisticsDetails(statistics: Statistics, masternodes: Option[Int], difficulty: Option[Float])
+case class StatisticsDetails(statistics: Statistics, masternodes: Option[Int], difficulty: Option[BigDecimal])
 
 object StatisticsDetails {
 
