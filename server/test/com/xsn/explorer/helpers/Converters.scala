@@ -8,6 +8,9 @@ import scala.language.implicitConversions
 object Converters {
 
   implicit def toPersistedBlock(rpcBlock: rpc.Block): persisted.Block = {
-    rpcBlock.into[persisted.Block].transform
+    rpcBlock
+        .into[persisted.Block]
+        .withFieldConst(_.extractionMethod, persisted.Block.ExtractionMethod.ProofOfWork) // TODO: Detect method
+        .transform
   }
 }

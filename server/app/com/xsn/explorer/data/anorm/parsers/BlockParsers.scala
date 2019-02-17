@@ -25,6 +25,10 @@ object BlockParsers {
       .map(Blockhash.from)
       .map { _.getOrElse(throw new RuntimeException("corrupted merkle_root")) }
 
+  val parseExtractionMethod = str("extraction_method")
+      .map(Block.ExtractionMethod.withNameInsensitiveOption)
+      .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
+
   val parseSize = int("size").map(Size.apply)
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
@@ -48,7 +52,8 @@ object BlockParsers {
           parseNonce ~
           parseBits ~
           parseChainwork ~
-          parseDifficulty).map {
+          parseDifficulty ~
+          parseExtractionMethod).map {
 
     case hash ~
         nextBlockhash ~
@@ -63,7 +68,8 @@ object BlockParsers {
         nonce ~
         bits ~
         chainwork ~
-        difficulty =>
+        difficulty ~
+        extractionMethod =>
 
       Block(
         hash = hash,
@@ -79,7 +85,8 @@ object BlockParsers {
         bits = bits,
         chainwork = chainwork,
         difficulty = difficulty,
-        version = version
+        version = version,
+        extractionMethod = extractionMethod
       )
   }
 }

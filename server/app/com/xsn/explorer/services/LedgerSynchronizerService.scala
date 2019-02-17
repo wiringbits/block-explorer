@@ -162,7 +162,10 @@ class LedgerSynchronizerService @Inject() (
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr
-      block = rpcBlock.into[Block].transform
+      block = rpcBlock
+          .into[Block]
+          .withFieldConst(_.extractionMethod, Block.ExtractionMethod.ProofOfWork) // TODO: Get proper method
+          .transform
     } yield (block, transactions)
 
     result.toFuture

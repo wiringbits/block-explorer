@@ -3,7 +3,6 @@ package com.xsn.explorer.helpers
 import java.io.File
 
 import com.xsn.explorer.models._
-import io.scalaland.chimney.dsl._
 import play.api.libs.json.{JsValue, Json}
 
 object BlockLoader {
@@ -12,8 +11,7 @@ object BlockLoader {
 
   def get(blockhash: String): persisted.Block = {
     val rpcBlock = getRPC(blockhash)
-
-    rpcBlock.into[persisted.Block].transform
+    Converters.toPersistedBlock(rpcBlock)
   }
 
   def getRPC(blockhash: String): rpc.Block = {
@@ -33,7 +31,7 @@ object BlockLoader {
 
   def all(): List[persisted.Block] = {
     allRPC()
-        .map(_.into[persisted.Block].transform)
+        .map(Converters.toPersistedBlock)
   }
 
   def allRPC(): List[rpc.Block] = {

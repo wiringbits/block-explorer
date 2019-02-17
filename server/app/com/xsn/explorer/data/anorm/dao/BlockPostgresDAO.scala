@@ -20,15 +20,15 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
         |INSERT INTO blocks
         |  (
         |    blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |    height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |    height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |  )
         |VALUES
         |  (
         |    {blockhash}, {previous_blockhash}, {next_blockhash}, {tpos_contract}, {merkle_root}, {size},
-        |    {height}, {version}, {time}, {median_time}, {nonce}, {bits}, {chainwork}, {difficulty}
+        |    {height}, {version}, {time}, {median_time}, {nonce}, {bits}, {chainwork}, {difficulty}, {extraction_method}::BLOCK_EXTRACTION_METHOD_TYPE
         |  )
         |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
       'blockhash -> block.hash.string,
@@ -44,7 +44,8 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       'nonce -> block.nonce,
       'bits -> block.bits,
       'chainwork -> block.chainwork,
-      'difficulty -> block.difficulty
+      'difficulty -> block.difficulty,
+      'extraction_method -> block.extractionMethod.entryName
     ).as(parseBlock.singleOpt)
   }
 
@@ -59,7 +60,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
         |SET next_blockhash = {next_blockhash}
         |WHERE blockhash = {blockhash}
         |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
       'blockhash -> blockhash.string,
@@ -71,7 +72,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     SQL(
       """
         |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |WHERE blockhash = {blockhash}
       """.stripMargin
@@ -84,7 +85,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     SQL(
       """
         |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |WHERE height = {height}
       """.stripMargin
@@ -102,7 +103,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     SQL(
       s"""
         |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |       height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |$orderBy
         |OFFSET {offset}
@@ -131,7 +132,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
         |DELETE FROM blocks
         |WHERE blockhash = {blockhash}
         |RETURNING blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
-        |          height, version, time, median_time, nonce, bits, chainwork, difficulty
+        |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
       "blockhash" -> blockhash.string
