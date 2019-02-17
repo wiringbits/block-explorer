@@ -7,7 +7,7 @@ import com.xsn.explorer.config.{ExplorerConfig, RPCConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.values.{Address, Blockhash, Height}
+import com.xsn.explorer.models.values.{Address, Blockhash, Height, HexString}
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory

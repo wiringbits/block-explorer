@@ -1,4 +1,4 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.values
 
 class HexString private (val string: String) extends AnyVal {
 

@@ -1,7 +1,6 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.HexString
-import com.xsn.explorer.models.values._
+import com.xsn.explorer.models.values.{HexString, _}
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
 class ScriptPubKeySpec extends WordSpec with MustMatchers with OptionValues {

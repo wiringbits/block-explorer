@@ -2,8 +2,8 @@ package com.xsn.explorer.helpers
 
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.values.{Address, Blockhash, Confirmations, Height}
-import com.xsn.explorer.models.{HexString, Size, TransactionId}
+import com.xsn.explorer.models.values._
+import com.xsn.explorer.models.{Size, TransactionId}
 
 trait DataGenerator {
 

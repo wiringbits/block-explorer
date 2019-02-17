@@ -5,7 +5,8 @@ import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr}
 import com.xsn.explorer.errors.{InvalidRawTransactionError, TransactionFormatError, TransactionNotFoundError, XSNWorkQueueDepthExceeded}
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.TransactionVIN
-import com.xsn.explorer.models.{HexString, TransactionDetails, TransactionId, TransactionValue}
+import com.xsn.explorer.models.values._
+import com.xsn.explorer.models.{TransactionDetails, TransactionId, TransactionValue}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}

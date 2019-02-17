@@ -1,4 +1,4 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.values
 
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
