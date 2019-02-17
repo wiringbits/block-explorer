@@ -3,8 +3,8 @@ package com.xsn.explorer.helpers
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.models.rpc.{Block, Transaction}
-import com.xsn.explorer.models.values.Blockhash
-import com.xsn.explorer.models.{Height, TransactionId}
+import com.xsn.explorer.models.values.{Blockhash, Height}
+import com.xsn.explorer.models.TransactionId
 import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
 

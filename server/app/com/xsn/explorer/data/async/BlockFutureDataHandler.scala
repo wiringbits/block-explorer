@@ -7,8 +7,7 @@ import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.Block
-import com.xsn.explorer.models.Height
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
 import scala.concurrent.Future

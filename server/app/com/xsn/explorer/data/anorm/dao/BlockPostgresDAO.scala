@@ -9,8 +9,7 @@ import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.Block
-import com.xsn.explorer.models.Height
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
 class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {

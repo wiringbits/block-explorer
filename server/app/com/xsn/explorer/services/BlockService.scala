@@ -5,7 +5,7 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.BlockRewardsNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject

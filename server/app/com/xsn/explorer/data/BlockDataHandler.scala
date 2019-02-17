@@ -5,8 +5,7 @@ import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.Block
-import com.xsn.explorer.models.Height
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Height}
 
 import scala.language.higherKinds
 

@@ -1,4 +1,4 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.values
 
 import com.alexitc.playsonify.models.WrappedInt
 import play.api.libs.json.{JsPath, Reads}

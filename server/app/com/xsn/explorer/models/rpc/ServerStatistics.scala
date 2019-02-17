@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.Height
+import com.xsn.explorer.models.values.Height
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, Reads, Writes, __}
 

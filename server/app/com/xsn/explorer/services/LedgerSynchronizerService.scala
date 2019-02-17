@@ -6,8 +6,7 @@ import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHand
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.persisted.{Block, Transaction}
 import com.xsn.explorer.models.transformers._
-import com.xsn.explorer.models.Height
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.Good
