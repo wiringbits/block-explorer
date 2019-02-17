@@ -5,6 +5,7 @@ import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.values._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalactic.{Bad, Good}

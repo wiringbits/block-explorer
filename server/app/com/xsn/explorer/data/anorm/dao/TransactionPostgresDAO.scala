@@ -10,6 +10,7 @@ import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 

@@ -1,6 +1,7 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.{Address, TransactionId}
+import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.values.Address
 import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try

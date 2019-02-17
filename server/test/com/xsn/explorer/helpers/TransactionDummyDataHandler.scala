@@ -8,6 +8,7 @@ import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.values.Address
 
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 

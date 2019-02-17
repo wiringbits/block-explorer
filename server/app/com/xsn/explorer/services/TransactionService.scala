@@ -8,6 +8,7 @@ import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.values._
 import com.xsn.explorer.parsers.TransactionOrderingParser
 import io.scalaland.chimney.dsl._
 import javax.inject.Inject

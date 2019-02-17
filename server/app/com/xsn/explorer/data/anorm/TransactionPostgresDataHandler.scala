@@ -8,6 +8,7 @@ import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, Transactio
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database

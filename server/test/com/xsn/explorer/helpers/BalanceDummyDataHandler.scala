@@ -6,8 +6,8 @@ import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.Address
 import com.xsn.explorer.models.persisted.Balance
+import com.xsn.explorer.models.values.Address
 
 class BalanceDummyDataHandler extends BalanceBlockingDataHandler {
 

@@ -8,6 +8,7 @@ import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 
 import scala.concurrent.Future

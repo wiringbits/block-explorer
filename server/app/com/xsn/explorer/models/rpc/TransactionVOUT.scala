@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.values.Address
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Reads, __}
 

@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.values.Address
 import play.api.libs.json._
 
 case class Balance(

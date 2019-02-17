@@ -7,8 +7,8 @@ import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BalanceBlockingDataHandler, BalanceDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.Address
 import com.xsn.explorer.models.persisted.Balance
+import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 
 import scala.concurrent.Future

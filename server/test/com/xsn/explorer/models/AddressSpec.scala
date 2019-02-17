@@ -1,5 +1,6 @@
 package com.xsn.explorer.models
 
+import com.xsn.explorer.models.values._
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
 class AddressSpec extends WordSpec with MustMatchers with OptionValues {

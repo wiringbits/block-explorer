@@ -1,6 +1,7 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models.{Address, Blockhash, HexString, Size, TransactionId, rpc}
+import com.xsn.explorer.models.values.Address
+import com.xsn.explorer.models.{Blockhash, HexString, Size, TransactionId, rpc}
 
 case class Transaction(
     id: TransactionId,
