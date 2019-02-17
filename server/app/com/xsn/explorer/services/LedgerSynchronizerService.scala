@@ -5,9 +5,9 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.models.{Blockhash, Height, Transaction}
 import com.xsn.explorer.util.Extensions.FutureOrExt
-import io.scalaland.chimney.dsl._
 import javax.inject.Inject
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
@@ -162,11 +162,7 @@ class LedgerSynchronizerService @Inject() (
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr
-      block = rpcBlock
-          .into[Block]
-          .withFieldConst(_.extractionMethod, Block.ExtractionMethod.ProofOfWork) // TODO: Get proper method
-          .transform
-    } yield (block, transactions)
+    } yield (toPersistedBlock(rpcBlock), transactions)
 
     result.toFuture
   }
