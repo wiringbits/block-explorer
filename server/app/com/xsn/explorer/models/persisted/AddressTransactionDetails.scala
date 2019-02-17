@@ -1,4 +1,6 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.persisted
+
+import com.xsn.explorer.models.{Address, TransactionId}
 
 case class AddressTransactionDetails(
     address: Address,
@@ -6,4 +8,3 @@ case class AddressTransactionDetails(
     time: Long,
     received: BigDecimal = 0,
     sent: BigDecimal = 0)
-
