@@ -6,9 +6,9 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition,
 import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.errors.IPAddressFormatError
-import com.xsn.explorer.models.IPAddress
 import com.xsn.explorer.models.fields.MasternodeField
 import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.values.IPAddress
 import com.xsn.explorer.parsers.MasternodeOrderingParser
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
