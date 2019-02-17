@@ -1,6 +1,6 @@
 package com.xsn.explorer.models
 
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Size}
 import play.api.libs.json.{Json, Writes}
 
 case class TransactionWithValues(

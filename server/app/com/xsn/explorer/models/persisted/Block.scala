@@ -1,7 +1,7 @@
 package com.xsn.explorer.models.persisted
 
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.values.{Blockhash, Height}
+import com.xsn.explorer.models.values.{Blockhash, Height, Size}
 import enumeratum._
 
 case class Block(

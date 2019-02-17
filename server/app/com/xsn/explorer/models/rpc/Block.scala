@@ -1,7 +1,7 @@
 package com.xsn.explorer.models.rpc
 
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height}
+import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 

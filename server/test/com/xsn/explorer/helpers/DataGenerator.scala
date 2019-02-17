@@ -3,7 +3,7 @@ package com.xsn.explorer.helpers
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.{Size, TransactionId}
+import com.xsn.explorer.models.TransactionId
 
 trait DataGenerator {
 
