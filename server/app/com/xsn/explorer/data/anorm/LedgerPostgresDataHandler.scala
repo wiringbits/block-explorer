@@ -7,8 +7,8 @@ import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.{AggregatedAmountPostgresDAO, BalancePostgresDAO, BlockPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
-import com.xsn.explorer.models.persisted.{Block, Transaction}
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.persisted.{Balance, Block, Transaction}
+import com.xsn.explorer.models.Address
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import javax.inject.Inject
 import org.scalactic.Good

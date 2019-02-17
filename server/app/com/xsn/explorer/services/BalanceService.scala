@@ -7,7 +7,8 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.BalanceFutureDataHandler
 import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.models.{Address, Balance, WrappedResult}
+import com.xsn.explorer.models.persisted.Balance
+import com.xsn.explorer.models.{Address, WrappedResult}
 import com.xsn.explorer.parsers.BalanceOrderingParser
 import javax.inject.Inject
 import org.scalactic.{Good, One, Or}

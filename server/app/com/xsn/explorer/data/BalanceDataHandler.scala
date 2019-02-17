@@ -4,7 +4,8 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.persisted.Balance
 
 import scala.language.higherKinds
 

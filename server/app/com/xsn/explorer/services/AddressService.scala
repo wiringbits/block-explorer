@@ -4,8 +4,8 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.async.{BalanceFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.persisted.{Balance, Transaction}
+import com.xsn.explorer.models.Address
 import javax.inject.Inject
 import org.scalactic.{One, Or}
 

@@ -5,7 +5,8 @@ import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDA
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.persisted.Balance
 import org.scalatest.OptionValues._
 
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {

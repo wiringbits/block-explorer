@@ -7,7 +7,8 @@ import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
 import com.xsn.explorer.models.fields.BalanceField
-import com.xsn.explorer.models.{Address, Balance}
+import com.xsn.explorer.models.Address
+import com.xsn.explorer.models.persisted.Balance
 import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database

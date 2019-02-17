@@ -5,8 +5,8 @@ import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper}
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.persisted.Balance
 import controllers.common.MyAPISpec
 import org.scalactic.Good
 import play.api.inject.bind

@@ -7,8 +7,8 @@ import com.xsn.explorer.data.anorm.BalancePostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataHelper
-import com.xsn.explorer.models.Balance
 import com.xsn.explorer.models.fields.BalanceField
+import com.xsn.explorer.models.persisted.Balance
 import org.scalactic.Good
 
 class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {

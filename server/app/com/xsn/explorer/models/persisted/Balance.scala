@@ -1,5 +1,6 @@
-package com.xsn.explorer.models
+package com.xsn.explorer.models.persisted
 
+import com.xsn.explorer.models.Address
 import play.api.libs.json._
 
 case class Balance(
