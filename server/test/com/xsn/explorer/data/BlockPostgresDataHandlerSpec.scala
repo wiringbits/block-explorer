@@ -10,7 +10,7 @@ import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 import org.scalactic.{Bad, One, Or}
 import org.scalatest.BeforeAndAfter
 

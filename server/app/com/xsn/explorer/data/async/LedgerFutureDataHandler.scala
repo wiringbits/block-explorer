@@ -6,7 +6,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.{LedgerBlockingDataHandler, LedgerDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.Transaction
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 
 import scala.concurrent.Future
 

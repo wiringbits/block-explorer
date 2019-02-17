@@ -11,7 +11,7 @@ import scala.concurrent.Future
 
 class FileBasedXSNService extends DummyXSNService {
 
-  private lazy val blockMap = BlockLoader.all().map { block => block.hash -> block }.toMap
+  private lazy val blockMap = BlockLoader.allRPC().map { block => block.hash -> block }.toMap
   private lazy val transactionMap = TransactionLoader.all().map { tx => tx.id -> tx }.toMap
 
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {

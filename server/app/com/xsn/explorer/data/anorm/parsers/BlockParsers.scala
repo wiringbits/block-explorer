@@ -3,7 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 
 object BlockParsers {
 
@@ -79,9 +79,7 @@ object BlockParsers {
         bits = bits,
         chainwork = chainwork,
         difficulty = difficulty,
-        version = version,
-        transactions = List.empty,
-        confirmations = Confirmations(0)
+        version = version
       )
   }
 }

@@ -4,9 +4,10 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.{Blockhash, Height, Transaction}
 import com.xsn.explorer.util.Extensions.FutureOrExt
+import io.scalaland.chimney.dsl._
 import javax.inject.Inject
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
@@ -159,8 +160,9 @@ class LedgerSynchronizerService @Inject() (
 
   private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = {
     val result = for {
-      block <- xsnService.getBlock(blockhash).toFutureOr
-      transactions <- transactionRPCService.getTransactions(block.transactions).toFutureOr
+      rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
+      transactions <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr
+      block = rpcBlock.into[Block].transform
     } yield (block, transactions)
 
     result.toFuture

@@ -8,7 +8,7 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, Paginated
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.{Blockhash, Height}
 import javax.inject.Inject
 

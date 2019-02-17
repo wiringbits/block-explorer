@@ -7,7 +7,7 @@ import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.{Blockhash, Height}
 import javax.inject.Inject
 import org.scalactic.{Good, One, Or}

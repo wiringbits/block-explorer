@@ -6,7 +6,7 @@ import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.{Blockhash, Height}
 import javax.inject.Inject
 

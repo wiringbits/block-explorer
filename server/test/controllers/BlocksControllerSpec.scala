@@ -19,7 +19,7 @@ import play.api.test.Helpers._
 class BlocksControllerSpec extends MyAPISpec {
 
   // PoS block
-  val posBlock = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+  val posBlock = BlockLoader.getRPC("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
   val customXSNService = new FileBasedXSNService
 
@@ -27,7 +27,7 @@ class BlocksControllerSpec extends MyAPISpec {
     // TODO: Handle ordering
     override def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
       val transactions = BlockLoader
-          .get(blockhash.string)
+          .getRPC(blockhash.string)
           .transactions
           .map(_.string)
           .map(TransactionLoader.get)
@@ -82,7 +82,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve a PoS block having a rounding error" in {
-      val posBlockRoundingError = BlockLoader.get("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
+      val posBlockRoundingError = BlockLoader.getRPC("25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058")
       val block = posBlockRoundingError
       val response = GET(url(block.hash.string))
 
@@ -103,7 +103,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve a PoW block" in {
-      val powBlock = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val powBlock = BlockLoader.getRPC("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
       val block = powBlock
       val response = GET(url(block.hash.string))
 
@@ -121,7 +121,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve TPoS block" in {
-      val tposBlock = BlockLoader.get("19f320185015d146237efe757852b21c5e08b88b2f4de9d3fa9517d8463e472b")
+      val tposBlock = BlockLoader.getRPC("19f320185015d146237efe757852b21c5e08b88b2f4de9d3fa9517d8463e472b")
       val block = tposBlock
       val response = GET(url(block.hash.string))
 
@@ -147,7 +147,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve TPoS block with coinsplit" in {
-      val tposBlock2 = BlockLoader.get("a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c")
+      val tposBlock2 = BlockLoader.getRPC("a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c")
       val block = tposBlock2
       val response = GET(url(block.hash.string))
 
@@ -173,7 +173,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve the genesis block" in {
-      val block = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+      val block = BlockLoader.getRPC("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
       val response = GET(url(block.hash.string))
 
       status(response) mustEqual OK
