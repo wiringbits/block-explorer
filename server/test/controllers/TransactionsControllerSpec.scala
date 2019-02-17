@@ -7,6 +7,7 @@ import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.{DataHelper, DummyXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Transaction
+import com.xsn.explorer.models.values.Confirmations
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{Bad, Good}

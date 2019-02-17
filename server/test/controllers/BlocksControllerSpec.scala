@@ -9,7 +9,7 @@ import com.xsn.explorer.helpers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.values.Blockhash
+import com.xsn.explorer.models.values.{Blockhash, Confirmations}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.Good
