@@ -45,7 +45,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       'bits -> block.bits,
       'chainwork -> block.chainwork,
       'difficulty -> block.difficulty
-    ).as(parseBlock.single)
+    ).as(parseBlock.singleOpt)
   }
 
   def setNextBlockhash(
@@ -64,7 +64,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     ).on(
       'blockhash -> blockhash.string,
       'next_blockhash -> nextBlockhash.string
-    ).as(parseBlock.singleOpt).flatten
+    ).as(parseBlock.singleOpt)
   }
 
   def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
@@ -77,7 +77,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       """.stripMargin
     ).on(
       "blockhash" -> blockhash.string
-    ).as(parseBlock.singleOpt).flatten
+    ).as(parseBlock.singleOpt)
   }
 
   def getBy(height: Height)(implicit conn: Connection): Option[Block] = {
@@ -90,7 +90,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       """.stripMargin
     ).on(
       "height" -> height.int
-    ).as(parseBlock.singleOpt).flatten
+    ).as(parseBlock.singleOpt)
   }
 
   def getBy(
@@ -111,7 +111,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     ).on(
       'offset -> paginatedQuery.offset.int,
       'limit -> paginatedQuery.limit.int
-    ).as(parseBlock.*).flatten
+    ).as(parseBlock.*)
   }
 
   def count(implicit conn: Connection): Count = {
@@ -135,7 +135,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       """.stripMargin
     ).on(
       "blockhash" -> blockhash.string
-    ).as(parseBlock.singleOpt).flatten
+    ).as(parseBlock.singleOpt)
   }
 
   def getLatestBlock(implicit conn: Connection): Option[Block] = {

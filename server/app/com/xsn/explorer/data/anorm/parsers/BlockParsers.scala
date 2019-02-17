@@ -9,10 +9,22 @@ object BlockParsers {
 
   import CommonParsers._
 
-  val parseNextBlockhash = str("next_blockhash").map(Blockhash.from)
-  val parsePreviousBlockhash = str("previous_blockhash").map(Blockhash.from)
-  val parseTposContract = str("tpos_contract").map(TransactionId.from)
-  val parseMerkleRoot = str("merkle_root").map(Blockhash.from)
+  val parseNextBlockhash = str("next_blockhash")
+      .map(Blockhash.from)
+      .map { _.getOrElse(throw new RuntimeException("corrupted next_blockhash")) }
+
+  val parsePreviousBlockhash = str("previous_blockhash")
+      .map(Blockhash.from)
+      .map { _.getOrElse(throw new RuntimeException("corrupted previous_blockhash")) }
+
+  val parseTposContract = str("tpos_contract")
+      .map(TransactionId.from)
+      .map { _.getOrElse(throw new RuntimeException("corrupted tpos_contract")) }
+
+  val parseMerkleRoot = str("merkle_root")
+      .map(Blockhash.from)
+      .map { _.getOrElse(throw new RuntimeException("corrupted merkle_root")) }
+
   val parseSize = int("size").map(Size.apply)
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
@@ -38,11 +50,11 @@ object BlockParsers {
           parseChainwork ~
           parseDifficulty).map {
 
-    case hashMaybe ~
+    case hash ~
         nextBlockhash ~
         previousBlockhash ~
         tposContract ~
-        merkleRootMaybe ~
+        merkleRoot ~
         size ~
         height ~
         version ~
@@ -53,14 +65,11 @@ object BlockParsers {
         chainwork ~
         difficulty =>
 
-      for {
-        hash <- hashMaybe
-        merkleRoot <- merkleRootMaybe
-      } yield Block(
+      Block(
         hash = hash,
-        previousBlockhash = previousBlockhash.flatten,
-        nextBlockhash = nextBlockhash.flatten,
-        tposContract = tposContract.flatten,
+        previousBlockhash = previousBlockhash,
+        nextBlockhash = nextBlockhash,
+        tposContract = tposContract,
         merkleRoot = merkleRoot,
         size = size,
         height = height,

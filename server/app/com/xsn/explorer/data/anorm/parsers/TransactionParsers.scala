@@ -23,10 +23,9 @@ object TransactionParsers {
   val parseTposMerchantAddress = str("tpos_merchant_address").map(Address.from)
 
   val parseTransaction = (parseTransactionId ~ parseBlockhash ~ parseTime ~ parseSize).map {
-    case txidMaybe ~ blockhashMaybe ~ time ~ size =>
+    case txidMaybe ~ blockhash ~ time ~ size =>
       for {
         txid <- txidMaybe
-        blockhash <- blockhashMaybe
       } yield Transaction(txid, blockhash, time, size, List.empty, List.empty)
   }
 
@@ -38,10 +37,9 @@ object TransactionParsers {
           parseSent ~
           parseReceived).map {
 
-    case txidMaybe ~ blockhashMaybe ~ time ~ size ~ sent ~ received =>
+    case txidMaybe ~ blockhash ~ time ~ size ~ sent ~ received =>
       for {
         txid <- txidMaybe
-        blockhash <- blockhashMaybe
       } yield TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
