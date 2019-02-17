@@ -9,7 +9,8 @@ import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.LedgerHelper._
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.{Blockhash, Height}
+import com.xsn.explorer.models.Height
+import com.xsn.explorer.models.values.Blockhash
 import com.xsn.explorer.parsers.TransactionOrderingParser
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter

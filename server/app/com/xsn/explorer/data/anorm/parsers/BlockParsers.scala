@@ -4,6 +4,7 @@ import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.values._
 
 object BlockParsers {
 

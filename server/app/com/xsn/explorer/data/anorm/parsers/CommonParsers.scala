@@ -2,7 +2,7 @@ package com.xsn.explorer.data.anorm.parsers
 
 import anorm.SqlParser.{int, long, str}
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.{Blockhash, Size}
+import com.xsn.explorer.models.Size
 
 object CommonParsers {
 

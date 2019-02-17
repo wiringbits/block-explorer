@@ -1,6 +1,7 @@
 package com.xsn.explorer.models.rpc
 
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.values.Blockhash
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 

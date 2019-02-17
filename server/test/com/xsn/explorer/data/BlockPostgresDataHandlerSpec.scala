@@ -8,9 +8,9 @@ import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.BlockLoader
-import com.xsn.explorer.models.Blockhash
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.values.Blockhash
 import org.scalactic.{Bad, One, Or}
 import org.scalatest.BeforeAndAfter
 

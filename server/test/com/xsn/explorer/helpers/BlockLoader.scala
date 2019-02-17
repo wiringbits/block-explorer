@@ -3,6 +3,7 @@ package com.xsn.explorer.helpers
 import java.io.File
 
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.values.Blockhash
 import play.api.libs.json.{JsValue, Json}
 
 object BlockLoader {

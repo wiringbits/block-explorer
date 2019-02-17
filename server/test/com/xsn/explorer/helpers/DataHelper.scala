@@ -1,7 +1,7 @@
 package com.xsn.explorer.helpers
 
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.{Blockhash, TransactionId}
+import com.xsn.explorer.models.TransactionId
 
 object DataHelper {
 

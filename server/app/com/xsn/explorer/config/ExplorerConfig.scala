@@ -1,6 +1,6 @@
 package com.xsn.explorer.config
 
-import com.xsn.explorer.models.Blockhash
+import com.xsn.explorer.models.values.Blockhash
 import javax.inject.Inject
 import play.api.Configuration
 

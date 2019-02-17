@@ -3,7 +3,7 @@ package com.xsn.explorer.helpers
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Masternode
-import com.xsn.explorer.models.values.Address
+import com.xsn.explorer.models.values.{Address, Blockhash}
 import com.xsn.explorer.services.XSNService
 import play.api.libs.json.JsValue
 
