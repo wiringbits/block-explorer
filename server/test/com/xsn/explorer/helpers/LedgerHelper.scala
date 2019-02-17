@@ -1,6 +1,7 @@
 package com.xsn.explorer.helpers
 
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.Transaction
 
 object LedgerHelper {
 

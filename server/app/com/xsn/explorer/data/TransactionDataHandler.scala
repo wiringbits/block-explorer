@@ -5,6 +5,7 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import com.xsn.explorer.models.persisted.Transaction
 
 import scala.language.higherKinds
 

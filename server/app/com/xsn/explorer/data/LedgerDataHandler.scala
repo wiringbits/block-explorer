@@ -1,8 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.xsn.explorer.models.Transaction
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, Transaction}
 
 import scala.language.higherKinds
 

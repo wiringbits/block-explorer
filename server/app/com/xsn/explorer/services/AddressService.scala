@@ -1,12 +1,12 @@
 package com.xsn.explorer.services
 
-import javax.inject.Inject
-
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.async.{BalanceFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.errors.AddressFormatError
-import com.xsn.explorer.models.{Address, Balance, Transaction}
+import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.{Address, Balance}
+import javax.inject.Inject
 import org.scalactic.{One, Or}
 
 import scala.concurrent.ExecutionContext

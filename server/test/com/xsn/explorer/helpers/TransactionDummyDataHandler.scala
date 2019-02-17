@@ -7,6 +7,7 @@ import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import com.xsn.explorer.models.persisted.Transaction
 
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 

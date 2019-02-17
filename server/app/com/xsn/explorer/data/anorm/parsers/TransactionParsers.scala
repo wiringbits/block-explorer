@@ -3,6 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser.{get, str}
 import anorm.~
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.Transaction
 
 object TransactionParsers {
 

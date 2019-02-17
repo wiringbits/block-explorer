@@ -8,6 +8,7 @@ import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDat
 import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, TransactionDummyDataHandler}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.MyAPISpec
 import org.scalactic.Good

@@ -4,7 +4,8 @@ import java.sql.Connection
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models.{Address, Transaction, TransactionId}
+import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.Transaction
 import org.slf4j.LoggerFactory
 
 class TransactionOutputPostgresDAO {

@@ -4,9 +4,9 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, Transaction}
 import com.xsn.explorer.models.transformers._
-import com.xsn.explorer.models.{Blockhash, Height, Transaction}
+import com.xsn.explorer.models.{Blockhash, Height}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.Good

@@ -2,7 +2,7 @@ package controllers
 
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
-import com.xsn.explorer.models.Transaction
+import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.services.{AddressService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
