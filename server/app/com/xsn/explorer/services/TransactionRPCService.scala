@@ -6,7 +6,7 @@ import com.xsn.explorer.errors.{InvalidRawTransactionError, TransactionFormatErr
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.{TransactionDetails, TransactionId, TransactionValue}
+import com.xsn.explorer.models.{TransactionDetails, TransactionValue}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}

@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, BlockhashFormatError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, Transaction}
-import com.xsn.explorer.models.values.{Address, Blockhash}
+import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import org.scalactic.{Bad, Good, One, Or}
 
 class BlockLogic {

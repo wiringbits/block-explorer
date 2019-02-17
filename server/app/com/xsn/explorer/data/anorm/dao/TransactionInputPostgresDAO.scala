@@ -6,7 +6,7 @@ import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.models.values.Address
+import com.xsn.explorer.models.values.{Address, TransactionId}
 import org.slf4j.LoggerFactory
 
 class TransactionInputPostgresDAO {

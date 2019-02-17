@@ -5,7 +5,7 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.values.TransactionId
 
 class AddressTransactionDetailsPostgresDAO {
 

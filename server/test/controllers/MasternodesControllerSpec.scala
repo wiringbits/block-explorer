@@ -5,8 +5,7 @@ import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.errors.MasternodeNotFoundError
 import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models.rpc.Masternode
-import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.values.{TransactionId, _}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.scalactic.{Bad, Good}

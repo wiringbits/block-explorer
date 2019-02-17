@@ -1,7 +1,6 @@
 package com.xsn.explorer.helpers
 
-import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.TransactionId
+import com.xsn.explorer.models.values.{TransactionId, _}
 
 object DataHelper {
 

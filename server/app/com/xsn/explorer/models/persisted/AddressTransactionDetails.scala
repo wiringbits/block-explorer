@@ -1,7 +1,6 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models.TransactionId
-import com.xsn.explorer.models.values.Address
+import com.xsn.explorer.models.values.{Address, TransactionId}
 
 case class AddressTransactionDetails(
     address: Address,
