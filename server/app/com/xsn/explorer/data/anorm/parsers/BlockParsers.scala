@@ -27,7 +27,7 @@ object BlockParsers {
       .map { _.getOrElse(throw new RuntimeException("corrupted merkle_root")) }
 
   val parseExtractionMethod = str("extraction_method")
-      .map(Block.ExtractionMethod.withNameInsensitiveOption)
+      .map(BlockExtractionMethod.withNameInsensitiveOption)
       .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
 
   val parseSize = int("size").map(Size.apply)

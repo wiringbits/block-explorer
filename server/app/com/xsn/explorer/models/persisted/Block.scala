@@ -1,8 +1,7 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models._
-import com.xsn.explorer.models.values.{Blockhash, Height, Size, TransactionId}
-import enumeratum._
+import com.xsn.explorer.models.BlockExtractionMethod
+import com.xsn.explorer.models.values._
 
 case class Block(
     hash: Blockhash,
@@ -19,17 +18,4 @@ case class Block(
     bits: String,
     chainwork: String,
     difficulty: BigDecimal,
-    extractionMethod: Block.ExtractionMethod)
-
-object Block {
-
-  sealed abstract class ExtractionMethod(override val entryName: String) extends EnumEntry
-  object ExtractionMethod extends Enum[ExtractionMethod] {
-
-    val values = findValues
-
-    final case object ProofOfWork extends ExtractionMethod("PoW")
-    final case object ProofOfStake extends ExtractionMethod("PoS")
-    final case object TrustlessProofOfStake extends ExtractionMethod("TPoS")
-  }
-}
+    extractionMethod: BlockExtractionMethod)

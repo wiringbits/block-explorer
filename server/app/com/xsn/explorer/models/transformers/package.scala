@@ -12,7 +12,7 @@ package object transformers {
   def toPersistedBlock(rpcBlock: rpc.Block): persisted.Block = {
     rpcBlock
         .into[Block]
-        .withFieldConst(_.extractionMethod, Block.ExtractionMethod.ProofOfWork) // TODO: Get proper method
+        .withFieldConst(_.extractionMethod, BlockExtractionMethod.ProofOfWork) // TODO: Get proper method
         .transform
   }
 
