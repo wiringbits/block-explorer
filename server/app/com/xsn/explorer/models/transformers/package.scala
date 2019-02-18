@@ -1,6 +1,6 @@
 package com.xsn.explorer.models
 
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, Transaction}
 import io.scalaland.chimney.dsl._
 
 /**
@@ -13,6 +13,29 @@ package object transformers {
     rpcBlock
         .into[Block]
         .withFieldConst(_.extractionMethod, Block.ExtractionMethod.ProofOfWork) // TODO: Get proper method
+        .transform
+  }
+
+  def toLightWalletTransactionInput(input: Transaction.Input): LightWalletTransaction.Input = {
+    input
+        .into[LightWalletTransaction.Input]
+        .withFieldRenamed(_.fromOutputIndex, _.index)
+        .withFieldRenamed(_.fromTxid, _.txid)
+        .transform
+  }
+
+  def toLightWalletTransactionOutput(output: Transaction.Output): LightWalletTransaction.Output = {
+    output.into[LightWalletTransaction.Output].transform
+  }
+
+  def toLightWalletTransaction(tx: Transaction.HasIO): LightWalletTransaction = {
+    val inputs = tx.inputs.map(toLightWalletTransactionInput)
+    val outputs = tx.outputs.map(toLightWalletTransactionOutput)
+
+    tx.transaction
+        .into[LightWalletTransaction]
+        .withFieldConst(_.inputs, inputs)
+        .withFieldConst(_.outputs, outputs)
         .transform
   }
 }

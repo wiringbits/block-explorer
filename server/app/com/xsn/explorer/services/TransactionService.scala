@@ -8,9 +8,9 @@ import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.parsers.TransactionOrderingParser
-import io.scalaland.chimney.dsl._
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -71,25 +71,7 @@ class TransactionService @Inject() (
 
       transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
     } yield {
-      val lightTxs = transactions.map { tx =>
-        val inputs = tx.inputs.map { input =>
-          input
-              .into[LightWalletTransaction.Input]
-              .withFieldRenamed(_.fromOutputIndex, _.index)
-              .withFieldRenamed(_.fromTxid, _.txid)
-              .transform
-        }
-
-        val outputs = tx.outputs.map { output =>
-          output.into[LightWalletTransaction.Output].transform
-        }
-
-        tx.transaction
-            .into[LightWalletTransaction]
-            .withFieldConst(_.inputs, inputs)
-            .withFieldConst(_.outputs, outputs)
-            .transform
-      }
+      val lightTxs = transactions.map(toLightWalletTransaction)
 
       WrappedResult(lightTxs)
     }
