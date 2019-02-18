@@ -1,6 +1,5 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -46,6 +45,7 @@ case class Block(
 }
 
 object Block {
+
   implicit val reads: Reads[Block] = {
     val builder = (__ \ 'hash).read[Blockhash] and
         (__ \ 'previousblockhash).readNullable[Blockhash] and

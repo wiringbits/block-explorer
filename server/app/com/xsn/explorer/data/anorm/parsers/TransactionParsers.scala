@@ -28,7 +28,7 @@ object TransactionParsers {
     case txidMaybe ~ blockhash ~ time ~ size =>
       for {
         txid <- txidMaybe
-      } yield Transaction(txid, blockhash, time, size, List.empty, List.empty)
+      } yield Transaction(txid, blockhash, time, size)
   }
 
   val parseTransactionWithValues = (

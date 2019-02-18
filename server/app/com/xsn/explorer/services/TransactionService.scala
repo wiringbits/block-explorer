@@ -84,7 +84,7 @@ class TransactionService @Inject() (
           output.into[LightWalletTransaction.Output].transform
         }
 
-        tx
+        tx.transaction
             .into[LightWalletTransaction]
             .withFieldConst(_.inputs, inputs)
             .withFieldConst(_.outputs, outputs)

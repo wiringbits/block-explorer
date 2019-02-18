@@ -41,7 +41,7 @@ class LedgerSynchronizerService @Inject() (
     result.toFuture
   }
 
-  private def synchronize(block: Block, transactions: List[Transaction]): FutureApplicationResult[Unit] = {
+  private def synchronize(block: Block, transactions: List[Transaction.HasIO]): FutureApplicationResult[Unit] = {
     logger.info(s"Synchronize block ${block.height}, hash = ${block.hash}")
 
     val result = for {
@@ -65,7 +65,7 @@ class LedgerSynchronizerService @Inject() (
    * 1.1. the given block is the genensis block, it is added.
    * 1.2. the given block is not the genesis block, sync everything until the given block.
    */
-  private def onEmptyLedger(block: Block, transactions: List[Transaction]): FutureApplicationResult[Unit] = {
+  private def onEmptyLedger(block: Block, transactions: List[Transaction.HasIO]): FutureApplicationResult[Unit] = {
     if (block.height.int == 0) {
       logger.info(s"Synchronize genesis block on empty ledger, hash = ${block.hash}")
       ledgerDataHandler.push(block, transactions)
@@ -88,7 +88,7 @@ class LedgerSynchronizerService @Inject() (
    * 2.4. if H <= N, if the hash already exists, it is ignored.
    * 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included), then, add the new H.
    */
-  private def onLatestBlock(ledgerBlock: Block, newBlock: Block, newTransactions: List[Transaction]): FutureApplicationResult[Unit] = {
+  private def onLatestBlock(ledgerBlock: Block, newBlock: Block, newTransactions: List[Transaction.HasIO]): FutureApplicationResult[Unit] = {
     if (ledgerBlock.height.int + 1 == newBlock.height.int &&
         newBlock.previousBlockhash.contains(ledgerBlock.hash)) {
 
@@ -158,7 +158,7 @@ class LedgerSynchronizerService @Inject() (
     }
   }
 
-  private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction])] = {
+  private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction.HasIO])] = {
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
       transactions <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr

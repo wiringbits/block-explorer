@@ -25,19 +25,19 @@ class TransactionPostgresDAO @Inject() (
   /**
    * NOTE: Ensure the connection has an open transaction.
    */
-  def upsert(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
+  def upsert(index: Int, transaction: Transaction.HasIO)(implicit conn: Connection): Option[Transaction.HasIO] = {
     for {
-      partialTx <- upsertTransaction(index, transaction)
+      partialTx <- upsertTransaction(index, transaction.transaction)
       _ <- transactionOutputDAO.batchInsertOutputs(transaction.outputs)
       _ <- transactionInputDAO.batchInsertInputs(transaction.inputs.map(transaction.id -> _))
       _ <- transactionOutputDAO.batchSpend(transaction.id, transaction.inputs)
       _ <- addressTransactionDetailsDAO.batchInsertDetails(transaction)
-    } yield partialTx.copy(inputs = transaction.inputs, outputs = transaction.outputs)
+    } yield Transaction.HasIO(partialTx, inputs = transaction.inputs, outputs = transaction.outputs)
   }
 
-  def insert(transactions: List[Transaction])(implicit conn: Connection): Option[List[Transaction]] = {
+  def insert(transactions: List[Transaction.HasIO])(implicit conn: Connection): Option[List[Transaction]] = {
     for {
-      r <- batchInsert(transactions)
+      r <- batchInsert(transactions.map(_.transaction))
 
       outputs = transactions.flatMap(_.outputs)
       _ <- transactionOutputDAO.batchInsertOutputs(outputs)
@@ -51,13 +51,13 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  private def insertDetails(transactions: List[Transaction])(implicit conn: Connection): Unit = {
+  private def insertDetails(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {
     val detailsResult = transactions.map(addressTransactionDetailsDAO.batchInsertDetails)
 
     assert(detailsResult.forall(_.isDefined), "Inserting address details batch failed")
   }
 
-  private def spend(transactions: List[Transaction])(implicit conn: Connection): Unit = {
+  private def spend(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {
     val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
 
     assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
@@ -99,7 +99,7 @@ class TransactionPostgresDAO @Inject() (
   /**
    * NOTE: Ensure the connection has an open transaction.
    */
-  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Transaction] = {
+  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Transaction.HasIO] = {
     val expectedTransactions = SQL(
       """
         |SELECT txid, blockhash, time, size
@@ -116,7 +116,7 @@ class TransactionPostgresDAO @Inject() (
       val outputs = transactionOutputDAO.deleteOutputs(tx.id)
       val _ = addressTransactionDetailsDAO.deleteDetails(tx.id)
 
-      tx.copy(inputs = inputs, outputs = outputs)
+      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
 
     val deletedTransactions = SQL(
@@ -138,7 +138,7 @@ class TransactionPostgresDAO @Inject() (
   /**
    * Get the transactions by the given address (sorted by time).
    */
-  def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[Transaction] = {
+  def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[Transaction.HasIO] = {
     val order = toSQL(orderingCondition)
 
     val transactions = SQL(
@@ -159,7 +159,7 @@ class TransactionPostgresDAO @Inject() (
     } yield {
       val inputs = transactionInputDAO.getInputs(tx.id, address)
       val outputs = transactionOutputDAO.getOutputs(tx.id, address)
-      tx.copy(inputs = inputs, outputs = outputs)
+      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
   }
 
@@ -174,7 +174,7 @@ class TransactionPostgresDAO @Inject() (
       lastSeenTxid: TransactionId,
       limit: Limit,
       orderingCondition: OrderingCondition)(
-      implicit conn: Connection): List[Transaction] = {
+      implicit conn: Connection): List[Transaction.HasIO] = {
 
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
@@ -208,7 +208,7 @@ class TransactionPostgresDAO @Inject() (
     } yield {
       val inputs = transactionInputDAO.getInputs(tx.id, address)
       val outputs = transactionOutputDAO.getOutputs(tx.id, address)
-      tx.copy(inputs = inputs, outputs = outputs)
+      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
   }
 

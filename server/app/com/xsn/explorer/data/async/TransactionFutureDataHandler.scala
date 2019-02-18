@@ -30,7 +30,7 @@ class TransactionFutureDataHandler @Inject() (
       address: Address,
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition): FutureApplicationResult[List[Transaction]] = Future {
+      orderingCondition: OrderingCondition): FutureApplicationResult[List[Transaction.HasIO]] = Future {
 
     blockingDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition)
   }

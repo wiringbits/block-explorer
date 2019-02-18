@@ -53,7 +53,7 @@ class TransactionRPCService @Inject() (
     result.toFuture
   }
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction.HasIO] = {
     val result = for {
       tx <- xsnService.getTransaction(txid).toFutureOr
       transactionVIN <- getTransactionVIN(tx.vin).toFutureOr
@@ -96,8 +96,8 @@ class TransactionRPCService @Inject() (
         }
   }
 
-  def getTransactions(ids: List[TransactionId]): FutureApplicationResult[List[Transaction]] = {
-    def loadTransactionsSlowly(pending: List[TransactionId]): FutureOr[List[Transaction]] = pending match {
+  def getTransactions(ids: List[TransactionId]): FutureApplicationResult[List[Transaction.HasIO]] = {
+    def loadTransactionsSlowly(pending: List[TransactionId]): FutureOr[List[Transaction.HasIO]] = pending match {
       case x :: xs =>
         for {
           tx <- getTransaction(x).toFutureOr

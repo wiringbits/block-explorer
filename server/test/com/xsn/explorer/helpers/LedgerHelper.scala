@@ -15,7 +15,7 @@ object LedgerHelper {
     BlockLoader.getRPC("0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85")
   )
 
-  def getTransactions(block: rpc.Block): List[Transaction] = {
+  def getTransactions(block: rpc.Block): List[Transaction.HasIO] = {
     block
         .transactions
         .map(_.string)

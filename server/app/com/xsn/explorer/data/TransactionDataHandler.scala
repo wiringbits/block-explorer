@@ -17,7 +17,7 @@ trait TransactionDataHandler[F[_]] {
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[TransactionField]): F[PaginatedResult[TransactionWithValues]]
 
-  def getBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId], orderingCondition: OrderingCondition): F[List[Transaction]]
+  def getBy(address: Address, limit: Limit, lastSeenTxid: Option[TransactionId], orderingCondition: OrderingCondition): F[List[Transaction.HasIO]]
 
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 

@@ -9,7 +9,7 @@ import com.xsn.explorer.models.values.TransactionId
 
 class AddressTransactionDetailsPostgresDAO {
 
-  def batchInsertDetails(transaction: Transaction)(implicit conn: Connection): Option[Unit] = {
+  def batchInsertDetails(transaction: Transaction.HasIO)(implicit conn: Connection): Option[Unit] = {
     val received = transaction
         .outputs
         .groupBy(_.address)

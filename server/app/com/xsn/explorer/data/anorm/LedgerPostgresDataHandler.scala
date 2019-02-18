@@ -32,7 +32,7 @@ class LedgerPostgresDataHandler @Inject() (
    */
   override def push(
       block: Block,
-      transactions: List[Transaction]): ApplicationResult[Unit] = {
+      transactions: List[Transaction.HasIO]): ApplicationResult[Unit] = {
 
     val result = withTransaction { implicit conn =>
       val result = for {
@@ -67,7 +67,7 @@ class LedgerPostgresDataHandler @Inject() (
         .getOrElse(throw new RuntimeException("Unable to pop block"))
   }
 
-  private def upsertBlockCascade(block: Block, transactions: List[Transaction])(implicit conn: Connection): Option[Unit] = {
+  private def upsertBlockCascade(block: Block, transactions: List[Transaction.HasIO])(implicit conn: Connection): Option[Unit] = {
     val result = for {
       // block
       _ <- deleteBlockCascade(block).orElse(Some(()))
@@ -119,7 +119,7 @@ class LedgerPostgresDataHandler @Inject() (
     balanceList.map { b => balancePostgresDAO.upsert(b) }
   }
 
-  private def spendMap(transactions: List[Transaction]): Map[Address, BigDecimal] = {
+  private def spendMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
     transactions
         .map(_.inputs)
         .flatMap { inputs =>
@@ -129,7 +129,7 @@ class LedgerPostgresDataHandler @Inject() (
         .mapValues { list => list.map(_._2).sum }
   }
 
-  private def receiveMap(transactions: List[Transaction]): Map[Address, BigDecimal] = {
+  private def receiveMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
     transactions
         .map(_.outputs)
         .flatMap { outputs =>
@@ -141,7 +141,7 @@ class LedgerPostgresDataHandler @Inject() (
         .mapValues { list => list.map(_._2).sum }
   }
 
-  private def balances(transactions: List[Transaction]) = {
+  private def balances(transactions: List[Transaction.HasIO]) = {
     val spentList = spendMap(transactions).map { case (address, spent) =>
       Balance(address, spent = spent)
     }

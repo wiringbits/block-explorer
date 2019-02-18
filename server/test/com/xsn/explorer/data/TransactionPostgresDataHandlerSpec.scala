@@ -123,7 +123,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       result.data.size mustEqual transactions.size
     }
 
-    def testOrdering[B](field: TransactionField, orderingCondition: OrderingCondition)(lt: (Transaction, Transaction) => Boolean) = {
+    def testOrdering[B](field: TransactionField, orderingCondition: OrderingCondition)(lt: (Transaction.HasIO, Transaction.HasIO) => Boolean) = {
       createBlock(block, transactions)
 
       val ordering = FieldOrdering(field, orderingCondition)
@@ -212,11 +212,12 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
-      Transaction(
-        txid,
-        blockhash,
-        time,
-        Size(1000),
+      Transaction.HasIO(
+        Transaction(
+          txid,
+          blockhash,
+          time,
+          Size(1000)),
         inputs,
         outputs.map(_.copy(txid = txid)))
     }
@@ -246,7 +247,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
               }
       }
 
-      def matchOnlyData(expected: Transaction, actual: Transaction) = {
+      def matchOnlyData(expected: Transaction.HasIO, actual: Transaction.HasIO) = {
         actual.copy(inputs = List.empty, outputs = List.empty) mustEqual expected.copy(inputs = List.empty, outputs = List.empty)
       }
 
@@ -308,18 +309,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
           None, None)
       )
 
-      val transaction = Transaction(
-        newTxid,
-        blockhash,
-        321,
-        Size(1000),
+      val transaction = Transaction.HasIO(
+        Transaction(
+          newTxid,
+          blockhash,
+          321,
+          Size(1000)),
         inputs,
         outputs)
 
       val newTxid2 = randomTransactionId
       val newAddress = randomAddress
       val transaction2 = transaction.copy(
-        id = newTxid2,
+        transaction = transaction.transaction.copy(id = newTxid2),
         inputs = List(
           Transaction.Input(
             fromTxid = transaction.id,
@@ -394,7 +396,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     result.isGood mustEqual true
   }
 
-  private def createBlock(block: Block, transactions: List[Transaction]) = {
+  private def createBlock(block: Block, transactions: List[Transaction.HasIO]) = {
     val result = ledgerDataHandler.push(block, transactions)
 
     result.isGood mustEqual true
@@ -411,7 +413,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  private def prepareTransaction(transaction: Transaction) = {
+  private def prepareTransaction(transaction: Transaction.HasIO) = {
     try {
       upsertTransaction(transaction)
     } catch {
@@ -419,7 +421,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  private def upsertTransaction(transaction: Transaction) = {
+  private def upsertTransaction(transaction: Transaction.HasIO) = {
     database.withConnection { implicit conn =>
       val maybe = transactionPostgresDAO.upsert(1, transaction)
       Or.from(maybe, One(TransactionNotFoundError))

@@ -1,21 +1,13 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models.values._
 import com.xsn.explorer.models.rpc
+import com.xsn.explorer.models.values._
 
 case class Transaction(
     id: TransactionId,
     blockhash: Blockhash,
     time: Long,
-    size: Size,
-    inputs: List[Transaction.Input],
-    outputs: List[Transaction.Output]) {
-
-  require(
-    outputs.forall(_.txid == id),
-    "There are outputs that having a different txid"
-  )
-}
+    size: Size)
 
 object Transaction {
 
@@ -38,13 +30,29 @@ object Transaction {
       tposOwnerAddress: Option[Address],
       tposMerchantAddress: Option[Address])
 
+  case class HasIO(
+      transaction: Transaction,
+      inputs: List[Transaction.Input],
+      outputs: List[Transaction.Output]) {
+
+    require(
+      outputs.forall(_.txid == transaction.id),
+      "There are outputs that having a different txid"
+    )
+
+    def id: TransactionId = transaction.id
+    def time: Long = transaction.time
+    def blockhash: Blockhash = transaction.blockhash
+    def size: Size = transaction.size
+  }
+
   /**
    * Please note that the inputs might not be accurate.
    *
    * If the rpc transaction might not be complete, get the input value and address using
-   * the utxo index or the getTransaction method from the TransactionService..
+   * the utxo index or the getTransaction method from the TransactionService.
    */
-  def fromRPC(tx: rpc.Transaction): Transaction = {
+  def fromRPC(tx: rpc.Transaction): HasIO = {
     val inputs = tx.vin.zipWithIndex.flatMap { case (vin, index) =>
       for {
         value <- vin.value
@@ -61,13 +69,13 @@ object Transaction {
       } yield Transaction.Output(tx.id, vout.n, vout.value, address, script, tposAddresses.map(_._1), tposAddresses.map(_._2))
     }
 
-    Transaction(
+    val transaction = Transaction(
       id = tx.id,
       blockhash = tx.blockhash,
       time = tx.time,
-      size = tx.size,
-      inputs = inputs,
-      outputs = outputs
+      size = tx.size
     )
+
+    HasIO(transaction, inputs, outputs)
   }
 }
