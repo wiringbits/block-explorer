@@ -101,6 +101,31 @@ class BlockService @Inject() (
     result.toFuture
   }
 
+  def extractionMethod(block: rpc.Block): FutureApplicationResult[BlockExtractionMethod] = {
+    if (block.tposContract.isDefined) {
+      Future.successful(Good(BlockExtractionMethod.TrustlessProofOfStake))
+    } else if (block.transactions.isEmpty) {
+      Future.successful(Good(BlockExtractionMethod.ProofOfWork))
+    } else {
+      isPoS(block)
+          .toFutureOr
+          .map {
+            case true => BlockExtractionMethod.ProofOfStake
+            case false => BlockExtractionMethod.ProofOfWork
+          }
+          .toFuture
+    }
+  }
+
+  private def isPoS(block: rpc.Block): FutureApplicationResult[Boolean] = {
+    val result = for {
+      coinbaseTxid <- blockLogic.getCoinbase(block).toFutureOr
+      coinbase <- xsnService.getTransaction(coinbaseTxid).toFutureOr
+    } yield blockLogic.isPoS(block, coinbase)
+
+    result.toFuture
+  }
+
   private def getBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
     if (block.transactions.isEmpty) {
       Future.successful(Bad(BlockRewardsNotFoundError).accumulating)

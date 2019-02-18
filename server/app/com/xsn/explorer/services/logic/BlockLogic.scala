@@ -1,7 +1,7 @@
 package com.xsn.explorer.services.logic
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.xsn.explorer.errors.{BlockNotFoundError, BlockhashFormatError}
+import com.xsn.explorer.errors.{BlockNotFoundError, BlockhashFormatError, TransactionNotFoundError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
@@ -18,6 +18,12 @@ class BlockLogic {
     val maybe = block.transactions.headOption
 
     Or.from(maybe, One(BlockNotFoundError))
+  }
+
+  def getCoinbase(block: Block): ApplicationResult[TransactionId] = {
+    val maybe = block.transactions.headOption
+
+    Or.from(maybe, One(TransactionNotFoundError))
   }
 
   /**
@@ -143,5 +149,11 @@ class BlockLogic {
     }
 
     Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
+  }
+
+  def isPoS(block: rpc.Block, coinbase: rpc.Transaction): Boolean = {
+    block.nonce == 0 &&
+        coinbase.vin.isEmpty &&
+        coinbase.vout.flatMap(_.address).isEmpty
   }
 }
