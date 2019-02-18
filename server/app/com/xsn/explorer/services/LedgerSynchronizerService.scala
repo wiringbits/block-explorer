@@ -18,6 +18,7 @@ class LedgerSynchronizerService @Inject() (
     xsnService: XSNService,
     transactionService: TransactionService,
     transactionRPCService: TransactionRPCService,
+    blockService: BlockService,
     ledgerDataHandler: LedgerFutureDataHandler,
     blockDataHandler: BlockFutureDataHandler)(
     implicit ec: ExecutionContext) {
@@ -161,8 +162,9 @@ class LedgerSynchronizerService @Inject() (
   private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[(Block, List[Transaction.HasIO])] = {
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
+      extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
       transactions <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr
-    } yield (toPersistedBlock(rpcBlock), transactions)
+    } yield (toPersistedBlock(rpcBlock, extractionMethod), transactions)
 
     result.toFuture
   }

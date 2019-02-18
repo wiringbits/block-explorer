@@ -9,10 +9,10 @@ import io.scalaland.chimney.dsl._
  */
 package object transformers {
 
-  def toPersistedBlock(rpcBlock: rpc.Block): persisted.Block = {
+  def toPersistedBlock(rpcBlock: rpc.Block, extractionMethod: BlockExtractionMethod): persisted.Block = {
     rpcBlock
         .into[Block]
-        .withFieldConst(_.extractionMethod, BlockExtractionMethod.ProofOfWork) // TODO: Get proper method
+        .withFieldConst(_.extractionMethod, extractionMethod)
         .transform
   }
 

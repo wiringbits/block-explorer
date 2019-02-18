@@ -7,6 +7,6 @@ import scala.language.implicitConversions
 object Converters {
 
   implicit def toPersistedBlock(rpcBlock: rpc.Block): persisted.Block = {
-    transformers.toPersistedBlock(rpcBlock)
+    transformers.toPersistedBlock(rpcBlock, BlockExtractionMethod.ProofOfWork)
   }
 }

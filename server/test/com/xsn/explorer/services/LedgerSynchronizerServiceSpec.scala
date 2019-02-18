@@ -11,6 +11,7 @@ import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.TransactionOrderingParser
+import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -214,11 +215,13 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new TransactionOrderingParser,
       new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC))
 
+    val blockService = new BlockService(xsnService, new BlockLogic, new TransactionLogic)
     val transactionRPCService = new TransactionRPCService(xsnService)
     new LedgerSynchronizerService(
       xsnService,
       transactionService,
       transactionRPCService,
+      blockService,
       new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
       new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC))
   }
