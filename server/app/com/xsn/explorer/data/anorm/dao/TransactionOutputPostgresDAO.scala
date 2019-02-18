@@ -4,7 +4,6 @@ import java.sql.Connection
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import org.slf4j.LoggerFactory
@@ -24,7 +23,7 @@ class TransactionOutputPostgresDAO {
       """.stripMargin
     ).on(
       'address -> address.string
-    ).as(parseTransactionOutput.*).flatten
+    ).as(parseTransactionOutput.*)
   }
 
   def batchInsertOutputs(
@@ -76,7 +75,7 @@ class TransactionOutputPostgresDAO {
       'txid -> txid.string
     ).as(parseTransactionOutput.*)
 
-    result.flatten
+    result
   }
 
   def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
@@ -90,7 +89,7 @@ class TransactionOutputPostgresDAO {
     ).on(
       'txid -> txid.string,
       'address -> address.string
-    ).as(parseTransactionOutput.*).flatten
+    ).as(parseTransactionOutput.*)
   }
 
   def batchSpend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {

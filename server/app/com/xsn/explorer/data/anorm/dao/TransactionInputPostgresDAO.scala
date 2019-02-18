@@ -4,7 +4,6 @@ import java.sql.Connection
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import org.slf4j.LoggerFactory
@@ -60,7 +59,7 @@ class TransactionInputPostgresDAO {
       """.stripMargin
     ).on(
       'txid -> txid.string
-    ).as(parseTransactionInput.*).flatten
+    ).as(parseTransactionInput.*)
   }
 
   def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
@@ -74,6 +73,6 @@ class TransactionInputPostgresDAO {
     ).on(
       'txid -> txid.string,
       'address -> address.string
-    ).as(parseTransactionInput.*).flatten
+    ).as(parseTransactionInput.*)
   }
 }

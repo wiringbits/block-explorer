@@ -36,7 +36,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
       'address -> partial.address.string,
       'received -> partial.received,
       'spent -> partial.spent,
-    ).as(parseBalance.singleOpt).flatten
+    ).as(parseBalance.singleOpt)
   }
 
   def get(
@@ -60,7 +60,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     ).on(
       'offset -> query.offset.int,
       'limit -> query.limit.int
-    ).as(parseBalance.*).flatten
+    ).as(parseBalance.*)
   }
 
   def getNonZeroBalances(
@@ -84,7 +84,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     ).on(
       'offset -> query.offset.int,
       'limit -> query.limit.int
-    ).as(parseBalance.*).flatten
+    ).as(parseBalance.*)
   }
 
   def count(implicit conn: Connection): Count = {
@@ -111,7 +111,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
       """.stripMargin
     ).on(
       'address -> address.string
-    ).as(parseBalance.singleOpt).flatten
+    ).as(parseBalance.singleOpt)
   }
 
   def countNonZeroBalances(implicit conn: Connection): Count = {
@@ -143,7 +143,7 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
       """.stripMargin
     ).on(
       'limit -> limit.int
-    ).as(parseBalance.*).flatten
+    ).as(parseBalance.*)
   }
 
   /**
@@ -170,6 +170,6 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
     ).on(
       'limit -> limit.int,
       'lastSeenAddress -> lastSeenAddress.string
-    ).as(parseBalance.*).flatten
+    ).as(parseBalance.*)
   }
 }

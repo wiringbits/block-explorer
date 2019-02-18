@@ -109,7 +109,7 @@ class TransactionPostgresDAO @Inject() (
       """.stripMargin
     ).on(
       'blockhash -> blockhash.string
-    ).as(parseTransaction.*).flatten
+    ).as(parseTransaction.*)
 
     val result = expectedTransactions.map { tx =>
       val inputs = transactionInputDAO.deleteInputs(tx.id)
@@ -127,7 +127,7 @@ class TransactionPostgresDAO @Inject() (
       """.stripMargin
     ).on(
       'blockhash -> blockhash.string
-    ).as(parseTransaction.*).flatten
+    ).as(parseTransaction.*)
 
     Option(deletedTransactions)
         .filter(_.size == expectedTransactions.size)
@@ -152,7 +152,7 @@ class TransactionPostgresDAO @Inject() (
     ).on(
       'address -> address.string,
       'limit -> limit.int
-    ).as(parseTransaction.*).flatten
+    ).as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -201,7 +201,7 @@ class TransactionPostgresDAO @Inject() (
       'address -> address.string,
       'limit -> limit.int,
       'lastSeenTxid -> lastSeenTxid.string
-    ).as(parseTransaction.*).flatten
+    ).as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -234,7 +234,7 @@ class TransactionPostgresDAO @Inject() (
       'address -> address.string,
       'offset -> paginatedQuery.offset.int,
       'limit -> paginatedQuery.limit.int
-    ).as(parseTransactionWithValues.*).flatten
+    ).as(parseTransactionWithValues.*)
   }
 
   def countBy(address: Address)(implicit conn: Connection): Count = {
@@ -279,7 +279,7 @@ class TransactionPostgresDAO @Inject() (
       'blockhash -> blockhash.string,
       'offset -> paginatedQuery.offset.int,
       'limit -> paginatedQuery.limit.int
-    ).as(parseTransactionWithValues.*).flatten
+    ).as(parseTransactionWithValues.*)
   }
 
   def countByBlockhash(blockhash: Blockhash)(implicit conn: Connection): Count = {
@@ -310,7 +310,7 @@ class TransactionPostgresDAO @Inject() (
     ).on(
       'limit -> limit.int,
       'blockhash -> blockhash.string
-    ).as(parseTransactionWithValues.*).flatten
+    ).as(parseTransactionWithValues.*)
   }
 
   def getByBlockhash(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[TransactionWithValues] = {
@@ -329,7 +329,7 @@ class TransactionPostgresDAO @Inject() (
       'limit -> limit.int,
       'blockhash -> blockhash.string,
       'lastSeenTxid -> lastSeenTxid.string
-    ).as(parseTransactionWithValues.*).flatten
+    ).as(parseTransactionWithValues.*)
   }
 
   private def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
@@ -352,7 +352,7 @@ class TransactionPostgresDAO @Inject() (
       'time -> transaction.time,
       'size -> transaction.size.int,
       'index -> index
-    ).as(parseTransaction.singleOpt).flatten
+    ).as(parseTransaction.singleOpt)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
