@@ -24,6 +24,11 @@ server {
     proxy_pass http://10.136.151.203:9000;
   }
 
+  location /api/grs {
+    rewrite ^/api/grs/(.*) /$1 break;
+    proxy_pass http://10.136.164.36:9000;
+  }
+
   location /api/xsn {
     rewrite ^/api/xsn/(.*) /$1 break;
     proxy_pass http://10.136.160.52:9000;
