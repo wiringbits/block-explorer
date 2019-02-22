@@ -29,6 +29,11 @@ server {
     proxy_pass http://10.136.164.36:9000;
   }
 
+  location /api/btc {
+    rewrite ^/api/btc/(.*) /$1 break;
+    proxy_pass http://10.136.55.244:9000;
+  }
+
   location /api/xsn {
     rewrite ^/api/xsn/(.*) /$1 break;
     proxy_pass http://10.136.160.52:9000;
