@@ -458,6 +458,15 @@ class XSNServiceRPCImpl @Inject() (
         .filter(_.status == 200)
         .flatMap { r => Try(r.json).toOption }
         .flatMap { json =>
+          if (logger.isDebugEnabled) {
+            val x = (json \ "result").validate[A]
+            x.asEither.left.foreach { errors =>
+              val msg = errors
+                  .map { case (path, error) => path.toJsonString -> error.toString() }
+                  .mkString(", ")
+              logger.debug(s"Failed to decode result, errors = ${msg}")
+            }
+          }
           (json \ "result")
               .asOpt[A]
               .map { Good(_) }
