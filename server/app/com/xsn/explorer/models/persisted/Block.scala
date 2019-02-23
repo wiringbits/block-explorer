@@ -18,4 +18,24 @@ case class Block(
     bits: String,
     chainwork: String,
     difficulty: BigDecimal,
-    extractionMethod: BlockExtractionMethod)
+    extractionMethod: BlockExtractionMethod) {
+
+  def withTransactions(transactions: List[Transaction.HasIO]): Block.HasTransactions = {
+    Block.HasTransactions(this, transactions)
+  }
+}
+
+object Block {
+
+  case class HasTransactions(block: Block, transactions: List[Transaction.HasIO]) {
+    require(
+      transactions.forall(_.blockhash == block.hash),
+      s"The transaction = ${transactions.find(_.blockhash != block.hash).get.id} doesn't belong to the block = ${block.hash}"
+    )
+
+    def hash: Blockhash = block.hash
+    def height: Height = block.height
+    def previousBlockhash: Option[Blockhash] = block.previousBlockhash
+    def asTip: HasTransactions = HasTransactions(block.copy(nextBlockhash = None), transactions)
+  }
+}
