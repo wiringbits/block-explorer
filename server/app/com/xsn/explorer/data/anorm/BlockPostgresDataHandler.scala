@@ -2,12 +2,13 @@ package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
@@ -53,5 +54,18 @@ class BlockPostgresDataHandler @Inject() (
   override def getFirstBlock(): ApplicationResult[Block] = database.withConnection { implicit conn =>
     val maybe = blockPostgresDAO.getFirstBlock
     Or.from(maybe, One(BlockNotFoundError))
+  }
+
+  override def getHeaders(
+      limit: pagination.Limit,
+      lastSeenHash: Option[Blockhash]): ApplicationResult[List[BlockHeader]] = withConnection { implicit conn =>
+
+    val result = lastSeenHash
+        .map { hash =>
+          blockPostgresDAO.getHeaders(hash, limit)
+        }
+        .getOrElse { blockPostgresDAO.getHeaders(limit) }
+
+    Good(result)
   }
 }

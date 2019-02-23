@@ -2,11 +2,12 @@ package com.xsn.explorer.data.async
 
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
@@ -39,5 +40,9 @@ class BlockFutureDataHandler @Inject() (
 
   override def getFirstBlock(): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getFirstBlock()
+  }
+
+  override def getHeaders(limit: pagination.Limit, lastSeenHash: Option[Blockhash]): FutureApplicationResult[List[BlockHeader]] = Future {
+    blockBlockingDataHandler.getHeaders(limit, lastSeenHash)
   }
 }

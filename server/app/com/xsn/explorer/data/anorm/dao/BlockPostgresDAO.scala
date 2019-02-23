@@ -8,7 +8,7 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, Paginated
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
@@ -149,5 +149,38 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     val query = PaginatedQuery(Offset(0), Limit(1))
     val ordering = FieldOrdering(BlockField.Height, OrderingCondition.AscendingOrder)
     getBy(query, ordering).headOption
+  }
+
+  def getHeaders(limit: Limit)(implicit conn: Connection): List[BlockHeader] = {
+    SQL(
+      """
+        |SELECT blockhash, previous_blockhash, merkle_root, height, time
+        |FROM blocks
+        |ORDER BY height
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int
+    ).as(parseHeader.*)
+  }
+
+  def getHeaders(lastSeenHash: Blockhash, limit: Limit)(implicit conn: Connection): List[BlockHeader] = {
+    SQL(
+      """
+        |WITH CTE AS (
+        |  SELECT height as lastSeenHeight
+        |  FROM blocks
+        |  WHERE blockhash = {lastSeenHash}
+        |)
+        |SELECT b.blockhash, b.previous_blockhash, b.merkle_root, b.height, b.time
+        |FROM CTE CROSS JOIN blocks b
+        |WHERE b.height > lastSeenHeight
+        |ORDER BY height
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'lastSeenHash -> lastSeenHash.string,
+      'limit -> limit.int
+    ).as(parseHeader.*)
   }
 }

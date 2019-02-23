@@ -14,6 +14,8 @@ GET   /addresses/:address                            controllers.AddressesContro
 GET   /v2/addresses/:address/transactions            controllers.AddressesController.getLightWalletTransactions(address: String, limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc")
 
 GET   /blocks                            controllers.BlocksController.getLatestBlocks()
+GET   /blocks/headers                    controllers.BlocksController.getBlockHeaders(lastSeenHash: Option[String], limit: Int ?= 10)
+
 GET   /blocks/:query                     controllers.BlocksController.getDetails(query: String)
 GET   /blocks/:query/raw                 controllers.BlocksController.getRawBlock(query: String)
 GET   /v2/blocks/:blockhash/transactions controllers.BlocksController.getTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])

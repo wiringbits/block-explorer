@@ -21,6 +21,10 @@ class BlocksController @Inject() (
     blockService.getLatestBlocks()
   }
 
+  def getBlockHeaders(lastSeenHash: Option[String], limit: Int) = public { _ =>
+    blockService.getBlockHeaders(Limit(limit), lastSeenHash)
+  }
+
   /**
    * Try to retrieve a block by height, in case the query argument
    * is not a valid height, we assume it might be a blockhash and try to

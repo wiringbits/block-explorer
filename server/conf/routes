@@ -16,6 +16,8 @@ GET   /v2/addresses/:address/transactions            controllers.AddressesContro
 GET   /addresses/:address/utxos                      controllers.AddressesController.getUnspentOutputs(address: String)
 
 GET   /blocks                            controllers.BlocksController.getLatestBlocks()
+GET   /blocks/headers                    controllers.BlocksController.getBlockHeaders(lastSeenHash: Option[String], limit: Int ?= 10)
+
 GET   /blocks/:query                     controllers.BlocksController.getDetails(query: String)
 GET   /blocks/:query/raw                 controllers.BlocksController.getRawBlock(query: String)
 GET   /blocks/:blockhash/transactions    controllers.BlocksController.getTransactions(blockhash: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")

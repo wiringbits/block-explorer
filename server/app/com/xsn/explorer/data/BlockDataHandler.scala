@@ -2,9 +2,9 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 
 import scala.language.higherKinds
@@ -24,6 +24,8 @@ trait BlockDataHandler[F[_]] {
   def getLatestBlock(): F[Block]
 
   def getFirstBlock(): F[Block]
+
+  def getHeaders(limit: Limit, lastSeenHash: Option[Blockhash]): F[List[BlockHeader]]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

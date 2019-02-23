@@ -3,7 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values._
 
 object BlockParsers {
@@ -89,5 +89,10 @@ object BlockParsers {
         version = version,
         extractionMethod = extractionMethod
       )
+  }
+
+  val parseHeader = (parseBlockhash ~ parsePreviousBlockhash.? ~ parseMerkleRoot ~ parseHeight ~ parseTime).map {
+    case blockhash ~ previousBlockhash ~ merkleRoot ~ height ~ time =>
+      BlockHeader(blockhash, previousBlockhash, merkleRoot, height, time)
   }
 }
