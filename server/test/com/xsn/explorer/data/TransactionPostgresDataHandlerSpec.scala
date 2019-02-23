@@ -391,13 +391,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         .map(TransactionLoader.get)
         .map(Transaction.fromRPC)
 
-    val result = ledgerDataHandler.push(block, transactions)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions))
 
     result.isGood mustEqual true
   }
 
   private def createBlock(block: Block, transactions: List[Transaction.HasIO]) = {
-    val result = ledgerDataHandler.push(block, transactions)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions))
 
     result.isGood mustEqual true
   }

@@ -21,7 +21,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block, transactions) mustEqual Good(())
+        dataHandler.push(block.withTransactions(transactions)) mustEqual Good(())
       }
     }
 
@@ -29,22 +29,22 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.drop(1).foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block, transactions) mustEqual Bad(PreviousBlockMissingError).accumulating
+        dataHandler.push(block.withTransactions(transactions)) mustEqual Bad(PreviousBlockMissingError).accumulating
       }
     }
 
     "succeed storing a repeated block by hash" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis, getTransactions(genesis)) mustEqual Good(())
-      dataHandler.push(genesis, getTransactions(genesis)) mustEqual Good(())
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis))) mustEqual Good(())
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis))) mustEqual Good(())
     }
 
     "fail to store a repeated block by height" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis, getTransactions(genesis)) mustEqual Good(())
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis))) mustEqual Good(())
 
       val block = blockList(1).copy(previousBlockhash = None, height = genesis.height)
-      dataHandler.push(block, getTransactions(block)) mustEqual Bad(RepeatedBlockHeightError).accumulating
+      dataHandler.push(block.withTransactions(getTransactions(block))) mustEqual Bad(RepeatedBlockHeightError).accumulating
     }
   }
 
@@ -62,7 +62,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block, transactions) mustEqual Good(())
+        dataHandler.push(block.withTransactions(transactions)) mustEqual Good(())
       }
 
       blockList.reverse.foreach { block =>

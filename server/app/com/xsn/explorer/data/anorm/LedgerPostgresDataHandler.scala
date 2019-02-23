@@ -31,12 +31,11 @@ class LedgerPostgresDataHandler @Inject() (
    * to have a next block, we remove the link because that block is not stored yet.
    */
   override def push(
-      block: Block,
-      transactions: List[Transaction.HasIO]): ApplicationResult[Unit] = {
+      block: Block.HasTransactions): ApplicationResult[Unit] = {
 
     val result = withTransaction { implicit conn =>
       val result = for {
-        _ <- upsertBlockCascade(block.copy(nextBlockhash = None), transactions)
+        _ <- upsertBlockCascade(block.asTip)
       } yield ()
 
       result
@@ -67,17 +66,17 @@ class LedgerPostgresDataHandler @Inject() (
         .getOrElse(throw new RuntimeException("Unable to pop block"))
   }
 
-  private def upsertBlockCascade(block: Block, transactions: List[Transaction.HasIO])(implicit conn: Connection): Option[Unit] = {
+  private def upsertBlockCascade(block: Block.HasTransactions)(implicit conn: Connection): Option[Unit] = {
     val result = for {
       // block
-      _ <- deleteBlockCascade(block).orElse(Some(()))
-      _ <- blockPostgresDAO.insert(block)
+      _ <- deleteBlockCascade(block.block).orElse(Some(()))
+      _ <- blockPostgresDAO.insert(block.block)
 
       // batch insert
-      _ <- transactionPostgresDAO.insert(transactions)
+      _ <- transactionPostgresDAO.insert(block.transactions)
 
       // balances
-      balanceList = balances(transactions)
+      balanceList = balances(block.transactions)
       _ <- insertBalanceBatch(balanceList).toList.everything
 
       // compute aggregated amount
