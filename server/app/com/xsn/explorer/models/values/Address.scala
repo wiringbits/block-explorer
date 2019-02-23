@@ -10,7 +10,7 @@ class Address private (val string: String) extends AnyVal with WrappedString
 
 object Address {
 
-  private val pattern = "^[a-zA-Z0-9]{34,64}$".r.pattern
+  private val pattern = "^[a-zA-Z0-9]{22,64}$".r.pattern
 
   def from(string: String): Option[Address] = {
     if (pattern.matcher(string).matches()) {
