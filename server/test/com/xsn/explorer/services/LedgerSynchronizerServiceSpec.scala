@@ -227,6 +227,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
     )
     new LedgerSynchronizerService(
+      Config.explorerConfig,
       xsnService,
       blockService,
       transactionCollectorService,

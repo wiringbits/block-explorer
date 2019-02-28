@@ -3,11 +3,16 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
+import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
 import com.xsn.explorer.models.values.TransactionId
+import javax.inject.Inject
+import org.slf4j.LoggerFactory
 
-class AddressTransactionDetailsPostgresDAO {
+class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
+
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def batchInsertDetails(transaction: Transaction.HasIO)(implicit conn: Connection): Option[Unit] = {
     val outputAddressValueList = for {
@@ -66,9 +71,12 @@ class AddressTransactionDetailsPostgresDAO {
           params.tail: _*
         )
 
-        val success = batch.execute().forall(_ == 1)
+        val result = batch.execute()
+        val success = result.forall(_ == 1)
 
-        if (success) {
+        if (success ||
+            explorerConfig.liteVersionConfig.enabled) {
+
           Some(())
         } else {
           None

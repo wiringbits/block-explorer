@@ -7,15 +7,28 @@ import play.api.Configuration
 trait ExplorerConfig {
 
   def genesisBlock: Blockhash
+
+  def liteVersionConfig: ExplorerConfig.LiteVersionConfig
 }
 
-class PlayExplorerConfig @Inject() (config: Configuration) extends ExplorerConfig {
+object ExplorerConfig {
 
-  override val genesisBlock:  Blockhash = {
-    Blockhash
-      .from(config.get[String]("explorer.genesisBlock"))
-      .getOrElse(throw new RuntimeException("The given genesisBlock is incorrect"))
+  case class LiteVersionConfig(enabled: Boolean, syncTransactionsFromBlock: Int)
+
+  class Play @Inject() (config: Configuration) extends ExplorerConfig {
+
+    override val genesisBlock: Blockhash = {
+      Blockhash
+          .from(config.get[String]("explorer.genesisBlock"))
+          .getOrElse(throw new RuntimeException("The given genesisBlock is incorrect"))
+    }
+
+    override def liteVersionConfig: LiteVersionConfig = {
+      val inner = config.get[Configuration]("explorer.liteVersion")
+      val enabled = inner.get[Boolean]("enabled")
+      val syncTransactionsFromBlock = inner.get[Int]("syncTransactionsFromBlock")
+
+      LiteVersionConfig(enabled, syncTransactionsFromBlock)
+    }
   }
-
 }
-

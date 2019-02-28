@@ -3,12 +3,14 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
+import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
+import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class TransactionInputPostgresDAO {
+class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -41,8 +43,11 @@ class TransactionInputPostgresDAO {
           params.tail: _*
         )
 
-        val success = batch.execute().forall(_ == 1)
-        if (success) {
+        val result = batch.execute()
+        val success = result.forall(_ == 1)
+        if (success ||
+            explorerConfig.liteVersionConfig.enabled) {
+
           Some(inputs)
         } else {
           None

@@ -6,6 +6,7 @@ import anorm._
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Count, Limit, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
+import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
@@ -15,6 +16,7 @@ import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
 class TransactionPostgresDAO @Inject() (
+    explorerConfig: ExplorerConfig,
     transactionInputDAO: TransactionInputPostgresDAO,
     transactionOutputDAO: TransactionOutputPostgresDAO,
     tposContractDAO: TPoSContractDAO,
@@ -65,7 +67,11 @@ class TransactionPostgresDAO @Inject() (
   private def spend(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {
     val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
 
-    assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
+    if (explorerConfig.liteVersionConfig.enabled) {
+      ()
+    } else {
+      assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
+    }
   }
 
   private def closeContracts(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {

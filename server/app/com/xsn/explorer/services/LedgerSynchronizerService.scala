@@ -2,6 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
+import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.{ExecutionContext, Future}
 
 class LedgerSynchronizerService @Inject() (
+    explorerConfig: ExplorerConfig,
     xsnService: XSNService,
     blockService: BlockService,
     transactionCollectorService: TransactionCollectorService,
@@ -172,7 +174,14 @@ class LedgerSynchronizerService @Inject() (
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
-      rpcBlock
+      if (explorerConfig.liteVersionConfig.enabled &&
+          rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
+
+        // lite version, ignore transactions
+        rpcBlock.copy(transactions = List.empty)
+      } else {
+        rpcBlock
+      }
     }
 
     result.toFuture

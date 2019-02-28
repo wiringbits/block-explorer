@@ -7,12 +7,15 @@ import play.api.db.Database
 
 trait DataHandlerObjects {
 
+  import Config.explorerConfig
+
   lazy val fieldOrderingSQLInterpreter = new FieldOrderingSQLInterpreter
-  lazy val transactionInputDAO = new TransactionInputPostgresDAO
-  lazy val transactionOutputDAO = new TransactionOutputPostgresDAO
-  lazy val addressTransactionDetailsDAO = new AddressTransactionDetailsPostgresDAO
+  lazy val transactionInputDAO = new TransactionInputPostgresDAO(explorerConfig)
+  lazy val transactionOutputDAO = new TransactionOutputPostgresDAO(explorerConfig)
+  lazy val addressTransactionDetailsDAO = new AddressTransactionDetailsPostgresDAO(explorerConfig)
   lazy val tposContractDAO = new TPoSContractDAO
   lazy val transactionPostgresDAO = new TransactionPostgresDAO(
+    explorerConfig,
     transactionInputDAO,
     transactionOutputDAO,
     tposContractDAO,
