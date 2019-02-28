@@ -11,7 +11,7 @@ import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsObject, JsString, JsValue}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -125,8 +125,8 @@ class TransactionRPCService @Inject() (
   def sendRawTransaction(hexString: String): FutureApplicationResult[JsValue] = {
     val result = for {
       hex <- Or.from(HexString.from(hexString), One(InvalidRawTransactionError)).toFutureOr
-      _ <- xsnService.sendRawTransaction(hex).toFutureOr
-    } yield JsObject.empty + ("hex" -> JsString(hex.string))
+      txid <- xsnService.sendRawTransaction(hex).toFutureOr
+    } yield Json.obj("txid" -> JsString(txid))
 
     result.toFuture
   }

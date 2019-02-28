@@ -46,7 +46,7 @@ trait XSNService {
 
   def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
 
-  def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit]
+  def sendRawTransaction(hex: HexString): FutureApplicationResult[String]
 
   def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
     Option(block)
@@ -394,7 +394,7 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
-  override def sendRawTransaction(hex: HexString): FutureApplicationResult[Unit] = {
+  override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(
       -26 -> InvalidRawTransactionError,
       -22 -> InvalidRawTransactionError,
@@ -411,8 +411,7 @@ class XSNServiceRPCImpl @Inject() (
     server
         .post(body)
         .map { response =>
-          val maybe = getResult[String](response, errorCodeMapper)
-              .map { _.map(_ => ()) }
+          val maybe = getResult[String](response, errorCodeMapper).map { _.map(_.toString()) }
 
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
