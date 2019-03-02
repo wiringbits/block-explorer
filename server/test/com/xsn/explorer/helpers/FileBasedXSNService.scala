@@ -2,7 +2,7 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
-import com.xsn.explorer.models.rpc.{Block, Transaction}
+import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height, TransactionId}
 import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
@@ -39,7 +39,7 @@ class FileBasedXSNService extends DummyXSNService {
     Future.successful(Good(block))
   }
 
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
     val maybe = transactionMap.get(txid)
     val result = Or.from(maybe, One(TransactionNotFoundError))
     Future.successful(result)

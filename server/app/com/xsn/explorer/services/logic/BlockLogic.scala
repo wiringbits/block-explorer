@@ -45,7 +45,7 @@ class BlockLogic {
     Or.from(maybe, One(BlockNotFoundError))
   }
 
-  def getTPoSAddresses(tposContract: Transaction): ApplicationResult[(Address, Address)] = {
+  def getTPoSAddresses(tposContract: Transaction[_]): ApplicationResult[(Address, Address)] = {
     val maybe = tposContract
         .vout
         .flatMap(_.scriptPubKey)
@@ -74,7 +74,7 @@ class BlockLogic {
    * we return 0 in that case because the reward could be negative.
    */
   def getPoSRewards(
-      coinstakeTx: Transaction,
+      coinstakeTx: Transaction[_],
       coinstakeAddress: Address,
       coinstakeInput: BigDecimal): ApplicationResult[PoSBlockRewards] = {
 
@@ -106,7 +106,7 @@ class BlockLogic {
   }
 
   def getTPoSRewards(
-      coinstakeTx: Transaction,
+      coinstakeTx: Transaction[_],
       owner: Address,
       merchant: Address,
       coinstakeInput: BigDecimal): ApplicationResult[TPoSBlockRewards] = {
@@ -151,7 +151,7 @@ class BlockLogic {
     Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
   }
 
-  def isPoS(block: rpc.Block, coinbase: rpc.Transaction): Boolean = {
+  def isPoS(block: rpc.Block, coinbase: rpc.Transaction[_]): Boolean = {
     block.nonce == 0 &&
         coinbase.vin.isEmpty &&
         coinbase.vout.flatMap(_.address).isEmpty

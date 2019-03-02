@@ -255,10 +255,9 @@ class BlockService @Inject() (
       result.toFuture
     }
 
-    coinstakeTxVIN
-        .value
-        .map(Good(_))
-        .map(Future.successful)
-        .getOrElse(loadFromTx)
+    coinstakeTxVIN match {
+      case TransactionVIN.HasValues(_, _, value, _) => Future.successful(Good(value))
+      case _ => loadFromTx
+    }
   }
 }

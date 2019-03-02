@@ -1,6 +1,7 @@
 package com.xsn.explorer.models.persisted
 
 import com.xsn.explorer.models.rpc
+import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
 
 case class Transaction(
@@ -52,13 +53,14 @@ object Transaction {
    * If the rpc transaction might not be complete, get the input value and address using
    * the utxo index or the getTransaction method from the TransactionService.
    */
-  def fromRPC(tx: rpc.Transaction): HasIO = {
-    val inputs = tx.vin.zipWithIndex.flatMap { case (vin, index) =>
-      for {
-        value <- vin.value
-        address <- vin.address
-      } yield Transaction.Input(vin.txid, vin.voutIndex, index, value, address)
-    }
+  def fromRPC[VIN <: TransactionVIN](tx: rpc.Transaction[VIN]): HasIO = {
+    val inputs = tx
+        .vin
+        .zipWithIndex
+        .collect { case (vin: rpc.TransactionVIN.HasValues, index) => (vin, index) }
+        .map { case (vin, index) =>
+          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.address)
+        }
 
     val outputs = tx.vout.flatMap { vout =>
       val tposAddresses = vout.scriptPubKey.flatMap(_.getTPoSAddresses)

@@ -8,7 +8,7 @@ import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -38,7 +38,7 @@ class BlocksControllerSpec extends MyAPISpec {
               blockhash = blockhash,
               time = tx.time,
               size = tx.size,
-              sent = tx.vin.flatMap(_.value).sum,
+              sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
               received = tx.vout.map(_.value).sum
             )
           }

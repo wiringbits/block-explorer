@@ -13,16 +13,16 @@ class TransactionLogic {
     Or.from(maybe, One(error))
   }
 
-  def getVIN(tx: Transaction, error: ApplicationError): ApplicationResult[TransactionVIN] = {
+  def getVIN(tx: Transaction[TransactionVIN], error: ApplicationError): ApplicationResult[TransactionVIN] = {
     val maybe = tx.vin.headOption
     Or.from(maybe, One(error))
   }
 
-  def getVOUT(vin: TransactionVIN, previousTX: Transaction, error: ApplicationError): ApplicationResult[TransactionVOUT] = {
+  def getVOUT(vin: TransactionVIN, previousTX: Transaction[_], error: ApplicationError): ApplicationResult[TransactionVOUT] = {
     getVOUT(vin.voutIndex, previousTX, error)
   }
 
-  def getVOUT(index: Int, previousTX: Transaction, error: ApplicationError): ApplicationResult[TransactionVOUT] = {
+  def getVOUT(index: Int, previousTX: Transaction[_], error: ApplicationError): ApplicationResult[TransactionVOUT] = {
     val maybe = previousTX.vout.find(_.n == index)
     Or.from(maybe, One(error))
   }

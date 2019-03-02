@@ -22,16 +22,14 @@ case class TransactionDetails(
 
 object TransactionDetails {
 
-  def from(tx: rpc.Transaction, input: List[TransactionValue]): TransactionDetails = {
-    TransactionDetails
-        .from(tx)
-        .copy(input = input)
-  }
+  def from(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): TransactionDetails = {
+    val input = tx.vin.map { vin =>
+      TransactionValue(vin.address, vin.value)
+    }
 
-  def from(tx: rpc.Transaction): TransactionDetails = {
     val output = tx.vout.flatMap(TransactionValue.from)
 
-    TransactionDetails(tx.id, tx.size, tx.blockhash, tx.time, tx.blocktime, tx.confirmations, List.empty, output)
+    TransactionDetails(tx.id, tx.size, tx.blockhash, tx.time, tx.blocktime, tx.confirmations, input, output)
   }
 
   implicit val writes: Writes[TransactionDetails] = Json.writes[TransactionDetails]

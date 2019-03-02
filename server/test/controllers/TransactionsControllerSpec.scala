@@ -6,7 +6,7 @@ import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.helpers.{DataHelper, DummyXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.Transaction
+import com.xsn.explorer.models.rpc.{Transaction, TransactionVIN}
 import com.xsn.explorer.models.values.{Confirmations, Size, TransactionId}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
@@ -38,7 +38,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       severalInputsTx.id -> severalInputsTx
     )
 
-    override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction] = {
+    override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
       val result = map.get(txid)
           .map(Good(_))
           .getOrElse {
@@ -92,13 +92,17 @@ class TransactionsControllerSpec extends MyAPISpec {
     }
 
     "return non-coinbase transaction" in {
-      val tx = nonCoinbaseTx
       val input = List(
         TransactionValue(
           createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
-          BigDecimal("2343749.965625"))
-      )
-      val details = TransactionDetails.from(nonCoinbaseTx, input)
+          BigDecimal("2343749.965625")))
+          .map { v =>
+            TransactionVIN.HasValues(createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"), 0, v.value, v.address)
+          }
+
+      val tx = nonCoinbaseTx.copy(vin = input)
+
+      val details = TransactionDetails.from(tx)
       val response = GET(url(tx.id.string))
 
       status(response) mustEqual OK

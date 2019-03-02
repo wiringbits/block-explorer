@@ -2,7 +2,7 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.rpc.{Masternode, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
 import play.api.libs.json.JsValue
@@ -10,7 +10,7 @@ import play.api.libs.json.JsValue
 class DummyXSNService extends XSNService {
 
   override def genesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction] = ???
+  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = ???
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = ???
   override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = ???
   override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = ???

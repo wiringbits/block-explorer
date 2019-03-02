@@ -11,7 +11,7 @@ import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsString, JsValue, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -43,12 +43,8 @@ class TransactionRPCService @Inject() (
       }
 
       transaction <- xsnService.getTransaction(txid).toFutureOr
-
-      input <- transaction
-          .vin
-          .map(getTransactionValue)
-          .toFutureOr
-    } yield TransactionDetails.from(transaction, input)
+      vin <- getTransactionVIN(transaction.vin).toFutureOr
+    } yield TransactionDetails.from(transaction.copy(vin = vin))
 
     result.toFuture
   }
@@ -63,19 +59,19 @@ class TransactionRPCService @Inject() (
     result.toFuture
   }
 
-  private def getTransactionVIN(list: List[TransactionVIN]): FutureApplicationResult[List[TransactionVIN]] = {
+  private def getTransactionVIN(list: List[TransactionVIN]): FutureApplicationResult[List[TransactionVIN.HasValues]] = {
     def getVIN(vin: TransactionVIN) = {
       getTransactionValue(vin)
           .map {
             case Good(transactionValue) =>
-              val newVIN = vin.copy(address = Some(transactionValue.address), value = Some(transactionValue.value))
+              val newVIN = vin.withValues(address = transactionValue.address, value = transactionValue.value)
               Good(newVIN)
 
             case Bad(e) => Bad(e)
           }
     }
 
-    def loadVINSequentially(pending: List[TransactionVIN]): FutureOr[List[TransactionVIN]] = pending match {
+    def loadVINSequentially(pending: List[TransactionVIN]): FutureOr[List[TransactionVIN.HasValues]] = pending match {
       case x :: xs =>
         for {
           tx <- getVIN(x).toFutureOr
@@ -132,10 +128,10 @@ class TransactionRPCService @Inject() (
   }
 
   private def getTransactionValue(vin: TransactionVIN): FutureApplicationResult[TransactionValue] = {
-    val valueMaybe = for {
-      value <- vin.value
-      address <- vin.address
-    } yield TransactionValue(address, value)
+    val valueMaybe = vin match {
+      case x: TransactionVIN.HasValues => Some(TransactionValue(x.address, x.value))
+      case _ => None
+    }
 
     valueMaybe
         .map(Good(_))

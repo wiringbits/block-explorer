@@ -2,15 +2,15 @@ package com.xsn.explorer.helpers
 
 import java.io.File
 
-import com.xsn.explorer.models.rpc.Transaction
+import com.xsn.explorer.models.rpc.{Transaction, TransactionVIN}
 import play.api.libs.json.{JsValue, Json}
 
 object TransactionLoader {
 
   private val BasePath = "transactions"
 
-  def get(txid: String): Transaction = {
-    json(txid).as[Transaction]
+  def get(txid: String): Transaction[TransactionVIN] = {
+    json(txid).as[Transaction[TransactionVIN]]
   }
 
   def json(txid: String): JsValue = {
@@ -23,7 +23,7 @@ object TransactionLoader {
     }
   }
 
-  def all(): List[Transaction] = {
+  def all(): List[Transaction[TransactionVIN]] = {
     val uri = getClass.getResource(s"/$BasePath")
     new File(uri.getPath)
         .listFiles()

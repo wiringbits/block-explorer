@@ -18,7 +18,7 @@ import scala.util.Try
 
 trait XSNService {
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction]
+  def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]]
 
   def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue]
 
@@ -73,14 +73,14 @@ class XSNServiceRPCImpl @Inject() (
       .withHttpHeaders("Content-Type" -> "text/plain")
 
 
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction] = {
+  override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> TransactionNotFoundError)
 
     server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
 
-          val maybe = getResult[rpc.Transaction](response, errorCodeMapper)
+          val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](response, errorCodeMapper)
           maybe.getOrElse {
             logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
 
