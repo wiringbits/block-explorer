@@ -11,6 +11,18 @@
 
 3. Run the application with: `sbt run`
 
+## Bitcoin
+If you want to run the explorer for Bitcoin, checkout the `bitcoin` branch and then, apply manually the following SQL commands:
+```sql
+ALTER TABLE transaction_inputs DROP CONSTRAINT transaction_inputs_txid_fk;
+ALTER TABLE transaction_inputs DROP CONSTRAINT transaction_inputs_from_fk;
+
+ALTER TABLE transaction_outputs DROP CONSTRAINT transaction_outputs_txid_fk;
+ALTER TABLE transaction_outputs DROP CONSTRAINT transaction_outputs_spent_on_fk;
+
+ALTER TABLE address_transaction_details DROP CONSTRAINT address_transaction_details_txid_fk;
+```
+
 ## Test
 Run the `sbt test` command to execute the tests.
 
