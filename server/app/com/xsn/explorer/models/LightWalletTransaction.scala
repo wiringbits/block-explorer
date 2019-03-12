@@ -1,6 +1,6 @@
 package com.xsn.explorer.models
 
-import com.xsn.explorer.models.values.{Blockhash, Size, TransactionId}
+import com.xsn.explorer.models.values.{Address, Blockhash, Size, TransactionId}
 import play.api.libs.json.{Json, Writes}
 
 case class LightWalletTransaction(
@@ -14,7 +14,7 @@ case class LightWalletTransaction(
 object LightWalletTransaction {
 
   case class Input(txid: TransactionId, index: Int, value: BigDecimal)
-  case class Output(index: Int, value: BigDecimal)
+  case class Output(index: Int, value: BigDecimal, address: Address)
 
   implicit val inputWrites: Writes[Input] = Json.writes[Input]
   implicit val outputWrites: Writes[Output] = Json.writes[Output]
