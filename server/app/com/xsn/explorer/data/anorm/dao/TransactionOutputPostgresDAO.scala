@@ -78,6 +78,18 @@ class TransactionOutputPostgresDAO {
     result
   }
 
+  def getOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
+    SQL(
+      """
+        |SELECT txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+        |FROM transaction_outputs
+        |WHERE txid = {txid}
+      """.stripMargin
+    ).on(
+      'txid -> txid.string
+    ).as(parseTransactionOutput.*)
+  }
+
   def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """

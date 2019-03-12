@@ -53,4 +53,8 @@ class BlocksController @Inject() (
   def getTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getByBlockhash(blockhash, Limit(limit), lastSeenTxid)
   }
+
+  def getLightTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
+    transactionService.getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+  }
 }

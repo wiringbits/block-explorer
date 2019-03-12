@@ -54,4 +54,12 @@ class TransactionFutureDataHandler @Inject() (
 
     blockingDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid)
   }
+
+  override def getTransactionsWithIOBy(
+      blockhash: Blockhash,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId]): FutureApplicationResult[List[Transaction.HasIO]] = Future {
+
+    blockingDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid)
+  }
 }

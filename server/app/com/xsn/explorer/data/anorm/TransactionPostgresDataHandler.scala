@@ -73,4 +73,16 @@ class TransactionPostgresDataHandler @Inject() (
 
     Good(transactions)
   }
+
+  override def getTransactionsWithIOBy(
+      blockhash: Blockhash,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId]): ApplicationResult[List[Transaction.HasIO]] = withConnection { implicit conn =>
+
+    val transactions = lastSeenTxid
+        .map { transactionPostgresDAO.getTransactionsWithIOBy(blockhash, _, limit) }
+        .getOrElse { transactionPostgresDAO.getTransactionsWithIOBy(blockhash, limit) }
+
+    Good(transactions)
+  }
 }

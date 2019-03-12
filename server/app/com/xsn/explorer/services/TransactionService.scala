@@ -109,6 +109,33 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
+  def getLightWalletTransactionsByBlockhash(
+      blockhashString: String,
+      limit: Limit,
+      lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+
+    val result = for {
+      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+
+      lastSeenTxid <- {
+        lastSeenTxidString
+            .map(TransactionId.from)
+            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
+            .getOrElse(Good(Option.empty))
+            .toFutureOr
+      }
+
+      transactions <- transactionFutureDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid).toFutureOr
+    } yield {
+      val lightTxs = transactions.map(toLightWalletTransaction)
+
+      WrappedResult(lightTxs)
+    }
+
+    result.toFuture
+  }
+
   /** TODO: Move to another file */
   private def getOrderingConditionResult(unsafeOrderingCondition: String) = {
     val maybe = parseOrderingCondition(unsafeOrderingCondition)

@@ -62,6 +62,18 @@ class TransactionInputPostgresDAO {
     ).as(parseTransactionInput.*)
   }
 
+  def getInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
+    SQL(
+      """
+        |SELECT txid, index, from_txid, from_output_index, value, address
+        |FROM transaction_inputs
+        |WHERE txid = {txid}
+      """.stripMargin
+    ).on(
+      'txid -> txid.string
+    ).as(parseTransactionInput.*)
+  }
+
   def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
     SQL(
       """

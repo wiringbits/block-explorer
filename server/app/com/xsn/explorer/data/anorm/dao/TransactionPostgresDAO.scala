@@ -332,6 +332,59 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransactionWithValues.*)
   }
 
+  def getTransactionsWithIOBy(blockhash: Blockhash, limit: Limit)(implicit conn: Connection): List[Transaction.HasIO] = {
+    val transactions = SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size
+        |FROM transactions t JOIN blocks USING (blockhash)
+        |WHERE blockhash = {blockhash}
+        |ORDER BY t.index ASC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int,
+      'blockhash -> blockhash.string
+    ).as(parseTransaction.*)
+
+    for {
+      tx <- transactions
+    } yield {
+      val inputs = transactionInputDAO.getInputs(tx.id)
+      val outputs = transactionOutputDAO.getOutputs(tx.id)
+      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
+    }
+  }
+
+  def getTransactionsWithIOBy(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[Transaction.HasIO] = {
+    val transactions = SQL(
+      """
+        |WITH CTE AS (
+        |  SELECT index AS lastSeenIndex
+        |  FROM transactions
+        |  WHERE txid = {lastSeenTxid}
+        |)
+        |SELECT t.txid, t.blockhash, t.time, t.size
+        |FROM CTE CROSS JOIN transactions t JOIN blocks USING (blockhash)
+        |WHERE blockhash = {blockhash} AND
+        |      t.index > lastSeenIndex
+        |ORDER BY t.index ASC
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+      'limit -> limit.int,
+      'blockhash -> blockhash.string,
+      'lastSeenTxid -> lastSeenTxid.string
+    ).as(parseTransaction.*)
+
+    for {
+      tx <- transactions
+    } yield {
+      val inputs = transactionInputDAO.getInputs(tx.id)
+      val outputs = transactionOutputDAO.getOutputs(tx.id)
+      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
+    }
+  }
+
   private def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """

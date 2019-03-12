@@ -31,6 +31,10 @@ trait TransactionDataHandler[F[_]] {
       limit: Limit,
       lastSeenTxid: Option[TransactionId]): F[List[TransactionWithValues]]
 
+  def getTransactionsWithIOBy(
+      blockhash: Blockhash,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId]): F[List[Transaction.HasIO]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]
