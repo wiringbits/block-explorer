@@ -2,6 +2,7 @@ package controllers
 
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
+import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.services.{AddressService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
@@ -15,6 +16,7 @@ class AddressesController @Inject() (
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
+  import AddressesController._
   import Codecs._
 
   def getBy(address: String) = public { _ =>
@@ -58,4 +60,12 @@ class AddressesController @Inject() (
   def getUnspentOutputs(address: String) = public { _ =>
     addressService.getUnspentOutputs(address)
   }
+}
+
+object AddressesController {
+
+  implicit val inputWrites: Writes[LightWalletTransaction.Input] = Json.writes[LightWalletTransaction.Input]
+  implicit val outputWrites: Writes[LightWalletTransaction.Output] = Json.writes[LightWalletTransaction.Output]
+  implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] = Json.writes[LightWalletTransaction]
+
 }

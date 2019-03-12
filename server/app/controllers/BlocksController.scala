@@ -2,10 +2,12 @@ package controllers
 
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
+import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.values.Height
 import com.xsn.explorer.services.{BlockService, TransactionService}
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
+import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
 
@@ -15,6 +17,7 @@ class BlocksController @Inject() (
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
+  import BlocksController._
   import Codecs._
 
   def getLatestBlocks() = public { _ =>
@@ -56,5 +59,26 @@ class BlocksController @Inject() (
 
   def getLightTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+  }
+}
+
+object BlocksController {
+
+  implicit val inputWrites: Writes[LightWalletTransaction.Input] = (obj: LightWalletTransaction.Input) => {
+    Json.obj(
+      "txid" -> obj.txid,
+      "index" -> obj.index
+    )
+  }
+
+  implicit val outputWrites: Writes[LightWalletTransaction.Output] = Json.writes[LightWalletTransaction.Output]
+  implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] = (obj: LightWalletTransaction) => {
+    Json.obj(
+      "id" -> obj.id,
+      "size" -> obj.size,
+      "time" -> obj.time,
+      "inputs" -> Json.toJson(obj.inputs),
+      "outputs" -> Json.toJson(obj.outputs)
+    )
   }
 }
