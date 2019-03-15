@@ -25,7 +25,7 @@ class BlockService @Inject() (
     transactionLogic: TransactionLogic)(
     implicit ec: ExecutionContext) {
 
-  private val maxHeadersPerQuery = 100
+  private val maxHeadersPerQuery = 1000
 
   def getBlockHeaders(limit: Limit, lastSeenHashString: Option[String]): FutureApplicationResult[WrappedResult[List[persisted.BlockHeader]]] = {
     val result = for {
