@@ -6,6 +6,8 @@
 GET   /health                controllers.HealthController.check()
 # GET   /maintenance           controllers.MaintenanceController.run(query: String ?= "")
 
+GET   /v2/blocks/:blockhash/light-wallet-transactions controllers.BlocksController.getLightTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
+
 GET   /transactions/:txid        controllers.TransactionsController.getTransaction(txid: String)
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
 POST  /transactions              controllers.TransactionsController.sendRawTransaction()
