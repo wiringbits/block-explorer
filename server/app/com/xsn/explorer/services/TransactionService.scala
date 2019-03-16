@@ -2,7 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models.ordering.{OrderingCondition, OrderingError, OrderingQuery}
+import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
@@ -10,7 +10,7 @@ import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.parsers.TransactionOrderingParser
+import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -19,6 +19,7 @@ import scala.concurrent.ExecutionContext
 
 class TransactionService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
+    orderingConditionParser: OrderingConditionParser,
     transactionOrderingParser: TransactionOrderingParser,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
@@ -59,7 +60,7 @@ class TransactionService @Inject() (
       }
 
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
-      orderingCondition <- getOrderingConditionResult(orderingConditionString).toFutureOr
+      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
       lastSeenTxid <- {
         lastSeenTxidString
@@ -134,18 +135,5 @@ class TransactionService @Inject() (
     }
 
     result.toFuture
-  }
-
-  /** TODO: Move to another file */
-  private def getOrderingConditionResult(unsafeOrderingCondition: String) = {
-    val maybe = parseOrderingCondition(unsafeOrderingCondition)
-    Or.from(maybe, One(OrderingError.InvalidCondition))
-  }
-
-  /** TODO: Move to another file */
-  private def parseOrderingCondition(unsafeOrderingCondition: String): Option[OrderingCondition] = unsafeOrderingCondition.toLowerCase match {
-    case "asc" => Some(OrderingCondition.AscendingOrder)
-    case "desc" => Some(OrderingCondition.DescendingOrder)
-    case _ => None
   }
 }
