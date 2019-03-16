@@ -24,8 +24,8 @@ class BlocksController @Inject() (
     blockService.getLatestBlocks()
   }
 
-  def getBlockHeaders(lastSeenHash: Option[String], limit: Int) = public { _ =>
-    blockService.getBlockHeaders(Limit(limit), lastSeenHash)
+  def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
+    blockService.getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
   }
 
   /**

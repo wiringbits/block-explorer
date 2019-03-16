@@ -9,6 +9,7 @@ import com.xsn.explorer.errors.{BlockRewardsNotFoundError, BlockhashFormatError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
+import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
@@ -22,12 +23,17 @@ class BlockService @Inject() (
     blockDataHandler: BlockFutureDataHandler,
     paginatedQueryValidator: PaginatedQueryValidator,
     blockLogic: BlockLogic,
-    transactionLogic: TransactionLogic)(
+    transactionLogic: TransactionLogic,
+    orderingConditionParser: OrderingConditionParser)(
     implicit ec: ExecutionContext) {
 
   private val maxHeadersPerQuery = 1000
 
-  def getBlockHeaders(limit: Limit, lastSeenHashString: Option[String]): FutureApplicationResult[WrappedResult[List[persisted.BlockHeader]]] = {
+  def getBlockHeaders(
+      limit: Limit,
+      lastSeenHashString: Option[String],
+      orderingConditionString: String): FutureApplicationResult[WrappedResult[List[persisted.BlockHeader]]] = {
+
     val result = for {
       lastSeenHash <- {
         lastSeenHashString
@@ -38,8 +44,9 @@ class BlockService @Inject() (
       }
 
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
+      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      headers <- blockDataHandler.getHeaders(limit, lastSeenHash).toFutureOr
+      headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
     } yield WrappedResult(headers)
 
     result.toFuture

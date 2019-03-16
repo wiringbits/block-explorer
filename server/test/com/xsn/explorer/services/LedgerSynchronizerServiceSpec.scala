@@ -221,7 +221,8 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC),
       new PaginatedQueryValidator,
       new BlockLogic,
-      new TransactionLogic)
+      new TransactionLogic,
+      new OrderingConditionParser)
     val transactionRPCService = new TransactionRPCService(xsnService)
     new LedgerSynchronizerService(
       xsnService,

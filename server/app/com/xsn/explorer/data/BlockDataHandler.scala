@@ -1,7 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.{Block, BlockHeader}
@@ -25,7 +25,7 @@ trait BlockDataHandler[F[_]] {
 
   def getFirstBlock(): F[Block]
 
-  def getHeaders(limit: Limit, lastSeenHash: Option[Blockhash]): F[List[BlockHeader]]
+  def getHeaders(limit: Limit, orderingCondition: OrderingCondition, lastSeenHash: Option[Blockhash]): F[List[BlockHeader]]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

@@ -151,12 +151,14 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     getBy(query, ordering).headOption
   }
 
-  def getHeaders(limit: Limit)(implicit conn: Connection): List[BlockHeader] = {
+  def getHeaders(limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockHeader] = {
+    val order = toSQL(orderingCondition)
+
     SQL(
-      """
+      s"""
         |SELECT blockhash, previous_blockhash, merkle_root, height, time
         |FROM blocks
-        |ORDER BY height
+        |ORDER BY height $order
         |LIMIT {limit}
       """.stripMargin
     ).on(
@@ -164,9 +166,15 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     ).as(parseHeader.*)
   }
 
-  def getHeaders(lastSeenHash: Blockhash, limit: Limit)(implicit conn: Connection): List[BlockHeader] = {
+  def getHeaders(lastSeenHash: Blockhash, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockHeader] = {
+    val order = toSQL(orderingCondition)
+    val comparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => "<"
+      case OrderingCondition.AscendingOrder => ">"
+    }
+
     SQL(
-      """
+      s"""
         |WITH CTE AS (
         |  SELECT height as lastSeenHeight
         |  FROM blocks
@@ -174,13 +182,18 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
         |)
         |SELECT b.blockhash, b.previous_blockhash, b.merkle_root, b.height, b.time
         |FROM CTE CROSS JOIN blocks b
-        |WHERE b.height > lastSeenHeight
-        |ORDER BY height
+        |WHERE b.height $comparator lastSeenHeight
+        |ORDER BY height $order
         |LIMIT {limit}
       """.stripMargin
     ).on(
       'lastSeenHash -> lastSeenHash.string,
       'limit -> limit.int
     ).as(parseHeader.*)
+  }
+
+  private def toSQL(condition: OrderingCondition): String = condition match {
+    case OrderingCondition.AscendingOrder => "ASC"
+    case OrderingCondition.DescendingOrder => "DESC"
   }
 }

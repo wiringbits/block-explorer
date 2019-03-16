@@ -1,7 +1,7 @@
 package com.xsn.explorer.data.async
 
 import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
@@ -42,7 +42,11 @@ class BlockFutureDataHandler @Inject() (
     blockBlockingDataHandler.getFirstBlock()
   }
 
-  override def getHeaders(limit: pagination.Limit, lastSeenHash: Option[Blockhash]): FutureApplicationResult[List[BlockHeader]] = Future {
-    blockBlockingDataHandler.getHeaders(limit, lastSeenHash)
+  override def getHeaders(
+      limit: pagination.Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash]): FutureApplicationResult[List[BlockHeader]] = Future {
+
+    blockBlockingDataHandler.getHeaders(limit, orderingCondition, lastSeenHash)
   }
 }

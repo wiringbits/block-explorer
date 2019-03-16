@@ -1,7 +1,7 @@
 package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.FieldOrdering
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BlockBlockingDataHandler
@@ -58,13 +58,14 @@ class BlockPostgresDataHandler @Inject() (
 
   override def getHeaders(
       limit: pagination.Limit,
+      orderingCondition: OrderingCondition,
       lastSeenHash: Option[Blockhash]): ApplicationResult[List[BlockHeader]] = withConnection { implicit conn =>
 
     val result = lastSeenHash
         .map { hash =>
-          blockPostgresDAO.getHeaders(hash, limit)
+          blockPostgresDAO.getHeaders(hash, limit, orderingCondition)
         }
-        .getOrElse { blockPostgresDAO.getHeaders(limit) }
+        .getOrElse { blockPostgresDAO.getHeaders(limit, orderingCondition) }
 
     Good(result)
   }
