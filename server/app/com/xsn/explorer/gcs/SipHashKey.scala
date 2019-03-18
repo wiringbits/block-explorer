@@ -1,6 +1,7 @@
 package com.xsn.explorer.gcs
 
 import com.google.common.primitives.Longs
+import com.xsn.explorer.models.values.Blockhash
 
 /**
  * Represents a SipHash key using a 128-bit value, compatible with Guava.
@@ -8,7 +9,12 @@ import com.google.common.primitives.Longs
  * @param k0 the first half of the key
  * @param k1 the second half of the key
  */
-case class SipHashKey(k0: Long, k1: Long)
+case class SipHashKey(k0: Long, k1: Long) {
+
+  override def toString: String = {
+    s"SipHashKey(${java.lang.Long.toUnsignedString(k0)}, ${java.lang.Long.toUnsignedString(k1)})"
+  }
+}
 
 object SipHashKey {
 
@@ -28,5 +34,16 @@ object SipHashKey {
     val k0 = Longs.fromByteArray(key.take(8).reverse.toArray)
     val k1 = Longs.fromByteArray(key.drop(8).reverse.toArray)
     SipHashKey(k0, k1)
+  }
+
+  def fromBtcutil(hash: Blockhash): SipHashKey = {
+    val bytes = hash
+        .string
+        .take(32)
+        .grouped(2)
+        .map { hex => Integer.parseInt(hex, 16).asInstanceOf[Byte] }
+        .toList
+
+    fromBtcutil(bytes)
   }
 }

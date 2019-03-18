@@ -1,5 +1,6 @@
 package com.xsn.explorer.gcs
 
+import com.xsn.explorer.models.values.Blockhash
 import org.scalatest.MustMatchers._
 import org.scalatest.WordSpec
 
@@ -14,6 +15,13 @@ class SipHashKeySpec extends WordSpec {
       val key = SipHashKey.fromBtcutil(bytes)
       key.k0 must be(4692295987881554252L)
       key.k1 must be(1534194084347808571l)
+    }
+
+    "allow to use a blockhash" in {
+      val blockhash = Blockhash.from("00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32").get
+      val expected = "SipHashKey(12718269283101769728, 15210999809835452079)"
+      val key = SipHashKey.fromBtcutil(blockhash)
+      key.toString must be(expected)
     }
   }
 }
