@@ -37,5 +37,16 @@ object Block {
     def height: Height = block.height
     def previousBlockhash: Option[Blockhash] = block.previousBlockhash
     def asTip: HasTransactions = HasTransactions(block.copy(nextBlockhash = None), transactions)
+
+    /**
+     * Collect the addresses involved in the block.
+     */
+    def collectAddresses: Set[Address] = {
+      transactions.foldLeft(Set.empty[Address]) { case (acc, tx) =>
+        val spending = tx.inputs.map(_.address)
+        val receiving = tx.outputs.map(_.address)
+        spending.toSet ++ receiving.toSet ++ acc
+      }
+    }
   }
 }

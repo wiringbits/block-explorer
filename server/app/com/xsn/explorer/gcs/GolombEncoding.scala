@@ -1,6 +1,7 @@
 package com.xsn.explorer.gcs
 
 import com.google.common.hash.Hashing
+import com.xsn.explorer.models.persisted.Block
 
 import scala.collection.SortedSet
 
@@ -179,5 +180,12 @@ object GolombEncoding {
 
   def default(key: SipHashKey): GolombEncoding = {
     new GolombEncoding(p = DefaultP, m = DefaultM, key = key)
+  }
+
+  def encode(block: Block.HasTransactions): Option[GolombCodedSet] = {
+    val key = SipHashKey.fromBtcutil(block.hash)
+    val encoder = default(key)
+    val addresses = block.collectAddresses
+    encoder.encode(addresses.map(_.string))
   }
 }
