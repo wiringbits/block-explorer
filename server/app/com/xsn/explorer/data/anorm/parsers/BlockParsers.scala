@@ -93,6 +93,6 @@ object BlockParsers {
 
   val parseHeader = (parseBlockhash ~ parsePreviousBlockhash.? ~ parseMerkleRoot ~ parseHeight ~ parseTime).map {
     case blockhash ~ previousBlockhash ~ merkleRoot ~ height ~ time =>
-      BlockHeader(blockhash, previousBlockhash, merkleRoot, height, time)
+      BlockHeader.Simple(blockhash, previousBlockhash, merkleRoot, height, time)
   }
 }
