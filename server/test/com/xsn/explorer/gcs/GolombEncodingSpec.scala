@@ -1,5 +1,6 @@
 package com.xsn.explorer.gcs
 
+import com.google.common.io.BaseEncoding
 import org.scalatest.{MustMatchers, WordSpec}
 
 class GolombEncodingSpec extends WordSpec with MustMatchers {
@@ -35,7 +36,13 @@ class GolombEncodingSpec extends WordSpec with MustMatchers {
 
     "decode the same hashes" in {
       val hashes = golomb.hashes(words)
-      val decoded = golomb.decode(encoded.data, words.size)
+      val bytes = BaseEncoding
+          .base16()
+          .decode(encoded.hex.string.toUpperCase)
+          .toList
+          .map(new UnsignedByte(_))
+
+      val decoded = golomb.decode(bytes, words.size)
 
       decoded mustEqual hashes
     }

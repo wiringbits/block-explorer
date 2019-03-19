@@ -26,7 +26,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
         .map { bits => UnsignedByte.parse(bits.padTo(8, Bit.Zero)) }
         .toList
 
-    new GolombCodedSet(
+    GolombCodedSet.apply(
       p = p,
       m = m,
       n = words.size,
@@ -115,6 +115,28 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     List.fill(size - bits.size)(Bit.Zero) ++ bits
   }
 
+  /**
+   * NOTE: This is a copy from https://github.com/btcsuite/btcutil/blob/master/gcs/gcs.go
+   *       that is used for compatibility reasons, here we don't care about such optimizations
+   *       because a filter is built once per block and never queried.
+   *
+   * Original docs:
+   * fastReduction calculates a mapping that's more ore less equivalent to: x mod N.
+   *
+   * However, instead of using a mod operation, which using a non-power of two
+   * will lead to slowness on many processors due to unnecessary division, we
+   * instead use a "multiply-and-shift" trick which eliminates all divisions,
+   * described in:
+   * https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+   *
+   * * v * N  >> log_2(N)
+   *
+   * In our case, using 64-bit integers, log_2 is 64. As most processors don't
+   * support 128-bit arithmetic natively, we'll be super portable and unfold the
+   * operation into several operations with 64-bit arithmetic. As inputs, we the
+   * number to reduce, and our modulus N divided into its high 32-bits and lower
+   * 32-bits.
+   */
   private def fastReduction(v: BigInt, modulus: BigInt): BigInt = {
     val nHi = modulus >> 32
     val nLo = modulus & 0xFFFFFFFFL
