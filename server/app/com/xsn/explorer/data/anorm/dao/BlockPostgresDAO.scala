@@ -12,7 +12,9 @@ import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
-class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+class BlockPostgresDAO @Inject() (
+    blockFilterPostgresDAO: BlockFilterPostgresDAO,
+    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   def insert(block: Block)(implicit conn: Connection): Option[Block] = {
     SQL(
@@ -154,7 +156,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
   def getHeaders(limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockHeader] = {
     val order = toSQL(orderingCondition)
 
-    SQL(
+    val headers = SQL(
       s"""
         |SELECT blockhash, previous_blockhash, merkle_root, height, time
         |FROM blocks
@@ -164,6 +166,13 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
     ).on(
       'limit -> limit.int
     ).as(parseHeader.*)
+
+    for {
+      header <- headers
+      filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
+    } yield filterMaybe
+        .map(header.withFilter)
+        .getOrElse(header)
   }
 
   def getHeaders(lastSeenHash: Blockhash, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockHeader] = {
@@ -173,7 +182,7 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       case OrderingCondition.AscendingOrder => ">"
     }
 
-    SQL(
+    val headers = SQL(
       s"""
         |WITH CTE AS (
         |  SELECT height as lastSeenHeight
@@ -190,6 +199,13 @@ class BlockPostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLI
       'lastSeenHash -> lastSeenHash.string,
       'limit -> limit.int
     ).as(parseHeader.*)
+
+    for {
+      header <- headers
+      filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
+    } yield filterMaybe
+        .map(header.withFilter)
+        .getOrElse(header)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

@@ -5,7 +5,7 @@ import com.xsn.explorer.models.values._
 import io.scalaland.chimney.dsl._
 import play.api.libs.json.{Json, Writes}
 
-sealed trait BlockHeader {
+sealed trait BlockHeader extends Product with Serializable {
 
   def hash: Blockhash
   def previousBlockhash: Option[Blockhash]

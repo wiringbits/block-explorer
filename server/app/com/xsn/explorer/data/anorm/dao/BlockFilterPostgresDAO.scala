@@ -40,4 +40,16 @@ class BlockFilterPostgresDAO {
       'blockhash -> blockhash.string
     ).as(parseFilter.singleOpt)
   }
+
+  def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
+    SQL(
+      """
+        |SELECT blockhash, m, n, p, hex
+        |FROM block_address_gcs
+        |WHERE blockhash = {blockhash}
+      """.stripMargin
+    ).on(
+      'blockhash -> blockhash.string
+    ).as(parseFilter.singleOpt)
+  }
 }

@@ -2,12 +2,10 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
-import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
-import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
-import com.xsn.explorer.helpers.BlockLoader
+import com.xsn.explorer.helpers.{BlockLoader, DataHandlerObjects}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.values.Blockhash
@@ -16,12 +14,14 @@ import org.scalatest.BeforeAndAfter
 
 class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
+  import DataHandlerObjects._
+
   before {
     clearDatabase()
   }
 
+  val dao = blockPostgresDAO
   val defaultOrdering = FieldOrdering(BlockField.Height, OrderingCondition.AscendingOrder)
-  lazy val dao = new BlockPostgresDAO(new FieldOrderingSQLInterpreter)
   lazy val dataHandler = new BlockPostgresDataHandler(database, dao)
 
   def insert(block: Block) = {
