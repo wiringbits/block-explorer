@@ -17,9 +17,18 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   private val hasher = Hashing.sipHash24(key.k0, key.k1)
 
   /**
-   * Encodes the given word list.
+   * Encodes the given word set.
    */
-  def encode(words: Set[String]): GolombCodedSet = {
+  def encode(words: Set[String]): Option[GolombCodedSet] = {
+    if (words.isEmpty) {
+      Option.empty
+    } else {
+      val gcs = encodeNonEmptySet(words)
+      Option(gcs)
+    }
+  }
+
+  private def encodeNonEmptySet(words: Set[String]): GolombCodedSet = {
     val sortedHashes = hashes(words)
     val diffList = differences(sortedHashes)
     val encodedBits = diffList.flatMap(golombEncode)

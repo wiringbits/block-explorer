@@ -1,11 +1,13 @@
 package com.xsn.explorer.gcs
 
 import com.google.common.io.BaseEncoding
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.MustMatchers._
+import org.scalatest.OptionValues._
+import org.scalatest.WordSpec
 
-class GolombEncodingSpec extends WordSpec with MustMatchers {
+class GolombEncodingSpec extends WordSpec {
 
-  val words = List(
+  val words = Set(
     "Alex",
     "Bob",
     "Charlie",
@@ -32,10 +34,15 @@ class GolombEncodingSpec extends WordSpec with MustMatchers {
 
     val key = SipHashKey.fromBtcutil(keyBytes)
     val golomb = GolombEncoding.default(key)
-    val encoded = golomb.encode(words.toSet)
+    val encoded = golomb.encode(words).value
+
+    "succeed on empty set" in {
+      val result = golomb.encode(Set.empty)
+      result must be(empty)
+    }
 
     "decode the same hashes" in {
-      val hashes = golomb.hashes(words.toSet)
+      val hashes = golomb.hashes(words)
       val bytes = BaseEncoding
           .base16()
           .decode(encoded.hex.string.toUpperCase)
