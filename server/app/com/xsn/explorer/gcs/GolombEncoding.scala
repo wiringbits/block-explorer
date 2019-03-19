@@ -2,6 +2,8 @@ package com.xsn.explorer.gcs
 
 import com.google.common.hash.Hashing
 
+import scala.collection.SortedSet
+
 /**
  * A Golomb-coded set, matches all items in the set with probability 1, and matches other items with probability 1/M.
  *
@@ -17,9 +19,9 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   /**
    * Encodes the given word list.
    */
-  def encode(words: List[String]): GolombCodedSet = {
-    val hashList = hashes(words)
-    val diffList = differences(hashList)
+  def encode(words: Set[String]): GolombCodedSet = {
+    val sortedHashes = hashes(words)
+    val diffList = differences(sortedHashes)
     val encodedBits = diffList.flatMap(golombEncode)
     val encodedBytes = encodedBits
         .grouped(8)
@@ -41,9 +43,9 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
    *
    * @param encoded the encoded bytes, we expect them to be correct
    * @param n the number of words encoded in the bytes
-   * @return the recovered list of hashes
+   * @return the recovered sorted set of hashes
    */
-  private[gcs] def decode(encoded: List[UnsignedByte], n: Int): List[BigInt] = {
+  private[gcs] def decode(encoded: List[UnsignedByte], n: Int): SortedSet[BigInt] = {
     val encodedBits = encoded.flatMap(_.bits)
     val (_, _, result) = List.fill(n)(0)
         .foldLeft((encodedBits, BigInt(0), List.empty[BigInt])) { case ((bits, acc, hashes), _) =>
@@ -52,19 +54,19 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
           (remaining, hash, hash :: hashes)
         }
 
-    result.reverse
+    result.to[SortedSet]
   }
 
   /**
-   * Maps the word list to a list of hashes.
+   * Maps the word set to a sorted set of hashes.
    */
-  private[gcs] def hashes(words: List[String]): List[BigInt] = {
-    val modulus = BigInt(m) * words.length
+  private[gcs] def hashes(words: Set[String]): SortedSet[BigInt] = {
+    val modulus = BigInt(m) * words.size
     val f = fastReduction(_: BigInt, modulus)
     words
         .map(hash)
         .map(f)
-        .sorted
+        .to[SortedSet]
   }
 
   private def golombEncode(x: BigInt): List[Bit] = {
@@ -88,8 +90,8 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     (pending, x)
   }
 
-  private def differences(sortedHashList: List[BigInt]): List[BigInt] = {
-    (BigInt(0) :: sortedHashList)
+  private def differences(sortedHashes: SortedSet[BigInt]): List[BigInt] = {
+    (BigInt(0) :: sortedHashes.toList)
         .sliding(2)
         .map { case a :: b :: Nil => b - a }
         .toList

@@ -32,10 +32,10 @@ class GolombEncodingSpec extends WordSpec with MustMatchers {
 
     val key = SipHashKey.fromBtcutil(keyBytes)
     val golomb = GolombEncoding.default(key)
-    val encoded = golomb.encode(words)
+    val encoded = golomb.encode(words.toSet)
 
     "decode the same hashes" in {
-      val hashes = golomb.hashes(words)
+      val hashes = golomb.hashes(words.toSet)
       val bytes = BaseEncoding
           .base16()
           .decode(encoded.hex.string.toUpperCase)
