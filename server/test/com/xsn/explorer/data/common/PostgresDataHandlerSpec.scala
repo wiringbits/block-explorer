@@ -64,10 +64,10 @@ trait PostgresDataHandlerSpec
       _root_.anorm.SQL("""DELETE FROM transaction_outputs""").execute()
       _root_.anorm.SQL("""DELETE FROM address_transaction_details""").execute()
       _root_.anorm.SQL("""DELETE FROM transactions""").execute()
+      _root_.anorm.SQL("""DELETE FROM block_address_gcs""").execute()
       _root_.anorm.SQL("""DELETE FROM blocks""").execute()
       _root_.anorm.SQL("""DELETE FROM balances""").execute()
       _root_.anorm.SQL("""DELETE FROM hidden_addresses""").execute()
     }
   }
-
 }
