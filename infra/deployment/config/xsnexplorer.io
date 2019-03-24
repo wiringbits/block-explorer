@@ -6,7 +6,6 @@ server {
 
 server {
   listen 443 ssl;
-
     ssl_certificate /etc/letsencrypt/live/xsnexplorer.io/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/xsnexplorer.io/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
