@@ -2,11 +2,14 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
+import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
+import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.{BlockRewardsNotFoundError, BlockhashFormatError}
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
@@ -14,7 +17,7 @@ import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Writes}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +27,8 @@ class BlockService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
     blockLogic: BlockLogic,
     transactionLogic: TransactionLogic,
-    orderingConditionParser: OrderingConditionParser)(
+    orderingConditionParser: OrderingConditionParser,
+    blockHeaderCache: BlockHeaderCache)(
     implicit ec: ExecutionContext) {
 
   private val maxHeadersPerQuery = 1000
@@ -32,7 +36,8 @@ class BlockService @Inject() (
   def getBlockHeaders(
       limit: Limit,
       lastSeenHashString: Option[String],
-      orderingConditionString: String): FutureApplicationResult[WrappedResult[List[persisted.BlockHeader]]] = {
+      orderingConditionString: String)(
+      implicit writes: Writes[BlockHeader]): FutureApplicationResult[JsValue] = {
 
     val result = for {
       lastSeenHash <- {
@@ -46,10 +51,26 @@ class BlockService @Inject() (
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
-    } yield WrappedResult(headers)
+      json <- getCacheableHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+    } yield json
 
     result.toFuture
+  }
+
+  private def getCacheableHeaders(
+      limit: Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash])(
+      implicit writes: Writes[BlockHeader]) = {
+
+    val cacheKey = BlockHeaderCache.Key(limit, orderingCondition, lastSeenHash)
+    blockHeaderCache.getOrSet(cacheKey) {
+      val result = for {
+        headers <-blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+      } yield WrappedResult(headers)
+
+      result.toFuture
+    }
   }
 
   def getRawBlock(blockhashString: String): FutureApplicationResult[JsValue] = {

@@ -2,6 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
+import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -222,7 +223,9 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new PaginatedQueryValidator,
       new BlockLogic,
       new TransactionLogic,
-      new OrderingConditionParser)
+      new OrderingConditionParser,
+      BlockHeaderCache.default
+    )
     val transactionRPCService = new TransactionRPCService(xsnService)
     new LedgerSynchronizerService(
       xsnService,
