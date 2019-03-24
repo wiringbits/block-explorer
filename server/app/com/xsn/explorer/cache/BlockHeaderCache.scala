@@ -31,12 +31,13 @@ class BlockHeaderCache(cache: Cache[BlockHeaderCache.Key, BlockHeaderCache.Encod
   import BlockHeaderCache._
 
   def getOrSet(
-      key: Key)(
+      key: Key,
+      entrySize: Int)(
       f: => FutureApplicationResult[Value])(
       implicit ec: ExecutionContext,
       writes: Writes[Value]): FutureApplicationResult[EncodedValue] = {
 
-    if (isCacheable(key)) {
+    if (isCacheable(key, entrySize)) {
       get(key)
           .map(v => Future.successful(Good(v)))
           .getOrElse {
@@ -65,12 +66,12 @@ class BlockHeaderCache(cache: Cache[BlockHeaderCache.Key, BlockHeaderCache.Encod
   /**
    * A block header list is cacheable if all the following meet:
    * - The ordering is from oldest to newest
-   * - The limit is 1000
+   * - The limit matches the expected entry size
    * - The entry is not the last one (TODO)
    */
-  def isCacheable(key: Key): Boolean = {
+  def isCacheable(key: Key, entrySize: Int): Boolean = {
     key.orderingCondition == OrderingCondition.AscendingOrder &&
-        key.limit.int == 1000
+        key.limit.int == entrySize
   }
 
   def get(key: Key): Option[EncodedValue] = {

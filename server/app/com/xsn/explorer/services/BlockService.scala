@@ -64,7 +64,7 @@ class BlockService @Inject() (
       implicit writes: Writes[BlockHeader]) = {
 
     val cacheKey = BlockHeaderCache.Key(limit, orderingCondition, lastSeenHash)
-    blockHeaderCache.getOrSet(cacheKey) {
+    blockHeaderCache.getOrSet(cacheKey, maxHeadersPerQuery) {
       val result = for {
         headers <-blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
       } yield WrappedResult(headers)
