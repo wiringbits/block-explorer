@@ -48,6 +48,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "io.sentry" % "sentry-logback" % "1.7.13"
+libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.7.0"
 
 libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.5.13"
