@@ -10,27 +10,15 @@ object BlockParsers {
 
   import CommonParsers._
 
-  val parseNextBlockhash = str("next_blockhash")
-      .map(Blockhash.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted next_blockhash")) }
-
-  val parsePreviousBlockhash = str("previous_blockhash")
-      .map(Blockhash.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted previous_blockhash")) }
-
-  val parseTposContract = str("tpos_contract")
-      .map(TransactionId.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted tpos_contract")) }
-
-  val parseMerkleRoot = str("merkle_root")
-      .map(Blockhash.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted merkle_root")) }
+  val parseNextBlockhash = parseBlockhash("next_blockhash")
+  val parsePreviousBlockhash = parseBlockhash("previous_blockhash")
+  val parseTposContract = parseTransactionId("tpos_contract")
+  val parseMerkleRoot = parseBlockhash("merkle_root")
 
   val parseExtractionMethod = str("extraction_method")
       .map(BlockExtractionMethod.withNameInsensitiveOption)
       .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
 
-  val parseSize = int("size").map(Size.apply)
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
   val parseMedianTime = long("median_time")
@@ -40,7 +28,7 @@ object BlockParsers {
   val parseDifficulty = get[BigDecimal]("difficulty")
 
   val parseBlock = (
-      parseBlockhash ~
+      parseBlockhash() ~
           parseNextBlockhash.? ~
           parsePreviousBlockhash.? ~
           parseTposContract.? ~
@@ -91,7 +79,7 @@ object BlockParsers {
       )
   }
 
-  val parseHeader = (parseBlockhash ~ parsePreviousBlockhash.? ~ parseMerkleRoot ~ parseHeight ~ parseTime).map {
+  val parseHeader = (parseBlockhash() ~ parsePreviousBlockhash.? ~ parseMerkleRoot ~ parseHeight ~ parseTime).map {
     case blockhash ~ previousBlockhash ~ merkleRoot ~ height ~ time =>
       BlockHeader.Simple(blockhash, previousBlockhash, merkleRoot, height, time)
   }

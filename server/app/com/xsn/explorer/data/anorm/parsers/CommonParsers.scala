@@ -5,14 +5,23 @@ import com.xsn.explorer.models.values._
 
 object CommonParsers {
 
-  val parseBlockhash = str("blockhash")
+  def parseBlockhash(field: String = "blockhash") = str(field)
       .map(Blockhash.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted blockhash")) }
+      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
-  val parseAddress = str("address")
+  def parseAddress(field: String = "address") = str(field)
       .map(Address.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted address")) }
+      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+
+  def parseTransactionId(field: String = "txid") = str(field)
+      .map(TransactionId.from)
+      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+
+  def parseHexString(field: String) = str(field)
+      .map(HexString.from)
+      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
   val parseTime = long("time")
   val parseSize = int("size").map(Size.apply)
+  val parseIndex = int("index")
 }
