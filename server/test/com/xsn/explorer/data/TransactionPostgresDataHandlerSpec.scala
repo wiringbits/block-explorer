@@ -80,9 +80,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"),
         index = 0,
         value = BigDecimal(76500000),
-        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get,
-        tposMerchantAddress = None,
-        tposOwnerAddress = None
+        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get
       )
 
       val result = dataHandler.getUnspentOutputs(expected.address).get
@@ -201,14 +199,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val outputs = List(
-      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString(), None, None),
+      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
       Transaction.Output(
         randomTransactionId,
         1,
         BigDecimal(250),
         randomAddress,
-        HexString.from("00").get,
-        None, None)
+        HexString.from("00").get)
     )
 
     val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
@@ -299,14 +296,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       val newTxid = randomTransactionId
       val outputs = List(
-        Transaction.Output(newTxid, 0, BigDecimal(50), randomAddress, randomHexString(), None, None),
+        Transaction.Output(newTxid, 0, BigDecimal(50), randomAddress, randomHexString()),
         Transaction.Output(
           newTxid,
           1,
           BigDecimal(250),
           randomAddress,
-          randomHexString(),
-          None, None)
+          randomHexString())
       )
 
       val transaction = Transaction.HasIO(

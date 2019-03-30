@@ -70,8 +70,7 @@ trait DataGenerator {
       index = nextInt(100),
       value = nextInt(1000000),
       address = randomAddress,
-      script = randomHexString(8),
-      None, None)
+      script = randomHexString(8))
   }
 
   def randomOutputs(n: Int = nextInt(5) + 1) : List[Transaction.Output] = {

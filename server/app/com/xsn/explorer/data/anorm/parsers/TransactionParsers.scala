@@ -17,9 +17,6 @@ object TransactionParsers {
   val parseValue = get[BigDecimal]("value")
   val parseHexScript = parseHexString("hex_script")
 
-  val parseTposOwnerAddress = parseAddress("tpos_owner_address")
-  val parseTposMerchantAddress = parseAddress("tpos_merchant_address")
-
   val parseTransaction = (parseTransactionId() ~ parseBlockhash() ~ parseTime ~ parseSize).map {
     case txid ~ blockhash ~ time ~ size => Transaction(txid, blockhash, time, size)
   }
@@ -46,12 +43,10 @@ object TransactionParsers {
           parseIndex ~
           parseValue ~
           parseAddress() ~
-          parseHexScript ~
-          parseTposOwnerAddress.? ~
-          parseTposMerchantAddress.?).map {
+          parseHexScript).map {
 
-    case txid ~ index ~ value ~ address ~ script ~ tposOwnerAddress ~ tposMerchantAddress =>
-      Transaction.Output(txid, index, value, address, script, tposOwnerAddress, tposMerchantAddress)
+    case txid ~ index ~ value ~ address ~ script =>
+      Transaction.Output(txid, index, value, address, script)
   }
 
   val parseAddressTransactionDetails = (parseAddress() ~ parseTransactionId() ~ parseSent ~ parseReceived ~ parseTime).map {

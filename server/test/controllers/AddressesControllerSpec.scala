@@ -31,18 +31,14 @@ class AddressesControllerSpec extends MyAPISpec {
       index = 0,
       value = BigDecimal("1500000000000").fromSatoshis,
       script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
-      txid = createTransactionId("ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"),
-      tposMerchantAddress = None,
-      tposOwnerAddress = None
+      txid = createTransactionId("ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539")
     ),
     Transaction.Output(
       address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
       index = 3,
       value = BigDecimal("2250000000").fromSatoshis,
       script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
-      txid = createTransactionId("96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"),
-      tposMerchantAddress = None,
-      tposOwnerAddress = None
+      txid = createTransactionId("96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d")
     )
   )
 

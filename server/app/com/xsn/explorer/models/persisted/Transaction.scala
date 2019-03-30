@@ -27,9 +27,7 @@ object Transaction {
       index: Int,
       value: BigDecimal,
       address: Address,
-      script: HexString,
-      tposOwnerAddress: Option[Address],
-      tposMerchantAddress: Option[Address])
+      script: HexString)
 
   case class HasIO(
       transaction: Transaction,
@@ -63,7 +61,6 @@ object Transaction {
         }
 
     val outputs = tx.vout.flatMap { vout =>
-      val contract = vout.scriptPubKey.flatMap(_.getTPoSContractDetails)
       val scriptMaybe = vout.scriptPubKey.map(_.hex)
       for {
         address <- vout.address
@@ -73,9 +70,7 @@ object Transaction {
         vout.n,
         vout.value,
         address,
-        script,
-        tposOwnerAddress = contract.map(_.owner),
-        tposMerchantAddress = contract.map(_.merchant))
+        script)
     }
 
     val transaction = Transaction(

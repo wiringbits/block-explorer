@@ -15,7 +15,7 @@ class TransactionOutputPostgresDAO {
   def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
-        |SELECT txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address
+        |SELECT txid, index, value, address, hex_script
         |FROM transaction_outputs
         |WHERE address = {address} AND
         |      spent_on IS NULL AND
@@ -39,17 +39,15 @@ class TransactionOutputPostgresDAO {
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
             'address -> output.address.string: NamedParameter,
-            'hex_script -> output.script.string: NamedParameter,
-            'tpos_owner_address -> output.tposOwnerAddress.map(_.string): NamedParameter,
-            'tpos_merchant_address -> output.tposMerchantAddress.map(_.string): NamedParameter)
+            'hex_script -> output.script.string: NamedParameter)
         }
 
         val batch = BatchSql(
           """
             |INSERT INTO transaction_outputs
-            |  (txid, index, value, address, hex_script, tpos_owner_address, tpos_merchant_address)
+            |  (txid, index, value, address, hex_script)
             |VALUES
-            |  ({txid}, {index}, {value}, {address}, {hex_script}, {tpos_owner_address}, {tpos_merchant_address})
+            |  ({txid}, {index}, {value}, {address}, {hex_script})
           """.stripMargin,
           params.head,
           params.tail: _*
@@ -69,7 +67,7 @@ class TransactionOutputPostgresDAO {
       """
         |DELETE FROM transaction_outputs
         |WHERE txid = {txid}
-        |RETURNING txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+        |RETURNING txid, index, hex_script, value, address
       """.stripMargin
     ).on(
       'txid -> txid.string
@@ -81,7 +79,7 @@ class TransactionOutputPostgresDAO {
   def getOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
-        |SELECT txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+        |SELECT txid, index, hex_script, value, address
         |FROM transaction_outputs
         |WHERE txid = {txid}
       """.stripMargin
@@ -93,7 +91,7 @@ class TransactionOutputPostgresDAO {
   def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
-        |SELECT txid, index, hex_script, value, address, tpos_owner_address, tpos_merchant_address
+        |SELECT txid, index, hex_script, value, address
         |FROM transaction_outputs
         |WHERE txid = {txid} AND
         |      address = {address}
