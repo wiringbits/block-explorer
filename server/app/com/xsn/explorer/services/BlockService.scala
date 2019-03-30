@@ -255,14 +255,12 @@ class BlockService @Inject() (
           .getTransaction(tposTxId)
           .toFutureOr
 
-      addresses <- blockLogic
-          .getTPoSAddresses(tposTx)
+      contract <- blockLogic
+          .getTPoSContractDetails(tposTx)
           .toFutureOr
 
-      (ownerAddress, merchantAddress) = addresses
-
       rewards <- blockLogic
-          .getTPoSRewards(coinstakeTx, ownerAddress, merchantAddress, coinstakeInput)
+          .getTPoSRewards(coinstakeTx, contract, coinstakeInput)
           .toFutureOr
     } yield rewards
 

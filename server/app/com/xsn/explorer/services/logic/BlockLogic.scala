@@ -45,11 +45,11 @@ class BlockLogic {
     Or.from(maybe, One(BlockNotFoundError))
   }
 
-  def getTPoSAddresses(tposContract: Transaction[_]): ApplicationResult[(Address, Address)] = {
+  def getTPoSContractDetails(tposContract: Transaction[_]): ApplicationResult[TPoSContract.Details] = {
     val maybe = tposContract
         .vout
         .flatMap(_.scriptPubKey)
-        .flatMap(_.getTPoSAddresses)
+        .flatMap(_.getTPoSContractDetails)
         .headOption
 
     Or.from(maybe, One(BlockNotFoundError))
@@ -107,8 +107,7 @@ class BlockLogic {
 
   def getTPoSRewards(
       coinstakeTx: Transaction[_],
-      owner: Address,
-      merchant: Address,
+      contract: TPoSContract.Details,
       coinstakeInput: BigDecimal): ApplicationResult[TPoSBlockRewards] = {
 
     /**
@@ -123,22 +122,22 @@ class BlockLogic {
     val coinstakeVOUT = coinstakeTx.vout
 
     val ownerValue = coinstakeVOUT
-        .filter(_.address contains owner)
+        .filter(_.address contains contract.owner)
         .map(_.value)
         .sum
 
     val ownerReward = BlockReward(
-      owner,
+      contract.owner,
       (ownerValue - coinstakeInput) max 0)
 
     // merchant
-    val merchantValue = coinstakeVOUT.filter(_.address contains merchant).map(_.value).sum
-    val merchantReward = BlockReward(merchant, merchantValue)
+    val merchantValue = coinstakeVOUT.filter(_.address contains contract.merchant).map(_.value).sum
+    val merchantReward = BlockReward(contract.merchant, merchantValue)
 
     // master node
     val masternodeRewardOUT = coinstakeVOUT.filterNot { out =>
-      out.address.contains(owner) ||
-          out.address.contains(merchant)
+      out.address.contains(contract.owner) ||
+          out.address.contains(contract.merchant)
     }
     val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.address).headOption
     val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>

@@ -63,12 +63,19 @@ object Transaction {
         }
 
     val outputs = tx.vout.flatMap { vout =>
-      val tposAddresses = vout.scriptPubKey.flatMap(_.getTPoSAddresses)
+      val contract = vout.scriptPubKey.flatMap(_.getTPoSContractDetails)
       val scriptMaybe = vout.scriptPubKey.map(_.hex)
       for {
         address <- vout.address
         script <- scriptMaybe
-      } yield Transaction.Output(tx.id, vout.n, vout.value, address, script, tposAddresses.map(_._1), tposAddresses.map(_._2))
+      } yield Transaction.Output(
+        tx.id,
+        vout.n,
+        vout.value,
+        address,
+        script,
+        tposOwnerAddress = contract.map(_.owner),
+        tposMerchantAddress = contract.map(_.merchant))
     }
 
     val transaction = Transaction(
