@@ -3,23 +3,23 @@ package com.xsn.explorer.services
 import com.xsn.explorer.config.{ExplorerConfig, RPCConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.models.values._
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.Mockito.{mock => _, _}
 import org.scalactic.{Bad, Good}
+import org.scalatest.MustMatchers._
+import org.scalatest.WordSpec
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.mockito.MockitoSugar._
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.Future
 
-class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with OptionValues {
+class XSNServiceRPCImplSpec extends WordSpec {
 
   import DataHelper._
 
@@ -601,11 +601,39 @@ class XSNServiceRPCImplSpec extends WordSpec with MustMatchers with ScalaFutures
     }
   }
 
+  "isTPoSContract" should {
+    "return true when the contract is valid" in {
+      val txid = createTransactionId("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01")
+      val content = "Contract is valid"
+      val responseBody = createRPCSuccessfulResponse(JsString(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.isTPoSContract(txid)) { result =>
+        result mustEqual Good(true)
+      }
+    }
+
+    "return false when the contract is not valid" in {
+      val txid = createTransactionId("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01")
+      val content = "Contract invalid, error: Signature invalid"
+      val responseBody = createRPCSuccessfulResponse(JsString(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.isTPoSContract(txid)) { result =>
+        result mustEqual Good(false)
+      }
+    }
+  }
+
   private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
     when(response.body).thenReturn(body.toString())
-    when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+    when(request.post[AnyRef](any())(any())).thenReturn(Future.successful(response))
   }
 
   private def mockRequestString(request: WSRequest, response: WSResponse)(status: Int, body: String) = {

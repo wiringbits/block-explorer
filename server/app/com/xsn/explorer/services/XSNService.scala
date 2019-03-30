@@ -11,7 +11,7 @@ import com.xsn.explorer.models.values._
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsNull, JsValue, Reads}
+import play.api.libs.json._
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSResponse}
 
 import scala.util.Try
@@ -47,6 +47,8 @@ trait XSNService {
   def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
 
   def sendRawTransaction(hex: HexString): FutureApplicationResult[String]
+
+  def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean]
 
   def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
     Option(block)
@@ -420,6 +422,32 @@ class XSNServiceRPCImpl @Inject() (
           }
         }
   }
+
+  override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = {
+    val innerBody = Json.obj("txid" -> txid.string, "check_spent" -> 0)
+    val body = Json.obj(
+      "jsonrpc" -> "1.0",
+      "method" -> "tposcontract",
+      "params" -> List(
+        JsString("validate"),
+        JsString(innerBody.toString())
+      )
+    )
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[String](response)
+              .map { _.map(_ == "Contract is valid") }
+
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
+
 
   private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
