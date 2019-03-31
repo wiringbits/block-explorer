@@ -54,7 +54,7 @@ class TransactionRPCService @Inject() (
       tx <- xsnService.getTransaction(txid).toFutureOr
       transactionVIN <- getTransactionVIN(tx.vin).toFutureOr
       rpcTransaction = tx.copy(vin = transactionVIN)
-    } yield Transaction.fromRPC(rpcTransaction)
+    } yield Transaction.fromRPC(rpcTransaction)._1
 
     result.toFuture
   }

@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.models.rpc
+import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
 
@@ -46,26 +46,23 @@ object Transaction {
   }
 
   /**
-   * Please note that the inputs might not be accurate.
+   * Transform a rpc transaction to a persisted transaction.
    *
-   * If the rpc transaction might not be complete, get the input value and address using
-   * the utxo index or the getTransaction method from the TransactionService.
+   * As the TPoS contracts aren't stored in the persisted transaction, they are returned on the result.
    */
-  def fromRPC[VIN <: TransactionVIN](tx: rpc.Transaction[VIN]): HasIO = {
+  def fromRPC(tx: rpc.Transaction[TransactionVIN.HasValues]): (HasIO, Option[TPoSContract]) = {
     val inputs = tx
         .vin
         .zipWithIndex
-        .collect { case (vin: rpc.TransactionVIN.HasValues, index) => (vin, index) }
         .map { case (vin, index) =>
           Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.address)
         }
 
     val outputs = tx.vout.flatMap { vout =>
-      val scriptMaybe = vout.scriptPubKey.map(_.hex)
       for {
         address <- vout.address
-        script <- scriptMaybe
-      } yield Transaction.Output(
+        script <- vout.scriptPubKey.map(_.hex)
+      } yield Output(
         tx.id,
         vout.n,
         vout.value,
@@ -80,6 +77,24 @@ object Transaction {
       size = tx.size
     )
 
-    HasIO(transaction, inputs, outputs)
+    (HasIO(transaction, inputs, outputs), getContract(tx))
+  }
+
+  /**
+   * A transaction can have at most one contract
+   */
+  private def getContract(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): Option[TPoSContract] = {
+    val collateralMaybe = tx.vout.find(_.value == 1)
+    val detailsMaybe = tx.vout.flatMap(_.scriptPubKey).flatMap(_.getTPoSContractDetails).headOption
+
+    for {
+      collateral <- collateralMaybe
+      details <- detailsMaybe
+    } yield TPoSContract(
+      TPoSContract.Id(tx.id, collateral.n),
+      time = tx.time,
+      details = details,
+      state = TPoSContract.State.Active
+    )
   }
 }

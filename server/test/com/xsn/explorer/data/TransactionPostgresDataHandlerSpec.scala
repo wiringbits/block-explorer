@@ -384,8 +384,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   private def createBlock(block: Block) = {
     val transactions = block.transactions
         .map(_.string)
-        .map(TransactionLoader.get)
+        .map(TransactionLoader.getWithValues)
         .map(Transaction.fromRPC)
+        .map(_._1)
 
     val result = ledgerDataHandler.push(block.withTransactions(transactions))
 

@@ -19,7 +19,8 @@ object LedgerHelper {
     block
         .transactions
         .map(_.string)
-        .map(TransactionLoader.get)
+        .map(TransactionLoader.getWithValues)
         .map(Transaction.fromRPC)
+        .map(_._1)
   }
 }
