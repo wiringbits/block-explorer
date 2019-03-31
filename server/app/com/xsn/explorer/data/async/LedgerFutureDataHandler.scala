@@ -3,6 +3,7 @@ package com.xsn.explorer.data.async
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.{LedgerBlockingDataHandler, LedgerDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
+import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.Block
 import javax.inject.Inject
 
@@ -13,8 +14,8 @@ class LedgerFutureDataHandler @Inject() (
     implicit ec: DatabaseExecutionContext)
     extends LedgerDataHandler[FutureApplicationResult] {
 
-  override def push(block: Block.HasTransactions): FutureApplicationResult[Unit] = Future {
-    blockingDataHandler.push(block)
+  override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): FutureApplicationResult[Unit] = Future {
+    blockingDataHandler.push(block, tposContracts)
   }
 
   override def pop(): FutureApplicationResult[Block] = Future {

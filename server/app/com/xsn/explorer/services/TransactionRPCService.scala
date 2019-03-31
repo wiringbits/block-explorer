@@ -6,7 +6,7 @@ import com.xsn.explorer.errors.{InvalidRawTransactionError, TransactionFormatErr
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.models.{TransactionDetails, TransactionValue}
+import com.xsn.explorer.models.{TPoSContract, TransactionDetails, TransactionValue}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
@@ -49,12 +49,12 @@ class TransactionRPCService @Inject() (
     result.toFuture
   }
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction.HasIO] = {
+  def getTransaction(txid: TransactionId): FutureApplicationResult[(Transaction.HasIO, Option[TPoSContract])] = {
     val result = for {
       tx <- xsnService.getTransaction(txid).toFutureOr
       transactionVIN <- getTransactionVIN(tx.vin).toFutureOr
       rpcTransaction = tx.copy(vin = transactionVIN)
-    } yield Transaction.fromRPC(rpcTransaction)._1
+    } yield Transaction.fromRPC(rpcTransaction)
 
     result.toFuture
   }
@@ -92,8 +92,8 @@ class TransactionRPCService @Inject() (
         }
   }
 
-  def getTransactions(ids: List[TransactionId]): FutureApplicationResult[List[Transaction.HasIO]] = {
-    def loadTransactionsSlowly(pending: List[TransactionId]): FutureOr[List[Transaction.HasIO]] = pending match {
+  def getTransactions(ids: List[TransactionId]): FutureApplicationResult[(List[Transaction.HasIO], List[TPoSContract])] = {
+    def loadTransactionsSlowly(pending: List[TransactionId]): FutureOr[List[(Transaction.HasIO, Option[TPoSContract])]] = pending match {
       case x :: xs =>
         for {
           tx <- getTransaction(x).toFutureOr
@@ -116,6 +116,13 @@ class TransactionRPCService @Inject() (
             logger.warn(s"Unable to load transactions due to server error, loading them sequentially, error = ${ex.getMessage}")
             loadTransactionsSlowly(ids).toFuture
         }
+        .toFutureOr
+        .map { result =>
+          val contracts = result.flatMap(_._2)
+          val txs = result.map(_._1)
+          (txs, contracts)
+        }
+        .toFuture
   }
 
   def sendRawTransaction(hexString: String): FutureApplicationResult[JsValue] = {

@@ -8,6 +8,7 @@ import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
+import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.{Balance, Block, Transaction}
 import com.xsn.explorer.models.values.Address
 import com.xsn.explorer.util.Extensions.ListOptionExt
@@ -33,13 +34,14 @@ class LedgerPostgresDataHandler @Inject() (
    * to have a next block, we remove the link because that block is not stored yet.
    */
   override def push(
-      block: Block.HasTransactions): ApplicationResult[Unit] = {
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract]): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
     val filter = GolombEncoding.encode(block)
     val result = withTransaction { implicit conn =>
       val result = for {
-        _ <- upsertBlockCascade(block.asTip, filter)
+        _ <- upsertBlockCascade(block.asTip, filter, tposContracts)
       } yield ()
 
       result
@@ -72,7 +74,8 @@ class LedgerPostgresDataHandler @Inject() (
 
   private def upsertBlockCascade(
       block: Block.HasTransactions,
-      filter: Option[GolombCodedSet])(
+      filter: Option[GolombCodedSet],
+      tposContracts: List[TPoSContract])(
       implicit conn: Connection): Option[Unit] = {
 
     val result = for {
@@ -82,7 +85,7 @@ class LedgerPostgresDataHandler @Inject() (
       _ = filter.foreach { f => blockFilterPostgresDAO.insert(block.hash, f) }
 
       // batch insert
-      _ <- transactionPostgresDAO.insert(block.transactions)
+      _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
 
       // balances
       balanceList = balances(block.transactions)

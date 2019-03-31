@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 class TransactionPostgresDAO @Inject() (
     transactionInputDAO: TransactionInputPostgresDAO,
     transactionOutputDAO: TransactionOutputPostgresDAO,
+    tposContractDAO: TPoSContractDAO,
     addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO,
     fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
@@ -31,11 +32,13 @@ class TransactionPostgresDAO @Inject() (
       _ <- transactionOutputDAO.batchInsertOutputs(transaction.outputs)
       _ <- transactionInputDAO.batchInsertInputs(transaction.inputs.map(transaction.id -> _))
       _ <- transactionOutputDAO.batchSpend(transaction.id, transaction.inputs)
+      _ = closeContracts(List(transaction))
+      _ = transactionOutputDAO.batchSpend(transaction.id, transaction.inputs)
       _ <- addressTransactionDetailsDAO.batchInsertDetails(transaction)
     } yield Transaction.HasIO(partialTx, inputs = transaction.inputs, outputs = transaction.outputs)
   }
 
-  def insert(transactions: List[Transaction.HasIO])(implicit conn: Connection): Option[List[Transaction]] = {
+  def insert(transactions: List[Transaction.HasIO], tposContracts: List[TPoSContract])(implicit conn: Connection): Option[List[Transaction]] = {
     for {
       r <- batchInsert(transactions.map(_.transaction))
 
@@ -47,6 +50,8 @@ class TransactionPostgresDAO @Inject() (
     } yield {
       insertDetails(transactions)
       spend(transactions)
+      closeContracts(transactions)
+      tposContracts.foreach { contract => tposContractDAO.create(contract) }
       r
     }
   }
@@ -61,6 +66,17 @@ class TransactionPostgresDAO @Inject() (
     val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
 
     assert(spendResult.forall(_.isDefined), "Spending inputs batch failed")
+  }
+
+  private def closeContracts(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {
+    for {
+      tx <- transactions
+      // a contract requires 1 XSN
+      input <- tx.inputs if input.value == 1
+    } {
+      val id = TPoSContract.Id(input.fromTxid, input.fromOutputIndex)
+      tposContractDAO.close(id, tx.id)
+    }
   }
 
   private def batchInsert(transactions: List[Transaction])(implicit conn: Connection): Option[List[Transaction]] = {
@@ -112,9 +128,16 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransaction.*)
 
     val result = expectedTransactions.map { tx =>
+      val _ = (
+          tposContractDAO.deleteBy(tx.id),
+          addressTransactionDetailsDAO.deleteDetails(tx.id)
+      )
       val inputs = transactionInputDAO.deleteInputs(tx.id)
       val outputs = transactionOutputDAO.deleteOutputs(tx.id)
-      val _ = addressTransactionDetailsDAO.deleteDetails(tx.id)
+
+      inputs
+          .map { input => TPoSContract.Id(input.fromTxid, input.fromOutputIndex) }
+          .foreach(tposContractDAO.open(_))
 
       Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }

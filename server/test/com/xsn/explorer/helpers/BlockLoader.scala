@@ -15,6 +15,32 @@ object BlockLoader {
     Converters.toPersistedBlock(rpcBlock)
   }
 
+  def getWithTransactions(blockhash: String): persisted.Block.HasTransactions = {
+    val rpcBlock = getRPC(blockhash)
+    val block = Converters.toPersistedBlock(rpcBlock)
+    val transactions = rpcBlock
+        .transactions
+        .map(_.string)
+        .map(TransactionLoader.getWithValues)
+        .map(persisted.Transaction.fromRPC)
+        .map(_._1)
+
+    persisted.Block.HasTransactions(block, transactions)
+  }
+
+  def getWithTransactions(rpcBlock: rpc.Block): persisted.Block.HasTransactions = {
+    val block = Converters.toPersistedBlock(rpcBlock)
+    val transactions = rpcBlock
+        .transactions
+        .map(_.string)
+        .map(TransactionLoader.getWithValues)
+        .map(_.copy(blockhash = rpcBlock.hash))
+        .map(persisted.Transaction.fromRPC)
+        .map(_._1)
+
+    persisted.Block.HasTransactions(block, transactions)
+  }
+
   def getRPC(blockhash: String): rpc.Block = {
     val partial = json(blockhash).as[rpc.Block]
     cleanGenesisBlock(partial)
