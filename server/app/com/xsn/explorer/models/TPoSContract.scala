@@ -2,6 +2,7 @@ package com.xsn.explorer.models
 
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import enumeratum._
+import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
 
@@ -64,5 +65,17 @@ object TPoSContract {
 
     final case object Active extends State("ACTIVE")
     final case object Closed extends State("CLOSED")
+  }
+
+  implicit val writes: Writes[TPoSContract] = (obj: TPoSContract) => {
+    Json.obj(
+      "txid" -> obj.id.txid,
+      "index" -> obj.id.index,
+      "owner" -> obj.details.owner,
+      "merchant" -> obj.details.merchant,
+      "merchantCommission" -> obj.details.merchantCommission.int,
+      "time" -> obj.time,
+      "state" -> obj.state.entryName
+    )
   }
 }

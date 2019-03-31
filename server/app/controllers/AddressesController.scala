@@ -4,7 +4,7 @@ import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.services.{AddressService, TransactionService}
+import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
@@ -13,6 +13,7 @@ import play.api.libs.json._
 class AddressesController @Inject() (
     addressService: AddressService,
     transactionService: TransactionService,
+    tposContractService: TPoSContractService,
     cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
@@ -59,6 +60,10 @@ class AddressesController @Inject() (
 
   def getUnspentOutputs(address: String) = public { _ =>
     addressService.getUnspentOutputs(address)
+  }
+
+  def getTPoSContracts(address: String) = public { _ =>
+    tposContractService.getBy(address)
   }
 }
 
