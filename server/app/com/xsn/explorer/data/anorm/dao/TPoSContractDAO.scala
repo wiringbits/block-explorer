@@ -5,7 +5,7 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.TPoSContractParsers
 import com.xsn.explorer.models.TPoSContract
-import com.xsn.explorer.models.values.TransactionId
+import com.xsn.explorer.models.values.{Address, TransactionId}
 
 class TPoSContractDAO {
 
@@ -74,5 +74,18 @@ class TPoSContractDAO {
       'index -> id.index,
       'state -> TPoSContract.State.Active.entryName,
     ).executeUpdate()
+  }
+
+  def getBy(address: Address)(implicit conn: Connection): List[TPoSContract] = {
+    SQL(
+      """
+        |SELECT txid, index, owner, merchant, merchant_commission, state, time
+        |FROM tpos_contracts
+        |WHERE owner = {address} OR merchant = {address}
+        |ORDER BY time DESC
+      """.stripMargin
+    ).on(
+      'address -> address.string
+    ).as(parseTPoSContract.*)
   }
 }
