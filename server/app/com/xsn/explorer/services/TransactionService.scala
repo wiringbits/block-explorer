@@ -11,6 +11,7 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
+import com.xsn.explorer.services.validators.AddressValidator
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -21,6 +22,7 @@ class TransactionService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
     orderingConditionParser: OrderingConditionParser,
     transactionOrderingParser: TransactionOrderingParser,
+    addressValidator: AddressValidator,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
 
@@ -34,11 +36,7 @@ class TransactionService @Inject() (
       orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
 
     val result = for {
-      address <- {
-        val maybe = Address.from(addressString)
-        Or.from(maybe, One(AddressFormatError)).toFutureOr
-      }
-
+      address <- addressValidator.validate(addressString).toFutureOr
       paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
       ordering <- transactionOrderingParser.from(orderingQuery).toFutureOr
       transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery, ordering).toFutureOr
@@ -54,10 +52,7 @@ class TransactionService @Inject() (
       orderingConditionString: String): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
 
     val result = for {
-      address <- {
-        val maybe = Address.from(addressString)
-        Or.from(maybe, One(AddressFormatError)).toFutureOr
-      }
+      address <- addressValidator.validate(addressString).toFutureOr
 
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
