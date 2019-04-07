@@ -6,12 +6,10 @@ import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
-import com.xsn.explorer.errors._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
-import com.xsn.explorer.models.values._
 import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
-import com.xsn.explorer.services.validators.{AddressValidator, TransactionIdValidator}
+import com.xsn.explorer.services.validators.{AddressValidator, BlockhashValidator, TransactionIdValidator}
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -24,6 +22,7 @@ class TransactionService @Inject() (
     transactionOrderingParser: TransactionOrderingParser,
     addressValidator: AddressValidator,
     transactionIdValidator: TransactionIdValidator,
+    blockhashValidator: BlockhashValidator,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
 
@@ -75,7 +74,7 @@ class TransactionService @Inject() (
 
   def getByBlockhash(blockhashString: String, paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
     val result = for {
-      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
       order <- transactionOrderingParser.from(orderingQuery).toFutureOr
       r <- transactionFutureDataHandler.getByBlockhash(blockhash, validatedQuery, order).toFutureOr
@@ -86,7 +85,7 @@ class TransactionService @Inject() (
 
   def getByBlockhash(blockhashString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[TransactionWithValues]]] = {
     val result = for {
-      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
       lastSeenTxid <- lastSeenTxidString
@@ -106,7 +105,7 @@ class TransactionService @Inject() (
       lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
 
     val result = for {
-      blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
       lastSeenTxid <- lastSeenTxidString

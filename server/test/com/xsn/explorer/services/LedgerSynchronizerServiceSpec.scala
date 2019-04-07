@@ -218,6 +218,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new TransactionOrderingParser,
       new AddressValidator,
       new TransactionIdValidator,
+      new BlockhashValidator,
       new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC))
 
     val blockService = new BlockService(
@@ -230,7 +231,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new OrderingConditionParser,
       BlockHeaderCache.default
     )
-    val transactionRPCService = new TransactionRPCService(xsnService)
+    val transactionRPCService = new TransactionRPCService(new TransactionIdValidator, xsnService)
     new LedgerSynchronizerService(
       xsnService,
       transactionService,

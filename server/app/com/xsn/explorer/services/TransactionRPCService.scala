@@ -2,11 +2,12 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps, OrOps}
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr}
-import com.xsn.explorer.errors.{InvalidRawTransactionError, TransactionFormatError, TransactionNotFoundError, XSNWorkQueueDepthExceeded}
+import com.xsn.explorer.errors.{InvalidRawTransactionError, TransactionNotFoundError, XSNWorkQueueDepthExceeded}
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.models.{TPoSContract, TransactionDetails, TransactionValue}
+import com.xsn.explorer.services.validators.TransactionIdValidator
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
@@ -17,6 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 class TransactionRPCService @Inject() (
+    transactionIdValidator: TransactionIdValidator,
     xsnService: XSNService)(
     implicit ec: ExecutionContext) {
 
@@ -24,11 +26,7 @@ class TransactionRPCService @Inject() (
 
   def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
     val result = for {
-      txid <- {
-        val maybe = TransactionId.from(txidString)
-        Or.from(maybe, One(TransactionFormatError)).toFutureOr
-      }
-
+      txid <- transactionIdValidator.validate(txidString).toFutureOr
       transaction <- xsnService.getRawTransaction(txid).toFutureOr
     } yield transaction
 
@@ -37,11 +35,7 @@ class TransactionRPCService @Inject() (
 
   def getTransactionDetails(txidString: String): FutureApplicationResult[TransactionDetails] = {
     val result = for {
-      txid <- {
-        val maybe = TransactionId.from(txidString)
-        Or.from(maybe, One(TransactionFormatError)).toFutureOr
-      }
-
+      txid <- transactionIdValidator.validate(txidString).toFutureOr
       transaction <- xsnService.getTransaction(txid).toFutureOr
       vin <- getTransactionVIN(transaction.vin).toFutureOr
     } yield TransactionDetails.from(transaction.copy(vin = vin))
