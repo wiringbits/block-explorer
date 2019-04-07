@@ -9,9 +9,8 @@ import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
-import com.xsn.explorer.services.validators.{AddressValidator, BlockhashValidator, TransactionIdValidator}
+import com.xsn.explorer.services.validators._
 import javax.inject.Inject
-import org.scalactic._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
@@ -57,11 +56,7 @@ class TransactionService @Inject() (
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      lastSeenTxid <- lastSeenTxidString
-          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
-          .getOrElse(Good(None))
-          .toFutureOr
-
+      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
       transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
     } yield {
       val lightTxs = transactions.map(toLightWalletTransaction)
@@ -88,11 +83,7 @@ class TransactionService @Inject() (
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
-      lastSeenTxid <- lastSeenTxidString
-          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
-          .getOrElse(Good(None))
-          .toFutureOr
-
+      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
       r <- transactionFutureDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid).toFutureOr
     } yield WrappedResult(r)
 
@@ -108,11 +99,7 @@ class TransactionService @Inject() (
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
-      lastSeenTxid <- lastSeenTxidString
-          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
-          .getOrElse(Good(None))
-          .toFutureOr
-
+      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
       transactions <- transactionFutureDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid).toFutureOr
     } yield {
       val lightTxs = transactions.map(toLightWalletTransaction)

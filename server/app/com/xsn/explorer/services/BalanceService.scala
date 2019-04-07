@@ -9,9 +9,8 @@ import com.xsn.explorer.data.async.BalanceFutureDataHandler
 import com.xsn.explorer.models.WrappedResult
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.parsers.BalanceOrderingParser
-import com.xsn.explorer.services.validators.AddressValidator
+import com.xsn.explorer.services.validators._
 import javax.inject.Inject
-import org.scalactic.Good
 
 import scala.concurrent.ExecutionContext
 
@@ -35,11 +34,7 @@ class BalanceService @Inject() (
   def getHighest(limit: Limit, lastSeenAddressString: Option[String]): FutureApplicationResult[WrappedResult[List[Balance]]] = {
     val result = for {
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), 100).toFutureOr
-
-      lastSeenAddress <- lastSeenAddressString
-          .map { string => addressValidator.validate(string).map(Option.apply) }
-          .getOrElse(Good(None))
-          .toFutureOr
+      lastSeenAddress <- validate(lastSeenAddressString, addressValidator.validate).toFutureOr
 
       data <- balanceFutureDataHandler.getHighestBalances(limit, lastSeenAddress).toFutureOr
     } yield WrappedResult(data)

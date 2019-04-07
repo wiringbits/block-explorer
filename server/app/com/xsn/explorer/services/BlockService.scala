@@ -14,7 +14,7 @@ import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
-import com.xsn.explorer.services.validators.BlockhashValidator
+import com.xsn.explorer.services.validators._
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
@@ -42,11 +42,7 @@ class BlockService @Inject() (
       implicit writes: Writes[BlockHeader]): FutureApplicationResult[JsValue] = {
 
     val result = for {
-      lastSeenHash <- lastSeenHashString
-          .map { string => blockhashValidator.validate(string).map(Option.apply) }
-          .getOrElse(Good(None))
-          .toFutureOr
-
+      lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
