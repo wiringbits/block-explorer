@@ -26,6 +26,20 @@ class TransactionOutputPostgresDAO {
     ).as(parseTransactionOutput.*)
   }
 
+  def getOutput(txid: TransactionId, index: Int)(implicit conn: Connection): Option[Transaction.Output] = {
+    SQL(
+      """
+        |SELECT txid, index, value, address, hex_script
+        |FROM transaction_outputs
+        |WHERE txid = {txid} AND
+        |      index = {index}
+      """.stripMargin
+    ).on(
+      'txid -> txid.string,
+      'index -> index
+    ).as(parseTransactionOutput.singleOpt)
+  }
+
   def batchInsertOutputs(
       outputs: List[Transaction.Output])(
       implicit conn: Connection): Option[List[Transaction.Output]] = {

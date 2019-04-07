@@ -39,6 +39,10 @@ class TransactionFutureDataHandler @Inject() (
     blockingDataHandler.getUnspentOutputs(address)
   }
 
+  override def getOutput(txid: TransactionId, index: Int): FutureApplicationResult[Transaction.Output] = Future {
+    blockingDataHandler.getOutput(txid, index)
+  }
+
   override def getByBlockhash(
       blockhash: Blockhash,
       paginatedQuery: PaginatedQuery,

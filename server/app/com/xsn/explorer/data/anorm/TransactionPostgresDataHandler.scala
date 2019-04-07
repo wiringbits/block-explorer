@@ -5,12 +5,13 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, TransactionPostgresDAO}
+import com.xsn.explorer.errors.TransactionNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import javax.inject.Inject
-import org.scalactic.Good
+import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 
 class TransactionPostgresDataHandler @Inject() (
@@ -48,6 +49,11 @@ class TransactionPostgresDataHandler @Inject() (
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
     val result = transactionOutputDAO.getUnspentOutputs(address)
     Good(result)
+  }
+
+  override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = withConnection { implicit conn =>
+    val maybe = transactionOutputDAO.getOutput(txid, index)
+    Or.from(maybe, One(TransactionNotFoundError))
   }
 
   override def getByBlockhash(

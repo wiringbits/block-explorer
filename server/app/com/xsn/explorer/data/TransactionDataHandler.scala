@@ -21,6 +21,8 @@ trait TransactionDataHandler[F[_]] {
 
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 
+  def getOutput(txid: TransactionId, index: Int): F[Transaction.Output]
+
   def getByBlockhash(
       blockhash: Blockhash,
       paginatedQuery: PaginatedQuery,

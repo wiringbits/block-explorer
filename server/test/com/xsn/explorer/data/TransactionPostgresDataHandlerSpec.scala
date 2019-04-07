@@ -13,7 +13,7 @@ import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Height, _}
-import org.scalactic.{Good, One, Or}
+import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
@@ -86,6 +86,35 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val result = dataHandler.getUnspentOutputs(expected.address).get
 
       result mustEqual List(expected)
+    }
+  }
+
+  "getOutput" should {
+    val txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8")
+
+    "return the output" in {
+      val index = 0
+      val expected = Transaction.Output(
+        address = createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
+        txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"),
+        index = 0,
+        value = BigDecimal(76500000.000000000000000),
+        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get
+      )
+
+      clearDatabase()
+      val blocks = blockList.take(3)
+      blocks.map(createBlock)
+
+      val result = dataHandler.getOutput(txid, index)
+      result must be(Good(expected))
+    }
+
+    "return no value" in {
+      val index = 10
+
+      val result = dataHandler.getOutput(txid, index)
+      result must be(Bad(TransactionNotFoundError).accumulating)
     }
   }
 
