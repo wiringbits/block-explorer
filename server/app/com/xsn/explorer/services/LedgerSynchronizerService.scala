@@ -17,9 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LedgerSynchronizerService @Inject() (
     xsnService: XSNService,
-    transactionService: TransactionService,
-    transactionRPCService: TransactionRPCService,
     blockService: BlockService,
+    transactionCollectorService: TransactionCollectorService,
     ledgerDataHandler: LedgerFutureDataHandler,
     blockDataHandler: BlockFutureDataHandler)(
     implicit ec: ExecutionContext) {
@@ -172,7 +171,7 @@ class LedgerSynchronizerService @Inject() (
   private def getBlockData(rpcBlock: rpc.Block): FutureApplicationResult[BlockData] = {
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
-      data <- transactionRPCService.getTransactions(rpcBlock.transactions).toFutureOr
+      data <- transactionCollectorService.collect(rpcBlock.transactions).toFutureOr
       (transactions, contracts) = data
       validContracts <- getValidContracts(contracts).toFutureOr
     } yield {

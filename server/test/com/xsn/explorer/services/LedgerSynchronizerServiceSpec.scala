@@ -11,9 +11,9 @@ import com.xsn.explorer.helpers.LedgerHelper._
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Height}
-import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
+import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
-import com.xsn.explorer.services.validators.{AddressValidator, BlockhashValidator, TransactionIdValidator}
+import com.xsn.explorer.services.validators.BlockhashValidator
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -212,15 +212,6 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
   }
 
   private def ledgerSynchronizerService(xsnService: XSNService): LedgerSynchronizerService = {
-    val transactionService = new TransactionService(
-      new PaginatedQueryValidator,
-      new OrderingConditionParser,
-      new TransactionOrderingParser,
-      new AddressValidator,
-      new TransactionIdValidator,
-      new BlockhashValidator,
-      new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC))
-
     val blockService = new BlockService(
       xsnService,
       new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC),
@@ -231,12 +222,14 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       new OrderingConditionParser,
       BlockHeaderCache.default
     )
-    val transactionRPCService = new TransactionRPCService(new TransactionIdValidator, xsnService)
+    val transactionCollectorService = new TransactionCollectorService(
+      xsnService,
+      new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
+    )
     new LedgerSynchronizerService(
       xsnService,
-      transactionService,
-      transactionRPCService,
       blockService,
+      transactionCollectorService,
       new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
       new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC))
   }
