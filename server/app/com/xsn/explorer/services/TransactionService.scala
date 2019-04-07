@@ -11,7 +11,7 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
-import com.xsn.explorer.services.validators.AddressValidator
+import com.xsn.explorer.services.validators.{AddressValidator, TransactionIdValidator}
 import javax.inject.Inject
 import org.scalactic._
 import org.slf4j.LoggerFactory
@@ -23,6 +23,7 @@ class TransactionService @Inject() (
     orderingConditionParser: OrderingConditionParser,
     transactionOrderingParser: TransactionOrderingParser,
     addressValidator: AddressValidator,
+    transactionIdValidator: TransactionIdValidator,
     transactionFutureDataHandler: TransactionFutureDataHandler)(
     implicit ec: ExecutionContext) {
 
@@ -57,13 +58,10 @@ class TransactionService @Inject() (
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      lastSeenTxid <- {
-        lastSeenTxidString
-            .map(TransactionId.from)
-            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
-            .getOrElse(Good(Option.empty))
-            .toFutureOr
-      }
+      lastSeenTxid <- lastSeenTxidString
+          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
+          .getOrElse(Good(None))
+          .toFutureOr
 
       transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
     } yield {
@@ -91,13 +89,10 @@ class TransactionService @Inject() (
       blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
-      lastSeenTxid <- {
-        lastSeenTxidString
-            .map(TransactionId.from)
-            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
-            .getOrElse(Good(Option.empty))
-            .toFutureOr
-      }
+      lastSeenTxid <- lastSeenTxidString
+          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
+          .getOrElse(Good(None))
+          .toFutureOr
 
       r <- transactionFutureDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid).toFutureOr
     } yield WrappedResult(r)
@@ -114,13 +109,10 @@ class TransactionService @Inject() (
       blockhash <- Or.from(Blockhash.from(blockhashString), One(BlockhashFormatError)).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
 
-      lastSeenTxid <- {
-        lastSeenTxidString
-            .map(TransactionId.from)
-            .map { txid => Or.from(txid, One(TransactionFormatError)).map(Option.apply) }
-            .getOrElse(Good(Option.empty))
-            .toFutureOr
-      }
+      lastSeenTxid <- lastSeenTxidString
+          .map { string => transactionIdValidator.validate(string).map(Option.apply) }
+          .getOrElse(Good(None))
+          .toFutureOr
 
       transactions <- transactionFutureDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid).toFutureOr
     } yield {
