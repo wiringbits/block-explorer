@@ -7,16 +7,17 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.{BlockRewardsNotFoundError, BlockhashFormatError}
+import com.xsn.explorer.errors.BlockRewardsNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
+import com.xsn.explorer.services.validators.BlockhashValidator
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
-import org.scalactic.{Bad, Good, One, Or}
+import org.scalactic.{Bad, Good}
 import play.api.libs.json.{JsValue, Writes}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,6 +26,7 @@ class BlockService @Inject() (
     xsnService: XSNService,
     blockDataHandler: BlockFutureDataHandler,
     paginatedQueryValidator: PaginatedQueryValidator,
+    blockhashValidator: BlockhashValidator,
     blockLogic: BlockLogic,
     transactionLogic: TransactionLogic,
     orderingConditionParser: OrderingConditionParser,
@@ -40,13 +42,10 @@ class BlockService @Inject() (
       implicit writes: Writes[BlockHeader]): FutureApplicationResult[JsValue] = {
 
     val result = for {
-      lastSeenHash <- {
-        lastSeenHashString
-            .map(Blockhash.from)
-            .map { txid => Or.from(txid, One(BlockhashFormatError)).map(Option.apply) }
-            .getOrElse(Good(Option.empty))
-            .toFutureOr
-      }
+      lastSeenHash <- lastSeenHashString
+          .map { string => blockhashValidator.validate(string).map(Option.apply) }
+          .getOrElse(Good(None))
+          .toFutureOr
 
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
@@ -75,10 +74,7 @@ class BlockService @Inject() (
 
   def getRawBlock(blockhashString: String): FutureApplicationResult[JsValue] = {
     val result = for {
-      blockhash <- blockLogic
-          .getBlockhash(blockhashString)
-          .toFutureOr
-
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       block <- xsnService.getRawBlock(blockhash).toFutureOr
     } yield block
 
@@ -96,10 +92,7 @@ class BlockService @Inject() (
 
   def getDetails(blockhashString: String): FutureApplicationResult[BlockDetails] = {
     val result = for {
-      blockhash <- blockLogic
-          .getBlockhash(blockhashString)
-          .toFutureOr
-
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       details <- getDetailsPrivate(blockhash).toFutureOr
     } yield details
 

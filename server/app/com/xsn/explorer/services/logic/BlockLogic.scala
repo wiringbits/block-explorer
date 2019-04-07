@@ -1,18 +1,13 @@
 package com.xsn.explorer.services.logic
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.xsn.explorer.errors.{BlockNotFoundError, BlockhashFormatError, TransactionNotFoundError}
+import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, Transaction}
-import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
+import com.xsn.explorer.models.values.{Address, TransactionId}
 import org.scalactic.{Bad, Good, One, Or}
 
 class BlockLogic {
-
-  def getBlockhash(string: String): ApplicationResult[Blockhash] = {
-    val maybe = Blockhash.from(string)
-    Or.from(maybe, One(BlockhashFormatError))
-  }
 
   def getPoWTransactionId(block: Block): ApplicationResult[TransactionId] = {
     val maybe = block.transactions.headOption

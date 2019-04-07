@@ -13,7 +13,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
-import com.xsn.explorer.services.validators.AddressValidator
+import com.xsn.explorer.services.validators.{AddressValidator, BlockhashValidator}
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -223,6 +223,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       xsnService,
       new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC),
       new PaginatedQueryValidator,
+      new BlockhashValidator,
       new BlockLogic,
       new TransactionLogic,
       new OrderingConditionParser,
