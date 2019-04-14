@@ -36,7 +36,7 @@ class LedgerSynchronizerService @Inject() (
    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
-      data <- xsnService.getBlock(blockhash).toFutureOr
+      data <- getRPCBlock(blockhash).toFutureOr
       _ <- synchronize(data).toFutureOr
     } yield ()
 
@@ -100,7 +100,7 @@ class LedgerSynchronizerService @Inject() (
       logger.info(s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}")
       val result = for {
         blockhash <- newBlock.previousBlockhash.toFutureOr(BlockNotFoundError)
-        previousBlock <- xsnService.getBlock(blockhash).toFutureOr
+        previousBlock <- getRPCBlock(blockhash).toFutureOr
         _ <- synchronize(previousBlock).toFutureOr
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
@@ -160,7 +160,7 @@ class LedgerSynchronizerService @Inject() (
       val result = for {
         _ <- previous.toFutureOr
         blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-        block <- xsnService.getBlock(blockhash).toFutureOr
+        block <- getRPCBlock(blockhash).toFutureOr
         _ <- synchronize(block).toFutureOr
       } yield ()
 
@@ -168,10 +168,22 @@ class LedgerSynchronizerService @Inject() (
     }
   }
 
+  private def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = {
+    val result = for {
+      rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
+    } yield {
+      rpcBlock
+    }
+
+    result.toFuture
+  }
+
+  private def ExcludedTransactions = List("e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468").flatMap(TransactionId.from)
+
   private def getBlockData(rpcBlock: rpc.Block): FutureApplicationResult[BlockData] = {
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
-      data <- transactionCollectorService.collect(rpcBlock.transactions).toFutureOr
+      data <- transactionCollectorService.collect(rpcBlock.transactions, ExcludedTransactions).toFutureOr
       (transactions, contracts) = data
       validContracts <- getValidContracts(contracts).toFutureOr
     } yield {
