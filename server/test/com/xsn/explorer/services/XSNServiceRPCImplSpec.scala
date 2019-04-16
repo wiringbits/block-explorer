@@ -629,6 +629,20 @@ class XSNServiceRPCImplSpec extends WordSpec {
     }
   }
 
+  "estimateSmartFee" should {
+    "return the result" in {
+      val content = """{"feerate":0.00001,"blocks":2}"""
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.estimateSmartFee(1)) { result =>
+        result mustEqual Good(Json.parse(content))
+      }
+    }
+  }
+
   private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)

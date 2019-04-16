@@ -50,6 +50,8 @@ trait XSNService {
 
   def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean]
 
+  def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue]
+
   def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
     Option(block)
       .filter(_.hash == genesisBlockhash)
@@ -448,6 +450,27 @@ class XSNServiceRPCImpl @Inject() (
         }
   }
 
+  override def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "estimatesmartfee",
+                  |  "params": [$confirmationsTarget]
+                  |}
+                  |""".stripMargin
+
+    server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[JsValue](response)
+
+          maybe.getOrElse {
+            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+  }
 
   private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
