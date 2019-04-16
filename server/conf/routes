@@ -18,6 +18,7 @@ GET   /addresses/:address/utxos                      controllers.AddressesContro
 
 GET   /blocks                            controllers.BlocksController.getLatestBlocks()
 GET   /blocks/headers                    controllers.BlocksController.getBlockHeaders(lastSeenHash: Option[String], limit: Int ?= 10, order: String ?= "asc")
+GET   /blocks/estimate-fee               controllers.BlocksController.estimateFee(nBlocks: Int ?= 1)
 
 GET   /blocks/:query                     controllers.BlocksController.getDetails(query: String)
 GET   /blocks/:query/raw                 controllers.BlocksController.getRawBlock(query: String)

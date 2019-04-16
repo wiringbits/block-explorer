@@ -7,7 +7,7 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.BlockRewardsNotFoundError
+import com.xsn.explorer.errors.{BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
@@ -156,6 +156,15 @@ class BlockService @Inject() (
             case false => BlockExtractionMethod.ProofOfWork
           }
           .toFuture
+    }
+  }
+
+  def estimateFee(nBlocks: Int): FutureApplicationResult[JsValue] = {
+    if (nBlocks >= 1 && nBlocks <= 1000) {
+      xsnService.estimateSmartFee(nBlocks)
+    } else {
+      val error = XSNMessageError("The nBlocks should be between 1 and 1000")
+      Future.successful(Bad(error).accumulating)
     }
   }
 

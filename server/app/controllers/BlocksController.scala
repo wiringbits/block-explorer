@@ -60,6 +60,10 @@ class BlocksController @Inject() (
   def getLightTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
   }
+
+  def estimateFee(nBlocks: Int) = public { _ =>
+    blockService.estimateFee(nBlocks)
+  }
 }
 
 object BlocksController {
