@@ -30,7 +30,7 @@ server {
 
   location /api/btc {
     rewrite ^/api/btc/(.*) /$1 break;
-    proxy_pass http://10.136.55.244:9000;
+    proxy_pass http://10.136.96.184:9000;
   }
 
   location /api/xsn {
