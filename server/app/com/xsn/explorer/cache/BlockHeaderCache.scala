@@ -1,7 +1,5 @@
 package com.xsn.explorer.cache
 
-import java.util.concurrent.TimeUnit
-
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.ordering.OrderingCondition
@@ -88,7 +86,7 @@ object BlockHeaderCache {
 
   def default: BlockHeaderCache = {
     val cache = Caffeine.newBuilder()
-        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .maximumSize(250000)
         .build[Key, EncodedValue]
 
     new BlockHeaderCache(cache)
