@@ -44,4 +44,9 @@ class FileBasedXSNService extends DummyXSNService {
     val result = Or.from(maybe, One(TransactionNotFoundError))
     Future.successful(result)
   }
+
+  override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+    val tx = TransactionLoader.json(txid.string)
+    Future.successful(Good(tx))
+  }
 }

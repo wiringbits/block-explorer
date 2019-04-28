@@ -10,16 +10,24 @@ import com.xsn.explorer.models.values.TransactionId
 class AddressTransactionDetailsPostgresDAO {
 
   def batchInsertDetails(transaction: Transaction.HasIO)(implicit conn: Connection): Option[Unit] = {
-    val received = transaction
-        .outputs
-        .groupBy(_.address)
-        .mapValues { outputs => outputs.map(_.value).sum }
+    val outputAddressValueList = for {
+      output <- transaction.outputs
+      address <- output.addresses
+    } yield address -> output.value
+
+    val received = outputAddressValueList
+        .groupBy(_._1)
+        .mapValues { _.map(_._2).sum }
         .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value) }
 
-    val sent = transaction
-        .inputs
-        .groupBy(_.address)
-        .mapValues { inputs => inputs.map(_.value).sum }
+    val inputAddressValueList = for {
+      input <- transaction.inputs
+      address <- input.addresses
+    } yield address -> input.value
+
+    val sent = inputAddressValueList
+        .groupBy(_._1)
+        .mapValues { _.map(_._2).sum }
         .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value) }
 
     val details = (received ++ sent)

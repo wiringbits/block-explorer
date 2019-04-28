@@ -43,8 +43,8 @@ object Block {
      */
     def collectAddresses: Set[Address] = {
       transactions.foldLeft(Set.empty[Address]) { case (acc, tx) =>
-        val spending = tx.inputs.map(_.address)
-        val receiving = tx.outputs.map(_.address)
+        val spending = tx.inputs.flatMap(_.addresses)
+        val receiving = tx.outputs.flatMap(_.addresses)
         spending.toSet ++ receiving.toSet ++ acc
       }
     }

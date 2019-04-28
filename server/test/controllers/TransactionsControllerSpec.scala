@@ -1,66 +1,34 @@
 package controllers
 
-import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionNotFoundError
-import com.xsn.explorer.helpers.{DataHelper, DummyXSNService, TransactionDummyDataHandler, TransactionLoader}
+import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{Transaction, TransactionVIN}
-import com.xsn.explorer.models.values.{Confirmations, Size, TransactionId}
+import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.{Bad, Good}
+import org.scalactic.Bad
 import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.test.Helpers._
-
-import scala.concurrent.Future
 
 class TransactionsControllerSpec extends MyAPISpec {
 
   import DataHelper._
 
-  val coinbaseTx = TransactionLoader.get("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
-  val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
-  val nonCoinbasePreviousTx = TransactionLoader.get("585cec5009c8ca19e83e33d282a6a8de65eb2ca007b54d6572167703768967d9")
-  val severalInputsTx = TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
-  val firstAddress = createAddress("Xvjue2ZLnJwTrSLUBx7DTHaSHTdpWrxtLF")
-  val secondAddress = createAddress("bc1qzhayf65p2j4h3pfw22aujgr5w42xfqzx5uvddt")
-  val firstTxId = DataHelper.createTransactionId("a3c43d223658a8656a31a6e5c407df4bbb0f565cb9c5a1acc90efa056b52c0eb")
-  val secondTxId = DataHelper.createTransactionId("8a865656b5a3c43d22b00f565cb9c5a1a3bba31a6e5c65407df4cc90efa2c0eb")
+  private val coinbaseTx = TransactionLoader.get("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
+  private val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+  private val severalInputsTx = TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
 
-  val customXSNService = new DummyXSNService {
-    val map = Map(
-      coinbaseTx.id -> coinbaseTx,
-      nonCoinbaseTx.id -> nonCoinbaseTx,
-      nonCoinbasePreviousTx.id -> nonCoinbasePreviousTx,
-      severalInputsTx.id -> severalInputsTx
-    )
+  private val customXSNService = new FileBasedXSNService
 
-    override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
-      val result = map.get(txid)
-          .map(Good(_))
-          .getOrElse {
-            Bad(TransactionNotFoundError).accumulating
-          }
-
-      Future.successful(result)
-    }
-
-    override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
-      val result = map.get(txid)
-          .map { _ => TransactionLoader.json(txid.string) }
-          .map(Good(_))
-          .getOrElse {
-            Bad(TransactionNotFoundError).accumulating
-          }
-
-      Future.successful(result)
+  private val transactionDataHandler = new TransactionDummyDataHandler {
+    override def getOutput(txid: TransactionId, index: Int): ApplicationResult[persisted.Transaction.Output] = {
+      Bad(TransactionNotFoundError).accumulating
     }
   }
-
-  val transactionDataHandler = new TransactionDummyDataHandler {}
 
   override val application = guiceApplicationBuilder
     .overrides(bind[XSNService].to(customXSNService))
@@ -87,7 +55,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       outputJsonList.size mustEqual 1
 
       val outputJson = outputJsonList.head
-      (outputJson \ "address").as[String] mustEqual tx.vout.head.address.get.string
+      (outputJson \ "address").as[String] mustEqual tx.vout.head.addresses.flatMap(_.headOption).get.string
       (outputJson \ "value").as[BigDecimal] mustEqual tx.vout.head.value
     }
 
@@ -97,7 +65,7 @@ class TransactionsControllerSpec extends MyAPISpec {
           createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
           BigDecimal("2343749.965625")))
           .map { v =>
-            TransactionVIN.HasValues(createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"), 0, v.value, v.address)
+            rpc.TransactionVIN.HasValues(createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"), 0, v.value, v.addresses)
           }
 
       val tx = nonCoinbaseTx.copy(vin = input)
@@ -118,18 +86,18 @@ class TransactionsControllerSpec extends MyAPISpec {
       inputJsonList.size mustEqual 1
 
       val inputJson = inputJsonList.head
-      (inputJson \ "address").as[String] mustEqual details.input.head.address.string
+      (inputJson \ "address").as[String] mustEqual details.input.head.address.map(_.string).getOrElse("")
       (inputJson \ "value").as[BigDecimal] mustEqual details.input.head.value
 
       val outputJsonList = (json \ "output").as[List[JsValue]]
       outputJsonList.size mustEqual 2
 
       val outputJson = outputJsonList.head
-      (outputJson \ "address").as[String] mustEqual details.output.head.address.string
+      (outputJson \ "address").as[String] mustEqual details.output.head.address.map(_.string).getOrElse("")
       (outputJson \ "value").as[BigDecimal] mustEqual details.output.head.value
 
       val outputJson2 = outputJsonList.drop(1).head
-      (outputJson2 \ "address").as[String] mustEqual details.output.drop(1).head.address.string
+      (outputJson2 \ "address").as[String] mustEqual details.output.drop(1).head.address.map(_.string).getOrElse("")
       (outputJson2 \ "value").as[BigDecimal] mustEqual details.output.drop(1).head.value
     }
 
@@ -154,7 +122,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       inputJsonList.size mustEqual 11
 
       inputJsonList.foreach { inputJson =>
-        (inputJson \ "address").as[String] mustEqual inputValue.address.string
+        (inputJson \ "address").as[String] mustEqual inputValue.address.map(_.string).getOrElse("")
         (inputJson \ "value").as[BigDecimal] mustEqual inputValue.value
       }
 

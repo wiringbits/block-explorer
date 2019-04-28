@@ -8,8 +8,12 @@ sealed trait TransactionVIN {
   def txid: TransactionId
   def voutIndex: Int
 
+  def withValues(value: BigDecimal, addresses: List[Address]): TransactionVIN.HasValues = {
+    TransactionVIN.HasValues(txid, voutIndex, value, addresses)
+  }
+
   def withValues(value: BigDecimal, address: Address): TransactionVIN.HasValues = {
-    TransactionVIN.HasValues(txid, voutIndex, value, address)
+    TransactionVIN.HasValues(txid, voutIndex, value, List(address))
   }
 }
 
@@ -20,21 +24,14 @@ object TransactionVIN {
       override val txid: TransactionId,
       override val voutIndex: Int,
       value: BigDecimal,
-      address: Address) extends TransactionVIN
+      addresses: List[Address]) extends TransactionVIN
 
   implicit val reads: Reads[TransactionVIN] = {
     val builder = (__ \ 'txid).read[TransactionId] and
-        (__ \ 'vout).read[Int] and
-        (__ \ 'value).readNullable[BigDecimal] and
-        (__ \ 'address).readNullable[Address]
+        (__ \ 'vout).read[Int]
 
-    builder.apply { (txid, index, valueMaybe, addressMaybe) =>
-      val maybe = for {
-        value <- valueMaybe
-        address <- addressMaybe
-      } yield HasValues(txid, index, value, address)
-
-      maybe.getOrElse(Raw(txid, index))
+    builder.apply { (txid, index) =>
+      Raw(txid, index)
     }
   }
 }

@@ -9,7 +9,7 @@ case class TransactionVOUT(
     n: Int,
     scriptPubKey: Option[ScriptPubKey] = None) {
 
-  val address: Option[Address] = scriptPubKey.flatMap(_.addresses.headOption)
+  val addresses: Option[List[Address]] = scriptPubKey.map(_.addresses)
 }
 
 object TransactionVOUT {

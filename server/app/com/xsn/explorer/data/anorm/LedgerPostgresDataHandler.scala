@@ -132,23 +132,25 @@ class LedgerPostgresDataHandler @Inject() (
   }
 
   private def spendMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
-    transactions
-        .map(_.inputs)
-        .flatMap { inputs =>
-          inputs.map { input => input.address -> input.value }
-        }
+    val addressValueList = for {
+      tx <- transactions
+      input <- tx.inputs
+      address <- input.addresses
+    } yield address -> input.value
+
+    addressValueList
         .groupBy(_._1)
         .mapValues { list => list.map(_._2).sum }
   }
 
   private def receiveMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
-    transactions
-        .map(_.outputs)
-        .flatMap { outputs =>
-          outputs.map { output =>
-            output.address -> output.value
-          }
-        }
+    val addressValueList = for {
+      tx <- transactions
+      output <- tx.outputs
+      address <- output.addresses
+    } yield address -> output.value
+
+    addressValueList
         .groupBy(_._1)
         .mapValues { list => list.map(_._2).sum }
   }

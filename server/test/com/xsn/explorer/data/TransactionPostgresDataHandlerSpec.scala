@@ -41,7 +41,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   "getBy address" should {
     val address = randomAddress
     val partialTransaction = randomTransaction(blockhash = block.hash, utxos = dummyTransaction.outputs)
-    val outputsForAddress = partialTransaction.outputs.map { _.copy(address = address) }
+    val outputsForAddress = partialTransaction.outputs.map { _.copy(addresses = List(address)) }
     val transaction = partialTransaction.copy(outputs = outputsForAddress)
     val query = PaginatedQuery(Offset(0), Limit(10))
 
@@ -60,8 +60,8 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         transaction.blockhash,
         transaction.time,
         transaction.size,
-        received = transaction.outputs.filter(_.address == address).map(_.value).sum,
-        sent = transaction.inputs.filter(_.address == address).map(_.value).sum)
+        received = transaction.outputs.filter(_.address contains address).map(_.value).sum,
+        sent = transaction.inputs.filter(_.address contains address).map(_.value).sum)
 
       val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
       val result = dataHandler.getBy(address, query, defaultOrdering)
@@ -83,7 +83,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get
       )
 
-      val result = dataHandler.getUnspentOutputs(expected.address).get
+      val result = dataHandler.getUnspentOutputs(expected.address.get).get
 
       result mustEqual List(expected)
     }

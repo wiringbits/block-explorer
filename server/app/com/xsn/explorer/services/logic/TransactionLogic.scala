@@ -9,7 +9,7 @@ import org.scalactic.{One, Or}
 class TransactionLogic {
 
   def getAddress(vout: TransactionVOUT, error: ApplicationError): ApplicationResult[Address] = {
-    val maybe = vout.address
+    val maybe = vout.addresses.flatMap(_.headOption)
     Or.from(maybe, One(error))
   }
 

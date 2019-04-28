@@ -20,14 +20,43 @@ object Transaction {
       fromOutputIndex: Int,
       index: Int,
       value: BigDecimal,
-      address: Address)
+      addresses: List[Address]) {
+
+    def address: Option[Address] = addresses.headOption
+  }
+  object Input {
+    def apply(
+        fromTxid: TransactionId,
+        fromOutputIndex: Int,
+        index: Int,
+        value: BigDecimal,
+        address: Address): Input = {
+
+      Input(fromTxid, fromOutputIndex, index, value, List(address))
+    }
+  }
 
   case class Output(
       txid: TransactionId,
       index: Int,
       value: BigDecimal,
-      address: Address,
-      script: HexString)
+      addresses: List[Address],
+      script: HexString) {
+
+    def address: Option[Address] = addresses.headOption
+  }
+
+  object Output {
+    def apply(
+        txid: TransactionId,
+        index: Int,
+        value: BigDecimal,
+        address: Address,
+        script: HexString): Output = {
+
+      new Output(txid, index, value, List(address), script)
+    }
+  }
 
   case class HasIO(
       transaction: Transaction,
@@ -55,18 +84,18 @@ object Transaction {
         .vin
         .zipWithIndex
         .map { case (vin, index) =>
-          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.address)
+          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.addresses)
         }
 
     val outputs = tx.vout.flatMap { vout =>
       for {
-        address <- vout.address
+        addresses <- vout.addresses
         script <- vout.scriptPubKey.map(_.hex)
       } yield Output(
         tx.id,
         vout.n,
         vout.value,
-        address,
+        addresses,
         script)
     }
 

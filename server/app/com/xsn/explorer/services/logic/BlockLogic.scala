@@ -77,7 +77,7 @@ class BlockLogic {
     val coinstakeVOUT = coinstakeTx.vout.drop(1)
     if (coinstakeVOUT.size >= 1 && coinstakeVOUT.size <= 3) {
       val value = coinstakeVOUT
-          .filter(_.address contains coinstakeAddress)
+          .filter(_.addresses.getOrElse(List.empty) contains coinstakeAddress)
           .map(_.value)
           .sum
 
@@ -85,12 +85,12 @@ class BlockLogic {
         coinstakeAddress,
         (value - coinstakeInput) max 0)
 
-      val masternodeRewardOUT = coinstakeVOUT.filterNot(_.address contains coinstakeAddress)
-      val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.address).headOption
+      val masternodeRewardOUT = coinstakeVOUT.filterNot(_.addresses.getOrElse(List.empty) contains coinstakeAddress)
+      val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
       val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
         BlockReward(
           masternodeAddress,
-          masternodeRewardOUT.filter(_.address contains masternodeAddress).map(_.value).sum
+          masternodeRewardOUT.filter(_.addresses.getOrElse(List.empty) contains masternodeAddress).map(_.value).sum
         )
       }
 
@@ -117,7 +117,7 @@ class BlockLogic {
     val coinstakeVOUT = coinstakeTx.vout
 
     val ownerValue = coinstakeVOUT
-        .filter(_.address contains contract.owner)
+        .filter(_.addresses.getOrElse(List.empty) contains contract.owner)
         .map(_.value)
         .sum
 
@@ -126,19 +126,19 @@ class BlockLogic {
       (ownerValue - coinstakeInput) max 0)
 
     // merchant
-    val merchantValue = coinstakeVOUT.filter(_.address contains contract.merchant).map(_.value).sum
+    val merchantValue = coinstakeVOUT.filter(_.addresses.getOrElse(List.empty) contains contract.merchant).map(_.value).sum
     val merchantReward = BlockReward(contract.merchant, merchantValue)
 
     // master node
     val masternodeRewardOUT = coinstakeVOUT.filterNot { out =>
-      out.address.contains(contract.owner) ||
-          out.address.contains(contract.merchant)
+      out.addresses.getOrElse(List.empty).contains(contract.owner) ||
+          out.addresses.getOrElse(List.empty).contains(contract.merchant)
     }
-    val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.address).headOption
+    val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.addresses.getOrElse(List.empty)).headOption
     val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
       BlockReward(
         masternodeAddress,
-        masternodeRewardOUT.filter(_.address contains masternodeAddress).map(_.value).sum
+        masternodeRewardOUT.filter(_.addresses.getOrElse(List.empty) contains masternodeAddress).map(_.value).sum
       )
     }
 
@@ -148,6 +148,6 @@ class BlockLogic {
   def isPoS(block: rpc.Block, coinbase: rpc.Transaction[_]): Boolean = {
     block.nonce == 0 &&
         coinbase.vin.isEmpty &&
-        coinbase.vout.flatMap(_.address).isEmpty
+        coinbase.vout.flatMap(_.addresses.getOrElse(List.empty)).isEmpty
   }
 }

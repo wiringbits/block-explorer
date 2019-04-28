@@ -118,7 +118,7 @@ class AddressesControllerSpec extends MyAPISpec {
     def url(address: String) = s"/addresses/$address/utxos"
 
     def matches(json: JsValue, output: Transaction.Output) = {
-      (json \ "address").as[String] mustEqual output.address.string
+      (json \ "address").as[String] mustEqual output.address.map(_.string).getOrElse("")
       (json \ "txid").as[String] mustEqual output.txid.string
       (json \ "outputIndex").as[Int] mustEqual output.index
       (json \ "script").as[String] mustEqual output.script.string

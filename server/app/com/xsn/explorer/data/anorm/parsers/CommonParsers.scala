@@ -1,6 +1,6 @@
 package com.xsn.explorer.data.anorm.parsers
 
-import anorm.SqlParser.{int, long, str}
+import anorm.SqlParser._
 import com.xsn.explorer.models.values._
 
 object CommonParsers {
@@ -12,6 +12,18 @@ object CommonParsers {
   def parseAddress(field: String = "address") = str(field)
       .map(Address.from)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+
+  def parseAddresses = array[String]("addresses")
+      .map { array =>
+        array
+            .map { string =>
+              Address.from(string) match {
+                case None => throw new RuntimeException("Corrupted address")
+                case Some(address) => address
+              }
+            }
+            .toList
+      }
 
   def parseTransactionId(field: String = "txid") = str(field)
       .map(TransactionId.from)

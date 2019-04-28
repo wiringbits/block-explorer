@@ -20,7 +20,7 @@ object TransactionLoader {
           .vout
           .find(_.n == vin.voutIndex)
           .flatMap { prev =>
-            prev.address.map { vin.withValues(prev.value, _) }
+            prev.addresses.map { vin.withValues(prev.value, _) }
           }
     }
 

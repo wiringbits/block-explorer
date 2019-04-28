@@ -47,8 +47,16 @@ class AddressesController @Inject() (
    * Format to keep compatibility with the previous approach using the RPC api.
    */
   implicit private val writes: Writes[Transaction.Output] = Writes { obj =>
+    val address = obj
+        .addresses
+        .headOption
+        .map(_.string)
+        .map(JsString.apply)
+        .getOrElse(JsNull)
+
     val values = Map(
-      "address" -> JsString(obj.address.string),
+      "address" -> address, // Keep compatibility with the legacy API
+      "addresses" -> JsArray(obj.addresses.map(_.string).map(JsString.apply)),
       "txid" -> JsString(obj.txid.string),
       "script" -> JsString(obj.script.string),
       "outputIndex" -> JsNumber(obj.index),
@@ -70,7 +78,22 @@ class AddressesController @Inject() (
 object AddressesController {
 
   implicit val inputWrites: Writes[LightWalletTransaction.Input] = Json.writes[LightWalletTransaction.Input]
-  implicit val outputWrites: Writes[LightWalletTransaction.Output] = Json.writes[LightWalletTransaction.Output]
+  implicit val outputWrites: Writes[LightWalletTransaction.Output] = (obj: LightWalletTransaction.Output) => {
+    val address = obj
+        .addresses
+        .headOption
+        .map(_.string)
+        .map(JsString.apply)
+        .getOrElse(JsNull)
+
+    Json.obj(
+      "index" -> obj.index,
+      "value" -> obj.value,
+      "address" -> address,
+      "addresses" -> obj.addresses
+    )
+  }
+
   implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] = Json.writes[LightWalletTransaction]
 
 }
