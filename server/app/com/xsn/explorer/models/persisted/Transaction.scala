@@ -89,7 +89,7 @@ object Transaction {
 
     val outputs = tx.vout.flatMap { vout =>
       for {
-        addresses <- vout.addresses
+        addresses <- vout.addresses if vout.value > 0
         script <- vout.scriptPubKey.map(_.hex)
       } yield Output(
         tx.id,
