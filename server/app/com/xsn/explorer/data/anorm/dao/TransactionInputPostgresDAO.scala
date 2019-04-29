@@ -35,7 +35,7 @@ class TransactionInputPostgresDAO {
             |INSERT INTO transaction_inputs
             |  (txid, index, from_txid, from_output_index, value, addresses)
             |VALUES
-            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, ARRAY[{addresses}])
+            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, ARRAY[{addresses}]::TEXT[])
           """.stripMargin,
           params.head,
           params.tail: _*

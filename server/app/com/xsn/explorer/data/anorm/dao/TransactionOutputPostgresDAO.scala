@@ -61,7 +61,7 @@ class TransactionOutputPostgresDAO {
             |INSERT INTO transaction_outputs
             |  (txid, index, value, addresses, hex_script)
             |VALUES
-            |  ({txid}, {index}, {value}, ARRAY[{addresses}], {hex_script})
+            |  ({txid}, {index}, {value}, ARRAY[{addresses}]::TEXT[], {hex_script})
           """.stripMargin,
           params.head,
           params.tail: _*

@@ -52,6 +52,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       result mustEqual Good(expected)
     }
 
+    "find no results - no address involved" in {
+      val tx = transaction.copy(
+        inputs = transaction.inputs.map(_.copy(addresses = List.empty)),
+        outputs = transaction.outputs.map(_.copy(addresses = List.empty))
+      )
+      upsertTransaction(tx)
+
+      val expected = PaginatedResult(query.offset, query.limit, Count(0), List.empty)
+      val result = dataHandler.getBy(randomAddress, query, defaultOrdering)
+
+      result mustEqual Good(expected)
+    }
+
     "find the right values" in {
       upsertTransaction(transaction)
 
