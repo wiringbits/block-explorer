@@ -27,7 +27,7 @@ class TransactionInputPostgresDAO {
             'from_txid -> input.fromTxid.string: NamedParameter,
             'from_output_index -> input.fromOutputIndex: NamedParameter,
             'value -> input.value: NamedParameter,
-            'addresses -> input.addresses.map(_.string): NamedParameter)
+            'addresses -> input.addresses.map(_.string).toArray: NamedParameter)
         }
 
         val batch = BatchSql(
@@ -35,7 +35,7 @@ class TransactionInputPostgresDAO {
             |INSERT INTO transaction_inputs
             |  (txid, index, from_txid, from_output_index, value, addresses)
             |VALUES
-            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, ARRAY[{addresses}]::TEXT[])
+            |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {addresses})
           """.stripMargin,
           params.head,
           params.tail: _*

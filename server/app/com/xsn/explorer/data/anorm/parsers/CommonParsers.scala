@@ -10,15 +10,19 @@ object CommonParsers {
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
   def parseAddress(field: String = "address") = str(field)
-      .map(Address.from)
-      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+      .map { string =>
+        Address.from(string) match {
+          case None => throw new RuntimeException(s"Corrupted $field: $string")
+          case Some(address) => address
+        }
+      }
 
   def parseAddresses = array[String]("addresses")
       .map { array =>
         array
             .map { string =>
               Address.from(string) match {
-                case None => throw new RuntimeException("Corrupted address")
+                case None => throw new RuntimeException(s"Corrupted address: $string")
                 case Some(address) => address
               }
             }

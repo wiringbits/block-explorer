@@ -52,7 +52,7 @@ class TransactionOutputPostgresDAO {
             'txid -> output.txid.string: NamedParameter,
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
-            'addresses -> output.addresses.map(_.string): NamedParameter,
+            'addresses -> output.addresses.map(_.string).toArray: NamedParameter,
             'hex_script -> output.script.string: NamedParameter)
         }
 
@@ -61,7 +61,7 @@ class TransactionOutputPostgresDAO {
             |INSERT INTO transaction_outputs
             |  (txid, index, value, addresses, hex_script)
             |VALUES
-            |  ({txid}, {index}, {value}, ARRAY[{addresses}]::TEXT[], {hex_script})
+            |  ({txid}, {index}, {value}, {addresses}, {hex_script})
           """.stripMargin,
           params.head,
           params.tail: _*

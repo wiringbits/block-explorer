@@ -12,9 +12,10 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.values.{Height, _}
+import com.xsn.explorer.models.values._
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
+import org.scalatest.EitherValues._
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
@@ -128,6 +129,22 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       val result = dataHandler.getOutput(txid, index)
       result must be(Bad(TransactionNotFoundError).accumulating)
+    }
+
+    "not corrupt the output" in {
+      val txid = createTransactionId("9969603dca74d14d29d1d5f56b94c7872551607f8c2d6837ab9715c60721b50e")
+      val rpcTx = TransactionLoader.getWithValues(txid.string).copy(blockhash = block.hash)
+      val tx = Transaction.fromRPC(rpcTx)._1
+      val expected = Transaction.Output(
+        txid = txid,
+        index = 2,
+        value = 0.01,
+        addresses = List.empty,
+        script = HexString.from("0804678afd04678afd75a820894eeb82f9a851f5d1cb1be3249f58bc8d259963832c5e7474a76f7a859ee95c87").get)
+
+      upsertTransaction(tx)
+      val result = dataHandler.getOutput(txid, 2)
+      result.toEither.right.value must be(expected)
     }
   }
 
