@@ -75,7 +75,14 @@ object BlocksController {
     )
   }
 
-  implicit val outputWrites: Writes[LightWalletTransaction.Output] = Json.writes[LightWalletTransaction.Output]
+  implicit val outputWrites: Writes[LightWalletTransaction.Output] = (obj: LightWalletTransaction.Output) => {
+    Json.obj(
+      "index" -> obj.index,
+      "value" -> obj.value,
+      "addresses" -> obj.addresses,
+      "script" -> obj.script.string
+    )
+  }
   implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] = (obj: LightWalletTransaction) => {
     Json.obj(
       "id" -> obj.id,
