@@ -1,17 +1,19 @@
 package controllers
 
-import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
+import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
+import org.mockito.ArgumentMatchersSugar._
+import org.mockito.MockitoSugar._
 import org.scalactic.Good
 import play.api.inject.bind
 import play.api.libs.json.JsValue
@@ -20,42 +22,15 @@ import play.api.test.Helpers._
 class BlocksControllerSpec extends MyAPISpec {
 
   // PoS block
-  val posBlock = BlockLoader.getRPC("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+  private val posBlock = BlockLoader.getRPC("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
 
-  val customXSNService = new FileBasedXSNService
+  private val customXSNService = new FileBasedXSNService
 
-  val transactionDataHandler = new TransactionDummyDataHandler {
-    // TODO: Handle ordering
-    override def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
-      val transactions = BlockLoader
-          .getRPC(blockhash.string)
-          .transactions
-          .map(_.string)
-          .map(TransactionLoader.get)
-          .map { tx =>
-            TransactionWithValues(
-              id = tx.id,
-              blockhash = blockhash,
-              time = tx.time,
-              size = tx.size,
-              sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
-              received = tx.vout.map(_.value).sum
-            )
-          }
-
-      val page = PaginatedResult(
-        paginatedQuery.offset,
-        paginatedQuery.limit,
-        Count(transactions.size),
-        transactions.drop(paginatedQuery.offset.int).take(paginatedQuery.limit.int))
-
-      Good(page)
-    }
-  }
+  private val transactionDataHandlerMock = mock[TransactionBlockingDataHandler]
 
   override val application = guiceApplicationBuilder
       .overrides(bind[XSNService].to(customXSNService))
-      .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandler))
+      .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandlerMock))
       .build()
 
   "GET /blocks/:query" should {
@@ -281,18 +256,101 @@ class BlocksControllerSpec extends MyAPISpec {
 
   "GET /blocks/:blockhash/transactions" should {
     "return the transactions for the given block" in {
-      val blockhash = "000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7"
-      val response = GET(s"/blocks/$blockhash/transactions?offset=0&limit=5&orderBy=time:desc")
+      val blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get
+
+      val result = {
+        val transactions = BlockLoader
+            .getRPC(blockhash.string)
+            .transactions
+            .map(_.string)
+            .map(TransactionLoader.get)
+            .map { tx =>
+              TransactionWithValues(
+                id = tx.id,
+                blockhash = blockhash,
+                time = tx.time,
+                size = tx.size,
+                sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
+                received = tx.vout.map(_.value).sum
+              )
+            }
+
+        val page = PaginatedResult(
+          Offset(0),
+          Limit(10),
+          Count(transactions.size),
+          transactions.take(5))
+
+        Good(page)
+      }
+
+      when(transactionDataHandlerMock
+          .getByBlockhash(
+            eqTo(blockhash),
+            any[PaginatedQuery],
+            any[FieldOrdering[TransactionField]]))
+          .thenReturn(result)
+      val response = GET(s"/blocks/$blockhash/transactions")
 
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
       (json \ "total").as[Int] mustEqual 1
       (json \ "offset").as[Int] mustEqual 0
-      (json \ "limit").as[Int] mustEqual 5
+      (json \ "limit").as[Int] mustEqual 10
 
       val data = (json \ "data").as[List[JsValue]]
       data.size mustEqual 1
+    }
+  }
+
+  "GET /v2/blocks/:blockhash/light-wallet-transactions" should {
+    "return the transactions" in {
+      val blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get
+      val txid = DataGenerator.randomTransactionId
+      val tx = Transaction.HasIO(
+        transaction = Transaction(txid, blockhash, 0, Size(1)),
+        inputs = List(
+          Transaction.Input(fromTxid = DataGenerator.randomTransactionId, fromOutputIndex = 1, index = 0, value = 100, address = DataGenerator.randomAddress)
+        ),
+        outputs = List(
+          Transaction.Output(txid = txid, index = 0, value = 200, address = DataGenerator.randomAddress, DataGenerator.randomHexString(8))
+        )
+      )
+
+      when(transactionDataHandlerMock
+          .getTransactionsWithIOBy(
+            eqTo(blockhash),
+            eqTo(Limit(10)),
+            eqTo(Option.empty)))
+          .thenReturn(Good(List(tx)))
+
+      val response = GET(s"/v2/blocks/$blockhash/light-wallet-transactions")
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val data = (json \ "data").as[List[JsValue]]
+      data.size must be(1)
+
+      val result = data.head
+      (result \ "id").as[String] must be(txid.string)
+      (result \ "size").as[Int] must be(tx.transaction.size.int)
+      (result \ "time").as[Int] must be(tx.transaction.time)
+
+      val inputs = (result \ "inputs").as[List[JsValue]]
+      inputs.size must be(1)
+      val input = inputs.head
+      (input \ "txid").as[String] must be(tx.inputs.head.fromTxid.string)
+      (input \ "index").as[Int] must be(tx.inputs.head.fromOutputIndex)
+
+      val outputs = (result \ "outputs").as[List[JsValue]]
+      outputs.size must be(1)
+      val output = outputs.head
+      (output \ "index").as[Int] must be(tx.outputs.head.index)
+      (output \ "value").as[BigDecimal] must be(tx.outputs.head.value)
+      (output \ "addresses").as[List[String]] must be(tx.outputs.head.addresses.map(_.string))
+      (output \ "script").as[String] must be(tx.outputs.head.script.string)
     }
   }
 
