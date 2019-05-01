@@ -333,7 +333,7 @@ class TransactionPostgresDAO @Inject() (
         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
         |FROM transactions t JOIN blocks USING (blockhash)
         |WHERE blockhash = {blockhash}
-        |ORDER BY t.txid ASC
+        |ORDER BY t.index ASC
         |LIMIT {limit}
       """.stripMargin
     ).on(
@@ -345,13 +345,18 @@ class TransactionPostgresDAO @Inject() (
   def getByBlockhash(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[TransactionWithValues] = {
     SQL(
       """
+        |WITH CTE AS (
+        |  SELECT index AS lastSeenIndex
+        |  FROM transactions
+        |  WHERE txid = {lastSeenTxid}
+        |)
         |SELECT t.txid, t.blockhash, t.time, t.size,
         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
-        |FROM transactions t JOIN blocks USING (blockhash)
+        |FROM CTE CROSS JOIN transactions t JOIN blocks USING (blockhash)
         |WHERE blockhash = {blockhash} AND
-        |      t.txid > {lastSeenTxid}
-        |ORDER BY t.txid ASC
+        |      t.index > lastSeenIndex
+        |ORDER BY t.index ASC
         |LIMIT {limit}
       """.stripMargin
     ).on(
