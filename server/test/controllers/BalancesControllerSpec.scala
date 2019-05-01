@@ -59,6 +59,8 @@ class BalancesControllerSpec extends MyAPISpec {
 
   "GET /balances" should {
     "get the richest addresses" in {
+      pending
+
       val query = PaginatedQuery(Offset(1), Limit(2))
       val expected1 = balances(1)
       val expected2 = balances(2)

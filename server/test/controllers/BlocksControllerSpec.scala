@@ -256,6 +256,8 @@ class BlocksControllerSpec extends MyAPISpec {
 
   "GET /blocks/:blockhash/transactions" should {
     "return the transactions for the given block" in {
+      pending
+
       val blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get
 
       val result = {
