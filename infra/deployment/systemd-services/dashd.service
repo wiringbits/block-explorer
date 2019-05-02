@@ -1,0 +1,16 @@
+[Unit]
+Description=Dash Server
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dash/
+StandardOutput=tty
+StandardError=tty
+User=dash
+LimitNOFILE=65535
+ExecStart=/home/dash/app/dashd
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
