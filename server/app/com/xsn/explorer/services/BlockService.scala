@@ -39,17 +39,30 @@ class BlockService @Inject() (
       limit: Limit,
       lastSeenHashString: Option[String],
       orderingConditionString: String)(
-      implicit writes: Writes[BlockHeader]): FutureApplicationResult[JsValue] = {
+      implicit writes: Writes[BlockHeader]): FutureApplicationResult[(WrappedResult[List[BlockHeader]], Boolean)] = {
 
     val result = for {
       lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      json <- getCacheableHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
-    } yield json
+      headers <-blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+      latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
+    } yield (WrappedResult(headers), canCacheResult(orderingCondition, limit.int, latestBlock, headers))
 
     result.toFuture
+  }
+
+  private def canCacheResult(
+      ordering: OrderingCondition,
+      expectedSize: Int,
+      latestKnownBlock: persisted.Block,
+      result: List[BlockHeader]): Boolean = {
+
+    ordering == OrderingCondition.AscendingOrder && // from oldest to newest
+      result.size == expectedSize && // a complete query
+      expectedSize > 0 && // non empty result
+      result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
   }
 
   private def getCacheableHeaders(
