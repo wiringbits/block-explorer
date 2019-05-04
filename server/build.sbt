@@ -22,7 +22,7 @@ scalacOptions ++= Seq(
 )
 
 
-val playsonifyVersion = "2.0.0"
+val playsonifyVersion = "2.0.1-SNAPSHOT"
 
 lazy val root = (project in file("."))
     .enablePlugins(PlayScala)
