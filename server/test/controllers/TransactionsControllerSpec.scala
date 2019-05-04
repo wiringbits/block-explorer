@@ -90,15 +90,15 @@ class TransactionsControllerSpec extends MyAPISpec {
       (inputJson \ "value").as[BigDecimal] mustEqual details.input.head.value
 
       val outputJsonList = (json \ "output").as[List[JsValue]]
-      outputJsonList.size mustEqual 2
-
-      val outputJson = outputJsonList.head
-      (outputJson \ "address").as[String] mustEqual details.output.head.address.map(_.string).getOrElse("")
-      (outputJson \ "value").as[BigDecimal] mustEqual details.output.head.value
+      outputJsonList.size mustEqual 3
 
       val outputJson2 = outputJsonList.drop(1).head
       (outputJson2 \ "address").as[String] mustEqual details.output.drop(1).head.address.map(_.string).getOrElse("")
       (outputJson2 \ "value").as[BigDecimal] mustEqual details.output.drop(1).head.value
+
+      val outputJson3 = outputJsonList.drop(2).head
+      (outputJson3 \ "address").as[String] mustEqual details.output.drop(2).head.address.map(_.string).getOrElse("")
+      (outputJson3 \ "value").as[BigDecimal] mustEqual details.output.drop(2).head.value
     }
 
     "return a transaction with several inputs" in {

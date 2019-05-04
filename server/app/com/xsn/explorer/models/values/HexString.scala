@@ -7,10 +7,14 @@ class HexString private (val string: String) extends AnyVal {
 
 object HexString {
 
-  private val RegEx = "^[A-Fa-f0-9]+$"
+  val Empty = new HexString("")
+
+  private val RegEx = "^([a-fA-F0-9][a-fA-F0-9])*$"
 
   def from(string: String): Option[HexString] = {
-    if (string.length % 2 == 0 && string.matches(RegEx)) {
+    if (string.isEmpty) {
+      Some(Empty)
+    } else if (string.matches(RegEx)) {
       Option(new HexString(string))
     } else {
       None

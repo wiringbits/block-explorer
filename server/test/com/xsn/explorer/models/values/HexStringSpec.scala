@@ -29,10 +29,10 @@ class HexStringSpec extends WordSpec with MustMatchers with OptionValues {
       result.value.string mustEqual string
     }
 
-    "reject an empty string" in {
+    "accept an empty string" in {
       val string = ""
       val result = HexString.from(string)
-      result.isEmpty mustEqual true
+      result.nonEmpty mustEqual true
     }
 
     "reject a single character" in {
@@ -42,13 +42,13 @@ class HexStringSpec extends WordSpec with MustMatchers with OptionValues {
     }
 
     "reject spaces" in {
-      val string = "a "
+      val string = "aa "
       val result = HexString.from(string)
       result.isEmpty mustEqual true
     }
 
     "reject non-hex characters" in {
-      val string = "abcdefg"
+      val string = "abcdefgh"
       val result = HexString.from(string)
       result.isEmpty mustEqual true
     }
