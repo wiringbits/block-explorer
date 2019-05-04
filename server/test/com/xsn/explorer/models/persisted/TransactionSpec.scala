@@ -1,6 +1,6 @@
 package com.xsn.explorer.models.persisted
 
-import com.xsn.explorer.helpers.DataGenerator
+import com.xsn.explorer.helpers.{DataGenerator, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.ScriptPubKey
 import com.xsn.explorer.models.values._
@@ -121,6 +121,18 @@ class TransactionSpec extends WordSpec {
 
       val (_, contract) = persisted.Transaction.fromRPC(tx)
       contract.value must be(expected)
+    }
+
+    "accept outputs with empty script" in {
+      val rpcTx = TransactionLoader.getWithValues("728e76d2d5f0513aabeca6fd7101878469052e39f42f7a9b979a63d7e87353c2")
+
+      val expected = List(
+        Transaction.Output(rpcTx.id, 0, 5.60400000, Address.from("Xgg7QHQcsBPYygYPj1QhDcCmfKXa7sFd9b").get, HexString.from("2102a9f34e4bc8b77f6f99aab03646da75d770e4088fd38f1604e2b0f106e7314156ac").get),
+        Transaction.Output(rpcTx.id, 1, 1.40100000, List.empty, HexString.from("").get)
+      )
+
+      val tx = Transaction.fromRPC(rpcTx)._1
+      tx.outputs must be(expected)
     }
   }
 }
