@@ -191,7 +191,7 @@ class BlockService @Inject() (
 
   private def getPoWBlockRewards(block: Block): FutureApplicationResult[PoWBlockRewards] = {
     val result = for {
-      txid <- blockLogic.getPoWTransactionId(block).toFutureOr
+      txid <- blockLogic.getCoinbase(block).toFutureOr
       // TODO: handle tx not found
       tx <- xsnService.getTransaction(txid).toFutureOr
       vout <- transactionLogic.getVOUT(0, tx, BlockRewardsNotFoundError).toFutureOr

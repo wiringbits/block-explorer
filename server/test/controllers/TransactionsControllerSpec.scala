@@ -3,7 +3,7 @@ package controllers
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.TransactionBlockingDataHandler
-import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
@@ -26,7 +26,7 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   private val transactionDataHandler = new TransactionDummyDataHandler {
     override def getOutput(txid: TransactionId, index: Int): ApplicationResult[persisted.Transaction.Output] = {
-      Bad(TransactionNotFoundError).accumulating
+      Bad(TransactionError.OutputNotFound(txid, index)).accumulating
     }
   }
 

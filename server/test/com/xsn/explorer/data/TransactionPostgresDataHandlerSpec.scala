@@ -3,7 +3,7 @@ package com.xsn.explorer.data
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
+import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.DataHelper._
@@ -128,7 +128,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val index = 10
 
       val result = dataHandler.getOutput(txid, index)
-      result must be(Bad(TransactionNotFoundError).accumulating)
+      result must be(Bad(TransactionError.OutputNotFound(txid, index)).accumulating)
     }
 
     "not corrupt the output" in {
@@ -480,7 +480,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   private def upsertTransaction(transaction: Transaction.HasIO) = {
     database.withConnection { implicit conn =>
       val maybe = transactionPostgresDAO.upsert(1, transaction)
-      Or.from(maybe, One(TransactionNotFoundError))
+      Or.from(maybe, One(TransactionError.NotFound(transaction.id)))
     }.isGood must be(true)
   }
 }

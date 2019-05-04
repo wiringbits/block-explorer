@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
-import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import javax.inject.Inject
@@ -177,7 +177,7 @@ class TransactionCollectorService @Inject() (
           .find(_.n == vin.voutIndex)
           .flatMap(TransactionValue.from)
 
-      Or.from(maybe, One(TransactionNotFoundError))
+      Or.from(maybe, One(TransactionError.OutputNotFound(tx.id, vin.voutIndex)))
     }
 
     transactionValue.map {

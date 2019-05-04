@@ -128,7 +128,7 @@ class XSNServiceRPCImplSpec extends WordSpec {
       mockRequest(request, response)(500, json)
 
       whenReady(service.getTransaction(txid)) { result =>
-        result mustEqual Bad(TransactionNotFoundError).accumulating
+        result mustEqual Bad(TransactionError.NotFound(txid)).accumulating
       }
     }
 

@@ -78,7 +78,7 @@ class XSNServiceRPCImpl @Inject() (
 
 
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
-    val errorCodeMapper = Map(-5 -> TransactionNotFoundError)
+    val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
@@ -94,7 +94,7 @@ class XSNServiceRPCImpl @Inject() (
   }
 
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
-    val errorCodeMapper = Map(-5 -> TransactionNotFoundError)
+    val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
@@ -400,9 +400,9 @@ class XSNServiceRPCImpl @Inject() (
 
   override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(
-      -26 -> InvalidRawTransactionError,
-      -22 -> InvalidRawTransactionError,
-      -27 -> RawTransactionAlreadyExistsError)
+      -26 -> TransactionError.InvalidRawTransaction,
+      -22 -> TransactionError.InvalidRawTransaction,
+      -27 -> TransactionError.RawTransactionAlreadyExists)
 
     val body = s"""
                   |{

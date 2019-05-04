@@ -5,7 +5,7 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, TransactionPostgresDAO}
-import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
@@ -53,7 +53,7 @@ class TransactionPostgresDataHandler @Inject() (
 
   override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = withConnection { implicit conn =>
     val maybe = transactionOutputDAO.getOutput(txid, index)
-    Or.from(maybe, One(TransactionNotFoundError))
+    Or.from(maybe, One(TransactionError.OutputNotFound(txid, index)))
   }
 
   override def getByBlockhash(

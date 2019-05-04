@@ -1,7 +1,7 @@
 package com.xsn.explorer.services.logic
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.xsn.explorer.errors.{BlockNotFoundError, TransactionNotFoundError}
+import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{Block, Transaction}
 import com.xsn.explorer.models.values.{Address, TransactionId}
@@ -9,16 +9,10 @@ import org.scalactic.{Bad, Good, One, Or}
 
 class BlockLogic {
 
-  def getPoWTransactionId(block: Block): ApplicationResult[TransactionId] = {
-    val maybe = block.transactions.headOption
-
-    Or.from(maybe, One(BlockNotFoundError))
-  }
-
   def getCoinbase(block: Block): ApplicationResult[TransactionId] = {
     val maybe = block.transactions.headOption
 
-    Or.from(maybe, One(TransactionNotFoundError))
+    Or.from(maybe, One(TransactionError.CoinbaseNotFound(block.hash)))
   }
 
   /**

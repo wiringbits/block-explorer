@@ -2,7 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.errors.InvalidRawTransactionError
+import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models.TransactionDetails
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.validators.TransactionIdValidator
@@ -42,7 +42,7 @@ class TransactionRPCService @Inject() (
 
   def sendRawTransaction(hexString: String): FutureApplicationResult[JsValue] = {
     val result = for {
-      hex <- Or.from(HexString.from(hexString), One(InvalidRawTransactionError)).toFutureOr
+      hex <- Or.from(HexString.from(hexString), One(TransactionError.InvalidRawTransaction)).toFutureOr
       txid <- xsnService.sendRawTransaction(hex).toFutureOr
     } yield Json.obj("txid" -> JsString(txid))
 

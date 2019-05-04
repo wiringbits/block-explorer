@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
-import com.xsn.explorer.errors.TransactionNotFoundError
+import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.helpers.{DataGenerator, DummyXSNService, Executors}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
@@ -61,20 +61,20 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactionVINWithValues(vin)) { result =>
-        result.toEither.left.value must be(One(TransactionNotFoundError))
+        result.toEither.left.value must be(One(TransactionError.OutputNotFound(txid, outputIndex)))
       }
     }
 
     "fail when the transaction doesn't exists" in {
       val xsnService = new DummyXSNService {
         override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
-          Future.successful(Bad(TransactionNotFoundError).accumulating)
+          Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
         }
       }
 
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactionVINWithValues(vin)) { result =>
-        result.toEither.left.value must be(One(TransactionNotFoundError))
+        result.toEither.left.value must be(One(TransactionError.NotFound(txid)))
       }
     }
   }
@@ -107,18 +107,21 @@ class TransactionCollectorServiceSpec extends WordSpec {
         txid -> Good(tx)
       }
 
-      val pending = DataGenerator.randomTransactionId -> Bad(TransactionNotFoundError).accumulating
+      val pending = {
+        val x = DataGenerator.randomTransactionId
+        x -> Bad(TransactionError.NotFound(x)).accumulating
+      }
       val input = (completed.take(5).toList ::: pending :: completed.drop(5).toList).reverse
 
       val xsnService = new DummyXSNService {
         override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
-          Future.successful(Bad(TransactionNotFoundError).accumulating)
+          Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
         }
       }
 
       val service = create(xsnService, null)
       whenReady(service.completeRPCTransactionsSequentially(input)) { result =>
-        result.toEither.left.value must be(One(TransactionNotFoundError))
+        result.toEither.left.value must be(One(pending._2.swap.get.head))
       }
     }
 
@@ -131,10 +134,16 @@ class TransactionCollectorServiceSpec extends WordSpec {
       val firstHalf = completed.take(5).toList
       val secondHalf = completed.drop(5).toList
 
-      val pending1 = DataGenerator.randomTransactionId -> Bad(TransactionNotFoundError).accumulating
+      val pending1 = {
+        val x = DataGenerator.randomTransactionId
+        x-> Bad(TransactionError.NotFound(x)).accumulating
+      }
       val pending1Tx = createTransaction(pending1._1, List.empty)
 
-      val pending2 = DataGenerator.randomTransactionId -> Bad(TransactionNotFoundError).accumulating
+      val pending2 = {
+        val x = DataGenerator.randomTransactionId
+        x -> Bad(TransactionError.NotFound(x)).accumulating
+      }
       val pending2Tx = createTransaction(pending2._1, List.empty)
 
       val input = firstHalf ::: List(pending1) ::: secondHalf ::: List(pending2)
@@ -145,7 +154,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
           } else if (txid == pending2._1) {
             Future.successful(Good(pending2Tx))
           } else {
-            Future.successful(Bad(TransactionNotFoundError).accumulating)
+            Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
           }
         }
       }
@@ -175,10 +184,10 @@ class TransactionCollectorServiceSpec extends WordSpec {
               Future.successful(Good(pending))
             } else {
               ready = ready + txid
-              Future.successful(Bad(TransactionNotFoundError).accumulating)
+              Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
             }
           } else {
-            Future.successful(Bad(TransactionNotFoundError).accumulating)
+            Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
           }
         }
       }
