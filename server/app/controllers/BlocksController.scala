@@ -1,18 +1,16 @@
 package controllers
 
+import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
-import com.alexitc.playsonify.models.{ErrorId, WrappedExceptionError}
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.values.Height
 import com.xsn.explorer.services.{BlockService, TransactionService}
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
-import org.scalactic.{Bad, Every, Good}
 import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
-import scala.util.control.NonFatal
 
 class BlocksController @Inject() (
     blockService: BlockService,
@@ -27,36 +25,19 @@ class BlocksController @Inject() (
     blockService.getLatestBlocks()
   }
 
-  def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = Action.async(EmptyJsonParser) { request =>
-    implicit val lang = messagesApi.preferred(request).lang
-    val result = blockService.getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
-    result.map {
-      case Good((value, cacheable)) =>
-        val response = renderSuccessfulResult(Ok, value)
-        if (cacheable) {
-          response.withHeaders("Cache-Control" -> "public, max-age=31536000")
-        } else {
-          response.withHeaders("Cache-Control" -> "no-store")
+  def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
+    blockService
+        .getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
+        .toFutureOr
+        .map { case (value, cacheable) =>
+          val response = Ok(Json.toJson(value))
+          if (cacheable) {
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+          } else {
+            response.withHeaders("Cache-Control" -> "no-store")
+          }
         }
-
-      case Bad(errors) =>
-        val errorId = ErrorId.create
-        val status = getResultStatus(errors)
-        val json = renderErrors(errors)
-
-        logServerErrors(errorId, errors)
-        status(json)
-    }.recover {
-      case NonFatal(ex) =>
-        val errorId = ErrorId.create
-        val error = WrappedExceptionError(errorId, ex)
-        val errors = Every(error)
-        val json = renderErrors(errors)
-        val status = getResultStatus(errors)
-
-        logServerErrors(errorId, errors)
-        status(json)
-    }
+        .toFuture
   }
 
   /**

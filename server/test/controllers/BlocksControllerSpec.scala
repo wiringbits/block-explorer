@@ -356,6 +356,24 @@ class BlocksControllerSpec extends MyAPISpec {
     }
   }
 
+  "GET /blocks/headers" should {
+    "return the headers" in {
+      pending
+    }
+
+    "cache when all results from a query are delivered" in {
+      pending
+    }
+
+    "not cache when all results from a query are delivered but one of the latest 20 blocks are included" in {
+      pending
+    }
+
+    "not cache when retrieving headers in descending order" in {
+      pending
+    }
+  }
+
   private def matchBlock(expected: Block, actual: JsValue) = {
     val jsonBlock = actual
     val block = expected
