@@ -30,6 +30,22 @@
         path: /var/log/nginx
         state: directory
 
+    - name: Create the cache directory
+      become: yes
+      file:
+        path: /var/www/cache
+        state: directory
+        owner: www-data
+        group: www-data
+
+    - name: Create the web data directory
+      become: yes
+      file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+
     - name: Copy the site config
       become: yes
       copy:
@@ -93,14 +109,6 @@
       synchronize:
         src: web.zip
         dest: web.zip
-
-    - name: Create the web data directory
-      become: yes
-      file:
-        path: /var/www/html
-        state: directory
-        owner: www-data
-        group: www-data
 
     - name: Unpack the application
       become: yes

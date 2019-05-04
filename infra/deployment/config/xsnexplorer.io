@@ -19,21 +19,33 @@ server {
 
   # the backend api
   location /api/ltc {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
     rewrite ^/api/ltc/(.*) /$1 break;
     proxy_pass http://10.136.151.203:9000;
   }
 
   location /api/grs {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
     rewrite ^/api/grs/(.*) /$1 break;
     proxy_pass http://10.136.164.36:9000;
   }
 
   location /api/btc {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
     rewrite ^/api/btc/(.*) /$1 break;
     proxy_pass http://10.136.96.184:9000;
   }
 
   location /api/xsn {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
     rewrite ^/api/xsn/(.*) /$1 break;
     proxy_pass http://10.136.160.52:9000;
   }
