@@ -3,9 +3,14 @@
   gather_facts: no
   roles:
     - ubuntu-16-04
-    - java8-oracle
 
   tasks:
+    - name: Install java8
+      become: yes
+      apt:
+        name: default-jre
+        state: latest
+
     - name: Build the application
       shell: ./scripts/build-server.sh
       delegate_to: 127.0.0.1
