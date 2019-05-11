@@ -1,0 +1,128 @@
+---
+- hosts: lnd-litecoin
+  gather_facts: no
+  roles:
+    - ubuntu-16-04
+
+  vars:
+    # local data
+    - x_download_url: https://github.com/lightningnetwork/lnd/releases/download/v0.6-beta/lnd-linux-amd64-v0.6-beta.tar.gz
+    - x_download_checksum: sha1:385a7388e6ab618386e71562cc8d8569cd759d93
+    - x_config_src: config/lnd/lnd-litecoin.conf
+    - x_systemd_service_source: systemd-services/lnd.service
+    - x_systemd_service_name: lnd
+    # remote data
+    - x_user: lnd
+    - x_group: lnd
+    - x_home: /home/lnd
+    - x_config_dir: /home/lnd/.lnd
+    - x_config_file: /home/lnd/.lnd/lnd.conf
+    - x_download_dest: /home/ubuntu/lnd.tar.gz
+    - x_unarchive_dest: /home/lnd/app
+    - x_unarchive_dest_app: /home/lnd/app/lnd-linux-amd64-v0.6-beta/lnd
+    - x_app: /home/lnd/app/lnd
+
+  tasks:
+    - name: Create the {{ x_group }} group
+      become: yes
+      group:
+        name={{ x_group }}
+        state=present
+
+    - name: Create the {{ x_user }} user
+      become: yes
+      user:
+        name={{ x_user }}
+        group={{ x_group }}
+        state=present
+        system=yes
+
+    - name: Create the app directory
+      become: yes
+      file:
+        path={{ x_home }}/app
+        state=directory
+        owner={{ x_user }}
+        group={{ x_group }}
+
+    - name: Create the config directory
+      become: yes
+      file:
+        path={{ x_config_dir }}
+        state=directory
+        owner={{ x_user }}
+        group={{ x_group }}
+
+    - name: Download the application
+      get_url:
+        url={{ x_download_url }}
+        dest={{ x_download_dest }}
+        checksum={{ x_download_checksum }}
+
+    - name: Unpack the application
+      become: yes
+      unarchive:
+        remote_src=yes
+        src={{ x_download_dest }}
+        dest={{ x_unarchive_dest }}
+        owner={{ x_user }}
+        group={{ x_group }}
+
+    - name: Move the application to the right folder
+      become: yes
+      command: mv {{ x_unarchive_dest_app }} {{ x_unarchive_dest }}
+
+    - name: Set the application as executable
+      become: yes
+      file:
+        path: "{{ x_app }}"
+        mode: "u=rwx"
+
+    - name: Set the application config
+      become: yes
+      copy:
+        src={{ x_config_src }}
+        dest={{ x_config_file }}
+        owner={{ x_user }}
+        group={{ x_group }}
+
+    - name: Set the application files permissions
+      become: yes
+      file:
+        dest={{ x_config_dir }}
+        owner={{ x_user }}
+        group={{ x_group }}
+        recurse=yes
+
+    - name: Set the application files permissions
+      become: yes
+      file:
+        dest={{ x_unarchive_dest }}
+        owner={{ x_user }}
+        group={{ x_group }}
+        recurse=yes
+
+    - name: Add the systemd service
+      become: yes
+      copy:
+        src: "{{ x_systemd_service_source }}"
+        dest: /etc/systemd/system/
+        owner: root
+        group: root
+
+    - name: Pick up systemd changes
+      become: yes
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart the application
+      become: yes
+      systemd:
+        name: "{{ x_systemd_service_name }}"
+        state: restarted
+
+    - name: Enable the application to run on system startup
+      become: yes
+      systemd:
+        name: "{{ x_systemd_service_name }}"
+        enabled: yes
