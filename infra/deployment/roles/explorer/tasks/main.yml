@@ -1,0 +1,102 @@
+- name: Install java8
+  become: yes
+  apt:
+    name: default-jre
+    state: latest
+
+- name: Build the application
+  shell: ./scripts/build-server.sh
+  delegate_to: 127.0.0.1
+
+- name: Upload the application
+  synchronize:
+    src: app.zip
+    dest: app.zip
+
+- name: Create the play group
+  become: yes
+  group:
+    name: play
+    state: present
+
+- name: Create the play user
+  become: yes
+  user:
+    name: play
+    group: play
+    state: present
+    system: yes
+
+- name: Create the app directory
+  become: yes
+  file:
+    path: /home/play/app
+    state: directory
+    owner: play
+    group: play
+
+- name: Unpack the application
+  become: yes
+  unarchive:
+    remote_src: yes
+    src: app.zip
+    dest: /home/play/app
+    owner: play
+    group: play
+
+- name: Set the application config
+  become: yes
+  copy:
+    src: "{{ explorer_config_file }}"
+    dest: /home/play/app/.env
+    owner: play
+    group: play
+
+- name: Set the sentry config
+  become: yes
+  copy:
+    src: "files/sentry.properties"
+    dest: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/sentry.properties
+    owner: play
+    group: play
+
+- name: Add the servername to the sentry config
+  become: yes
+  lineinfile:
+    path: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/sentry.properties
+    line: "servername={{ explorer_service_name }}"
+    owner: play
+    group: play
+
+- name: Set the application files permissions
+  become: yes
+  file:
+    dest: /home/play/app
+    owner: play
+    group: play
+    recurse: yes
+
+- name: Add the systemd service
+  become: yes
+  copy:
+    src: "{{ explorer_systemd_service }}"
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+
+- name: Pick up systemd changes
+  become: yes
+  systemd:
+    daemon_reload: yes
+
+- name: Restart the application
+  become: yes
+  systemd:
+    name: "{{ explorer_service_name }}"
+    state: restarted
+
+- name: Enable the application to run on system startup
+  become: yes
+  systemd:
+    name: "{{ explorer_service_name }}"
+    enabled: yes
