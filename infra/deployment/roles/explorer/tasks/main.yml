@@ -54,17 +54,9 @@
 
 - name: Set the sentry config
   become: yes
-  copy:
-    src: "files/sentry.properties"
+  template:
+    src: "templates/sentry.properties.j2"
     dest: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/sentry.properties
-    owner: play
-    group: play
-
-- name: Add the servername to the sentry config
-  become: yes
-  lineinfile:
-    path: /home/play/app/xsn-block-explorer-0.1.0-SNAPSHOT/conf/sentry.properties
-    line: "servername={{ explorer_service_name }}"
     owner: play
     group: play
 
