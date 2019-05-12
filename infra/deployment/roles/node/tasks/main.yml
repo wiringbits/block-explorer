@@ -1,0 +1,95 @@
+- name: "Create the {{ node_group }} group"
+  become: yes
+  group:
+    name={{ node_group }}
+    state=present
+
+- name: "Create the {{ node_user }} user"
+  become: yes
+  user:
+    name={{ node_user }}
+    group={{ node_group }}
+    state=present
+    system=yes
+
+- name: Create the app directory
+  become: yes
+  file:
+    path=/home/{{ node_user }}/app
+    state=directory
+    owner={{ node_user }}
+    group={{ node_group }}
+
+- name: Create the data directory
+  become: yes
+  file:
+    path=/home/{{ node_user }}/{{ node_data_folder }}
+    state=directory
+    owner={{ node_user }}
+    group={{ node_group }}
+
+- name: Download the node
+  get_url:
+    url={{ node_download_url }}
+    dest={{ node_compressed_file }}
+    checksum={{ node_download_checksum }}
+
+- name: Unpack the node
+  become: yes
+  unarchive:
+    remote_src=yes
+    src={{ node_compressed_file }}
+    dest=/home/{{ node_user }}/app
+    owner={{ node_user }}
+    group={{ node_group }}
+
+- name: Move the application to the right folder
+  become: yes
+  command: mv /home/{{ node_user }}/app/{{ node_daemon_file }} /home/{{ node_user }}/app
+
+- name: Set the application as executable
+  become: yes
+  file:
+    path: "/home/{{ node_user }}/app/{{ node_executable }}"
+    mode: "u=rwx"
+
+- name: Set the application config
+  become: yes
+  copy:
+    src={{ node_config_file }}
+    dest=/home/{{ node_user }}/{{ node_data_folder }}/{{ node_config_filename }}
+    owner={{ node_user }}
+    group={{ node_group }}
+
+- name: Set the application files permissions
+  become: yes
+  file:
+    dest=/home/{{ node_user }}/
+    owner={{ node_user }}
+    group={{ node_group }}
+    recurse=yes
+
+- name: Add the systemd service
+  become: yes
+  template:
+    src: "templates/node-systemd.service.j2"
+    dest: "/etc/systemd/system/{{ node_service_name }}.service"
+    owner: root
+    group: root
+
+- name: Pick up systemd changes
+  become: yes
+  systemd:
+    daemon_reload: yes
+
+- name: Restart the application
+  become: yes
+  systemd:
+    name: "{{ node_service_name }}"
+    state: restarted
+
+- name: Enable the application to run on system startup
+  become: yes
+  systemd:
+    name: "{{ node_service_name }}"
+    enabled: yes

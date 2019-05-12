@@ -1,0 +1,16 @@
+[Unit]
+Description={{ node_service_name }}
+
+[Service]
+Type=simple
+WorkingDirectory=/home/{{ node_user }}/
+StandardOutput=tty
+StandardError=tty
+User={{ node_user }}
+LimitNOFILE=65535
+ExecStart=/home/{{ node_user }}/app/{{ node_executable }}
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
