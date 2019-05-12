@@ -7,5 +7,4 @@
 
   vars:
     explorer_config_file: 'config/explorer/dash-explorer.env'
-    explorer_systemd_service: 'systemd-services/dash-explorer.service'
     explorer_service_name: 'dash-explorer'

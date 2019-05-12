@@ -70,9 +70,9 @@
 
 - name: Add the systemd service
   become: yes
-  copy:
-    src: "{{ explorer_systemd_service }}"
-    dest: /etc/systemd/system/
+  template:
+    src: "templates/explorer-systemd.service.j2"
+    dest: "/etc/systemd/system/{{ explorer_service_name }}.service"
     owner: root
     group: root
 
