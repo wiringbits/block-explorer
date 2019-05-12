@@ -3,118 +3,17 @@
   gather_facts: no
   roles:
     - ubuntu-16-04
+    - node
 
   vars:
-    - x_user: dash
-    - x_group: dash
-    - x_home: /home/dash
-    - x_config_dir: /home/dash/.dashcore
-    - x_download_url: https://github.com/dashpay/dash/releases/download/v0.13.3.0/dashcore-0.13.3.0-x86_64-linux-gnu.tar.gz
-    - x_download_dest: /home/ubuntu/dash.tar.gz
-    - x_download_checksum: sha1:b9779f4feaeb8b1fe3699d7e36aecf4d0fd09745
-    - x_unarchive_dest: /home/dash/app
-
-  tasks:
-    - name: Create the dash group
-      become: yes
-      group:
-        name={{ x_group }}
-        state=present
-
-    - name: Create the dash user
-      become: yes
-      user:
-        name={{ x_user }}
-        group={{ x_group }}
-        state=present
-        system=yes
-
-    - name: Create the app directory
-      become: yes
-      file:
-        path={{ x_home }}/app
-        state=directory
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Create the config directory
-      become: yes
-      file:
-        path={{ x_config_dir }}
-        state=directory
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Download the dashd
-      get_url:
-        url={{ x_download_url }}
-        dest={{ x_download_dest }}
-        checksum={{ x_download_checksum }}
-
-    - name: Unpack the application
-      become: yes
-      unarchive:
-        remote_src=yes
-        src={{ x_download_dest }}
-        dest={{ x_unarchive_dest }}
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Move the application to the right folder
-      become: yes
-      command: mv {{ x_unarchive_dest }}/dashcore-0.13.3/bin/dashd {{ x_unarchive_dest }}
-
-    - name: Set the application as executable
-      become: yes
-      file:
-        path: "{{ x_unarchive_dest }}/dashd"
-        mode: "u=rwx"
-
-    - name: Set the application config
-      become: yes
-      copy:
-        src=config/dash.conf
-        dest={{ x_config_dir }}/dash.conf
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Set the application files permissions
-      become: yes
-      file:
-        dest={{ x_config_dir }}
-        owner={{ x_user }}
-        group={{ x_group }}
-        recurse=yes
-
-    - name: Set the application files permissions
-      become: yes
-      file:
-        dest={{ x_unarchive_dest }}
-        owner={{ x_user }}
-        group={{ x_group }}
-        recurse=yes
-
-    - name: Add the systemd service
-      become: yes
-      copy:
-        src: systemd-services/dashd.service
-        dest: /etc/systemd/system/
-        owner: root
-        group: root
-
-    - name: Pick up systemd changes
-      become: yes
-      systemd:
-        daemon_reload: yes
-
-    - name: Restart the application
-      become: yes
-      systemd:
-        name: dashd
-        state: restarted
-
-    - name: Enable the application to run on system startup
-      become: yes
-      systemd:
-        name: dashd
-        enabled: yes
+    - node_user: dash
+    - node_group: dash
+    - node_data_folder: '.dashcore'
+    - node_download_url: https://github.com/dashpay/dash/releases/download/v0.13.3.0/dashcore-0.13.3.0-x86_64-linux-gnu.tar.gz
+    - node_download_checksum: sha1:b9779f4feaeb8b1fe3699d7e36aecf4d0fd09745
+    - node_compressed_file: /home/ubuntu/dash.tar.gz
+    - node_daemon_file: dashcore-0.13.3/bin/dashd
+    - node_config_file: config/nodes/dash.conf
+    - node_config_filename: dash.conf
+    - node_executable: dashd
+    - node_service_name: dashd
