@@ -3,118 +3,21 @@
   gather_facts: no
   roles:
     - ubuntu-16-04
+    - node
 
   vars:
-    - x_user: bitcoin
-    - x_group: bitcoin
-    - x_home: /home/bitcoin
-    - x_config_dir: /home/bitcoin/.bitcoin
-    - x_download_url: https://bitcoin.org/bin/bitcoin-core-0.17.1/bitcoin-0.17.1-x86_64-linux-gnu.tar.gz
-    - x_download_dest: /home/ubuntu/bitcoin.tar.gz
-    - x_download_checksum: sha1:546ee35d4089c7ccc040a01cdff3362599b8bc53
-    - x_unarchive_dest: /home/bitcoin/app
-
-  tasks:
-    - name: Create the bitcoin group
-      become: yes
-      group:
-        name={{ x_group }}
-        state=present
-
-    - name: Create the bitcoin user
-      become: yes
-      user:
-        name={{ x_user }}
-        group={{ x_group }}
-        state=present
-        system=yes
-
-    - name: Create the app directory
-      become: yes
-      file:
-        path={{ x_home }}/app
-        state=directory
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Create the config directory
-      become: yes
-      file:
-        path={{ x_config_dir }}
-        state=directory
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Download the bitcoind
-      get_url:
-        url={{ x_download_url }}
-        dest={{ x_download_dest }}
-        checksum={{ x_download_checksum }}
-
-    - name: Unpack the application
-      become: yes
-      unarchive:
-        remote_src=yes
-        src={{ x_download_dest }}
-        dest={{ x_unarchive_dest }}
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Move the application to the right folder
-      become: yes
-      command: mv {{ x_unarchive_dest }}/bitcoin-0.17.1/bin/bitcoind {{ x_unarchive_dest }}
-
-    - name: Set the application as executable
-      become: yes
-      file:
-        path: "{{ x_unarchive_dest }}/bitcoind"
-        mode: "u=rwx"
-
-    - name: Set the application config
-      become: yes
-      copy:
-        src=config/bitcoin.conf
-        dest={{ x_config_dir }}/bitcoin.conf
-        owner={{ x_user }}
-        group={{ x_group }}
-
-    - name: Set the application files permissions
-      become: yes
-      file:
-        dest={{ x_config_dir }}
-        owner={{ x_user }}
-        group={{ x_group }}
-        recurse=yes
-
-    - name: Set the application files permissions
-      become: yes
-      file:
-        dest={{ x_unarchive_dest }}
-        owner={{ x_user }}
-        group={{ x_group }}
-        recurse=yes
-
-    - name: Add the systemd service
-      become: yes
-      copy:
-        src: systemd-services/bitcoin-rpc.service
-        dest: /etc/systemd/system/
-        owner: root
-        group: root
-
-    - name: Pick up systemd changes
-      become: yes
-      systemd:
-        daemon_reload: yes
-
-    - name: Restart the application
-      become: yes
-      systemd:
-        name: bitcoin-rpc
-        state: restarted
-
-    - name: Enable the application to run on system startup
-      become: yes
-      systemd:
-        name: bitcoin-rpc
-        enabled: yes
+    - node_user: bitcoin
+    - node_group: bitcoin
+    - node_data_folder: '.bitcoin'
+    - node_download_url: https://bitcoin.org/bin/bitcoin-core-0.18.0/bitcoin-0.18.0-x86_64-linux-gnu.tar.gz
+    - node_download_checksum: sha1:858bc1833dfdb8ae3c7df7206ff29e0d9c454696
+    - node_compressed_file: /home/ubuntu/bitcoin.tar.gz
+    - node_daemon_file: bitcoin-0.18.0/bin/bitcoind
+    - node_config_file: config/nodes/bitcoin.conf
+    - node_config_filename: bitcoin.conf
+    - node_executable: bitcoind
+    - node_service_name: bitcoin-rpc
+    - node_private_ip_map:
+        'bitcoind-01': '10.136.64.36'
+        'bitcoind-02': '10.136.184.206'
+        'bitcoind-03': '10.136.132.146'

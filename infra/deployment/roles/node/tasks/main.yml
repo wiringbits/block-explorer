@@ -61,6 +61,15 @@
     owner={{ node_user }}
     group={{ node_group }}
 
+- name: Set the rpc listen address
+  become: yes
+  lineinfile:
+    path=/home/{{ node_user }}/{{ node_data_folder }}/{{ node_config_filename }}
+    line="rpcbind={{ node_private_ip_map[inventory_hostname] }}"
+    owner={{ node_user }}
+    group={{ node_group }}
+  when: (node_private_ip_map is defined) and (node_private_ip_map['{{ inventory_hostname }}'] is defined)
+
 - name: Set the application files permissions
   become: yes
   file:
