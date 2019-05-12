@@ -3,104 +3,17 @@
   gather_facts: no
   roles:
     - ubuntu-16-04
+    - node
 
   vars:
-    - xsn_user: xsn
-    - xsn_group: xsn
-    - xsn_home: /home/xsn
-    - xsn_config_dir: /home/xsn/.xsncore
-    - xsn_download_url: https://github.com/X9Developers/XSN/releases/download/1.0.18/xsn-1.0.18-x86_64-linux-gnu.tar.gz
-    - xsn_download_dest: /home/ubuntu/xsn.tar.gz
-    - xsn_download_checksum: sha1:b657a9e5dce6193d051d64eab4c40686f41e0b98
-    - xsn_unarchive_dest: /home/xsn/app
-
-  tasks:
-    - name: Create the xsn group
-      become: yes
-      group:
-        name={{ xsn_group }}
-        state=present
-
-    - name: Create the xsn user
-      become: yes
-      user:
-        name={{ xsn_user }}
-        group={{ xsn_group }}
-        state=present
-        system=yes
-
-    - name: Create the app directory
-      become: yes
-      file:
-        path={{ xsn_home }}/app
-        state=directory
-        owner={{ xsn_user }}
-        group={{ xsn_group }}
-
-    - name: Create the config directory
-      become: yes
-      file:
-        path={{ xsn_config_dir }}
-        state=directory
-        owner={{ xsn_user }}
-        group={{ xsn_group }}
-
-    - name: Download the xsnd
-      get_url:
-        url={{ xsn_download_url }}
-        dest={{ xsn_download_dest }}
-        checksum={{ xsn_download_checksum }}
-
-    - name: Unpack the application
-      become: yes
-      unarchive:
-        remote_src=yes
-        src={{ xsn_download_dest }}
-        dest={{ xsn_unarchive_dest }}
-        owner={{ xsn_user }}
-        group={{ xsn_group }}
-
-    - name: Move the application to the right folder
-      become: yes
-      command: mv {{ xsn_unarchive_dest }}/xsn-1.0.18/bin/xsnd {{ xsn_unarchive_dest }}
-
-    - name: Set the application config
-      become: yes
-      copy:
-        src=config/xsn.conf
-        dest={{ xsn_config_dir }}/xsn.conf
-        owner={{ xsn_user }}
-        group={{ xsn_group }}
-
-    - name: Set the application files permissions
-      become: yes
-      file:
-        dest={{ xsn_home }}
-        owner={{ xsn_user }}
-        group={{ xsn_group }}
-        recurse=yes
-
-    - name: Add the systemd service
-      become: yes
-      copy:
-        src: systemd-services/xsn-rpc.service
-        dest: /etc/systemd/system/
-        owner: root
-        group: root
-
-    - name: Pick up systemd changes
-      become: yes
-      systemd:
-        daemon_reload: yes
-
-    - name: Restart the application
-      become: yes
-      systemd:
-        name: xsn-rpc
-        state: restarted
-
-    - name: Enable the application to run on system startup
-      become: yes
-      systemd:
-        name: xsn-rpc
-        enabled: yes
+    - node_user: xsn
+    - node_group: xsn
+    - node_data_folder: '.xsncore'
+    - node_download_url: https://github.com/X9Developers/XSN/releases/download/1.0.18/xsn-1.0.18-x86_64-linux-gnu.tar.gz
+    - node_download_checksum: sha1:b657a9e5dce6193d051d64eab4c40686f41e0b98
+    - node_compressed_file: /home/ubuntu/xsn.tar.gz
+    - node_daemon_file: xsn-1.0.18/bin/xsnd
+    - node_config_file: config/nodes/xsn.conf
+    - node_config_filename: xsn.conf
+    - node_executable: xsnd
+    - node_service_name: xsn-rpc
