@@ -1,0 +1,18 @@
+---
+- hosts: lnd-bitcoin
+  gather_facts: no
+  roles:
+    - ubuntu-16-04
+    - lnd
+
+  vars:
+    - node_user: lnd
+    - node_group: lnd
+    - node_data_folder: '.lnd'
+    - node_download_url: https://github.com/lightningnetwork/lnd/releases/download/v0.6-beta/lnd-linux-amd64-v0.6-beta.tar.gz
+    - node_download_checksum: sha1:385a7388e6ab618386e71562cc8d8569cd759d93
+    - node_compressed_file: /home/ubuntu/lnd.tar.gz
+    - node_daemon_file: lnd-linux-amd64-v0.6-beta/lnd
+    - node_config_file: config/lnd/lnd-bitcoin.conf
+    - node_config_filename: lnd.conf
+    - node_executable: lnd
