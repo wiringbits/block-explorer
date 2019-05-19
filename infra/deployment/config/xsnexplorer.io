@@ -42,6 +42,14 @@ server {
     proxy_pass http://10.136.96.184:9000;
   }
 
+  location /api/dash {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/dash/(.*) /$1 break;
+    proxy_pass http://10.136.168.102:9000;
+  }
+
   location /api/xsn {
     proxy_cache my_cache;
     add_header X-Cache-Status $upstream_cache_status;
