@@ -9,10 +9,9 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class TPoSContractFutureDataHandler @Inject() (
-    blockingDataHandler: TPoSContractBlockingDataHandler)(
-    implicit ec: DatabaseExecutionContext)
-    extends TPoSContractDataHandler[FutureApplicationResult] {
+class TPoSContractFutureDataHandler @Inject()(blockingDataHandler: TPoSContractBlockingDataHandler)(
+    implicit ec: DatabaseExecutionContext
+) extends TPoSContractDataHandler[FutureApplicationResult] {
 
   override def getBy(address: Address): FutureApplicationResult[List[TPoSContract]] = Future {
     blockingDataHandler.getBy(address)

@@ -34,15 +34,13 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     val diffList = differences(sortedHashes)
     val encodedBits = diffList.flatMap(golombEncode)
     val encodedBytes = encodedBits
-        .grouped(8)
-        .map { bits => UnsignedByte.parse(bits.padTo(8, Bit.Zero)) }
-        .toList
+      .grouped(8)
+      .map { bits =>
+        UnsignedByte.parse(bits.padTo(8, Bit.Zero))
+      }
+      .toList
 
-    GolombCodedSet.apply(
-      p = p,
-      m = m,
-      n = words.size,
-      data = encodedBytes)
+    GolombCodedSet.apply(p = p, m = m, n = words.size, data = encodedBytes)
   }
 
   /**
@@ -57,12 +55,14 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
    */
   private[gcs] def decode(encoded: List[UnsignedByte], n: Int): SortedSet[BigInt] = {
     val encodedBits = encoded.flatMap(_.bits)
-    val (_, _, result) = List.fill(n)(0)
-        .foldLeft((encodedBits, BigInt(0), List.empty[BigInt])) { case ((bits, acc, hashes), _) =>
+    val (_, _, result) = List
+      .fill(n)(0)
+      .foldLeft((encodedBits, BigInt(0), List.empty[BigInt])) {
+        case ((bits, acc, hashes), _) =>
           val (remaining, delta) = golombDecode(bits)
           val hash = acc + delta
           (remaining, hash, hash :: hashes)
-        }
+      }
 
     result.to[SortedSet]
   }
@@ -74,14 +74,14 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     val modulus = BigInt(m) * words.size
     val f = fastReduction(_: BigInt, modulus)
     words
-        .map(hash)
-        .map(f)
-        .to[SortedSet]
+      .map(hash)
+      .map(f)
+      .to[SortedSet]
   }
 
   private def golombEncode(x: BigInt): List[Bit] = {
     val q = (x >> p).toInt
-    val r = (x & ((1 << p)-1)).toInt
+    val r = (x & ((1 << p) - 1)).toInt
 
     val qBits = List.fill[Bit](q)(Bit.One) :+ Bit.Zero
     val rBits = toBits(r, p)
@@ -102,9 +102,9 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
 
   private def differences(sortedHashes: SortedSet[BigInt]): List[BigInt] = {
     (BigInt(0) :: sortedHashes.toList)
-        .sliding(2)
-        .map { case a :: b :: Nil => b - a }
-        .toList
+      .sliding(2)
+      .map { case a :: b :: Nil => b - a }
+      .toList
   }
 
   private def hash(string: String): BigInt = {
@@ -113,16 +113,16 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   }
 
   private def toBigInt(bits: List[Bit]): BigInt = {
-    bits.foldLeft(BigInt(0)) { case (acc, cur) =>
-      (acc * 2) + cur.toInt
+    bits.foldLeft(BigInt(0)) {
+      case (acc, cur) =>
+        (acc * 2) + cur.toInt
     }
   }
 
   private def toBits(x: Long, size: Int): List[Bit] = {
-    val bits = x
-        .toBinaryString
-        .flatMap(Bit.from)
-        .toList
+    val bits = x.toBinaryString
+      .flatMap(Bit.from)
+      .toList
 
     List.fill(size - bits.size)(Bit.Zero) ++ bits
   }
@@ -151,11 +151,11 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
    */
   private def fastReduction(v: BigInt, modulus: BigInt): BigInt = {
     val nHi = modulus >> 32
-    val nLo = modulus & 0xFFFFFFFFL
+    val nLo = modulus & 0XFFFFFFFFL
 
     // First, we'll spit the item we need to reduce into its higher and lower bits.
     val vhi = v >> 32
-    val vlo = v & 0xFFFFFFFFL
+    val vlo = v & 0XFFFFFFFFL
 
     // Then, we distribute multiplication over each part.
     val vnphi = vhi * nHi
@@ -164,7 +164,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     val vnplo = vlo * nLo
 
     // We calculate the carry bit.
-    val carry =	((vnpmid & 0xFFFFFFFFL) + (npvmid & 0xFFFFFFFFL) + (vnplo >> 32)) >> 32
+    val carry = ((vnpmid & 0XFFFFFFFFL) + (npvmid & 0XFFFFFFFFL) + (vnplo >> 32)) >> 32
 
     // Last, we add the high bits, the middle bits, and the carry.
     val result = vnphi + (vnpmid >> 32) + (npvmid >> 32) + carry

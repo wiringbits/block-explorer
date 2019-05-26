@@ -7,4 +7,5 @@ case class AddressTransactionDetails(
     txid: TransactionId,
     time: Long,
     received: BigDecimal = 0,
-    sent: BigDecimal = 0)
+    sent: BigDecimal = 0
+)

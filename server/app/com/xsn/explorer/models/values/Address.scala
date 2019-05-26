@@ -22,18 +22,20 @@ object Address {
 
   def fromHex(hex: String): Option[Address] = {
     Try { DatatypeConverter.parseHexBinary(hex) }
-        .map { bytes => new String(bytes) }
-        .toOption
-        .flatMap(from)
+      .map { bytes =>
+        new String(bytes)
+      }
+      .toOption
+      .flatMap(from)
   }
 
   implicit val reads: Reads[Address] = Reads { json =>
     json.validate[String].flatMap { string =>
       from(string)
-          .map(JsSuccess.apply(_))
-          .getOrElse {
-            JsError.apply("Invalid address")
-          }
+        .map(JsSuccess.apply(_))
+        .getOrElse {
+          JsError.apply("Invalid address")
+        }
     }
   }
 }

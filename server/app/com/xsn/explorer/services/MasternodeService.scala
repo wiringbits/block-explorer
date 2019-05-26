@@ -15,13 +15,16 @@ import org.scalactic.{Bad, Good}
 
 import scala.concurrent.ExecutionContext
 
-class MasternodeService @Inject() (
+class MasternodeService @Inject()(
     queryValidator: PaginatedQueryValidator,
     masternodeOrderingParser: MasternodeOrderingParser,
-    xsnService: XSNService)(
-    implicit ec: ExecutionContext) {
+    xsnService: XSNService
+)(implicit ec: ExecutionContext) {
 
-  def getMasternodes(paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[Masternode] = {
+  def getMasternodes(
+      paginatedQuery: PaginatedQuery,
+      orderingQuery: OrderingQuery
+  ): FuturePaginatedResult[Masternode] = {
     val result = for {
       validatedQuery <- queryValidator.validate(paginatedQuery, 2000).toFutureOr
       ordering <- masternodeOrderingParser.from(orderingQuery).toFutureOr
@@ -34,10 +37,10 @@ class MasternodeService @Inject() (
   def getMasternode(ipAddressString: String): FutureApplicationResult[Masternode] = {
     val result = for {
       ipAddress <- IPAddress
-          .from(ipAddressString)
-          .map(Good(_))
-          .getOrElse(Bad(IPAddressFormatError).accumulating)
-          .toFutureOr
+        .from(ipAddressString)
+        .map(Good(_))
+        .getOrElse(Bad(IPAddressFormatError).accumulating)
+        .toFutureOr
 
       masternode <- xsnService.getMasternode(ipAddress).toFutureOr
     } yield masternode
@@ -47,7 +50,7 @@ class MasternodeService @Inject() (
 
   private def build(list: List[Masternode], query: PaginatedQuery, ordering: FieldOrdering[MasternodeField]) = {
     val partial = sort(list, ordering)
-        .slice(query.offset.int, query.offset.int + query.limit.int)
+      .slice(query.offset.int, query.offset.int + query.limit.int)
 
     PaginatedResult(query.offset, query.limit, Count(list.size), partial)
   }

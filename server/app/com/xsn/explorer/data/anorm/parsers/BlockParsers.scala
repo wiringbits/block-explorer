@@ -16,8 +16,8 @@ object BlockParsers {
   val parseMerkleRoot = parseBlockhash("merkle_root")
 
   val parseExtractionMethod = str("extraction_method")
-      .map(BlockExtractionMethod.withNameInsensitiveOption)
-      .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
+    .map(BlockExtractionMethod.withNameInsensitiveOption)
+    .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
 
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
@@ -27,39 +27,37 @@ object BlockParsers {
   val parseChainwork = str("chainwork")
   val parseDifficulty = get[BigDecimal]("difficulty")
 
-  val parseBlock = (
-      parseBlockhash() ~
-          parseNextBlockhash.? ~
-          parsePreviousBlockhash.? ~
-          parseTposContract.? ~
-          parseMerkleRoot ~
-          parseSize ~
-          parseHeight ~
-          parseVersion ~
-          parseTime ~
-          parseMedianTime ~
-          parseNonce ~
-          parseBits ~
-          parseChainwork ~
-          parseDifficulty ~
-          parseExtractionMethod).map {
+  val parseBlock = (parseBlockhash() ~
+    parseNextBlockhash.? ~
+    parsePreviousBlockhash.? ~
+    parseTposContract.? ~
+    parseMerkleRoot ~
+    parseSize ~
+    parseHeight ~
+    parseVersion ~
+    parseTime ~
+    parseMedianTime ~
+    parseNonce ~
+    parseBits ~
+    parseChainwork ~
+    parseDifficulty ~
+    parseExtractionMethod).map {
 
     case hash ~
-        nextBlockhash ~
-        previousBlockhash ~
-        tposContract ~
-        merkleRoot ~
-        size ~
-        height ~
-        version ~
-        time ~
-        medianTime ~
-        nonce ~
-        bits ~
-        chainwork ~
-        difficulty ~
-        extractionMethod =>
-
+          nextBlockhash ~
+          previousBlockhash ~
+          tposContract ~
+          merkleRoot ~
+          size ~
+          height ~
+          version ~
+          time ~
+          medianTime ~
+          nonce ~
+          bits ~
+          chainwork ~
+          difficulty ~
+          extractionMethod =>
       Block(
         hash = hash,
         previousBlockhash = previousBlockhash,

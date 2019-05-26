@@ -12,21 +12,25 @@ case class Transaction[VIN <: TransactionVIN](
     blocktime: Long,
     confirmations: Confirmations,
     vin: List[VIN],
-    vout: List[TransactionVOUT])
+    vout: List[TransactionVOUT]
+)
 
 object Transaction {
 
   implicit val reads: Reads[Transaction[TransactionVIN]] = {
     val builder = (__ \ 'txid).read[TransactionId] and
-        (__ \ 'size).read[Size] and
-        (__ \ 'blockhash).read[Blockhash] and
-        (__ \ 'time).readNullable[Long] and
-        (__ \ 'blocktime).readNullable[Long] and
-        (__ \ 'confirmations).read[Confirmations] and
-        (__ \ 'vout).read[List[TransactionVOUT]] and
-        (__ \ 'vin).readNullable[List[JsValue]]
-            .map(_ getOrElse List.empty)
-            .map { list => list.flatMap(_.asOpt[TransactionVIN]) }
+      (__ \ 'size).read[Size] and
+      (__ \ 'blockhash).read[Blockhash] and
+      (__ \ 'time).readNullable[Long] and
+      (__ \ 'blocktime).readNullable[Long] and
+      (__ \ 'confirmations).read[Confirmations] and
+      (__ \ 'vout).read[List[TransactionVOUT]] and
+      (__ \ 'vin)
+        .readNullable[List[JsValue]]
+        .map(_ getOrElse List.empty)
+        .map { list =>
+          list.flatMap(_.asOpt[TransactionVIN])
+        }
 
     // TODO: Enfore blocktime and time fields when https://github.com/X9Developers/XSN/issues/72 is fixed.
     builder.apply { (id, size, blockHash, time, blockTime, confirmations, vout, vin) =>

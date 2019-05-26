@@ -13,9 +13,7 @@ import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 
-class BalancePostgresDataHandler @Inject() (
-    override val database: Database,
-    balancePostgresDAO: BalancePostgresDAO)
+class BalancePostgresDataHandler @Inject()(override val database: Database, balancePostgresDAO: BalancePostgresDAO)
     extends BalanceBlockingDataHandler
     with AnormPostgresDataHandler {
 
@@ -27,8 +25,8 @@ class BalancePostgresDataHandler @Inject() (
 
   override def get(
       query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
-
+      ordering: FieldOrdering[BalanceField]
+  ): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
     val balances = balancePostgresDAO.get(query, ordering)
     val total = balancePostgresDAO.count
     val result = PaginatedResult(query.offset, query.limit, total, balances)
@@ -46,8 +44,8 @@ class BalancePostgresDataHandler @Inject() (
 
   override def getNonZeroBalances(
       query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
-
+      ordering: FieldOrdering[BalanceField]
+  ): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
     val balances = balancePostgresDAO.getNonZeroBalances(query, ordering)
     val total = balancePostgresDAO.countNonZeroBalances
     val result = PaginatedResult(query.offset, query.limit, total, balances)
@@ -55,11 +53,12 @@ class BalancePostgresDataHandler @Inject() (
     Good(result)
   }
 
-  override def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] = withConnection { implicit conn =>
-    val result = lastSeenAddress
-            .map { balancePostgresDAO.getHighestBalances(_, limit) }
-            .getOrElse { balancePostgresDAO.getHighestBalances(limit) }
+  override def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] =
+    withConnection { implicit conn =>
+      val result = lastSeenAddress
+        .map { balancePostgresDAO.getHighestBalances(_, limit) }
+        .getOrElse { balancePostgresDAO.getHighestBalances(limit) }
 
-    Good(result)
-  }
+      Good(result)
+    }
 }

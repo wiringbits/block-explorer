@@ -15,15 +15,15 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 
-class TransactionService @Inject() (
+class TransactionService @Inject()(
     paginatedQueryValidator: PaginatedQueryValidator,
     orderingConditionParser: OrderingConditionParser,
     transactionOrderingParser: TransactionOrderingParser,
     addressValidator: AddressValidator,
     transactionIdValidator: TransactionIdValidator,
     blockhashValidator: BlockhashValidator,
-    transactionFutureDataHandler: TransactionFutureDataHandler)(
-    implicit ec: ExecutionContext) {
+    transactionFutureDataHandler: TransactionFutureDataHandler
+)(implicit ec: ExecutionContext) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -32,7 +32,8 @@ class TransactionService @Inject() (
   def getTransactions(
       addressString: String,
       paginatedQuery: PaginatedQuery,
-      orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
+      orderingQuery: OrderingQuery
+  ): FuturePaginatedResult[TransactionWithValues] = {
 
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
@@ -48,7 +49,8 @@ class TransactionService @Inject() (
       addressString: String,
       limit: Limit,
       lastSeenTxidString: Option[String],
-      orderingConditionString: String): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+      orderingConditionString: String
+  ): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
 
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
@@ -67,7 +69,11 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
-  def getByBlockhash(blockhashString: String, paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[TransactionWithValues] = {
+  def getByBlockhash(
+      blockhashString: String,
+      paginatedQuery: PaginatedQuery,
+      orderingQuery: OrderingQuery
+  ): FuturePaginatedResult[TransactionWithValues] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
@@ -78,7 +84,11 @@ class TransactionService @Inject() (
     result.toFuture
   }
 
-  def getByBlockhash(blockhashString: String, limit: Limit, lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[TransactionWithValues]]] = {
+  def getByBlockhash(
+      blockhashString: String,
+      limit: Limit,
+      lastSeenTxidString: Option[String]
+  ): FutureApplicationResult[WrappedResult[List[TransactionWithValues]]] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
@@ -93,7 +103,8 @@ class TransactionService @Inject() (
   def getLightWalletTransactionsByBlockhash(
       blockhashString: String,
       limit: Limit,
-      lastSeenTxidString: Option[String]): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+      lastSeenTxidString: Option[String]
+  ): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
 
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr

@@ -10,26 +10,28 @@ import com.xsn.explorer.models.values.{Address, TransactionId}
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
+class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def batchInsertInputs(
-      inputs: List[(TransactionId, Transaction.Input)])(
-      implicit conn: Connection): Option[List[(TransactionId, Transaction.Input)]] = {
+      inputs: List[(TransactionId, Transaction.Input)]
+  )(implicit conn: Connection): Option[List[(TransactionId, Transaction.Input)]] = {
 
     inputs match {
       case Nil => Some(inputs)
 
       case _ =>
-        val params = inputs.map { case (txid, input) =>
-          List(
-            'txid -> txid.string: NamedParameter,
-            'index -> input.index: NamedParameter,
-            'from_txid -> input.fromTxid.string: NamedParameter,
-            'from_output_index -> input.fromOutputIndex: NamedParameter,
-            'value -> input.value: NamedParameter,
-            'addresses -> input.addresses.map(_.string).toArray: NamedParameter)
+        val params = inputs.map {
+          case (txid, input) =>
+            List(
+              'txid -> txid.string: NamedParameter,
+              'index -> input.index: NamedParameter,
+              'from_txid -> input.fromTxid.string: NamedParameter,
+              'from_output_index -> input.fromOutputIndex: NamedParameter,
+              'value -> input.value: NamedParameter,
+              'addresses -> input.addresses.map(_.string).toArray: NamedParameter
+            )
         }
 
         val batch = BatchSql(
@@ -46,7 +48,7 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         val result = batch.execute()
         val success = result.forall(_ == 1)
         if (success ||
-            explorerConfig.liteVersionConfig.enabled) {
+          explorerConfig.liteVersionConfig.enabled) {
 
           Some(inputs)
         } else {
@@ -63,8 +65,9 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, from_txid, from_output_index, value, addresses
       """.stripMargin
     ).on(
-      'txid -> txid.string
-    ).as(parseTransactionInput.*)
+        'txid -> txid.string
+      )
+      .as(parseTransactionInput.*)
   }
 
   def getInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
@@ -75,8 +78,9 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |WHERE txid = {txid}
       """.stripMargin
     ).on(
-      'txid -> txid.string
-    ).as(parseTransactionInput.*)
+        'txid -> txid.string
+      )
+      .as(parseTransactionInput.*)
   }
 
   def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
@@ -88,8 +92,9 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      {address} = ANY(addresses)
       """.stripMargin
     ).on(
-      'txid -> txid.string,
-      'address -> address.string
-    ).as(parseTransactionInput.*)
+        'txid -> txid.string,
+        'address -> address.string
+      )
+      .as(parseTransactionInput.*)
   }
 }

@@ -31,6 +31,7 @@ class StatisticsPostgresDAO {
 }
 
 object StatisticsPostgresDAO {
+
   /**
    * We need to exclude the burn address from the total supply.
    */

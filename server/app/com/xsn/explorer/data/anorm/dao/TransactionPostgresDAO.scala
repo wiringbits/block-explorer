@@ -15,13 +15,14 @@ import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class TransactionPostgresDAO @Inject() (
+class TransactionPostgresDAO @Inject()(
     explorerConfig: ExplorerConfig,
     transactionInputDAO: TransactionInputPostgresDAO,
     transactionOutputDAO: TransactionOutputPostgresDAO,
     tposContractDAO: TPoSContractDAO,
     addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO,
-    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter
+) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -40,20 +41,26 @@ class TransactionPostgresDAO @Inject() (
     } yield Transaction.HasIO(partialTx, inputs = transaction.inputs, outputs = transaction.outputs)
   }
 
-  def insert(transactions: List[Transaction.HasIO], tposContracts: List[TPoSContract])(implicit conn: Connection): Option[List[Transaction]] = {
+  def insert(transactions: List[Transaction.HasIO], tposContracts: List[TPoSContract])(
+      implicit conn: Connection
+  ): Option[List[Transaction]] = {
     for {
       r <- batchInsert(transactions.map(_.transaction))
 
       outputs = transactions.flatMap(_.outputs)
       _ <- transactionOutputDAO.batchInsertOutputs(outputs)
 
-      inputs = transactions.flatMap { tx => tx.inputs.map(tx.id -> _) }
+      inputs = transactions.flatMap { tx =>
+        tx.inputs.map(tx.id -> _)
+      }
       _ <- transactionInputDAO.batchInsertInputs(inputs)
     } yield {
       insertDetails(transactions)
       spend(transactions)
       closeContracts(transactions)
-      tposContracts.foreach { contract => tposContractDAO.create(contract) }
+      tposContracts.foreach { contract =>
+        tposContractDAO.create(contract)
+      }
       r
     }
   }
@@ -65,7 +72,9 @@ class TransactionPostgresDAO @Inject() (
   }
 
   private def spend(transactions: List[Transaction.HasIO])(implicit conn: Connection): Unit = {
-    val spendResult = transactions.map { tx => transactionOutputDAO.batchSpend(tx.id, tx.inputs) }
+    val spendResult = transactions.map { tx =>
+      transactionOutputDAO.batchSpend(tx.id, tx.inputs)
+    }
 
     if (explorerConfig.liteVersionConfig.enabled) {
       ()
@@ -89,13 +98,15 @@ class TransactionPostgresDAO @Inject() (
     transactions match {
       case Nil => Some(transactions)
       case _ =>
-        val params = transactions.zipWithIndex.map { case (transaction, index) =>
-          List(
-            'txid -> transaction.id.string: NamedParameter,
-            'blockhash -> transaction.blockhash.string: NamedParameter,
-            'time -> transaction.time: NamedParameter,
-            'size -> transaction.size.int: NamedParameter,
-            'index -> index: NamedParameter)
+        val params = transactions.zipWithIndex.map {
+          case (transaction, index) =>
+            List(
+              'txid -> transaction.id.string: NamedParameter,
+              'blockhash -> transaction.blockhash.string: NamedParameter,
+              'time -> transaction.time: NamedParameter,
+              'size -> transaction.size.int: NamedParameter,
+              'index -> index: NamedParameter
+            )
         }
 
         val batch = BatchSql(
@@ -130,20 +141,23 @@ class TransactionPostgresDAO @Inject() (
         |ORDER BY index DESC
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string
-    ).as(parseTransaction.*)
+        'blockhash -> blockhash.string
+      )
+      .as(parseTransaction.*)
 
     val result = expectedTransactions.map { tx =>
       val _ = (
-          tposContractDAO.deleteBy(tx.id),
-          addressTransactionDetailsDAO.deleteDetails(tx.id)
+        tposContractDAO.deleteBy(tx.id),
+        addressTransactionDetailsDAO.deleteDetails(tx.id)
       )
       val inputs = transactionInputDAO.deleteInputs(tx.id)
       val outputs = transactionOutputDAO.deleteOutputs(tx.id)
 
       inputs
-          .map { input => TPoSContract.Id(input.fromTxid, input.fromOutputIndex) }
-          .foreach(tposContractDAO.open(_))
+        .map { input =>
+          TPoSContract.Id(input.fromTxid, input.fromOutputIndex)
+        }
+        .foreach(tposContractDAO.open(_))
 
       Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
@@ -155,19 +169,22 @@ class TransactionPostgresDAO @Inject() (
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string
-    ).as(parseTransaction.*)
+        'blockhash -> blockhash.string
+      )
+      .as(parseTransaction.*)
 
     Option(deletedTransactions)
-        .filter(_.size == expectedTransactions.size)
-        .map(_ => result)
-        .getOrElse { throw new RuntimeException("Failed to delete transactions consistently")} // this should not happen
+      .filter(_.size == expectedTransactions.size)
+      .map(_ => result)
+      .getOrElse { throw new RuntimeException("Failed to delete transactions consistently") } // this should not happen
   }
 
   /**
    * Get the transactions by the given address (sorted by time).
    */
-  def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[Transaction.HasIO] = {
+  def getBy(address: Address, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[Transaction.HasIO] = {
     val order = toSQL(orderingCondition)
 
     val transactions = SQL(
@@ -179,9 +196,10 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'address -> address.string,
-      'limit -> limit.int
-    ).as(parseTransaction.*)
+        'address -> address.string,
+        'limit -> limit.int
+      )
+      .as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -198,12 +216,9 @@ class TransactionPostgresDAO @Inject() (
    * - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are retrieved.
    * - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are retrieved.
    */
-  def getBy(
-      address: Address,
-      lastSeenTxid: TransactionId,
-      limit: Limit,
-      orderingCondition: OrderingCondition)(
-      implicit conn: Connection): List[Transaction.HasIO] = {
+  def getBy(address: Address, lastSeenTxid: TransactionId, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[Transaction.HasIO] = {
 
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
@@ -227,10 +242,11 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'address -> address.string,
-      'limit -> limit.int,
-      'lastSeenTxid -> lastSeenTxid.string
-    ).as(parseTransaction.*)
+        'address -> address.string,
+        'limit -> limit.int,
+        'lastSeenTxid -> lastSeenTxid.string
+      )
+      .as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -241,11 +257,9 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  def getBy(
-      address: Address,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField])(
-      implicit conn: Connection): List[TransactionWithValues] = {
+  def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField])(
+      implicit conn: Connection
+  ): List[TransactionWithValues] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
 
@@ -260,10 +274,11 @@ class TransactionPostgresDAO @Inject() (
          |LIMIT {limit}
       """.stripMargin
     ).on(
-      'address -> address.string,
-      'offset -> paginatedQuery.offset.int,
-      'limit -> paginatedQuery.limit.int
-    ).as(parseTransactionWithValues.*)
+        'address -> address.string,
+        'offset -> paginatedQuery.offset.int,
+        'limit -> paginatedQuery.limit.int
+      )
+      .as(parseTransactionWithValues.*)
   }
 
   def countBy(address: Address)(implicit conn: Connection): Count = {
@@ -274,17 +289,16 @@ class TransactionPostgresDAO @Inject() (
         |  WHERE address = {address}
       """.stripMargin
     ).on(
-      'address -> address.string
-    ).as(SqlParser.scalar[Int].single)
+        'address -> address.string
+      )
+      .as(SqlParser.scalar[Int].single)
 
     Count(result)
   }
 
-  def getByBlockhash(
-      blockhash: Blockhash,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField])(
-      implicit conn: Connection): List[TransactionWithValues] = {
+  def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField])(
+      implicit conn: Connection
+  ): List[TransactionWithValues] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
 
@@ -305,10 +319,11 @@ class TransactionPostgresDAO @Inject() (
          |LIMIT {limit}
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string,
-      'offset -> paginatedQuery.offset.int,
-      'limit -> paginatedQuery.limit.int
-    ).as(parseTransactionWithValues.*)
+        'blockhash -> blockhash.string,
+        'offset -> paginatedQuery.offset.int,
+        'limit -> paginatedQuery.limit.int
+      )
+      .as(parseTransactionWithValues.*)
   }
 
   def countByBlockhash(blockhash: Blockhash)(implicit conn: Connection): Count = {
@@ -319,8 +334,9 @@ class TransactionPostgresDAO @Inject() (
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string
-    ).as(SqlParser.scalar[Int].single)
+        'blockhash -> blockhash.string
+      )
+      .as(SqlParser.scalar[Int].single)
 
     Count(result)
   }
@@ -337,12 +353,15 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'blockhash -> blockhash.string
-    ).as(parseTransactionWithValues.*)
+        'limit -> limit.int,
+        'blockhash -> blockhash.string
+      )
+      .as(parseTransactionWithValues.*)
   }
 
-  def getByBlockhash(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[TransactionWithValues] = {
+  def getByBlockhash(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(
+      implicit conn: Connection
+  ): List[TransactionWithValues] = {
     SQL(
       """
         |WITH CTE AS (
@@ -360,13 +379,16 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'blockhash -> blockhash.string,
-      'lastSeenTxid -> lastSeenTxid.string
-    ).as(parseTransactionWithValues.*)
+        'limit -> limit.int,
+        'blockhash -> blockhash.string,
+        'lastSeenTxid -> lastSeenTxid.string
+      )
+      .as(parseTransactionWithValues.*)
   }
 
-  def getTransactionsWithIOBy(blockhash: Blockhash, limit: Limit)(implicit conn: Connection): List[Transaction.HasIO] = {
+  def getTransactionsWithIOBy(blockhash: Blockhash, limit: Limit)(
+      implicit conn: Connection
+  ): List[Transaction.HasIO] = {
     val transactions = SQL(
       """
         |SELECT t.txid, t.blockhash, t.time, t.size
@@ -376,9 +398,10 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'blockhash -> blockhash.string
-    ).as(parseTransaction.*)
+        'limit -> limit.int,
+        'blockhash -> blockhash.string
+      )
+      .as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -389,7 +412,9 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  def getTransactionsWithIOBy(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(implicit conn: Connection): List[Transaction.HasIO] = {
+  def getTransactionsWithIOBy(blockhash: Blockhash, lastSeenTxid: TransactionId, limit: Limit)(
+      implicit conn: Connection
+  ): List[Transaction.HasIO] = {
     val transactions = SQL(
       """
         |WITH CTE AS (
@@ -405,10 +430,11 @@ class TransactionPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'blockhash -> blockhash.string,
-      'lastSeenTxid -> lastSeenTxid.string
-    ).as(parseTransaction.*)
+        'limit -> limit.int,
+        'blockhash -> blockhash.string,
+        'lastSeenTxid -> lastSeenTxid.string
+      )
+      .as(parseTransaction.*)
 
     for {
       tx <- transactions
@@ -419,7 +445,9 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  private def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
+  private def upsertTransaction(index: Int, transaction: Transaction)(
+      implicit conn: Connection
+  ): Option[Transaction] = {
     SQL(
       """
         |INSERT INTO transactions
@@ -434,12 +462,13 @@ class TransactionPostgresDAO @Inject() (
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
-      'txid -> transaction.id.string,
-      'blockhash -> transaction.blockhash.string,
-      'time -> transaction.time,
-      'size -> transaction.size.int,
-      'index -> index
-    ).as(parseTransaction.singleOpt)
+        'txid -> transaction.id.string,
+        'blockhash -> transaction.blockhash.string,
+        'time -> transaction.time,
+        'size -> transaction.size.int,
+        'index -> index
+      )
+      .as(parseTransaction.singleOpt)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

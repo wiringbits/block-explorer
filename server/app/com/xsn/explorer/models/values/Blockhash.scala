@@ -24,10 +24,10 @@ object Blockhash {
   implicit val reads: Reads[Blockhash] = Reads { json =>
     json.validate[String].flatMap { string =>
       from(string)
-          .map(JsSuccess.apply(_))
-          .getOrElse {
-            JsError.apply("Invalid blockhash")
-          }
+        .map(JsSuccess.apply(_))
+        .getOrElse {
+          JsError.apply("Invalid blockhash")
+        }
     }
   }
 }

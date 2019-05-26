@@ -11,7 +11,8 @@ case class TransactionDetails(
     blocktime: Long,
     confirmations: Confirmations,
     input: List[TransactionValue],
-    output: List[TransactionValue]) {
+    output: List[TransactionValue]
+) {
 
   lazy val fee: BigDecimal = {
     val vin = input.map(_.value).sum

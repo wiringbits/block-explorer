@@ -21,12 +21,13 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string,
-      'm -> filter.m,
-      'n -> filter.n,
-      'p -> filter.p,
-      'hex -> filter.hex.string
-    ).as(parseFilter.single)
+        'blockhash -> blockhash.string,
+        'm -> filter.m,
+        'n -> filter.n,
+        'p -> filter.p,
+        'hex -> filter.hex.string
+      )
+      .as(parseFilter.single)
   }
 
   def delete(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
@@ -37,8 +38,9 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string
-    ).as(parseFilter.singleOpt)
+        'blockhash -> blockhash.string
+      )
+      .as(parseFilter.singleOpt)
   }
 
   def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
@@ -49,7 +51,8 @@ class BlockFilterPostgresDAO {
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string
-    ).as(parseFilter.singleOpt)
+        'blockhash -> blockhash.string
+      )
+      .as(parseFilter.singleOpt)
   }
 }

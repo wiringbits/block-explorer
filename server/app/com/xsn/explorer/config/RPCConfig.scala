@@ -20,7 +20,7 @@ object RPCConfig {
   case class Password(string: String) extends AnyVal
 }
 
-class PlayRPCConfig @Inject() (config: Configuration) extends RPCConfig {
+class PlayRPCConfig @Inject()(config: Configuration) extends RPCConfig {
 
   import RPCConfig._
 

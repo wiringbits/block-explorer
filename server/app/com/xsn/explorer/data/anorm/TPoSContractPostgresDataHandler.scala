@@ -9,9 +9,7 @@ import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database
 
-class TPoSContractPostgresDataHandler @Inject() (
-    override val database: Database,
-    tposContractDAO: TPoSContractDAO)
+class TPoSContractPostgresDataHandler @Inject()(override val database: Database, tposContractDAO: TPoSContractDAO)
     extends TPoSContractBlockingDataHandler
     with AnormPostgresDataHandler {
 

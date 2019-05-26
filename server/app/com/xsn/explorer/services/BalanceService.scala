@@ -14,12 +14,12 @@ import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
-class BalanceService @Inject() (
+class BalanceService @Inject()(
     paginatedQueryValidator: PaginatedQueryValidator,
     balanceOrderingParser: BalanceOrderingParser,
     addressValidator: AddressValidator,
-    balanceFutureDataHandler: BalanceFutureDataHandler)(
-    implicit ec: ExecutionContext) {
+    balanceFutureDataHandler: BalanceFutureDataHandler
+)(implicit ec: ExecutionContext) {
 
   def get(paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[Balance] = {
     val result = for {
@@ -31,7 +31,10 @@ class BalanceService @Inject() (
     result.toFuture
   }
 
-  def getHighest(limit: Limit, lastSeenAddressString: Option[String]): FutureApplicationResult[WrappedResult[List[Balance]]] = {
+  def getHighest(
+      limit: Limit,
+      lastSeenAddressString: Option[String]
+  ): FutureApplicationResult[WrappedResult[List[Balance]]] = {
     val result = for {
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), 100).toFutureOr
       lastSeenAddress <- validate(lastSeenAddressString, addressValidator.validate).toFutureOr

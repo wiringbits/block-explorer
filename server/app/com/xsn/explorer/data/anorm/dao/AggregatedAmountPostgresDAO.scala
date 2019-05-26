@@ -14,8 +14,9 @@ class AggregatedAmountPostgresDAO {
         |WHERE name = 'available_coins'
       """.stripMargin
     ).on(
-      'delta -> delta
-    ).executeUpdate()
+        'delta -> delta
+      )
+      .executeUpdate()
 
     require(affectedRows == 1)
   }

@@ -6,9 +6,7 @@ import com.xsn.explorer.services.MasternodeService
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 
-class MasternodesController @Inject() (
-    masternodeService: MasternodeService,
-    cc: MyJsonControllerComponents)
+class MasternodesController @Inject()(masternodeService: MasternodeService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
   import Codecs._

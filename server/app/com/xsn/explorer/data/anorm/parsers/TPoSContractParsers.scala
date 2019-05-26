@@ -10,22 +10,22 @@ object TPoSContractParsers {
 
   val parseOwner = parseAddress("owner")
   val parseMerchant = parseAddress("merchant")
+
   val parseMerchantCommission = int("merchant_commission")
-      .map(TPoSContract.Commission.from)
-      .map { _.getOrElse(throw new RuntimeException("corrupted merchant_commission")) }
+    .map(TPoSContract.Commission.from)
+    .map { _.getOrElse(throw new RuntimeException("corrupted merchant_commission")) }
 
   val parseTPoSContractState = str("state")
-      .map(TPoSContract.State.withNameInsensitiveOption)
-      .map { _.getOrElse(throw new RuntimeException("corrupted state")) }
+    .map(TPoSContract.State.withNameInsensitiveOption)
+    .map { _.getOrElse(throw new RuntimeException("corrupted state")) }
 
-  val parseTPoSContract = (
-      parseTransactionId() ~
-      parseIndex ~
-      parseOwner ~
-      parseMerchant ~
-      parseMerchantCommission ~
-      parseTime ~
-      parseTPoSContractState).map {
+  val parseTPoSContract = (parseTransactionId() ~
+    parseIndex ~
+    parseOwner ~
+    parseMerchant ~
+    parseMerchantCommission ~
+    parseTime ~
+    parseTPoSContractState).map {
 
     case txid ~ index ~ owner ~ merchant ~ merchantCommission ~ time ~ state =>
       val details = TPoSContract.Details(owner = owner, merchant = merchant, merchantCommission = merchantCommission)

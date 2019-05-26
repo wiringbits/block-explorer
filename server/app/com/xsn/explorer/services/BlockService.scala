@@ -22,7 +22,7 @@ import play.api.libs.json.{JsValue, Writes}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BlockService @Inject() (
+class BlockService @Inject()(
     xsnService: XSNService,
     blockDataHandler: BlockFutureDataHandler,
     paginatedQueryValidator: PaginatedQueryValidator,
@@ -30,23 +30,21 @@ class BlockService @Inject() (
     blockLogic: BlockLogic,
     transactionLogic: TransactionLogic,
     orderingConditionParser: OrderingConditionParser,
-    blockHeaderCache: BlockHeaderCache)(
-    implicit ec: ExecutionContext) {
+    blockHeaderCache: BlockHeaderCache
+)(implicit ec: ExecutionContext) {
 
   private val maxHeadersPerQuery = 1000
 
-  def getBlockHeaders(
-      limit: Limit,
-      lastSeenHashString: Option[String],
-      orderingConditionString: String)(
-      implicit writes: Writes[BlockHeader]): FutureApplicationResult[(WrappedResult[List[BlockHeader]], Boolean)] = {
+  def getBlockHeaders(limit: Limit, lastSeenHashString: Option[String], orderingConditionString: String)(
+      implicit writes: Writes[BlockHeader]
+  ): FutureApplicationResult[(WrappedResult[List[BlockHeader]], Boolean)] = {
 
     val result = for {
       lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
       _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
-      headers <-blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+      headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
     } yield (WrappedResult(headers), canCacheResult(orderingCondition, limit.int, latestBlock, headers))
 
@@ -57,24 +55,23 @@ class BlockService @Inject() (
       ordering: OrderingCondition,
       expectedSize: Int,
       latestKnownBlock: persisted.Block,
-      result: List[BlockHeader]): Boolean = {
+      result: List[BlockHeader]
+  ): Boolean = {
 
     ordering == OrderingCondition.AscendingOrder && // from oldest to newest
-      result.size == expectedSize && // a complete query
-      expectedSize > 0 && // non empty result
-      result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
+    result.size == expectedSize && // a complete query
+    expectedSize > 0 && // non empty result
+    result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
   }
 
-  private def getCacheableHeaders(
-      limit: Limit,
-      orderingCondition: OrderingCondition,
-      lastSeenHash: Option[Blockhash])(
-      implicit writes: Writes[BlockHeader]) = {
+  private def getCacheableHeaders(limit: Limit, orderingCondition: OrderingCondition, lastSeenHash: Option[Blockhash])(
+      implicit writes: Writes[BlockHeader]
+  ) = {
 
     val cacheKey = BlockHeaderCache.Key(limit, orderingCondition, lastSeenHash)
     blockHeaderCache.getOrSet(cacheKey, maxHeadersPerQuery) {
       val result = for {
-        headers <-blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+        headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
       } yield WrappedResult(headers)
 
       result.toFuture
@@ -111,8 +108,8 @@ class BlockService @Inject() (
   def getDetails(height: Height): FutureApplicationResult[BlockDetails] = {
     val result = for {
       blockhash <- xsnService
-          .getBlockhash(height)
-          .toFutureOr
+        .getBlockhash(height)
+        .toFutureOr
 
       details <- getDetailsPrivate(blockhash).toFutureOr
     } yield details
@@ -123,19 +120,19 @@ class BlockService @Inject() (
   private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
     val result = for {
       block <- xsnService
-          .getBlock(blockhash)
-          .toFutureOr
+        .getBlock(blockhash)
+        .toFutureOr
 
-      rewards <- getBlockRewards(block)
-          .toFutureOr
-          .map(Option.apply)
-          .recoverFrom(BlockRewardsNotFoundError)(Option.empty)
+      rewards <- getBlockRewards(block).toFutureOr
+        .map(Option.apply)
+        .recoverFrom(BlockRewardsNotFoundError)(Option.empty)
     } yield BlockDetails(block, rewards)
 
     result.toFuture
   }
 
   def getLatestBlocks(): FutureApplicationResult[List[Block]] = {
+
     /**
      * Temporal workaround to retrieve the latest blocks, they
      * will be retrieved from the database once available.
@@ -162,13 +159,10 @@ class BlockService @Inject() (
     } else if (block.transactions.isEmpty) {
       Future.successful(Good(BlockExtractionMethod.ProofOfWork))
     } else {
-      isPoS(block)
-          .toFutureOr
-          .map {
-            case true => BlockExtractionMethod.ProofOfStake
-            case false => BlockExtractionMethod.ProofOfWork
-          }
-          .toFuture
+      isPoS(block).toFutureOr.map {
+        case true => BlockExtractionMethod.ProofOfStake
+        case false => BlockExtractionMethod.ProofOfWork
+      }.toFuture
     }
   }
 
@@ -217,29 +211,29 @@ class BlockService @Inject() (
   private def getPoSBlockRewards(block: Block): FutureApplicationResult[PoSBlockRewards] = {
     val result = for {
       coinstakeTxId <- blockLogic
-          .getCoinstakeTransactionId(block)
-          .toFutureOr
+        .getCoinstakeTransactionId(block)
+        .toFutureOr
       coinstakeTx <- xsnService
-          .getTransaction(coinstakeTxId)
-          .toFutureOr
+        .getTransaction(coinstakeTxId)
+        .toFutureOr
       coinstakeTxVIN <- transactionLogic
-          .getVIN(coinstakeTx, BlockRewardsNotFoundError)
-          .toFutureOr
+        .getVIN(coinstakeTx, BlockRewardsNotFoundError)
+        .toFutureOr
 
       previousToCoinstakeTx <- xsnService
-          .getTransaction(coinstakeTxVIN.txid)
-          .toFutureOr
+        .getTransaction(coinstakeTxVIN.txid)
+        .toFutureOr
       previousToCoinstakeVOUT <- transactionLogic
-          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
-          .toFutureOr
+        .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
+        .toFutureOr
 
       coinstakeAddress <- transactionLogic
-          .getAddress(previousToCoinstakeVOUT, BlockRewardsNotFoundError)
-          .toFutureOr
+        .getAddress(previousToCoinstakeVOUT, BlockRewardsNotFoundError)
+        .toFutureOr
 
       rewards <- blockLogic
-          .getPoSRewards(coinstakeTx, coinstakeAddress, previousToCoinstakeVOUT.value)
-          .toFutureOr
+        .getPoSRewards(coinstakeTx, coinstakeAddress, previousToCoinstakeVOUT.value)
+        .toFutureOr
     } yield rewards
 
     result.toFuture
@@ -248,31 +242,31 @@ class BlockService @Inject() (
   private def getTPoSBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
     val result = for {
       coinstakeTxId <- blockLogic
-          .getCoinstakeTransactionId(block)
-          .toFutureOr
+        .getCoinstakeTransactionId(block)
+        .toFutureOr
       coinstakeTx <- xsnService
-          .getTransaction(coinstakeTxId)
-          .toFutureOr
+        .getTransaction(coinstakeTxId)
+        .toFutureOr
       coinstakeTxVIN <- transactionLogic
-          .getVIN(coinstakeTx, BlockRewardsNotFoundError)
-          .toFutureOr
+        .getVIN(coinstakeTx, BlockRewardsNotFoundError)
+        .toFutureOr
 
       coinstakeInput <- getCoinstakeInput(coinstakeTxVIN).toFutureOr
 
       tposTxId <- blockLogic
-          .getTPoSTransactionId(block)
-          .toFutureOr
+        .getTPoSTransactionId(block)
+        .toFutureOr
       tposTx <- xsnService
-          .getTransaction(tposTxId)
-          .toFutureOr
+        .getTransaction(tposTxId)
+        .toFutureOr
 
       contract <- blockLogic
-          .getTPoSContractDetails(tposTx)
-          .toFutureOr
+        .getTPoSContractDetails(tposTx)
+        .toFutureOr
 
       rewards <- blockLogic
-          .getTPoSRewards(coinstakeTx, contract, coinstakeInput)
-          .toFutureOr
+        .getTPoSRewards(coinstakeTx, contract, coinstakeInput)
+        .toFutureOr
     } yield rewards
 
     result.toFuture
@@ -282,11 +276,11 @@ class BlockService @Inject() (
     def loadFromTx = {
       val result = for {
         previousToCoinstakeTx <- xsnService
-            .getTransaction(coinstakeTxVIN.txid)
-            .toFutureOr
+          .getTransaction(coinstakeTxVIN.txid)
+          .toFutureOr
         previousToCoinstakeVOUT <- transactionLogic
-            .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
-            .toFutureOr
+          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
+          .toFutureOr
       } yield previousToCoinstakeVOUT.value
 
       result.toFuture

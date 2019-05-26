@@ -9,10 +9,9 @@ import org.scalactic.{Bad, Good}
 
 import scala.concurrent.ExecutionContext
 
-class StatisticsService @Inject() (
-    xsnService: XSNService,
-    statisticsFutureDataHandler: StatisticsFutureDataHandler)(
-    implicit ec: ExecutionContext) {
+class StatisticsService @Inject()(xsnService: XSNService, statisticsFutureDataHandler: StatisticsFutureDataHandler)(
+    implicit ec: ExecutionContext
+) {
 
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
@@ -30,10 +29,10 @@ class StatisticsService @Inject() (
 
   private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
     value
-        .map {
-          case Good(result) => Good(Some(result))
-          case Bad(_) => Good(None)
-        }
-        .recover { case _: Throwable => Good(None) }
+      .map {
+        case Good(result) => Good(Some(result))
+        case Bad(_) => Good(None)
+      }
+      .recover { case _: Throwable => Good(None) }
   }
 }

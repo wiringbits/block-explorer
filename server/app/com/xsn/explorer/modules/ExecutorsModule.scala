@@ -1,7 +1,12 @@
 package com.xsn.explorer.modules
 
 import com.google.inject.AbstractModule
-import com.xsn.explorer.executors.{DatabaseAkkaExecutionContext, DatabaseExecutionContext, ExternalServiceAkkaExecutionContext, ExternalServiceExecutionContext}
+import com.xsn.explorer.executors.{
+  DatabaseAkkaExecutionContext,
+  DatabaseExecutionContext,
+  ExternalServiceAkkaExecutionContext,
+  ExternalServiceExecutionContext
+}
 
 class ExecutorsModule extends AbstractModule {
 

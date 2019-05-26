@@ -63,50 +63,49 @@ trait XSNService {
 
 }
 
-class XSNServiceRPCImpl @Inject() (
-    ws: WSClient,
-    rpcConfig: RPCConfig,
-    explorerConfig: ExplorerConfig)(
-    implicit ec: ExternalServiceExecutionContext)
-    extends XSNService {
+class XSNServiceRPCImpl @Inject()(ws: WSClient, rpcConfig: RPCConfig, explorerConfig: ExplorerConfig)(
+    implicit ec: ExternalServiceExecutionContext
+) extends XSNService {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private val server = ws.url(rpcConfig.host.string)
-      .withAuth(rpcConfig.username.string, rpcConfig.password.string, WSAuthScheme.BASIC)
-      .withHttpHeaders("Content-Type" -> "text/plain")
-
+  private val server = ws
+    .url(rpcConfig.host.string)
+    .withAuth(rpcConfig.username.string, rpcConfig.password.string, WSAuthScheme.BASIC)
+    .withHttpHeaders("Content-Type" -> "text/plain")
 
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     server
-        .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
-        .map { response =>
+      .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
+      .map { response =>
+        val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}"
+          )
 
-          val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     server
-        .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
-        .map { response =>
+      .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
+      .map { response =>
+        val maybe = getResult[JsValue](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}"
+          )
 
-          val maybe = getResult[JsValue](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = {
@@ -124,16 +123,17 @@ class XSNServiceRPCImpl @Inject() (
     val errorCodeMapper = Map(-5 -> AddressFormatError)
 
     server
-        .post(body)
-        .map { response =>
+      .post(body)
+      .map { response =>
+        val maybe = getResult[rpc.AddressBalance](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}"
+          )
 
-          val maybe = getResult[rpc.AddressBalance](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = {
@@ -151,16 +151,17 @@ class XSNServiceRPCImpl @Inject() (
     val errorCodeMapper = Map(-5 -> AddressFormatError)
 
     server
-        .post(body)
-        .map { response =>
+      .post(body)
+      .map { response =>
+        val maybe = getResult[List[TransactionId]](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}"
+          )
 
-          val maybe = getResult[List[TransactionId]](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = {
@@ -168,21 +169,22 @@ class XSNServiceRPCImpl @Inject() (
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
     server
-        .post(body)
-        .map { response =>
-
-          val maybe = getResult[rpc.Block](response, errorCodeMapper)
-          maybe
-              .map {
-                case Good(block) => Good(cleanGenesisBlock(block))
-                case x => x
-              }
-              .getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
+      .post(body)
+      .map { response =>
+        val maybe = getResult[rpc.Block](response, errorCodeMapper)
+        maybe
+          .map {
+            case Good(block) => Good(cleanGenesisBlock(block))
+            case x => x
+          }
+          .getOrElse {
+            logger.warn(
+              s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}"
+            )
 
             Bad(XSNUnexpectedResponseError).accumulating
           }
-        }
+      }
   }
 
   override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
@@ -190,16 +192,17 @@ class XSNServiceRPCImpl @Inject() (
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
     server
-        .post(body)
-        .map { response =>
+      .post(body)
+      .map { response =>
+        val maybe = getResult[JsValue](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}"
+          )
 
-          val maybe = getResult[JsValue](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
@@ -207,16 +210,17 @@ class XSNServiceRPCImpl @Inject() (
     val body = s"""{ "jsonrpc": "1.0", "method": "getblockhash", "params": [${height.int}] }"""
 
     server
-        .post(body)
-        .map { response =>
+      .post(body)
+      .map { response =>
+        val maybe = getResult[Blockhash](response, errorCodeMapper)
+        maybe.getOrElse {
+          logger.warn(
+            s"Unexpected response from XSN Server, blockhash = ${height.int}, status = ${response.status}, response = ${response.body}"
+          )
 
-          val maybe = getResult[Blockhash](response, errorCodeMapper)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, blockhash = ${height.int}, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getLatestBlock(): FutureApplicationResult[rpc.Block] = {
@@ -229,28 +233,27 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .flatMap { response =>
+      .post(body)
+      .flatMap { response =>
+        val result = for {
+          blockhash <- getResult[Blockhash](response)
+            .orElse {
+              logger.warn(
+                s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}"
+              )
+              None
+            }
+            .getOrElse(Bad(XSNUnexpectedResponseError).accumulating)
+            .toFutureOr
 
-          val result = for {
-            blockhash <- getResult[Blockhash](response)
-                .orElse {
-                  logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
-                  None
-                }
-                .getOrElse(Bad(XSNUnexpectedResponseError).accumulating)
-                .toFutureOr
+          block <- getBlock(blockhash).map {
+            case Good(block) => Good(cleanGenesisBlock(block))
+            case x => x
+          }.toFutureOr
+        } yield block
 
-            block <- getBlock(blockhash).
-                map {
-                  case Good(block) => Good(cleanGenesisBlock(block))
-                  case x => x
-                }
-                .toFutureOr
-          } yield block
-
-          result.toFuture
-        }
+        result.toFuture
+      }
   }
 
   override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = {
@@ -263,15 +266,15 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[rpc.ServerStatistics](response)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+      .post(body)
+      .map { response =>
+        val maybe = getResult[rpc.ServerStatistics](response)
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getMasternodeCount(): FutureApplicationResult[Int] = {
@@ -284,15 +287,15 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[Int](response)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+      .post(body)
+      .map { response =>
+        val maybe = getResult[Int](response)
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getDifficulty(): FutureApplicationResult[BigDecimal] = {
@@ -316,7 +319,6 @@ class XSNServiceRPCImpl @Inject() (
       }
   }
 
-
   override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] = {
     val body = s"""
                   |{
@@ -327,20 +329,20 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[Map[String, String]](response)
-              .map {
-                case Good(map) => Good(rpc.Masternode.fromMap(map))
-                case Bad(errors) => Bad(errors)
-              }
-
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
+      .post(body)
+      .map { response =>
+        val maybe = getResult[Map[String, String]](response)
+          .map {
+            case Good(map) => Good(rpc.Masternode.fromMap(map))
+            case Bad(errors) => Bad(errors)
           }
+
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode] = {
@@ -353,26 +355,26 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[Map[String, String]](response)
-              .map {
-                case Good(map) =>
-                  rpc.Masternode
-                      .fromMap(map)
-                      .headOption
-                      .map(Good(_))
-                      .getOrElse(Bad(MasternodeNotFoundError).accumulating)
+      .post(body)
+      .map { response =>
+        val maybe = getResult[Map[String, String]](response)
+          .map {
+            case Good(map) =>
+              rpc.Masternode
+                .fromMap(map)
+                .headOption
+                .map(Good(_))
+                .getOrElse(Bad(MasternodeNotFoundError).accumulating)
 
-                case Bad(errors) => Bad(errors)
-              }
-
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
-
-            Bad(XSNUnexpectedResponseError).accumulating
+            case Bad(errors) => Bad(errors)
           }
+
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
@@ -387,22 +389,23 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[JsValue](response)
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+      .post(body)
+      .map { response =>
+        val maybe = getResult[JsValue](response)
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(
       -26 -> TransactionError.InvalidRawTransaction,
       -22 -> TransactionError.InvalidRawTransaction,
-      -27 -> TransactionError.RawTransactionAlreadyExists)
+      -27 -> TransactionError.RawTransactionAlreadyExists
+    )
 
     val body = s"""
                   |{
@@ -413,16 +416,16 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[String](response, errorCodeMapper).map { _.map(_.toString()) }
+      .post(body)
+      .map { response =>
+        val maybe = getResult[String](response, errorCodeMapper).map { _.map(_.toString()) }
 
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = {
@@ -437,17 +440,17 @@ class XSNServiceRPCImpl @Inject() (
     )
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[String](response)
-              .map { _.map(_ == "Contract is valid") }
+      .post(body)
+      .map { response =>
+        val maybe = getResult[String](response)
+          .map { _.map(_ == "Contract is valid") }
 
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   override def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue] = {
@@ -460,89 +463,91 @@ class XSNServiceRPCImpl @Inject() (
                   |""".stripMargin
 
     server
-        .post(body)
-        .map { response =>
-          val maybe = getResult[JsValue](response)
+      .post(body)
+      .map { response =>
+        val maybe = getResult[JsValue](response)
 
-          maybe.getOrElse {
-            logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
+        maybe.getOrElse {
+          logger.warn(s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}")
 
-            Bad(XSNUnexpectedResponseError).accumulating
-          }
+          Bad(XSNUnexpectedResponseError).accumulating
         }
+      }
   }
 
   private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
-        .asOpt[JsValue]
-        .filter(_ != JsNull)
+      .asOpt[JsValue]
+      .filter(_ != JsNull)
 
     val errorMaybe = jsonErrorMaybe
-        .flatMap { jsonError =>
-          // from error code if possible
-          (jsonError \ "code")
-              .asOpt[Int]
-              .flatMap(errorCodeMapper.get)
-              .orElse {
-                // from message
-                (jsonError \ "message")
-                    .asOpt[String]
-                    .filter(_.nonEmpty)
-                    .map(XSNMessageError.apply)
-              }
-        }
+      .flatMap { jsonError =>
+        // from error code if possible
+        (jsonError \ "code")
+          .asOpt[Int]
+          .flatMap(errorCodeMapper.get)
+          .orElse {
+            // from message
+            (jsonError \ "message")
+              .asOpt[String]
+              .filter(_.nonEmpty)
+              .map(XSNMessageError.apply)
+          }
+      }
 
     errorMaybe
-        .collect {
-          case XSNMessageError("Work queue depth exceeded") => XSNWorkQueueDepthExceeded
-        }
-        .orElse(errorMaybe)
+      .collect {
+        case XSNMessageError("Work queue depth exceeded") => XSNWorkQueueDepthExceeded
+      }
+      .orElse(errorMaybe)
   }
 
-  private def getResult[A](
-      response: WSResponse,
-      errorCodeMapper: Map[Int, ApplicationError] = Map.empty)(
-      implicit reads: Reads[A]): Option[ApplicationResult[A]] = {
+  private def getResult[A](response: WSResponse, errorCodeMapper: Map[Int, ApplicationError] = Map.empty)(
+      implicit reads: Reads[A]
+  ): Option[ApplicationResult[A]] = {
 
     val maybe = Option(response)
-        .filter(_.status == 200)
-        .flatMap { r => Try(r.json).toOption }
-        .flatMap { json =>
-          if (logger.isDebugEnabled) {
-            val x = (json \ "result").validate[A]
-            x.asEither.left.foreach { errors =>
-              val msg = errors
-                  .map { case (path, error) => path.toJsonString -> error.toString() }
-                  .mkString(", ")
-              logger.debug(s"Failed to decode result, errors = ${msg}")
-            }
+      .filter(_.status == 200)
+      .flatMap { r =>
+        Try(r.json).toOption
+      }
+      .flatMap { json =>
+        if (logger.isDebugEnabled) {
+          val x = (json \ "result").validate[A]
+          x.asEither.left.foreach { errors =>
+            val msg = errors
+              .map { case (path, error) => path.toJsonString -> error.toString() }
+              .mkString(", ")
+            logger.debug(s"Failed to decode result, errors = ${msg}")
           }
-          (json \ "result")
-              .asOpt[A]
-              .map { Good(_) }
-              .orElse {
-                mapError(json, errorCodeMapper)
-                    .map(Bad.apply)
-                    .map(_.accumulating)
-              }
         }
+        (json \ "result")
+          .asOpt[A]
+          .map { Good(_) }
+          .orElse {
+            mapError(json, errorCodeMapper)
+              .map(Bad.apply)
+              .map(_.accumulating)
+          }
+      }
 
     maybe
-        .orElse {
-          // if there is no result nor error, it is probably that the server returned non 200 status
-          Try(response.json)
-              .toOption
-              .flatMap { json => mapError(json, errorCodeMapper) }
-              .map { e => Bad(e).accumulating }
-        }
-        .orElse {
-          // if still there is no error, the response might not be a json
-          Try(response.body)
-              .collect {
-                case "Work queue depth exceeded" => Bad(XSNWorkQueueDepthExceeded).accumulating
-              }
-              .toOption
-        }
+      .orElse {
+        // if there is no result nor error, it is probably that the server returned non 200 status
+        Try(response.json).toOption
+          .flatMap { json =>
+            mapError(json, errorCodeMapper)
+          }
+          .map { e =>
+            Bad(e).accumulating
+          }
+      }
+      .orElse {
+        // if still there is no error, the response might not be a json
+        Try(response.body).collect {
+          case "Work queue depth exceeded" => Bad(XSNWorkQueueDepthExceeded).accumulating
+        }.toOption
+      }
   }
 
   override val genesisBlockhash: Blockhash = explorerConfig.genesisBlock

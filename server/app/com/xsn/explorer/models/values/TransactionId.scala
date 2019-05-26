@@ -24,10 +24,10 @@ object TransactionId {
   implicit val reads: Reads[TransactionId] = Reads { json =>
     json.validate[String].flatMap { string =>
       from(string)
-          .map(JsSuccess.apply(_))
-          .getOrElse {
-            JsError.apply("Invalid transaction")
-          }
+        .map(JsSuccess.apply(_))
+        .getOrElse {
+          JsError.apply("Invalid transaction")
+        }
     }
   }
 }

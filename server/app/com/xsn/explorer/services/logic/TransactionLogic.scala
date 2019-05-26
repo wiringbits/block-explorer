@@ -18,7 +18,11 @@ class TransactionLogic {
     Or.from(maybe, One(error))
   }
 
-  def getVOUT(vin: TransactionVIN, previousTX: Transaction[_], error: ApplicationError): ApplicationResult[TransactionVOUT] = {
+  def getVOUT(
+      vin: TransactionVIN,
+      previousTX: Transaction[_],
+      error: ApplicationError
+  ): ApplicationResult[TransactionVOUT] = {
     getVOUT(vin.voutIndex, previousTX, error)
   }
 

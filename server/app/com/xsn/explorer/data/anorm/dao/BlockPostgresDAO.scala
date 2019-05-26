@@ -12,9 +12,10 @@ import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
-class BlockPostgresDAO @Inject() (
+class BlockPostgresDAO @Inject()(
     blockFilterPostgresDAO: BlockFilterPostgresDAO,
-    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter
+) {
 
   def insert(block: Block)(implicit conn: Connection): Option[Block] = {
     SQL(
@@ -33,28 +34,26 @@ class BlockPostgresDAO @Inject() (
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
-      'blockhash -> block.hash.string,
-      'previous_blockhash -> block.previousBlockhash.map(_.string),
-      'next_blockhash -> block.nextBlockhash.map(_.string),
-      'tpos_contract -> block.tposContract.map(_.string),
-      'merkle_root -> block.merkleRoot.string,
-      'size -> block.size.int,
-      'height -> block.height.int,
-      'version -> block.version,
-      'time -> block.time,
-      'median_time -> block.medianTime,
-      'nonce -> block.nonce,
-      'bits -> block.bits,
-      'chainwork -> block.chainwork,
-      'difficulty -> block.difficulty,
-      'extraction_method -> block.extractionMethod.entryName
-    ).as(parseBlock.singleOpt)
+        'blockhash -> block.hash.string,
+        'previous_blockhash -> block.previousBlockhash.map(_.string),
+        'next_blockhash -> block.nextBlockhash.map(_.string),
+        'tpos_contract -> block.tposContract.map(_.string),
+        'merkle_root -> block.merkleRoot.string,
+        'size -> block.size.int,
+        'height -> block.height.int,
+        'version -> block.version,
+        'time -> block.time,
+        'median_time -> block.medianTime,
+        'nonce -> block.nonce,
+        'bits -> block.bits,
+        'chainwork -> block.chainwork,
+        'difficulty -> block.difficulty,
+        'extraction_method -> block.extractionMethod.entryName
+      )
+      .as(parseBlock.singleOpt)
   }
 
-  def setNextBlockhash(
-      blockhash: Blockhash,
-      nextBlockhash: Blockhash)(
-      implicit conn: Connection): Option[Block] = {
+  def setNextBlockhash(blockhash: Blockhash, nextBlockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
 
     SQL(
       """
@@ -65,9 +64,10 @@ class BlockPostgresDAO @Inject() (
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.string,
-      'next_blockhash -> nextBlockhash.string
-    ).as(parseBlock.singleOpt)
+        'blockhash -> blockhash.string,
+        'next_blockhash -> nextBlockhash.string
+      )
+      .as(parseBlock.singleOpt)
   }
 
   def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[Block] = {
@@ -79,8 +79,9 @@ class BlockPostgresDAO @Inject() (
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-      "blockhash" -> blockhash.string
-    ).as(parseBlock.singleOpt)
+        "blockhash" -> blockhash.string
+      )
+      .as(parseBlock.singleOpt)
   }
 
   def getBy(height: Height)(implicit conn: Connection): Option[Block] = {
@@ -92,14 +93,14 @@ class BlockPostgresDAO @Inject() (
         |WHERE height = {height}
       """.stripMargin
     ).on(
-      "height" -> height.int
-    ).as(parseBlock.singleOpt)
+        "height" -> height.int
+      )
+      .as(parseBlock.singleOpt)
   }
 
-  def getBy(
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[BlockField])(
-      implicit conn: Connection): List[Block] = {
+  def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField])(
+      implicit conn: Connection
+  ): List[Block] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
@@ -112,9 +113,10 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'offset -> paginatedQuery.offset.int,
-      'limit -> paginatedQuery.limit.int
-    ).as(parseBlock.*)
+        'offset -> paginatedQuery.offset.int,
+        'limit -> paginatedQuery.limit.int
+      )
+      .as(parseBlock.*)
   }
 
   def count(implicit conn: Connection): Count = {
@@ -137,8 +139,9 @@ class BlockPostgresDAO @Inject() (
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
-      "blockhash" -> blockhash.string
-    ).as(parseBlock.singleOpt)
+        "blockhash" -> blockhash.string
+      )
+      .as(parseBlock.singleOpt)
   }
 
   def getLatestBlock(implicit conn: Connection): Option[Block] = {
@@ -164,18 +167,21 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int
-    ).as(parseHeader.*)
+        'limit -> limit.int
+      )
+      .as(parseHeader.*)
 
     for {
       header <- headers
       filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
     } yield filterMaybe
-        .map(header.withFilter)
-        .getOrElse(header)
+      .map(header.withFilter)
+      .getOrElse(header)
   }
 
-  def getHeaders(lastSeenHash: Blockhash, limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockHeader] = {
+  def getHeaders(lastSeenHash: Blockhash, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[BlockHeader] = {
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
@@ -196,16 +202,17 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'lastSeenHash -> lastSeenHash.string,
-      'limit -> limit.int
-    ).as(parseHeader.*)
+        'lastSeenHash -> lastSeenHash.string,
+        'limit -> limit.int
+      )
+      .as(parseHeader.*)
 
     for {
       header <- headers
       filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
     } yield filterMaybe
-        .map(header.withFilter)
-        .getOrElse(header)
+      .map(header.withFilter)
+      .getOrElse(header)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

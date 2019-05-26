@@ -10,7 +10,7 @@ import com.xsn.explorer.models.values.TransactionId
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
+class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -21,9 +21,12 @@ class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerCo
     } yield address -> output.value
 
     val received = outputAddressValueList
-        .groupBy(_._1)
-        .mapValues { _.map(_._2).sum }
-        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value) }
+      .groupBy(_._1)
+      .mapValues { _.map(_._2).sum }
+      .map {
+        case (address, value) =>
+          AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value)
+      }
 
     val inputAddressValueList = for {
       input <- transaction.inputs
@@ -31,18 +34,22 @@ class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerCo
     } yield address -> input.value
 
     val sent = inputAddressValueList
-        .groupBy(_._1)
-        .mapValues { _.map(_._2).sum }
-        .map { case (address, value) => AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value) }
+      .groupBy(_._1)
+      .mapValues { _.map(_._2).sum }
+      .map {
+        case (address, value) =>
+          AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value)
+      }
 
     val details = (received ++ sent)
-        .groupBy(_.address)
-        .mapValues {
-          case head :: list => list.foldLeft(head) { (acc, current) =>
+      .groupBy(_.address)
+      .mapValues {
+        case head :: list =>
+          list.foldLeft(head) { (acc, current) =>
             current.copy(received = current.received + acc.received, sent = current.sent + acc.sent)
           }
-        }
-        .values
+      }
+      .values
 
     batchInsertDetails(details.toList)
   }
@@ -53,11 +60,12 @@ class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerCo
       case _ =>
         val params = details.map { d =>
           List(
-            'address  -> d.address.string: NamedParameter,
+            'address -> d.address.string: NamedParameter,
             'txid -> d.txid.string: NamedParameter,
             'received -> d.received: NamedParameter,
             'sent -> d.sent: NamedParameter,
-            'time -> d.time: NamedParameter)
+            'time -> d.time: NamedParameter
+          )
         }
 
         val batch = BatchSql(
@@ -75,7 +83,7 @@ class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerCo
         val success = result.forall(_ == 1)
 
         if (success ||
-            explorerConfig.liteVersionConfig.enabled) {
+          explorerConfig.liteVersionConfig.enabled) {
 
           Some(())
         } else {
@@ -92,8 +100,9 @@ class AddressTransactionDetailsPostgresDAO @Inject() (explorerConfig: ExplorerCo
         |RETURNING address, txid, received, sent, time
       """.stripMargin
     ).on(
-      'txid -> txid.string
-    ).as(parseAddressTransactionDetails.*)
+        'txid -> txid.string
+      )
+      .as(parseAddressTransactionDetails.*)
 
     result
   }

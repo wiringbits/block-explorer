@@ -14,4 +14,5 @@ object BlockRewards {
 
 case class PoWBlockRewards(reward: BlockReward) extends BlockRewards
 case class PoSBlockRewards(coinstake: BlockReward, masternode: Option[BlockReward]) extends BlockRewards
-case class TPoSBlockRewards(owner: BlockReward, merchant: BlockReward, masternode: Option[BlockReward]) extends BlockRewards
+case class TPoSBlockRewards(owner: BlockReward, merchant: BlockReward, masternode: Option[BlockReward])
+    extends BlockRewards

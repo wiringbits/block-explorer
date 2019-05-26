@@ -5,11 +5,13 @@ import com.xsn.explorer.models.values._
 
 object CommonParsers {
 
-  def parseBlockhash(field: String = "blockhash") = str(field)
+  def parseBlockhash(field: String = "blockhash") =
+    str(field)
       .map(Blockhash.from)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
-  def parseAddress(field: String = "address") = str(field)
+  def parseAddress(field: String = "address") =
+    str(field)
       .map { string =>
         Address.from(string) match {
           case None => throw new RuntimeException(s"Corrupted $field: $string")
@@ -17,23 +19,24 @@ object CommonParsers {
         }
       }
 
-  def parseAddresses = array[String]("addresses")
+  def parseAddresses =
+    array[String]("addresses")
       .map { array =>
-        array
-            .map { string =>
-              Address.from(string) match {
-                case None => throw new RuntimeException(s"Corrupted address: $string")
-                case Some(address) => address
-              }
-            }
-            .toList
+        array.map { string =>
+          Address.from(string) match {
+            case None => throw new RuntimeException(s"Corrupted address: $string")
+            case Some(address) => address
+          }
+        }.toList
       }
 
-  def parseTransactionId(field: String = "txid") = str(field)
+  def parseTransactionId(field: String = "txid") =
+    str(field)
       .map(TransactionId.from)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
-  def parseHexString(field: String) = str(field)
+  def parseHexString(field: String) =
+    str(field)
       .map(HexString.from)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 

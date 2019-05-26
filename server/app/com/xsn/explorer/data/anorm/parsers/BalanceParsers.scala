@@ -11,7 +11,8 @@ object BalanceParsers {
   val parseReceived = get[BigDecimal]("received")
   val parseSpent = get[BigDecimal]("spent")
 
-  val parseBalance = (parseAddress() ~ parseReceived ~ parseSpent).map { case address ~ received ~ spent =>
-    Balance(address, received, spent)
+  val parseBalance = (parseAddress() ~ parseReceived ~ parseSpent).map {
+    case address ~ received ~ spent =>
+      Balance(address, received, spent)
   }
 }

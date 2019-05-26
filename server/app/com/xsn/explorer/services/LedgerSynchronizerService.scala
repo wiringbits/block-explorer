@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LedgerSynchronizerService @Inject() (
+class LedgerSynchronizerService @Inject()(
     explorerConfig: ExplorerConfig,
     xsnService: XSNService,
     blockService: BlockService,
     transactionCollectorService: TransactionCollectorService,
     ledgerDataHandler: LedgerFutureDataHandler,
-    blockDataHandler: BlockFutureDataHandler)(
-    implicit ec: ExecutionContext) {
+    blockDataHandler: BlockFutureDataHandler
+)(implicit ec: ExecutionContext) {
 
   import LedgerSynchronizerService._
 
@@ -50,15 +50,17 @@ class LedgerSynchronizerService @Inject() (
 
     val result = for {
       latestBlockMaybe <- blockDataHandler
-          .getLatestBlock()
-          .toFutureOr
-          .map(Option.apply)
-          .recoverFrom(BlockNotFoundError)(None)
+        .getLatestBlock()
+        .toFutureOr
+        .map(Option.apply)
+        .recoverFrom(BlockNotFoundError)(None)
 
       _ <- latestBlockMaybe
-          .map { latestBlock => onLatestBlock(latestBlock, block) }
-          .getOrElse { onEmptyLedger(block) }
-          .toFutureOr
+        .map { latestBlock =>
+          onLatestBlock(latestBlock, block)
+        }
+        .getOrElse { onEmptyLedger(block) }
+        .toFutureOr
     } yield ()
 
     result.toFuture
@@ -94,7 +96,7 @@ class LedgerSynchronizerService @Inject() (
    */
   private def onLatestBlock(ledgerBlock: Block, newBlock: rpc.Block): FutureApplicationResult[Unit] = {
     if (ledgerBlock.height.int + 1 == newBlock.height.int &&
-        newBlock.previousBlockhash.contains(ledgerBlock.hash)) {
+      newBlock.previousBlockhash.contains(ledgerBlock.hash)) {
 
       logger.info(s"Appending block ${newBlock.height}, hash = ${newBlock.hash}")
       appendBlock(newBlock)
@@ -119,22 +121,26 @@ class LedgerSynchronizerService @Inject() (
     } else {
       val result = for {
         expectedBlockMaybe <- blockDataHandler
-            .getBy(newBlock.hash)
-            .toFutureOr
-            .map(Option.apply)
-            .recoverFrom(BlockNotFoundError)(None)
+          .getBy(newBlock.hash)
+          .toFutureOr
+          .map(Option.apply)
+          .recoverFrom(BlockNotFoundError)(None)
 
-        _ = logger.info(s"Checking possible existing block ${newBlock.height}, hash = ${newBlock.hash}, exists = ${expectedBlockMaybe.isDefined}")
+        _ = logger.info(
+          s"Checking possible existing block ${newBlock.height}, hash = ${newBlock.hash}, exists = ${expectedBlockMaybe.isDefined}"
+        )
         _ <- expectedBlockMaybe
-            .map { _ => Future.successful(Good(())) }
-            .getOrElse {
-              val x = for {
-                _ <- trimTo(newBlock.height).toFutureOr
-                _ <- synchronize(newBlock).toFutureOr
-              } yield ()
-              x.toFuture
-            }
-            .toFutureOr
+          .map { _ =>
+            Future.successful(Good(()))
+          }
+          .getOrElse {
+            val x = for {
+              _ <- trimTo(newBlock.height).toFutureOr
+              _ <- synchronize(newBlock).toFutureOr
+            } yield ()
+            x.toFuture
+          }
+          .toFutureOr
       } yield ()
 
       result.toFuture
@@ -158,15 +164,16 @@ class LedgerSynchronizerService @Inject() (
     logger.info(s"Syncing block range = $range")
 
     // TODO: check, it might be safer to use the nextBlockhash instead of the height
-    range.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) { case (previous, height) =>
-      val result = for {
-        _ <- previous.toFutureOr
-        blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-        block <- getRPCBlock(blockhash).toFutureOr
-        _ <- synchronize(block).toFutureOr
-      } yield ()
+    range.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) {
+      case (previous, height) =>
+        val result = for {
+          _ <- previous.toFutureOr
+          blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
+          block <- getRPCBlock(blockhash).toFutureOr
+          _ <- synchronize(block).toFutureOr
+        } yield ()
 
-      result.toFuture
+        result.toFuture
     }
   }
 
@@ -175,7 +182,7 @@ class LedgerSynchronizerService @Inject() (
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
       if (explorerConfig.liteVersionConfig.enabled &&
-          rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
+        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
 
         // lite version, ignore transactions
         rpcBlock.copy(transactions = List.empty)
@@ -187,7 +194,8 @@ class LedgerSynchronizerService @Inject() (
     result.toFuture
   }
 
-  private def ExcludedTransactions = List("e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468").flatMap(TransactionId.from)
+  private def ExcludedTransactions =
+    List("e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468").flatMap(TransactionId.from)
 
   private def getBlockData(rpcBlock: rpc.Block): FutureApplicationResult[BlockData] = {
     val result = for {
@@ -199,7 +207,9 @@ class LedgerSynchronizerService @Inject() (
     } yield {
       if (transactions.size != filteredTransactions.size) {
         // see https://github.com/bitpay/insight-api/issues/42
-        logger.warn(s"The block = ${rpcBlock.hash} has phantom ${transactions.size - filteredTransactions.size} transactions, they are being discarded")
+        logger.warn(
+          s"The block = ${rpcBlock.hash} has phantom ${transactions.size - filteredTransactions.size} transactions, they are being discarded"
+        )
       }
 
       val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
@@ -211,16 +221,16 @@ class LedgerSynchronizerService @Inject() (
 
   private def getValidContracts(contracts: List[TPoSContract]): FutureApplicationResult[List[TPoSContract]] = {
     val listF = contracts
-        .map { contract =>
-          xsnService
-              .isTPoSContract(contract.txid)
-              .toFutureOr
-              .map { valid =>
-                if (valid) Some(contract)
-                else None
-              }
-              .toFuture
-        }
+      .map { contract =>
+        xsnService
+          .isTPoSContract(contract.txid)
+          .toFutureOr
+          .map { valid =>
+            if (valid) Some(contract)
+            else None
+          }
+          .toFuture
+      }
 
     val futureList = Future.sequence(listF)
     futureList.map { list =>
@@ -230,11 +240,12 @@ class LedgerSynchronizerService @Inject() (
       }
 
       val initial: ApplicationResult[List[TPoSContract]] = Good(List.empty)
-      x.foldLeft(initial) { case (acc, cur) =>
-        cur match {
-          case Good(contract) => acc.map(contract :: _)
-          case Bad(e) => acc.badMap(prev => prev ++ e)
-        }
+      x.foldLeft(initial) {
+        case (acc, cur) =>
+          cur match {
+            case Good(contract) => acc.map(contract :: _)
+            case Bad(e) => acc.badMap(prev => prev ++ e)
+          }
       }
     }
   }
@@ -245,18 +256,18 @@ class LedgerSynchronizerService @Inject() (
    */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
     val result = ledgerDataHandler
-        .pop()
-        .toFutureOr
-        .flatMap { block =>
-          logger.info(s"Trimmed block ${block.height} from the ledger")
-          val result = if (block.height == height) {
-            Future.successful(Good(()))
-          } else {
-            trimTo(height)
-          }
-
-          result.toFutureOr
+      .pop()
+      .toFutureOr
+      .flatMap { block =>
+        logger.info(s"Trimmed block ${block.height} from the ledger")
+        val result = if (block.height == height) {
+          Future.successful(Good(()))
+        } else {
+          trimTo(height)
         }
+
+        result.toFutureOr
+      }
 
     result.toFuture
   }

@@ -13,11 +13,11 @@ import play.api.libs.json.{JsString, JsValue, Json}
 
 import scala.concurrent.ExecutionContext
 
-class TransactionRPCService @Inject() (
+class TransactionRPCService @Inject()(
     transactionIdValidator: TransactionIdValidator,
     transactionCollectorService: TransactionCollectorService,
-    xsnService: XSNService)(
-    implicit ec: ExecutionContext) {
+    xsnService: XSNService
+)(implicit ec: ExecutionContext) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 

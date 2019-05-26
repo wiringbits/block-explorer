@@ -9,11 +9,11 @@ import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
-class AddressService @Inject() (
+class AddressService @Inject()(
     addressValidator: AddressValidator,
     balanceFutureDataHandler: BalanceFutureDataHandler,
-    transactionFutureDataHandler: TransactionFutureDataHandler)(
-    implicit ec: ExecutionContext) {
+    transactionFutureDataHandler: TransactionFutureDataHandler
+)(implicit ec: ExecutionContext) {
 
   def getBy(addressString: String): FutureApplicationResult[Balance] = {
     val result = for {

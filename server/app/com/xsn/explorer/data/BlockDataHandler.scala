@@ -15,9 +15,7 @@ trait BlockDataHandler[F[_]] {
 
   def getBy(height: Height): F[Block]
 
-  def getBy(
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[BlockField]): F[PaginatedResult[Block]]
+  def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField]): F[PaginatedResult[Block]]
 
   def delete(blockhash: Blockhash): F[Block]
 
@@ -25,7 +23,11 @@ trait BlockDataHandler[F[_]] {
 
   def getFirstBlock(): F[Block]
 
-  def getHeaders(limit: Limit, orderingCondition: OrderingCondition, lastSeenHash: Option[Blockhash]): F[List[BlockHeader]]
+  def getHeaders(
+      limit: Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash]
+  ): F[List[BlockHeader]]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

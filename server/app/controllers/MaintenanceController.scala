@@ -7,9 +7,7 @@ import play.api.libs.json.JsObject
 
 import scala.concurrent.Future
 
-class MaintenanceController @Inject() (
-    components: MyJsonControllerComponents)
-    extends MyJsonController(components) {
+class MaintenanceController @Inject()(components: MyJsonControllerComponents) extends MyJsonController(components) {
 
   def run(query: String) = public { _ =>
     Future.successful(Good(JsObject.empty))

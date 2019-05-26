@@ -15,9 +15,9 @@ sealed trait BlockHeader extends Product with Serializable {
 
   def withFilter(filter: GolombCodedSet): BlockHeader.HasFilter = {
     this
-        .into[BlockHeader.HasFilter]
-        .withFieldConst(_.filter, filter)
-        .transform
+      .into[BlockHeader.HasFilter]
+      .withFieldConst(_.filter, filter)
+      .transform
   }
 }
 
@@ -28,7 +28,8 @@ object BlockHeader {
       previousBlockhash: Option[Blockhash],
       merkleRoot: Blockhash,
       height: Height,
-      time: Long) extends BlockHeader
+      time: Long
+  ) extends BlockHeader
 
   case class HasFilter(
       hash: Blockhash,
@@ -36,7 +37,8 @@ object BlockHeader {
       merkleRoot: Blockhash,
       height: Height,
       time: Long,
-      filter: GolombCodedSet) extends BlockHeader
+      filter: GolombCodedSet
+  ) extends BlockHeader
 
   private implicit val filterWrites: Writes[GolombCodedSet] = (obj: GolombCodedSet) => {
     Json.obj(

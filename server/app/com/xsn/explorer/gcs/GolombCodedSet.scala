@@ -2,11 +2,7 @@ package com.xsn.explorer.gcs
 
 import com.xsn.explorer.models.values.HexString
 
-class GolombCodedSet(
-    val p: Int,
-    val m: Int,
-    val n: Int,
-    val hex: HexString)
+class GolombCodedSet(val p: Int, val m: Int, val n: Int, val hex: HexString)
 
 object GolombCodedSet {
 

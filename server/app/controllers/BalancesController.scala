@@ -6,9 +6,7 @@ import com.xsn.explorer.services.BalanceService
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 
-class BalancesController @Inject() (
-    balanceService: BalanceService,
-    cc: MyJsonControllerComponents)
+class BalancesController @Inject()(balanceService: BalanceService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
   import Codecs._

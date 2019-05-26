@@ -33,20 +33,21 @@ object Masternode {
    */
   def fromMap(values: Map[String, String]): List[Masternode] = {
     values
-        .map { case (key, value) =>
+      .map {
+        case (key, value) =>
           val list = value.split(" ").map(_.trim).filter(_.nonEmpty).toList
           parseValues(key, list)
-        }
-        .toList
-        .flatten
+      }
+      .toList
+      .flatten
   }
 
   private def parseTxid(key: String): Option[TransactionId] = {
     key
-        .split("\\,")
-        .headOption
-        .flatMap(_.split("\\(").lift(1))
-        .flatMap(TransactionId.from)
+      .split("\\,")
+      .headOption
+      .flatMap(_.split("\\(").lift(1))
+      .flatMap(TransactionId.from)
   }
 
   private def parseValues(key: String, values: List[String]): Option[Masternode] = values match {

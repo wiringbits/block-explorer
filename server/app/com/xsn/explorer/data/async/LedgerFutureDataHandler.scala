@@ -9,14 +9,14 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class LedgerFutureDataHandler @Inject() (
-    blockingDataHandler: LedgerBlockingDataHandler)(
-    implicit ec: DatabaseExecutionContext)
-    extends LedgerDataHandler[FutureApplicationResult] {
+class LedgerFutureDataHandler @Inject()(blockingDataHandler: LedgerBlockingDataHandler)(
+    implicit ec: DatabaseExecutionContext
+) extends LedgerDataHandler[FutureApplicationResult] {
 
-  override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): FutureApplicationResult[Unit] = Future {
-    blockingDataHandler.push(block, tposContracts)
-  }
+  override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): FutureApplicationResult[Unit] =
+    Future {
+      blockingDataHandler.push(block, tposContracts)
+    }
 
   override def pop(): FutureApplicationResult[Block] = Future {
     blockingDataHandler.pop()

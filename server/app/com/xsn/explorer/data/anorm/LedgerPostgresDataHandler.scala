@@ -17,14 +17,14 @@ import org.scalactic.Good
 import org.slf4j.LoggerFactory
 import play.api.db.Database
 
-class LedgerPostgresDataHandler @Inject() (
+class LedgerPostgresDataHandler @Inject()(
     override val database: Database,
     blockPostgresDAO: BlockPostgresDAO,
     blockFilterPostgresDAO: BlockFilterPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
     balancePostgresDAO: BalancePostgresDAO,
-    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO)
-    extends LedgerBlockingDataHandler
+    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO
+) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -33,9 +33,7 @@ class LedgerPostgresDataHandler @Inject() (
    * Push a block into the database chain, note that even if the block is supposed
    * to have a next block, we remove the link because that block is not stored yet.
    */
-  override def push(
-      block: Block.HasTransactions,
-      tposContracts: List[TPoSContract]): ApplicationResult[Unit] = {
+  override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
     val filter = GolombEncoding.encode(block)
@@ -45,8 +43,8 @@ class LedgerPostgresDataHandler @Inject() (
       } yield ()
 
       result
-          .map(Good(_))
-          .getOrElse(throw new RuntimeException("Unable to push block"))
+        .map(Good(_))
+        .getOrElse(throw new RuntimeException("Unable to push block"))
     }
 
     def fromError(e: ApplicationError) = e match {
@@ -68,21 +66,23 @@ class LedgerPostgresDataHandler @Inject() (
     } yield block
 
     result
-        .map(Good(_))
-        .getOrElse(throw new RuntimeException("Unable to pop block"))
+      .map(Good(_))
+      .getOrElse(throw new RuntimeException("Unable to pop block"))
   }
 
   private def upsertBlockCascade(
       block: Block.HasTransactions,
       filter: Option[GolombCodedSet],
-      tposContracts: List[TPoSContract])(
-      implicit conn: Connection): Option[Unit] = {
+      tposContracts: List[TPoSContract]
+  )(implicit conn: Connection): Option[Unit] = {
 
     val result = for {
       // block
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
-      _ = filter.foreach { f => blockFilterPostgresDAO.insert(block.hash, f) }
+      _ = filter.foreach { f =>
+        blockFilterPostgresDAO.insert(block.hash, f)
+      }
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
@@ -99,7 +99,7 @@ class LedgerPostgresDataHandler @Inject() (
     // link previous block (if possible)
     block.previousBlockhash.foreach { previousBlockhash =>
       blockPostgresDAO
-          .setNextBlockhash(previousBlockhash, block.hash)
+        .setNextBlockhash(previousBlockhash, block.hash)
     }
 
     result
@@ -116,10 +116,14 @@ class LedgerPostgresDataHandler @Inject() (
       // balances
       balanceList = balances(deletedTransactions)
       _ <- balanceList
-          .map { b => b.copy(spent = -b.spent, received = -b.received) }
-          .map { b => balancePostgresDAO.upsert(b) }
-          .toList
-          .everything
+        .map { b =>
+          b.copy(spent = -b.spent, received = -b.received)
+        }
+        .map { b =>
+          balancePostgresDAO.upsert(b)
+        }
+        .toList
+        .everything
 
       // compute aggregated amount
       delta = balanceList.map(_.available).sum
@@ -128,7 +132,9 @@ class LedgerPostgresDataHandler @Inject() (
   }
 
   private def insertBalanceBatch(balanceList: Iterable[Balance])(implicit conn: Connection) = {
-    balanceList.map { b => balancePostgresDAO.upsert(b) }
+    balanceList.map { b =>
+      balancePostgresDAO.upsert(b)
+    }
   }
 
   private def spendMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
@@ -139,8 +145,10 @@ class LedgerPostgresDataHandler @Inject() (
     } yield address -> input.value
 
     addressValueList
-        .groupBy(_._1)
-        .mapValues { list => list.map(_._2).sum }
+      .groupBy(_._1)
+      .mapValues { list =>
+        list.map(_._2).sum
+      }
   }
 
   private def receiveMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
@@ -151,23 +159,27 @@ class LedgerPostgresDataHandler @Inject() (
     } yield address -> output.value
 
     addressValueList
-        .groupBy(_._1)
-        .mapValues { list => list.map(_._2).sum }
+      .groupBy(_._1)
+      .mapValues { list =>
+        list.map(_._2).sum
+      }
   }
 
   private def balances(transactions: List[Transaction.HasIO]) = {
-    val spentList = spendMap(transactions).map { case (address, spent) =>
-      Balance(address, spent = spent)
+    val spentList = spendMap(transactions).map {
+      case (address, spent) =>
+        Balance(address, spent = spent)
     }
 
-    val receiveList = receiveMap(transactions).map { case (address, received) =>
-      Balance(address, received = received)
+    val receiveList = receiveMap(transactions).map {
+      case (address, received) =>
+        Balance(address, received = received)
     }
 
     val result = (spentList ++ receiveList)
-        .groupBy(_.address)
-        .mapValues { _.reduce(mergeBalances) }
-        .values
+      .groupBy(_.address)
+      .mapValues { _.reduce(mergeBalances) }
+      .values
 
     result
   }

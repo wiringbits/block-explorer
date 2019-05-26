@@ -12,11 +12,11 @@ import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
 
-class BlocksController @Inject() (
+class BlocksController @Inject()(
     blockService: BlockService,
     transactionService: TransactionService,
-    cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   import BlocksController._
   import Codecs._
@@ -27,17 +27,18 @@ class BlocksController @Inject() (
 
   def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
     blockService
-        .getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
-        .toFutureOr
-        .map { case (value, cacheable) =>
+      .getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
+      .toFutureOr
+      .map {
+        case (value, cacheable) =>
           val response = Ok(Json.toJson(value))
           if (cacheable) {
             response.withHeaders("Cache-Control" -> "public, max-age=31536000")
           } else {
             response.withHeaders("Cache-Control" -> "no-store")
           }
-        }
-        .toFuture
+      }
+      .toFuture
   }
 
   /**
@@ -47,16 +48,16 @@ class BlocksController @Inject() (
    */
   def getDetails(query: String) = public { _ =>
     Try(query.toInt)
-        .map(Height.apply)
-        .map(blockService.getDetails)
-        .getOrElse(blockService.getDetails(query))
+      .map(Height.apply)
+      .map(blockService.getDetails)
+      .getOrElse(blockService.getDetails(query))
   }
 
   def getRawBlock(query: String) = public { _ =>
     Try(query.toInt)
-        .map(Height.apply)
-        .map(blockService.getRawBlock)
-        .getOrElse(blockService.getRawBlock(query))
+      .map(Height.apply)
+      .map(blockService.getRawBlock)
+      .getOrElse(blockService.getRawBlock(query))
   }
 
   def getTransactions(blockhash: String, offset: Int, limit: Int, orderBy: String) = public { _ =>

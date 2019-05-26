@@ -15,12 +15,12 @@ object ExplorerConfig {
 
   case class LiteVersionConfig(enabled: Boolean, syncTransactionsFromBlock: Int)
 
-  class Play @Inject() (config: Configuration) extends ExplorerConfig {
+  class Play @Inject()(config: Configuration) extends ExplorerConfig {
 
     override val genesisBlock: Blockhash = {
       Blockhash
-          .from(config.get[String]("explorer.genesisBlock"))
-          .getOrElse(throw new RuntimeException("The given genesisBlock is incorrect"))
+        .from(config.get[String]("explorer.genesisBlock"))
+        .getOrElse(throw new RuntimeException("The given genesisBlock is incorrect"))
     }
 
     override def liteVersionConfig: LiteVersionConfig = {

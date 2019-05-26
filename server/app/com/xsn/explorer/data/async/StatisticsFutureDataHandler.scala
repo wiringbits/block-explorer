@@ -9,10 +9,9 @@ import com.xsn.explorer.models.Statistics
 
 import scala.concurrent.Future
 
-class StatisticsFutureDataHandler @Inject() (
-    blockingDataHandler: StatisticsBlockingDataHandler)(
-    implicit ec: DatabaseExecutionContext)
-    extends StatisticsDataHandler[FutureApplicationResult] {
+class StatisticsFutureDataHandler @Inject()(blockingDataHandler: StatisticsBlockingDataHandler)(
+    implicit ec: DatabaseExecutionContext
+) extends StatisticsDataHandler[FutureApplicationResult] {
 
   override def getStatistics(): FutureApplicationResult[Statistics] = Future {
     blockingDataHandler.getStatistics()

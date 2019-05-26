@@ -10,12 +10,12 @@ import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json._
 
-class AddressesController @Inject() (
+class AddressesController @Inject()(
     addressService: AddressService,
     transactionService: TransactionService,
     tposContractService: TPoSContractService,
-    cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   import AddressesController._
   import Codecs._
@@ -30,29 +30,19 @@ class AddressesController @Inject() (
     transactionService.getTransactions(address, paginatedQuery, OrderingQuery(ordering))
   }
 
-  def getLightWalletTransactions(
-      address: String,
-      limit: Int,
-      lastSeenTxid: Option[String],
-      orderingCondition: String) = public { _ =>
-
-    transactionService.getLightWalletTransactions(
-      address,
-      Limit(limit),
-      lastSeenTxid,
-      orderingCondition)
-  }
+  def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
+    public { _ =>
+      transactionService.getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)
+    }
 
   /**
    * Format to keep compatibility with the previous approach using the RPC api.
    */
   implicit private val writes: Writes[Transaction.Output] = Writes { obj =>
-    val address = obj
-        .addresses
-        .headOption
-        .map(_.string)
-        .map(JsString.apply)
-        .getOrElse(JsNull)
+    val address = obj.addresses.headOption
+      .map(_.string)
+      .map(JsString.apply)
+      .getOrElse(JsNull)
 
     val values = Map(
       "address" -> address, // Keep compatibility with the legacy API
@@ -79,12 +69,10 @@ object AddressesController {
 
   implicit val inputWrites: Writes[LightWalletTransaction.Input] = Json.writes[LightWalletTransaction.Input]
   implicit val outputWrites: Writes[LightWalletTransaction.Output] = (obj: LightWalletTransaction.Output) => {
-    val address = obj
-        .addresses
-        .headOption
-        .map(_.string)
-        .map(JsString.apply)
-        .getOrElse(JsNull)
+    val address = obj.addresses.headOption
+      .map(_.string)
+      .map(JsString.apply)
+      .getOrElse(JsNull)
 
     Json.obj(
       "index" -> obj.index,

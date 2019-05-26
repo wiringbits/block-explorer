@@ -13,7 +13,7 @@ import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -33,16 +33,14 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
         |RETURNING address, received, spent
       """.stripMargin
     ).on(
-      'address -> partial.address.string,
-      'received -> partial.received,
-      'spent -> partial.spent,
-    ).as(parseBalance.singleOpt)
+        'address -> partial.address.string,
+        'received -> partial.received,
+        'spent -> partial.spent
+      )
+      .as(parseBalance.singleOpt)
   }
 
-  def get(
-      query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField])(
-      implicit conn: Connection): List[Balance] = {
+  def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField])(implicit conn: Connection): List[Balance] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
@@ -58,15 +56,15 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'offset -> query.offset.int,
-      'limit -> query.limit.int
-    ).as(parseBalance.*)
+        'offset -> query.offset.int,
+        'limit -> query.limit.int
+      )
+      .as(parseBalance.*)
   }
 
-  def getNonZeroBalances(
-      query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField])(
-      implicit conn: Connection): List[Balance] = {
+  def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField])(
+      implicit conn: Connection
+  ): List[Balance] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
@@ -82,9 +80,10 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
          |LIMIT {limit}
       """.stripMargin
     ).on(
-      'offset -> query.offset.int,
-      'limit -> query.limit.int
-    ).as(parseBalance.*)
+        'offset -> query.offset.int,
+        'limit -> query.limit.int
+      )
+      .as(parseBalance.*)
   }
 
   def count(implicit conn: Connection): Count = {
@@ -110,8 +109,9 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
          |wHERE address = {address}
       """.stripMargin
     ).on(
-      'address -> address.string
-    ).as(parseBalance.singleOpt)
+        'address -> address.string
+      )
+      .as(parseBalance.singleOpt)
   }
 
   def countNonZeroBalances(implicit conn: Connection): Count = {
@@ -142,8 +142,9 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int
-    ).as(parseBalance.*)
+        'limit -> limit.int
+      )
+      .as(parseBalance.*)
   }
 
   /**
@@ -168,8 +169,9 @@ class BalancePostgresDAO @Inject() (fieldOrderingSQLInterpreter: FieldOrderingSQ
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'lastSeenAddress -> lastSeenAddress.string
-    ).as(parseBalance.*)
+        'limit -> limit.int,
+        'lastSeenAddress -> lastSeenAddress.string
+      )
+      .as(parseBalance.*)
   }
 }

@@ -28,30 +28,28 @@ class BlockHeaderCache(cache: Cache[BlockHeaderCache.Key, BlockHeaderCache.Encod
 
   import BlockHeaderCache._
 
-  def getOrSet(
-      key: Key,
-      entrySize: Int)(
-      f: => FutureApplicationResult[Value])(
-      implicit ec: ExecutionContext,
-      writes: Writes[Value]): FutureApplicationResult[EncodedValue] = {
+  def getOrSet(key: Key, entrySize: Int)(
+      f: => FutureApplicationResult[Value]
+  )(implicit ec: ExecutionContext, writes: Writes[Value]): FutureApplicationResult[EncodedValue] = {
 
     if (isCacheable(key, entrySize)) {
       get(key)
-          .map(v => Future.successful(Good(v)))
-          .getOrElse {
-            val result = for {
-              r <- f.toFutureOr
-            } yield (r.data.size, Json.toJson(r))
+        .map(v => Future.successful(Good(v)))
+        .getOrElse {
+          val result = for {
+            r <- f.toFutureOr
+          } yield (r.data.size, Json.toJson(r))
 
-            // set cache only if the response is complete
-            val _ = result.map { case (size, json) =>
+          // set cache only if the response is complete
+          val _ = result.map {
+            case (size, json) =>
               if (size == key.limit.int) {
                 cache.put(key, json)
               }
-            }
-
-            result.map(_._2).toFuture
           }
+
+          result.map(_._2).toFuture
+        }
     } else {
       val result = for {
         r <- f.toFutureOr
@@ -69,7 +67,7 @@ class BlockHeaderCache(cache: Cache[BlockHeaderCache.Key, BlockHeaderCache.Encod
    */
   def isCacheable(key: Key, entrySize: Int): Boolean = {
     key.orderingCondition == OrderingCondition.AscendingOrder &&
-        key.limit.int == entrySize
+    key.limit.int == entrySize
   }
 
   def get(key: Key): Option[EncodedValue] = {
@@ -85,9 +83,10 @@ object BlockHeaderCache {
   type EncodedValue = JsValue
 
   def default: BlockHeaderCache = {
-    val cache = Caffeine.newBuilder()
-        .maximumSize(250000)
-        .build[Key, EncodedValue]
+    val cache = Caffeine
+      .newBuilder()
+      .maximumSize(250000)
+      .build[Key, EncodedValue]
 
     new BlockHeaderCache(cache)
   }

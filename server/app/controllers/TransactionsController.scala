@@ -5,9 +5,7 @@ import com.xsn.explorer.services.TransactionRPCService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 
-class TransactionsController @Inject() (
-    transactionRPCService: TransactionRPCService,
-    cc: MyJsonControllerComponents)
+class TransactionsController @Inject()(transactionRPCService: TransactionRPCService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
   import Context._

@@ -13,7 +13,9 @@ package object validators {
 
   def validate[T](maybe: Option[String], validator: String => ApplicationResult[T]): ApplicationResult[Option[T]] = {
     maybe
-        .map { string => validator(string).map(Option.apply) }
-        .getOrElse(Good(None))
+      .map { string =>
+        validator(string).map(Option.apply)
+      }
+      .getOrElse(Good(None))
   }
 }

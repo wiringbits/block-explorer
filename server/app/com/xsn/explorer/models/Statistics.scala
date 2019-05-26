@@ -6,7 +6,8 @@ case class Statistics(
     blocks: Int,
     transactions: Int,
     totalSupply: Option[BigDecimal],
-    circulatingSupply: Option[BigDecimal])
+    circulatingSupply: Option[BigDecimal]
+)
 
 object Statistics {
 

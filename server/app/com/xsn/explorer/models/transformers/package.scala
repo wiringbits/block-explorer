@@ -11,17 +11,17 @@ package object transformers {
 
   def toPersistedBlock(rpcBlock: rpc.Block, extractionMethod: BlockExtractionMethod): persisted.Block = {
     rpcBlock
-        .into[Block]
-        .withFieldConst(_.extractionMethod, extractionMethod)
-        .transform
+      .into[Block]
+      .withFieldConst(_.extractionMethod, extractionMethod)
+      .transform
   }
 
   def toLightWalletTransactionInput(input: Transaction.Input): LightWalletTransaction.Input = {
     input
-        .into[LightWalletTransaction.Input]
-        .withFieldRenamed(_.fromOutputIndex, _.index)
-        .withFieldRenamed(_.fromTxid, _.txid)
-        .transform
+      .into[LightWalletTransaction.Input]
+      .withFieldRenamed(_.fromOutputIndex, _.index)
+      .withFieldRenamed(_.fromTxid, _.txid)
+      .transform
   }
 
   def toLightWalletTransactionOutput(output: Transaction.Output): LightWalletTransaction.Output = {
@@ -33,9 +33,9 @@ package object transformers {
     val outputs = tx.outputs.map(toLightWalletTransactionOutput)
 
     tx.transaction
-        .into[LightWalletTransaction]
-        .withFieldConst(_.inputs, inputs)
-        .withFieldConst(_.outputs, outputs)
-        .transform
+      .into[LightWalletTransaction]
+      .withFieldConst(_.inputs, inputs)
+      .withFieldConst(_.outputs, outputs)
+      .transform
   }
 }

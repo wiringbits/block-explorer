@@ -8,7 +8,8 @@ case class LightWalletTransaction(
     size: Size,
     time: Long,
     inputs: List[LightWalletTransaction.Input],
-    outputs: List[LightWalletTransaction.Output])
+    outputs: List[LightWalletTransaction.Output]
+)
 
 object LightWalletTransaction {
 

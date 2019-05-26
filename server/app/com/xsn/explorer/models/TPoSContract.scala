@@ -6,11 +6,7 @@ import play.api.libs.json.{Json, Writes}
 
 import scala.util.Try
 
-case class TPoSContract(
-    id: TPoSContract.Id,
-    details: TPoSContract.Details,
-    time: Long,
-    state: TPoSContract.State) {
+case class TPoSContract(id: TPoSContract.Id, details: TPoSContract.Details, time: Long, state: TPoSContract.State) {
 
   val txid: TransactionId = id.txid
 }
@@ -19,6 +15,7 @@ object TPoSContract {
 
   case class Id(txid: TransactionId, index: Int)
   class Commission private (val int: Int) extends AnyVal
+
   object Commission {
 
     val range = 1 until 100
@@ -30,6 +27,7 @@ object TPoSContract {
   }
 
   case class Details(owner: Address, merchant: Address, merchantCommission: Commission)
+
   object Details {
 
     /**
@@ -59,6 +57,7 @@ object TPoSContract {
   }
 
   sealed abstract class State(override val entryName: String) extends EnumEntry
+
   object State extends Enum[State] {
 
     val values = findValues

@@ -18,7 +18,8 @@ case class Block(
     bits: String,
     chainwork: String,
     difficulty: BigDecimal,
-    extractionMethod: BlockExtractionMethod) {
+    extractionMethod: BlockExtractionMethod
+) {
 
   def withTransactions(transactions: List[Transaction.HasIO]): Block.HasTransactions = {
     Block.HasTransactions(this, transactions)
@@ -42,10 +43,11 @@ object Block {
      * Collect the addresses involved in the block.
      */
     def collectAddresses: Set[Address] = {
-      transactions.foldLeft(Set.empty[Address]) { case (acc, tx) =>
-        val spending = tx.inputs.flatMap(_.addresses)
-        val receiving = tx.outputs.flatMap(_.addresses)
-        spending.toSet ++ receiving.toSet ++ acc
+      transactions.foldLeft(Set.empty[Address]) {
+        case (acc, tx) =>
+          val spending = tx.inputs.flatMap(_.addresses)
+          val receiving = tx.outputs.flatMap(_.addresses)
+          spending.toSet ++ receiving.toSet ++ acc
       }
     }
   }

@@ -6,8 +6,7 @@ import org.scalactic.{One, Or}
 
 class OrderingConditionParser {
 
-  def parse(
-      unsafeOrderingCondition: String): Option[OrderingCondition] = unsafeOrderingCondition.toLowerCase match {
+  def parse(unsafeOrderingCondition: String): Option[OrderingCondition] = unsafeOrderingCondition.toLowerCase match {
 
     case "asc" => Some(OrderingCondition.AscendingOrder)
     case "desc" => Some(OrderingCondition.DescendingOrder)

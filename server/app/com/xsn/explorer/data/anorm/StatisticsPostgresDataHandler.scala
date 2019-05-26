@@ -9,9 +9,7 @@ import com.xsn.explorer.models.Statistics
 import org.scalactic.Good
 import play.api.db.Database
 
-class StatisticsPostgresDataHandler @Inject() (
-    override val database: Database,
-    statisticsDAO: StatisticsPostgresDAO)
+class StatisticsPostgresDataHandler @Inject()(override val database: Database, statisticsDAO: StatisticsPostgresDAO)
     extends StatisticsBlockingDataHandler
     with AnormPostgresDataHandler {
 

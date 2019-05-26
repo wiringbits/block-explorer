@@ -9,7 +9,8 @@ case class TransactionWithValues(
     time: Long,
     size: Size,
     sent: BigDecimal,
-    received: BigDecimal)
+    received: BigDecimal
+)
 
 object TransactionWithValues {
 

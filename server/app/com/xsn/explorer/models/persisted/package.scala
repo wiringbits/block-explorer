@@ -7,6 +7,4 @@ package com.xsn.explorer.models
  * is that there are fields which shouldn't be persisted, for example, the number
  * of confirmations for a block.
  */
-package object persisted {
-
-}
+package object persisted {}

@@ -21,40 +21,36 @@ object TransactionParsers {
     case txid ~ blockhash ~ time ~ size => Transaction(txid, blockhash, time, size)
   }
 
-  val parseTransactionWithValues = (
-      parseTransactionId() ~
-          parseBlockhash() ~
-          parseTime ~
-          parseSize ~
-          parseSent ~
-          parseReceived).map {
+  val parseTransactionWithValues = (parseTransactionId() ~
+    parseBlockhash() ~
+    parseTime ~
+    parseSize ~
+    parseSent ~
+    parseReceived).map {
 
     case txid ~ blockhash ~ time ~ size ~ sent ~ received =>
       TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
   val parseTransactionInput = (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses)
-      .map { case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
+    .map {
+      case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
         Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
-      }
+    }
 
-  val parseTransactionOutput = (
-      parseTransactionId() ~
-          parseIndex ~
-          parseValue ~
-          parseAddresses ~
-          parseHexScript).map {
+  val parseTransactionOutput = (parseTransactionId() ~
+    parseIndex ~
+    parseValue ~
+    parseAddresses ~
+    parseHexScript).map {
 
     case txid ~ index ~ value ~ addresses ~ script =>
       Transaction.Output(txid, index, value, addresses, script)
   }
 
-  val parseAddressTransactionDetails = (parseAddress() ~ parseTransactionId() ~ parseSent ~ parseReceived ~ parseTime).map {
-    case address ~ txid ~ sent ~ received ~ time => AddressTransactionDetails(
-      address,
-      txid,
-      time = time,
-      sent = sent,
-      received = received)
-  }
+  val parseAddressTransactionDetails =
+    (parseAddress() ~ parseTransactionId() ~ parseSent ~ parseReceived ~ parseTime).map {
+      case address ~ txid ~ sent ~ received ~ time =>
+        AddressTransactionDetails(address, txid, time = time, sent = sent, received = received)
+    }
 }

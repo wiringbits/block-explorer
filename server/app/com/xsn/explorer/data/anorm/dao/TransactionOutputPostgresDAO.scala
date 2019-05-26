@@ -10,7 +10,7 @@ import com.xsn.explorer.models.values.{Address, TransactionId}
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
-class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
+class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -24,8 +24,9 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      value > 0
       """.stripMargin
     ).on(
-      'address -> address.string
-    ).as(parseTransactionOutput.*)
+        'address -> address.string
+      )
+      .as(parseTransactionOutput.*)
   }
 
   def getOutput(txid: TransactionId, index: Int)(implicit conn: Connection): Option[Transaction.Output] = {
@@ -37,14 +38,15 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      index = {index}
       """.stripMargin
     ).on(
-      'txid -> txid.string,
-      'index -> index
-    ).as(parseTransactionOutput.singleOpt)
+        'txid -> txid.string,
+        'index -> index
+      )
+      .as(parseTransactionOutput.singleOpt)
   }
 
   def batchInsertOutputs(
-      outputs: List[Transaction.Output])(
-      implicit conn: Connection): Option[List[Transaction.Output]] = {
+      outputs: List[Transaction.Output]
+  )(implicit conn: Connection): Option[List[Transaction.Output]] = {
 
     outputs match {
       case Nil => Some(outputs)
@@ -55,7 +57,8 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
             'addresses -> output.addresses.map(_.string).toArray: NamedParameter,
-            'hex_script -> output.script.string: NamedParameter)
+            'hex_script -> output.script.string: NamedParameter
+          )
         }
 
         val batch = BatchSql(
@@ -71,10 +74,10 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
 
         val success = batch.execute().forall(_ == 1)
         if (success ||
-            explorerConfig.liteVersionConfig.enabled) {
+          explorerConfig.liteVersionConfig.enabled) {
 
           Some(outputs)
-        } else{
+        } else {
           None
         }
     }
@@ -88,8 +91,9 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, hex_script, value, addresses
       """.stripMargin
     ).on(
-      'txid -> txid.string
-    ).as(parseTransactionOutput.*)
+        'txid -> txid.string
+      )
+      .as(parseTransactionOutput.*)
 
     result
   }
@@ -102,8 +106,9 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |WHERE txid = {txid}
       """.stripMargin
     ).on(
-      'txid -> txid.string
-    ).as(parseTransactionOutput.*)
+        'txid -> txid.string
+      )
+      .as(parseTransactionOutput.*)
   }
 
   def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
@@ -115,9 +120,10 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      {address} = ANY(addresses)
       """.stripMargin
     ).on(
-      'txid -> txid.string,
-      'address -> address.string
-    ).as(parseTransactionOutput.*)
+        'txid -> txid.string,
+        'address -> address.string
+      )
+      .as(parseTransactionOutput.*)
   }
 
   def batchSpend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
@@ -125,8 +131,10 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
       case Nil => Option(())
       case _ =>
         val txidArray = inputs
-            .map { input => s"'${input.fromTxid.string}'" }
-            .mkString("[", ",", "]")
+          .map { input =>
+            s"'${input.fromTxid.string}'"
+          }
+          .mkString("[", ",", "]")
 
         val indexArray = inputs.map(_.fromOutputIndex).mkString("[", ",", "]")
 
@@ -150,7 +158,7 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         ).executeUpdate()
 
         if (result == inputs.size ||
-            explorerConfig.liteVersionConfig.enabled) {
+          explorerConfig.liteVersionConfig.enabled) {
 
           Option(())
         } else {

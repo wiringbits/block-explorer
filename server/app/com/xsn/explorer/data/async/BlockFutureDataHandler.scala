@@ -13,10 +13,9 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class BlockFutureDataHandler @Inject() (
-    blockBlockingDataHandler: BlockBlockingDataHandler)(
-    implicit ec: DatabaseExecutionContext)
-    extends BlockDataHandler[FutureApplicationResult] {
+class BlockFutureDataHandler @Inject()(blockBlockingDataHandler: BlockBlockingDataHandler)(
+    implicit ec: DatabaseExecutionContext
+) extends BlockDataHandler[FutureApplicationResult] {
 
   override def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
     blockBlockingDataHandler.getBy(blockhash)
@@ -26,7 +25,10 @@ class BlockFutureDataHandler @Inject() (
     blockBlockingDataHandler.getBy(height)
   }
 
-  override def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField]): FuturePaginatedResult[Block] = Future {
+  override def getBy(
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[BlockField]
+  ): FuturePaginatedResult[Block] = Future {
     blockBlockingDataHandler.getBy(paginatedQuery, ordering)
   }
 
@@ -45,7 +47,8 @@ class BlockFutureDataHandler @Inject() (
   override def getHeaders(
       limit: pagination.Limit,
       orderingCondition: OrderingCondition,
-      lastSeenHash: Option[Blockhash]): FutureApplicationResult[List[BlockHeader]] = Future {
+      lastSeenHash: Option[Blockhash]
+  ): FutureApplicationResult[List[BlockHeader]] = Future {
 
     blockBlockingDataHandler.getHeaders(limit, orderingCondition, lastSeenHash)
   }
