@@ -12,7 +12,7 @@ This is an incomplete list of things to take care while contributing.
 - Every commit should include tests unless it is not practical.
 
 ## Code style
-- Try to keep the code style while we integrate a code formatter tool like scalafmt.
+- We use [scalafmt] to format the code automatically, follow the [IntelliJ setup for scalafmt](https://scalameta.org/scalafmt/docs/installation.html#intellij).
 
 ## Pull requests
 - The pull requests should go to the `develop` branch.
