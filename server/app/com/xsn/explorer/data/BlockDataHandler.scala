@@ -28,6 +28,8 @@ trait BlockDataHandler[F[_]] {
       orderingCondition: OrderingCondition,
       lastSeenHash: Option[Blockhash]
   ): F[List[BlockHeader]]
+
+  def getHeader(blockhash: Blockhash): F[BlockHeader]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

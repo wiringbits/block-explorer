@@ -5,12 +5,14 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, Paginated
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
+import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.helpers.{BlockLoader, DataHandlerObjects}
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.persisted.{Block, BlockHeader}
 import com.xsn.explorer.models.values.Blockhash
 import org.scalactic.{Bad, One, Or}
 import org.scalatest.BeforeAndAfter
+import io.scalaland.chimney.dsl._
 
 class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
@@ -215,6 +217,29 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     }
   }
 
+  "getHeader" should {
+
+    "return the blockHeader" in {
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      insert(block).isGood mustEqual true
+
+      val header = block.into[BlockHeader.Simple].transform
+      val result = dataHandler.getHeader(block.hash)
+
+      result.isGood mustEqual true
+      matches(header, result.get)
+    }
+
+    "fail on block not found" in {
+      val blockhash = Blockhash.from("b858d38a3552c83aea58f66fe00ae220352a235e33fcf1f3af04507a61a9dc32").get
+
+      val result = dataHandler.getHeader(blockhash)
+      result mustEqual Bad(BlockNotFoundError).accumulating
+    }
+  }
+
   private def matches(expected: Block, result: Block) = {
     // NOTE: transactions and confirmations are not matched intentionally
     result.hash mustEqual expected.hash
@@ -231,5 +256,26 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     result.chainwork mustEqual expected.chainwork
     result.difficulty mustEqual expected.difficulty
     result.nonce mustEqual expected.nonce
+  }
+
+  private def matches(expected: BlockHeader, result: BlockHeader) = {
+    result.hash mustEqual expected.hash
+    result.previousBlockhash mustEqual expected.previousBlockhash
+    result.merkleRoot mustEqual expected.merkleRoot
+    result.height mustEqual expected.height
+    result.time mustEqual expected.time
+
+    (expected, result) match {
+      case (e: BlockHeader.HasFilter, r: BlockHeader.HasFilter) => matchFilter(e.filter, r.filter)
+      case (_: BlockHeader.Simple, _: BlockHeader.Simple) => ()
+      case _ => fail("The filter doesn't match")
+    }
+  }
+
+  private def matchFilter(expected: GolombCodedSet, result: GolombCodedSet) = {
+    result.n mustEqual expected.n
+    result.m mustEqual expected.m
+    result.p mustEqual expected.p
+    result.hex.string mustEqual expected.hex.string
   }
 }

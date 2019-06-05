@@ -67,4 +67,11 @@ class BlockPostgresDataHandler @Inject()(override val database: Database, blockP
 
     Good(result)
   }
+
+  override def getHeader(blockhash: Blockhash): ApplicationResult[BlockHeader] =
+    withConnection { implicit conn =>
+      val maybe = blockPostgresDAO.getHeader(blockhash)
+      Or.from(maybe, One(BlockNotFoundError))
+    }
+
 }

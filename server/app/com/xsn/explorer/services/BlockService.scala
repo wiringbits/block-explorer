@@ -1,6 +1,6 @@
 package com.xsn.explorer.services
 
-import com.alexitc.playsonify.core.FutureApplicationResult
+import com.alexitc.playsonify.core.{FutureApplicationResult}
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
@@ -47,6 +47,15 @@ class BlockService @Inject()(
       headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
     } yield (WrappedResult(headers), canCacheResult(orderingCondition, limit.int, latestBlock, headers))
+
+    result.toFuture
+  }
+
+  def getBlockHeader(blockhashString: String): FutureApplicationResult[BlockHeader] = {
+    val result = for {
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
+      header <- blockDataHandler.getHeader(blockhash).toFutureOr
+    } yield header
 
     result.toFuture
   }

@@ -36,8 +36,7 @@ class BalancesControllerSpec extends MyAPISpec {
       received = BigDecimal("1000"),
       spent = BigDecimal("500")
     )
-  ).sortBy(_.available)
-    .reverse
+  ).sortBy(_.available).reverse
 
   val dataHandler = new BalanceDummyDataHandler {
 

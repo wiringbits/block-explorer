@@ -215,6 +215,27 @@ class BlockPostgresDAO @Inject()(
       .getOrElse(header)
   }
 
+  def getHeader(blockhash: Blockhash)(implicit conn: Connection): Option[BlockHeader] = {
+    val blockMaybe = SQL(
+      """
+        |SELECT blockhash, previous_blockhash, merkle_root, height, time
+        |FROM blocks
+        |WHERE blockhash = {blockhash}
+      """.stripMargin
+    ).on(
+        "blockhash" -> blockhash.string
+      )
+      .as(parseHeader.singleOpt)
+
+    for {
+      header <- blockMaybe
+      filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
+    } yield filterMaybe
+      .map(header.withFilter)
+      .getOrElse(header)
+
+  }
+
   private def toSQL(condition: OrderingCondition): String = condition match {
     case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"

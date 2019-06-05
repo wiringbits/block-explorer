@@ -41,6 +41,17 @@ class BlocksController @Inject()(
       .toFuture
   }
 
+  def getBlockHeader(blockhashString: String) = public { _ =>
+    blockService
+      .getBlockHeader(blockhashString)
+      .toFutureOr
+      .map { value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+      }
+      .toFuture
+  }
+
   /**
    * Try to retrieve a block by height, in case the query argument
    * is not a valid height, we assume it might be a blockhash and try to

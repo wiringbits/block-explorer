@@ -3,11 +3,12 @@ package controllers
 import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
-import com.xsn.explorer.data.TransactionBlockingDataHandler
+import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
-import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.persisted.{BlockHeader, Transaction}
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import com.xsn.explorer.services.XSNService
@@ -16,8 +17,9 @@ import org.mockito.ArgumentMatchersSugar._
 import org.mockito.MockitoSugar._
 import org.scalactic.Good
 import play.api.inject.bind
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue}
 import play.api.test.Helpers._
+import io.scalaland.chimney.dsl._
 
 class BlocksControllerSpec extends MyAPISpec {
 
@@ -27,10 +29,12 @@ class BlocksControllerSpec extends MyAPISpec {
   private val customXSNService = new FileBasedXSNService
 
   private val transactionDataHandlerMock = mock[TransactionBlockingDataHandler]
+  private val blockBlockingDataHandlerMock = mock[BlockBlockingDataHandler]
 
   override val application = guiceApplicationBuilder
     .overrides(bind[XSNService].to(customXSNService))
     .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandlerMock))
+    .overrides(bind[BlockBlockingDataHandler].to(blockBlockingDataHandlerMock))
     .build()
 
   "GET /blocks/:query" should {
@@ -378,6 +382,33 @@ class BlocksControllerSpec extends MyAPISpec {
     }
   }
 
+  "GET /block-headers/:blockhash" should {
+    "return the blockHeader for the given blockhash" in {
+
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      val blockheader =
+        block
+          .into[BlockHeader.Simple]
+          .transform
+          .withFilter(GolombCodedSet(1, 1, 1, List(new UnsignedByte(10.toByte))))
+      val result = Good(blockheader)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getHeader(eqTo(block.hash))
+      ).thenReturn(result)
+
+      val response = GET(s"/block-headers/${block.hash}")
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      matchBlockHeader(blockheader, json)
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "public, max-age=31536000"
+    }
+  }
+
   private def matchBlock(expected: Block, actual: JsValue) = {
     val jsonBlock = actual
     val block = expected
@@ -397,4 +428,28 @@ class BlocksControllerSpec extends MyAPISpec {
     (jsonBlock \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
     (jsonBlock \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
   }
+
+  private def matchBlockHeader(expected: BlockHeader, actual: JsValue) = {
+    val jsonBlockHeader = actual
+    val block = expected
+
+    (jsonBlockHeader \ "hash").as[Blockhash] mustEqual block.hash
+    (jsonBlockHeader \ "height").as[Height] mustEqual block.height
+    (jsonBlockHeader \ "time").as[Long] mustEqual block.time
+    (jsonBlockHeader \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+    (jsonBlockHeader \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+
+    block match {
+      case BlockHeader.HasFilter(_, _, _, _, _, filter) => {
+        val jsonFilter = (jsonBlockHeader \ "filter").as[JsValue]
+
+        (jsonFilter \ "n").as[Int] mustEqual filter.n
+        (jsonFilter \ "m").as[Int] mustEqual filter.m
+        (jsonFilter \ "p").as[Int] mustEqual filter.p
+        (jsonFilter \ "hex").as[String] mustEqual filter.hex.string
+      }
+      case BlockHeader.Simple(_, _, _, _, _) => ()
+    }
+  }
+
 }
