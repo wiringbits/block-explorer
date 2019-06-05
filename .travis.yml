@@ -10,7 +10,7 @@ matrix:
       before_script:
         - cd server
       script:
-        - sbt scalafmtCheck clean coverage test coverageReport
+        - sbt scalafmtCheckAll clean coverage test coverageReport
       after_success:
         - sbt coverageAggregate codacyCoverage
 
