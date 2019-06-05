@@ -101,7 +101,8 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
         genesis,
         block1.copy(nextBlockhash = Some(newBlock2.hash)),
         newBlock2.copy(nextBlockhash = Some(newBlock3.hash)),
-        newBlock3)
+        newBlock3
+      )
 
       val synchronizer = ledgerSynchronizerService(finalBlocks: _*)
       whenReady(synchronizer.synchronize(newBlock3.hash)) { result =>
@@ -126,7 +127,8 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
         block1.copy(nextBlockhash = Some(newBlock2.hash)),
         newBlock2.copy(nextBlockhash = Some(newBlock3.hash)),
         newBlock3.copy(nextBlockhash = Some(newBlock4.hash)),
-        newBlock4)
+        newBlock4
+      )
 
       val synchronizer = ledgerSynchronizerService(finalBlocks: _*)
       whenReady(synchronizer.synchronize(newBlock4.hash)) { result =>
@@ -178,22 +180,24 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
 
   private def createBlocks(synchronizer: LedgerSynchronizerService, blocks: Block*) = {
     blocks
-        .foreach { block =>
-          whenReady(synchronizer.synchronize(block.hash)) { result =>
-            result.isGood mustEqual true
-          }
+      .foreach { block =>
+        whenReady(synchronizer.synchronize(block.hash)) { result =>
+          result.isGood mustEqual true
         }
+      }
   }
 
   private def ledgerSynchronizerService(blocks: Block*): LedgerSynchronizerService = {
     val xsnService = new FileBasedXSNService {
       override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
         blocks
-            .find(_.hash == blockhash)
-            .map { block => Future.successful(Good(cleanGenesisBlock(block))) }
-            .getOrElse {
-              Future.successful(Bad(BlockNotFoundError).accumulating)
-            }
+          .find(_.hash == blockhash)
+          .map { block =>
+            Future.successful(Good(cleanGenesisBlock(block)))
+          }
+          .getOrElse {
+            Future.successful(Bad(BlockNotFoundError).accumulating)
+          }
       }
 
       override def getLatestBlock(): FutureApplicationResult[Block] = {
@@ -232,6 +236,7 @@ class LedgerSynchronizerServiceSpec extends PostgresDataHandlerSpec with BeforeA
       blockService,
       transactionCollectorService,
       new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
-      new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC))
+      new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC)
+    )
   }
 }

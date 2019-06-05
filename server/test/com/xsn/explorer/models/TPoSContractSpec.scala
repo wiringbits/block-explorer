@@ -13,7 +13,9 @@ class TPoSContractSpec extends WordSpec {
   val address1Hex = DatatypeConverter.printHexBinary(address1.string.getBytes())
   val address2Hex = DatatypeConverter.printHexBinary(address2.string.getBytes())
   val commission = "99"
-  val signature = "1f60a6a385a4e5163ffef65dd873f17452bb0d9f89da701ffcc5a0f72287273c0571485c29123fef880d2d8169cfdb884bf95a18a0b36461517acda390ce4cf441"
+
+  val signature =
+    "1f60a6a385a4e5163ffef65dd873f17452bb0d9f89da701ffcc5a0f72287273c0571485c29123fef880d2d8169cfdb884bf95a18a0b36461517acda390ce4cf441"
 
   val failureCases = Map(
     "fail when the signature is missing" -> s"OP_RETURN $address1Hex $address2Hex $commission",
@@ -34,17 +36,19 @@ class TPoSContractSpec extends WordSpec {
       val expected = TPoSContract.Details(
         owner = address1,
         merchant = address2,
-        merchantCommission = TPoSContract.Commission.from(100 - commission.toInt).get)
+        merchantCommission = TPoSContract.Commission.from(100 - commission.toInt).get
+      )
 
       val result = TPoSContract.Details.fromOutputScriptASM(asm)
       result.value must be(expected)
     }
 
-    failureCases.foreach { case (test, input) =>
-      test in {
-        val result = TPoSContract.Details.fromOutputScriptASM(input)
-        result must be(empty)
-      }
+    failureCases.foreach {
+      case (test, input) =>
+        test in {
+          val result = TPoSContract.Details.fromOutputScriptASM(input)
+          result must be(empty)
+        }
     }
   }
 }

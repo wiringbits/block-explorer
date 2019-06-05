@@ -22,7 +22,8 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
   def create(
       xsnService: XSNService,
-      transactionDataHandler: TransactionBlockingDataHandler): TransactionCollectorService = {
+      transactionDataHandler: TransactionBlockingDataHandler
+  ): TransactionCollectorService = {
 
     val futureDataHandler = new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
     new TransactionCollectorService(xsnService, futureDataHandler)
@@ -136,7 +137,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val pending1 = {
         val x = DataGenerator.randomTransactionId
-        x-> Bad(TransactionError.NotFound(x)).accumulating
+        x -> Bad(TransactionError.NotFound(x)).accumulating
       }
       val pending1Tx = createTransaction(pending1._1, List.empty)
 
@@ -161,7 +162,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.completeRPCTransactionsSequentially(input)) { result =>
-        val expected = firstHalf.flatMap(_._2.toOption) ::: List(pending1Tx) ::: secondHalf.flatMap(_._2.toOption) ::: List(pending2Tx)
+        val expected = firstHalf.flatMap(_._2.toOption) ::: List(pending1Tx) ::: secondHalf.flatMap(_._2.toOption) ::: List(
+          pending2Tx
+        )
         result.toEither.right.value must be(expected)
       }
     }

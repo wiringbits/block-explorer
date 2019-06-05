@@ -25,6 +25,7 @@ class AddressesControllerSpec extends MyAPISpec {
   val addressBalance = Balance(addressWithBalance, spent = 100, received = 200)
 
   val addressForUtxos = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+
   val utxosResponse = List(
     Transaction.Output(
       address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
@@ -43,17 +44,23 @@ class AddressesControllerSpec extends MyAPISpec {
   )
 
   val addressForTransactions = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
+
   val addressTransaction = TransactionWithValues(
     createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
     createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
     12312312L,
     Size(1000),
     sent = 50,
-    received = 200)
+    received = 200
+  )
 
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
-    override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
+    override def getBy(
+        address: Address,
+        paginatedQuery: PaginatedQuery,
+        ordering: FieldOrdering[TransactionField]
+    ): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
       if (address == addressForTransactions) {
         Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(1), List(addressTransaction)))
       } else {
@@ -81,9 +88,9 @@ class AddressesControllerSpec extends MyAPISpec {
   }
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[TransactionBlockingDataHandler].to(customTransactionDataHandler))
-      .overrides(bind[BalanceBlockingDataHandler].to(customBalanceDataHandler))
-      .build()
+    .overrides(bind[TransactionBlockingDataHandler].to(customTransactionDataHandler))
+    .overrides(bind[BalanceBlockingDataHandler].to(customBalanceDataHandler))
+    .build()
 
   "GET /addresses/:address" should {
     def url(address: String) = s"/addresses/$address"

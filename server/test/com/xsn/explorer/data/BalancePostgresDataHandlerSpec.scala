@@ -15,7 +15,8 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   import DataHelper._
 
-  lazy val dataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val dataHandler =
+    new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   val defaultOrdering = FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder)
 
@@ -47,30 +48,31 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       Balance(
         address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
         received = BigDecimal("1000"),
-        spent = BigDecimal("0")),
-
+        spent = BigDecimal("0")
+      ),
       Balance(
         address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
         received = BigDecimal("1000"),
-        spent = BigDecimal("100")),
-
+        spent = BigDecimal("100")
+      ),
       Balance(
         address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
         received = BigDecimal("10000"),
-        spent = BigDecimal("1000")),
-
+        spent = BigDecimal("1000")
+      ),
       Balance(
         address = DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
         received = BigDecimal("1000"),
-        spent = BigDecimal("500"))
+        spent = BigDecimal("500")
+      )
     ).sortBy(_.available).reverse
 
     def prepare() = {
       clearDatabase()
 
       balances
-          .map(dataHandler.upsert)
-          .foreach(_.isGood mustEqual true)
+        .map(dataHandler.upsert)
+        .foreach(_.isGood mustEqual true)
     }
 
     "return the first 3 richest addresses" in {
@@ -116,15 +118,16 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       Balance(
         address = DataHelper.createAddress("XiHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
         received = BigDecimal("0"),
-        spent = BigDecimal("0"))
+        spent = BigDecimal("0")
+      )
     ).sortBy(_.available).reverse
 
     def prepare() = {
       clearDatabase()
 
       balances
-          .map(dataHandler.upsert)
-          .foreach(_.isGood mustEqual true)
+        .map(dataHandler.upsert)
+        .foreach(_.isGood mustEqual true)
     }
 
     "ignore addresses with balance = 0" in {
@@ -147,7 +150,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       Balance(createAddress("XlHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 800),
       Balance(createAddress("XmmmmSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 700),
       Balance(createAddress("XnHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 600),
-      Balance(createAddress("XxxxxSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 2000),
+      Balance(createAddress("XxxxxSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 2000)
     )
 
     def prepare() = {
@@ -156,13 +159,12 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       balances.foreach(dataHandler.upsert(_).isGood mustEqual true)
       database.withConnection { implicit conn =>
         _root_.anorm
-            .SQL(
-              s"""
+          .SQL(s"""
                  |INSERT INTO hidden_addresses (address) VALUES
                  |  ('${balances(4).address.string}'),
                  |  ('${balances(6).address.string}')
                  |""".stripMargin)
-            .executeUpdate()
+          .executeUpdate()
       }
     }
 

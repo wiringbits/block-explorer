@@ -20,7 +20,8 @@ class StatisticsControllerSpec extends MyAPISpec {
     blocks = 45454,
     transactions = 93548,
     totalSupply = Some(BigDecimal("154516849.91650322")),
-    circulatingSupply = Some(BigDecimal("78016849.91636708")))
+    circulatingSupply = Some(BigDecimal("78016849.91636708"))
+  )
 
   val dataHandler = new StatisticsBlockingDataHandler {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
@@ -29,9 +30,9 @@ class StatisticsControllerSpec extends MyAPISpec {
   val xsnService = mock[XSNService]
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
-      .overrides(bind[XSNService].to(xsnService))
-      .build()
+    .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
+    .overrides(bind[XSNService].to(xsnService))
+    .build()
 
   "GET /stats" should {
     "return the server statistics" in {

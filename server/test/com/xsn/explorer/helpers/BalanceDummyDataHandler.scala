@@ -13,11 +13,20 @@ class BalanceDummyDataHandler extends BalanceBlockingDataHandler {
 
   override def upsert(balance: Balance): ApplicationResult[Balance] = ???
 
-  override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = ???
+  override def get(
+      query: PaginatedQuery,
+      ordering: FieldOrdering[BalanceField]
+  ): ApplicationResult[PaginatedResult[Balance]] = ???
 
   override def getBy(address: Address): ApplicationResult[Balance] = ???
 
-  override def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = ???
+  override def getNonZeroBalances(
+      query: PaginatedQuery,
+      ordering: FieldOrdering[BalanceField]
+  ): ApplicationResult[PaginatedResult[Balance]] = ???
 
-  override def getHighestBalances(limit: pagination.Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] = ???
+  override def getHighestBalances(
+      limit: pagination.Limit,
+      lastSeenAddress: Option[Address]
+  ): ApplicationResult[List[Balance]] = ???
 }

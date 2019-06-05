@@ -20,7 +20,8 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   private val coinbaseTx = TransactionLoader.get("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
   private val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
-  private val severalInputsTx = TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
+  private val severalInputsTx =
+    TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
 
   private val customXSNService = new FileBasedXSNService
 
@@ -60,12 +61,15 @@ class TransactionsControllerSpec extends MyAPISpec {
     }
 
     "return non-coinbase transaction" in {
-      val input = List(
-        TransactionValue(
-          createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
-          BigDecimal("2343749.965625")))
+      val input =
+        List(TransactionValue(createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"), BigDecimal("2343749.965625")))
           .map { v =>
-            rpc.TransactionVIN.HasValues(createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"), 0, v.value, v.addresses)
+            rpc.TransactionVIN.HasValues(
+              createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"),
+              0,
+              v.value,
+              v.addresses
+            )
           }
 
       val tx = nonCoinbaseTx.copy(vin = input)
@@ -103,9 +107,8 @@ class TransactionsControllerSpec extends MyAPISpec {
 
     "return a transaction with several inputs" in {
       val tx = severalInputsTx
-      val inputValue = TransactionValue(
-        createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
-        BigDecimal("73242.18642578"))
+      val inputValue =
+        TransactionValue(createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"), BigDecimal("73242.18642578"))
 
       val response = GET(url(tx.id.string))
 

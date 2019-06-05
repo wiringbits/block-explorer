@@ -25,17 +25,16 @@ import play.api.db.{Database, Databases}
  */
 trait PostgresDataHandlerSpec
     extends WordSpec
-        with MustMatchers
-        with DockerTestKit
-        with DockerPostgresService
-        with BeforeAndAfterAll {
+    with MustMatchers
+    with DockerTestKit
+    with DockerPostgresService
+    with BeforeAndAfterAll {
 
   import DockerPostgresService._
 
   implicit val pc = PatienceConfig(Span(20, Seconds), Span(1, Second))
 
-  override implicit val dockerFactory: DockerFactory = new SpotifyDockerFactory(
-    DefaultDockerClient.fromEnv().build())
+  override implicit val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   override def beforeAll(): Unit = {
     super.beforeAll()

@@ -25,6 +25,7 @@ class XSNServiceRPCImplSpec extends WordSpec {
 
   val ws = mock[WSClient]
   val ec = Executors.externalServiceEC
+
   val rpcConfig = new RPCConfig {
     override def password: RPCConfig.Password = RPCConfig.Password("pass")
     override def host: RPCConfig.Host = RPCConfig.Host("localhost")
@@ -32,7 +33,8 @@ class XSNServiceRPCImplSpec extends WordSpec {
   }
 
   val explorerConfig = new ExplorerConfig {
-    override def genesisBlock: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+    override def genesisBlock: Blockhash =
+      Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
 
     override def liteVersionConfig: ExplorerConfig.LiteVersionConfig = ???
   }
@@ -495,8 +497,8 @@ class XSNServiceRPCImplSpec extends WordSpec {
           status = "WATCHDOG_EXPIRED",
           activeSeconds = 0,
           lastSeen = 1532897292,
-          Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get),
-
+          Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
+        ),
         Masternode(
           txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
           ip = "45.32.148.13:62583",
@@ -504,7 +506,8 @@ class XSNServiceRPCImplSpec extends WordSpec {
           status = "ENABLED",
           activeSeconds = 6010,
           lastSeen = 1532905050,
-          Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
+          Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get
+        )
       )
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)
@@ -536,7 +539,8 @@ class XSNServiceRPCImplSpec extends WordSpec {
         status = "ENABLED",
         activeSeconds = 6010,
         lastSeen = 1532905050,
-        Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
+        Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get
+      )
 
       val responseBody = createRPCSuccessfulResponse(Json.parse(content))
       val json = Json.parse(responseBody)

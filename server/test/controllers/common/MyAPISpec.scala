@@ -44,7 +44,8 @@ trait MyAPISpec extends PlayAPISpec {
     Configuration.load(env) ++ Configuration.from(map)
   }
 
-  override val guiceApplicationBuilder: GuiceApplicationBuilder = GuiceApplicationBuilder(loadConfiguration = loadConfigWithoutEvolutions)
+  override val guiceApplicationBuilder: GuiceApplicationBuilder =
+    GuiceApplicationBuilder(loadConfiguration = loadConfigWithoutEvolutions)
       .in(Mode.Test)
       .disable(classOf[PollerSynchronizerModule])
       .overrides(bind[Database].to(dummyDB))

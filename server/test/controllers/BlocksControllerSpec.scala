@@ -29,9 +29,9 @@ class BlocksControllerSpec extends MyAPISpec {
   private val transactionDataHandlerMock = mock[TransactionBlockingDataHandler]
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[XSNService].to(customXSNService))
-      .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandlerMock))
-      .build()
+    .overrides(bind[XSNService].to(customXSNService))
+    .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandlerMock))
+    .build()
 
   "GET /blocks/:query" should {
     def url(query: String) = s"/blocks/$query"
@@ -262,36 +262,30 @@ class BlocksControllerSpec extends MyAPISpec {
 
       val result = {
         val transactions = BlockLoader
-            .getRPC(blockhash.string)
-            .transactions
-            .map(_.string)
-            .map(TransactionLoader.get)
-            .map { tx =>
-              TransactionWithValues(
-                id = tx.id,
-                blockhash = blockhash,
-                time = tx.time,
-                size = tx.size,
-                sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
-                received = tx.vout.map(_.value).sum
-              )
-            }
+          .getRPC(blockhash.string)
+          .transactions
+          .map(_.string)
+          .map(TransactionLoader.get)
+          .map { tx =>
+            TransactionWithValues(
+              id = tx.id,
+              blockhash = blockhash,
+              time = tx.time,
+              size = tx.size,
+              sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
+              received = tx.vout.map(_.value).sum
+            )
+          }
 
-        val page = PaginatedResult(
-          Offset(0),
-          Limit(10),
-          Count(transactions.size),
-          transactions.take(5))
+        val page = PaginatedResult(Offset(0), Limit(10), Count(transactions.size), transactions.take(5))
 
         Good(page)
       }
 
-      when(transactionDataHandlerMock
-          .getByBlockhash(
-            eqTo(blockhash),
-            any[PaginatedQuery],
-            any[FieldOrdering[TransactionField]]))
-          .thenReturn(result)
+      when(
+        transactionDataHandlerMock
+          .getByBlockhash(eqTo(blockhash), any[PaginatedQuery], any[FieldOrdering[TransactionField]])
+      ).thenReturn(result)
       val response = GET(s"/blocks/$blockhash/transactions")
 
       status(response) mustEqual OK
@@ -313,19 +307,29 @@ class BlocksControllerSpec extends MyAPISpec {
       val tx = Transaction.HasIO(
         transaction = Transaction(txid, blockhash, 0, Size(1)),
         inputs = List(
-          Transaction.Input(fromTxid = DataGenerator.randomTransactionId, fromOutputIndex = 1, index = 0, value = 100, address = DataGenerator.randomAddress)
+          Transaction.Input(
+            fromTxid = DataGenerator.randomTransactionId,
+            fromOutputIndex = 1,
+            index = 0,
+            value = 100,
+            address = DataGenerator.randomAddress
+          )
         ),
         outputs = List(
-          Transaction.Output(txid = txid, index = 0, value = 200, address = DataGenerator.randomAddress, DataGenerator.randomHexString(8))
+          Transaction.Output(
+            txid = txid,
+            index = 0,
+            value = 200,
+            address = DataGenerator.randomAddress,
+            DataGenerator.randomHexString(8)
+          )
         )
       )
 
-      when(transactionDataHandlerMock
-          .getTransactionsWithIOBy(
-            eqTo(blockhash),
-            eqTo(Limit(10)),
-            eqTo(Option.empty)))
-          .thenReturn(Good(List(tx)))
+      when(
+        transactionDataHandlerMock
+          .getTransactionsWithIOBy(eqTo(blockhash), eqTo(Limit(10)), eqTo(Option.empty))
+      ).thenReturn(Good(List(tx)))
 
       val response = GET(s"/v2/blocks/$blockhash/light-wallet-transactions")
 

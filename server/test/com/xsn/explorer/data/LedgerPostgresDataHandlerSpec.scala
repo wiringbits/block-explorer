@@ -29,7 +29,8 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.drop(1).foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block.withTransactions(transactions), List.empty) mustEqual Bad(PreviousBlockMissingError).accumulating
+        dataHandler
+          .push(block.withTransactions(transactions), List.empty) mustEqual Bad(PreviousBlockMissingError).accumulating
       }
     }
 
@@ -44,7 +45,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty) mustEqual Good(())
 
       val block = blockList(1).copy(previousBlockhash = None, height = genesis.height)
-      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty) mustEqual Bad(RepeatedBlockHeightError).accumulating
+      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty) mustEqual Bad(
+        RepeatedBlockHeightError
+      ).accumulating
     }
   }
 

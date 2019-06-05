@@ -12,17 +12,38 @@ import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 
 class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
-  override def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
+  override def getBy(
+      address: Address,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField]
+  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
 
-  override def getBy(address: Address, limit: pagination.Limit, lastSeenTxid: Option[TransactionId], orderingCondition: OrderingCondition): ApplicationResult[List[Transaction.HasIO]] = ???
+  override def getBy(
+      address: Address,
+      limit: pagination.Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): ApplicationResult[List[Transaction.HasIO]] = ???
 
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = ???
 
   override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = ???
 
-  override def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField]): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
+  override def getByBlockhash(
+      blockhash: Blockhash,
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[TransactionField]
+  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
 
-  override def getByBlockhash(blockhash: Blockhash, limit: pagination.Limit, lastSeenTxid: Option[TransactionId]): ApplicationResult[List[TransactionWithValues]] = ???
+  override def getByBlockhash(
+      blockhash: Blockhash,
+      limit: pagination.Limit,
+      lastSeenTxid: Option[TransactionId]
+  ): ApplicationResult[List[TransactionWithValues]] = ???
 
-  override def getTransactionsWithIOBy(blockhash: Blockhash, limit: pagination.Limit, lastSeenTxid: Option[TransactionId]): ApplicationResult[List[Transaction.HasIO]] = ???
+  override def getTransactionsWithIOBy(
+      blockhash: Blockhash,
+      limit: pagination.Limit,
+      lastSeenTxid: Option[TransactionId]
+  ): ApplicationResult[List[Transaction.HasIO]] = ???
 }

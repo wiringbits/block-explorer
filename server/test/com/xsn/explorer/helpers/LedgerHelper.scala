@@ -16,11 +16,10 @@ object LedgerHelper {
   )
 
   def getTransactions(block: rpc.Block): List[Transaction.HasIO] = {
-    block
-        .transactions
-        .map(_.string)
-        .map(TransactionLoader.getWithValues)
-        .map(Transaction.fromRPC)
-        .map(_._1)
+    block.transactions
+      .map(_.string)
+      .map(TransactionLoader.getWithValues)
+      .map(Transaction.fromRPC)
+      .map(_._1)
   }
 }

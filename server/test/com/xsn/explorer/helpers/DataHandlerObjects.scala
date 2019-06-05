@@ -20,7 +20,8 @@ trait DataHandlerObjects {
     transactionOutputDAO,
     tposContractDAO,
     addressTransactionDetailsDAO,
-    fieldOrderingSQLInterpreter)
+    fieldOrderingSQLInterpreter
+  )
   lazy val blockFilterPostgresDAO = new BlockFilterPostgresDAO
   lazy val blockPostgresDAO = new BlockPostgresDAO(blockFilterPostgresDAO, fieldOrderingSQLInterpreter)
   lazy val balancePostgresDAO = new BalancePostgresDAO(fieldOrderingSQLInterpreter)
@@ -33,7 +34,8 @@ trait DataHandlerObjects {
       blockFilterPostgresDAO,
       transactionPostgresDAO,
       balancePostgresDAO,
-      aggregatedAmountPostgresDAO)
+      aggregatedAmountPostgresDAO
+    )
   }
 
   def createBlockDataHandler(database: Database) = {

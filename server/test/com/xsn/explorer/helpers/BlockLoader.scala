@@ -18,25 +18,23 @@ object BlockLoader {
   def getWithTransactions(blockhash: String): persisted.Block.HasTransactions = {
     val rpcBlock = getRPC(blockhash)
     val block = Converters.toPersistedBlock(rpcBlock)
-    val transactions = rpcBlock
-        .transactions
-        .map(_.string)
-        .map(TransactionLoader.getWithValues)
-        .map(persisted.Transaction.fromRPC)
-        .map(_._1)
+    val transactions = rpcBlock.transactions
+      .map(_.string)
+      .map(TransactionLoader.getWithValues)
+      .map(persisted.Transaction.fromRPC)
+      .map(_._1)
 
     persisted.Block.HasTransactions(block, transactions)
   }
 
   def getWithTransactions(rpcBlock: rpc.Block): persisted.Block.HasTransactions = {
     val block = Converters.toPersistedBlock(rpcBlock)
-    val transactions = rpcBlock
-        .transactions
-        .map(_.string)
-        .map(TransactionLoader.getWithValues)
-        .map(_.copy(blockhash = rpcBlock.hash))
-        .map(persisted.Transaction.fromRPC)
-        .map(_._1)
+    val transactions = rpcBlock.transactions
+      .map(_.string)
+      .map(TransactionLoader.getWithValues)
+      .map(_.copy(blockhash = rpcBlock.hash))
+      .map(persisted.Transaction.fromRPC)
+      .map(_._1)
 
     persisted.Block.HasTransactions(block, transactions)
   }
@@ -58,20 +56,21 @@ object BlockLoader {
 
   def all(): List[persisted.Block] = {
     allRPC()
-        .map(Converters.toPersistedBlock)
+      .map(Converters.toPersistedBlock)
   }
 
   def allRPC(): List[rpc.Block] = {
     val uri = getClass.getResource(s"/$BasePath")
     new File(uri.getPath)
-        .listFiles()
-        .toList
-        .map(_.getName)
-        .map(getRPC)
+      .listFiles()
+      .toList
+      .map(_.getName)
+      .map(getRPC)
   }
 
   def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
-    val genesisBlockhash: Blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+    val genesisBlockhash: Blockhash =
+      Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
 
     Option(block)
       .filter(_.hash == genesisBlockhash)

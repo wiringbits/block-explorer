@@ -28,9 +28,8 @@ class GolombEncodingSpec extends WordSpec {
   )
 
   "the encoding" should {
-    val keyBytes = List(
-      0x4c, 0xb1, 0xab, 0x12, 0x57, 0x62, 0x1e, 0x41,
-      0x3b, 0x8b, 0x0e, 0x26, 0x64, 0x8d, 0x4a, 0x15).map(_.asInstanceOf[Byte])
+    val keyBytes = List(0x4c, 0xb1, 0xab, 0x12, 0x57, 0x62, 0x1e, 0x41, 0x3b, 0x8b, 0x0e, 0x26, 0x64, 0x8d, 0x4a, 0x15)
+      .map(_.asInstanceOf[Byte])
 
     val key = SipHashKey.fromBtcutil(keyBytes)
     val golomb = GolombEncoding.default(key)
@@ -44,10 +43,10 @@ class GolombEncodingSpec extends WordSpec {
     "decode the same hashes" in {
       val hashes = golomb.hashes(words)
       val bytes = BaseEncoding
-          .base16()
-          .decode(encoded.hex.string.toUpperCase)
-          .toList
-          .map(new UnsignedByte(_))
+        .base16()
+        .decode(encoded.hex.string.toUpperCase)
+        .toList
+        .map(new UnsignedByte(_))
 
       val decoded = golomb.decode(bytes, words.size)
 
@@ -55,6 +54,7 @@ class GolombEncodingSpec extends WordSpec {
     }
 
     "return the encoded hex from the btcutil gcs" in {
+
       /**
        * The hex was generated from this go code:
 {{{

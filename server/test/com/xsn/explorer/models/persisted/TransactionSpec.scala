@@ -22,16 +22,10 @@ class TransactionSpec extends WordSpec {
 
       val outputs = DataGenerator.randomOutputs(2)
       intercept[RuntimeException] {
-        Transaction.HasIO(
-          tx,
-          inputs = List.empty,
-          outputs = outputs)
+        Transaction.HasIO(tx, inputs = List.empty, outputs = outputs)
       }
 
-      val _ = Transaction.HasIO(
-        tx,
-        inputs = List.empty,
-        outputs = outputs.map(_.copy(txid = tx.id)))
+      val _ = Transaction.HasIO(tx, inputs = List.empty, outputs = outputs.map(_.copy(txid = tx.id)))
     }
   }
 
@@ -41,11 +35,7 @@ class TransactionSpec extends WordSpec {
       val hex = HexString.from("00").get
       val vout = List(
         rpc.TransactionVOUT(0, 1, None),
-        rpc.TransactionVOUT(10, 2, Some(ScriptPubKey(
-          "nulldata",
-          "",
-          hex,
-          List(address)))),
+        rpc.TransactionVOUT(10, 2, Some(ScriptPubKey("nulldata", "", hex, List(address))))
       )
 
       val tx = rpc.Transaction[rpc.TransactionVIN.HasValues](
@@ -56,7 +46,8 @@ class TransactionSpec extends WordSpec {
         blocktime = 10L,
         confirmations = Confirmations(10),
         vin = List.empty,
-        vout = vout)
+        vout = vout
+      )
 
       val expected = Transaction.Output(tx.id, 2, 10, address, hex)
       val (result, _) = persisted.Transaction.fromRPC(tx)
@@ -66,15 +57,11 @@ class TransactionSpec extends WordSpec {
     "discard outputs with 0 value" in {
       val address = DataGenerator.randomAddress
       val hex = HexString.from("00").get
-      val script = ScriptPubKey(
-        "nulldata",
-        "",
-        hex,
-        List(address))
+      val script = ScriptPubKey("nulldata", "", hex, List(address))
 
       val vout = List(
         rpc.TransactionVOUT(0, 1, Some(script)),
-        rpc.TransactionVOUT(10, 2, Some(script)),
+        rpc.TransactionVOUT(10, 2, Some(script))
       )
 
       val tx = rpc.Transaction[rpc.TransactionVIN.HasValues](
@@ -85,7 +72,8 @@ class TransactionSpec extends WordSpec {
         blocktime = 10L,
         confirmations = Confirmations(10),
         vin = List.empty,
-        vout = vout)
+        vout = vout
+      )
 
       val expected = Transaction.Output(tx.id, 2, 10, address, hex)
       val (result, _) = persisted.Transaction.fromRPC(tx)
@@ -102,15 +90,18 @@ class TransactionSpec extends WordSpec {
         n = 0,
         value = 1
       )
-      val tx = rpc.Transaction(
-        id = DataGenerator.randomTransactionId,
-        size = Size(200),
-        blockhash = DataGenerator.randomBlockhash,
-        time = 10L,
-        blocktime = 10L,
-        confirmations = Confirmations(10),
-        vin = List(),
-        vout = List(collateral, voutWithContract)).copy[rpc.TransactionVIN.HasValues](vin = List.empty)
+      val tx = rpc
+        .Transaction(
+          id = DataGenerator.randomTransactionId,
+          size = Size(200),
+          blockhash = DataGenerator.randomBlockhash,
+          time = 10L,
+          blocktime = 10L,
+          confirmations = Confirmations(10),
+          vin = List(),
+          vout = List(collateral, voutWithContract)
+        )
+        .copy[rpc.TransactionVIN.HasValues](vin = List.empty)
 
       val expected = TPoSContract(
         id = TPoSContract.Id(tx.id, collateral.n),
@@ -127,7 +118,13 @@ class TransactionSpec extends WordSpec {
       val rpcTx = TransactionLoader.getWithValues("728e76d2d5f0513aabeca6fd7101878469052e39f42f7a9b979a63d7e87353c2")
 
       val expected = List(
-        Transaction.Output(rpcTx.id, 0, 5.60400000, Address.from("Xgg7QHQcsBPYygYPj1QhDcCmfKXa7sFd9b").get, HexString.from("2102a9f34e4bc8b77f6f99aab03646da75d770e4088fd38f1604e2b0f106e7314156ac").get),
+        Transaction.Output(
+          rpcTx.id,
+          0,
+          5.60400000,
+          Address.from("Xgg7QHQcsBPYygYPj1QhDcCmfKXa7sFd9b").get,
+          HexString.from("2102a9f34e4bc8b77f6f99aab03646da75d770e4088fd38f1604e2b0f106e7314156ac").get
+        ),
         Transaction.Output(rpcTx.id, 1, 1.40100000, List.empty, HexString.from("").get)
       )
 

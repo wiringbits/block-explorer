@@ -19,43 +19,44 @@ class BalancesControllerSpec extends MyAPISpec {
     Balance(
       address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
       received = BigDecimal("1000"),
-      spent = BigDecimal("0")),
-
+      spent = BigDecimal("0")
+    ),
     Balance(
       address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
       received = BigDecimal("1000"),
-      spent = BigDecimal("100")),
-
+      spent = BigDecimal("100")
+    ),
     Balance(
       address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
       received = BigDecimal("10000"),
-      spent = BigDecimal("1000")),
-
+      spent = BigDecimal("1000")
+    ),
     Balance(
       address = DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
       received = BigDecimal("1000"),
-      spent = BigDecimal("500")))
-      .sortBy(_.available)
-      .reverse
+      spent = BigDecimal("500")
+    )
+  ).sortBy(_.available)
+    .reverse
 
   val dataHandler = new BalanceDummyDataHandler {
 
-    override def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): ApplicationResult[PaginatedResult[Balance]] = {
+    override def getNonZeroBalances(
+        query: PaginatedQuery,
+        ordering: FieldOrdering[BalanceField]
+    ): ApplicationResult[PaginatedResult[Balance]] = {
       val filtered = balances.filter(_.available > 0)
       val list = filtered.drop(query.offset.int).take(query.limit.int)
-      val result = PaginatedResult(
-        offset = query.offset,
-        limit = query.limit,
-        total = Count(filtered.size),
-        data = list)
+      val result =
+        PaginatedResult(offset = query.offset, limit = query.limit, total = Count(filtered.size), data = list)
 
       Good(result)
     }
   }
 
   val application = guiceApplicationBuilder
-      .overrides(bind[BalanceBlockingDataHandler].to(dataHandler))
-      .build()
+    .overrides(bind[BalanceBlockingDataHandler].to(dataHandler))
+    .build()
 
   "GET /balances" should {
     "get the richest addresses" in {

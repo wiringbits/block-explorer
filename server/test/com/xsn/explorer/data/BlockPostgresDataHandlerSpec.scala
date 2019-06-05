@@ -33,8 +33,9 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "getBy blockhash" should {
     "return a block" in {
-      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-          .copy(previousBlockhash = None, nextBlockhash = None)
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
 
       insert(block).isGood mustEqual true
 
@@ -53,8 +54,9 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "getBy height" should {
     "return a block" in {
-      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-          .copy(previousBlockhash = None, nextBlockhash = None)
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
 
       insert(block).isGood mustEqual true
 
@@ -73,12 +75,15 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "getBy" should {
     "paginate the results" in {
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
-          .copy(previousBlockhash = None, nextBlockhash = None)
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-          .copy(nextBlockhash = None)
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-          .copy(nextBlockhash = None)
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
 
       List(block0, block1, block2).map(insert).foreach(_.isGood mustEqual true)
 
@@ -96,18 +101,19 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       matches(data(1), expected(1))
     }
 
-
     def testOrdering[B](field: BlockField)(sortBy: Block => B)(implicit order: Ordering[B]) = {
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
-          .copy(previousBlockhash = None, nextBlockhash = None)
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-          .copy(nextBlockhash = None)
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-          .copy(nextBlockhash = None)
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
 
       val blocks = List(block0, block1, block2)
       blocks.map(insert).foreach(_.isGood mustEqual true)
-
 
       val ordering = FieldOrdering(field, OrderingCondition.AscendingOrder)
       val query = PaginatedQuery(Offset(0), Limit(10))
@@ -117,7 +123,8 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       result.map(_.hash) mustEqual expected
 
       val expectedReverse = expected.reverse
-      val resultReverse = dataHandler.getBy(query, ordering.copy(orderingCondition = OrderingCondition.DescendingOrder)).get.data
+      val resultReverse =
+        dataHandler.getBy(query, ordering.copy(orderingCondition = OrderingCondition.DescendingOrder)).get.data
       resultReverse.map(_.hash) mustEqual expectedReverse
     }
 
@@ -132,8 +139,9 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "delete" should {
     "delete a block" in {
-      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
-          .copy(previousBlockhash = None, nextBlockhash = None)
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
       insert(block).isGood mustEqual true
 
       val result = dataHandler.delete(block.hash)
@@ -153,12 +161,15 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     "return the block" in {
       clearDatabase()
 
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
-          .copy(previousBlockhash = None, nextBlockhash = None)
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-          .copy(nextBlockhash = None)
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-          .copy(nextBlockhash = None)
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
 
       List(block0, block1, block2).map(insert).foreach(_.isGood mustEqual true)
 
@@ -179,12 +190,15 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     "return the block" in {
       clearDatabase()
 
-      val block0 = BlockLoader.get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
-          .copy(previousBlockhash = None, nextBlockhash = None)
-      val block1 = BlockLoader.get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
-          .copy(nextBlockhash = None)
-      val block2 = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-          .copy(nextBlockhash = None)
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
 
       List(block0, block1, block2).map(insert).foreach(_.isGood mustEqual true)
 

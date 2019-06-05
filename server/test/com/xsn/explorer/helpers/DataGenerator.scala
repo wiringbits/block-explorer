@@ -42,7 +42,8 @@ trait DataGenerator {
   def randomBlock(
       blockhash: Blockhash = randomBlockhash,
       previousBlockhash: Option[Blockhash] = None,
-      nextBlockhash: Option[Blockhash] = None): Block = {
+      nextBlockhash: Option[Blockhash] = None
+  ): Block = {
 
     Block(
       hash = blockhash,
@@ -70,10 +71,11 @@ trait DataGenerator {
       index = nextInt(100),
       value = nextInt(1000000),
       address = randomAddress,
-      script = randomHexString(8))
+      script = randomHexString(8)
+    )
   }
 
-  def randomOutputs(n: Int = nextInt(5) + 1) : List[Transaction.Output] = {
+  def randomOutputs(n: Int = nextInt(5) + 1): List[Transaction.Output] = {
     (0 until n).map(x => randomOutput.copy(index = x)).toList
   }
 
@@ -111,27 +113,26 @@ trait DataGenerator {
   def randomTransaction(
       blockhash: Blockhash,
       id: TransactionId = randomTransactionId,
-      utxos: List[Transaction.Output]): Transaction.HasIO = {
+      utxos: List[Transaction.Output]
+  ): Transaction.HasIO = {
 
     Transaction.HasIO(
-      Transaction(
-        id = id,
-        blockhash = blockhash,
-        time = java.lang.System.currentTimeMillis(),
-        Size(1000)),
+      Transaction(id = id, blockhash = blockhash, time = java.lang.System.currentTimeMillis(), Size(1000)),
       createInputs(utxos),
       randomOutputs().map(_.copy(txid = id))
     )
   }
 
   def createInputs(outputs: List[Transaction.Output]): List[Transaction.Input] = {
-    outputs.zipWithIndex.map { case (output, index) =>
-      Transaction.Input(
-        fromTxid = output.txid,
-        fromOutputIndex = output.index,
-        index = index,
-        value = output.value,
-        address = randomAddress)
+    outputs.zipWithIndex.map {
+      case (output, index) =>
+        Transaction.Input(
+          fromTxid = output.txid,
+          fromOutputIndex = output.index,
+          index = index,
+          value = output.value,
+          address = randomAddress
+        )
     }
   }
 }

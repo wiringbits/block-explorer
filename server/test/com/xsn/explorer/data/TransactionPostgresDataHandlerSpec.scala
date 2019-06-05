@@ -21,7 +21,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   import DataGenerator._
 
-  lazy val dataHandler =  createTransactionDataHandler(database)
+  lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val blockDataHandler = createBlockDataHandler(database)
 
@@ -75,7 +75,8 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         transaction.time,
         transaction.size,
         received = transaction.outputs.filter(_.address contains address).map(_.value).sum,
-        sent = transaction.inputs.filter(_.address contains address).map(_.value).sum)
+        sent = transaction.inputs.filter(_.address contains address).map(_.value).sum
+      )
 
       val expected = PaginatedResult(query.offset, query.limit, Count(1), List(transactionWithValues))
       val result = dataHandler.getBy(address, query, defaultOrdering)
@@ -140,7 +141,10 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         index = 2,
         value = 0.01,
         addresses = List.empty,
-        script = HexString.from("0804678afd04678afd75a820894eeb82f9a851f5d1cb1be3249f58bc8d259963832c5e7474a76f7a859ee95c87").get)
+        script = HexString
+          .from("0804678afd04678afd75a820894eeb82f9a851f5d1cb1be3249f58bc8d259963832c5e7474a76f7a859ee95c87")
+          .get
+      )
 
       upsertTransaction(tx)
       val result = dataHandler.getOutput(txid, 2)
@@ -180,7 +184,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       result.data.size mustEqual transactions.size
     }
 
-    def testOrdering[B](field: TransactionField, orderingCondition: OrderingCondition)(lt: (Transaction.HasIO, Transaction.HasIO) => Boolean) = {
+    def testOrdering[B](field: TransactionField, orderingCondition: OrderingCondition)(
+        lt: (Transaction.HasIO, Transaction.HasIO) => Boolean
+    ) = {
       createBlock(block, transactions)
 
       val ordering = FieldOrdering(field, orderingCondition)
@@ -193,58 +199,68 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
 
     "allow to sort by txid" in {
-      testOrdering(TransactionField.TransactionId, OrderingCondition.AscendingOrder) { case (a, b) => a.id.string.compareTo(b.id.string) < 0 }
+      testOrdering(TransactionField.TransactionId, OrderingCondition.AscendingOrder) {
+        case (a, b) => a.id.string.compareTo(b.id.string) < 0
+      }
     }
 
     "allow to sort by txid - descending" in {
-      testOrdering(TransactionField.TransactionId, OrderingCondition.DescendingOrder) { case (a, b) => a.id.string.compareTo(b.id.string) > 0 }
+      testOrdering(TransactionField.TransactionId, OrderingCondition.DescendingOrder) {
+        case (a, b) => a.id.string.compareTo(b.id.string) > 0
+      }
     }
 
     "allow to sort by time" in {
-      testOrdering(TransactionField.Time, OrderingCondition.AscendingOrder) { case (a, b) =>
-        if (a.time < b.time) true
-        else if (a.time > b.time) false
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Time, OrderingCondition.AscendingOrder) {
+        case (a, b) =>
+          if (a.time < b.time) true
+          else if (a.time > b.time) false
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
 
     "allow to sort by time - descending" in {
-      testOrdering(TransactionField.Time, OrderingCondition.DescendingOrder) { case (a, b) =>
-        if (a.time < b.time) false
-        else if (a.time > b.time) true
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Time, OrderingCondition.DescendingOrder) {
+        case (a, b) =>
+          if (a.time < b.time) false
+          else if (a.time > b.time) true
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
 
     "allow to sort by sent" in {
-      testOrdering(TransactionField.Sent, OrderingCondition.AscendingOrder) { case (a, b) =>
-        if (a.inputs.map(_.value).sum < b.inputs.map(_.value).sum) true
-        else if (a.inputs.map(_.value).sum > b.inputs.map(_.value).sum) false
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Sent, OrderingCondition.AscendingOrder) {
+        case (a, b) =>
+          if (a.inputs.map(_.value).sum < b.inputs.map(_.value).sum) true
+          else if (a.inputs.map(_.value).sum > b.inputs.map(_.value).sum) false
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
 
     "allow to sort by sent - descending" in {
-      testOrdering(TransactionField.Sent, OrderingCondition.DescendingOrder) { case (a, b) =>
-        if (a.inputs.map(_.value).sum < b.inputs.map(_.value).sum) false
-        else if (a.inputs.map(_.value).sum > b.inputs.map(_.value).sum) true
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Sent, OrderingCondition.DescendingOrder) {
+        case (a, b) =>
+          if (a.inputs.map(_.value).sum < b.inputs.map(_.value).sum) false
+          else if (a.inputs.map(_.value).sum > b.inputs.map(_.value).sum) true
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
 
     "allow to sort by received" in {
-      testOrdering(TransactionField.Received, OrderingCondition.AscendingOrder) { case (a, b) =>
-        if (a.outputs.map(_.value).sum < b.outputs.map(_.value).sum) true
-        else if (a.outputs.map(_.value).sum > b.outputs.map(_.value).sum) false
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Received, OrderingCondition.AscendingOrder) {
+        case (a, b) =>
+          if (a.outputs.map(_.value).sum < b.outputs.map(_.value).sum) true
+          else if (a.outputs.map(_.value).sum > b.outputs.map(_.value).sum) false
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
 
     "allow to sort by received - descending" in {
-      testOrdering(TransactionField.Received, OrderingCondition.DescendingOrder) { case (a, b) =>
-        if (a.outputs.map(_.value).sum < b.outputs.map(_.value).sum) false
-        else if (a.outputs.map(_.value).sum > b.outputs.map(_.value).sum) true
-        else a.id.string.compareTo(b.id.string) < 0
+      testOrdering(TransactionField.Received, OrderingCondition.DescendingOrder) {
+        case (a, b) =>
+          if (a.outputs.map(_.value).sum < b.outputs.map(_.value).sum) false
+          else if (a.outputs.map(_.value).sum > b.outputs.map(_.value).sum) true
+          else a.id.string.compareTo(b.id.string) < 0
       }
     }
   }
@@ -259,23 +275,12 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
     val outputs = List(
       Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
-      Transaction.Output(
-        randomTransactionId,
-        1,
-        BigDecimal(250),
-        randomAddress,
-        HexString.from("00").get)
+      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
     )
 
-    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
-      Transaction.HasIO(
-        Transaction(
-          txid,
-          blockhash,
-          time,
-          Size(1000)),
-        inputs,
-        outputs.map(_.copy(txid = txid)))
+    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+      case (txid, time) =>
+        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
     }
 
     val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
@@ -288,23 +293,28 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val sorted = condition match {
         case OrderingCondition.AscendingOrder =>
           transactions
-              .sortWith { case (a, b) =>
+            .sortWith {
+              case (a, b) =>
                 if (a.time < b.time) true
                 else if (a.time > b.time) false
                 else a.id.string.compareTo(b.id.string) < 0
-              }
+            }
 
         case OrderingCondition.DescendingOrder =>
           transactions
-              .sortWith { case (a, b) =>
+            .sortWith {
+              case (a, b) =>
                 if (a.time > b.time) true
                 else if (a.time < b.time) false
                 else a.id.string.compareTo(b.id.string) < 0
-              }
+            }
       }
 
       def matchOnlyData(expected: Transaction.HasIO, actual: Transaction.HasIO) = {
-        actual.copy(inputs = List.empty, outputs = List.empty) mustEqual expected.copy(inputs = List.empty, outputs = List.empty)
+        actual.copy(inputs = List.empty, outputs = List.empty) mustEqual expected.copy(
+          inputs = List.empty,
+          outputs = List.empty
+        )
       }
 
       s"[$tag] return the first elements" in {
@@ -356,22 +366,10 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val newTxid = randomTransactionId
       val outputs = List(
         Transaction.Output(newTxid, 0, BigDecimal(50), randomAddress, randomHexString()),
-        Transaction.Output(
-          newTxid,
-          1,
-          BigDecimal(250),
-          randomAddress,
-          randomHexString())
+        Transaction.Output(newTxid, 1, BigDecimal(250), randomAddress, randomHexString())
       )
 
-      val transaction = Transaction.HasIO(
-        Transaction(
-          newTxid,
-          blockhash,
-          321,
-          Size(1000)),
-        inputs,
-        outputs)
+      val transaction = Transaction.HasIO(Transaction(newTxid, blockhash, 321, Size(1000)), inputs, outputs)
 
       val newTxid2 = randomTransactionId
       val newAddress = randomAddress
@@ -383,24 +381,22 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
             fromOutputIndex = 0,
             index = 0,
             value = transaction.outputs(0).value,
-            address = newAddress),
+            address = newAddress
+          ),
           Transaction.Input(
             fromTxid = transaction.id,
             fromOutputIndex = 1,
             index = 1,
             value = transaction.outputs(1).value,
-            address = newAddress)
+            address = newAddress
+          )
         ),
         outputs = transaction.outputs.map(_.copy(txid = newTxid2))
       )
 
-      val transactions = List(
-        transaction, transaction2)
+      val transactions = List(transaction, transaction2)
 
-      val block = this.block.copy(
-        hash = blockhash,
-        height = Height(10),
-        transactions = transactions.map(_.id))
+      val block = this.block.copy(hash = blockhash, height = Height(10), transactions = transactions.map(_.id))
 
       createBlock(block, transactions)
 
@@ -442,10 +438,10 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   private def createBlock(block: Block) = {
     val transactions = block.transactions
-        .map(_.string)
-        .map(TransactionLoader.getWithValues)
-        .map(Transaction.fromRPC)
-        .map(_._1)
+      .map(_.string)
+      .map(TransactionLoader.getWithValues)
+      .map(Transaction.fromRPC)
+      .map(_._1)
 
     val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
 

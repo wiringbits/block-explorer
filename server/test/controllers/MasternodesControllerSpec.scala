@@ -25,8 +25,8 @@ class MasternodesControllerSpec extends MyAPISpec {
       status = "WATCHDOG_EXPIRED",
       activeSeconds = 513323,
       lastSeen = 1524349009,
-      payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get),
-
+      payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
+    ),
     Masternode(
       txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
       ip = "45.32.148.13:62583",
@@ -34,7 +34,8 @@ class MasternodesControllerSpec extends MyAPISpec {
       status = "ENABLED",
       activeSeconds = 777344,
       lastSeen = 1524349028,
-      payee = Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get)
+      payee = Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get
+    )
   )
 
   val masternode = masternodes.last
@@ -54,8 +55,8 @@ class MasternodesControllerSpec extends MyAPISpec {
   }
 
   override val application = guiceApplicationBuilder
-      .overrides(bind[XSNService].to(xsnService))
-      .build
+    .overrides(bind[XSNService].to(xsnService))
+    .build
 
   "GET /masternodes" should {
     "return the masternodes" in {

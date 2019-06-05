@@ -12,7 +12,8 @@ import org.scalatest.OptionValues._
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   lazy val dataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
-  lazy val balanceDataHandler = new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+  lazy val balanceDataHandler =
+    new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
 
   "getStatistics" should {
     "succeed even if there is no data" in {
@@ -25,12 +26,14 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
 
       database.withConnection { implicit conn =>
-        _root_.anorm.SQL(
-          s"""
+        _root_.anorm
+          .SQL(
+            s"""
             |INSERT INTO hidden_addresses (address)
             |VALUES ('${hiddenAddress.string}')
           """.stripMargin
-        ).execute()
+          )
+          .execute()
       }
 
       val balance = Balance(hiddenAddress, received = BigDecimal(1000), spent = BigDecimal(500))
@@ -57,13 +60,15 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   private def setAvailableCoins(total: BigDecimal) = {
     database.withConnection { implicit conn =>
-      _root_.anorm.SQL(
-        s"""
+      _root_.anorm
+        .SQL(
+          s"""
            |UPDATE aggregated_amounts
            |SET value = value + $total
            |WHERE name = 'available_coins'
           """.stripMargin
-      ).executeUpdate()
+        )
+        .executeUpdate()
     }
   }
 }
