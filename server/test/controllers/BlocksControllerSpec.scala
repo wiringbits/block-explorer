@@ -382,7 +382,7 @@ class BlocksControllerSpec extends MyAPISpec {
     }
   }
 
-  "GET /block-headers/:blockhash" should {
+  "GET /block-headers/:query" should {
     "return the blockHeader for the given blockhash" in {
 
       val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
@@ -406,6 +406,31 @@ class BlocksControllerSpec extends MyAPISpec {
 
       val cacheHeader = header("Cache-Control", response)
       cacheHeader.value mustEqual "public, max-age=31536000"
+    }
+
+    "return the blockHeader for the given height" in {
+
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      val blockheader =
+        block
+          .into[BlockHeader.Simple]
+          .transform
+          .withFilter(GolombCodedSet(1, 1, 1, List(new UnsignedByte(10.toByte))))
+      val result = Good(blockheader)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getHeader(eqTo(block.height))
+      ).thenReturn(result)
+
+      val response = GET(s"/block-headers/${block.height}")
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      matchBlockHeader(blockheader, json)
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "no-store"
     }
   }
 

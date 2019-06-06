@@ -41,15 +41,25 @@ class BlocksController @Inject()(
       .toFuture
   }
 
-  def getBlockHeader(blockhashString: String) = public { _ =>
-    blockService
-      .getBlockHeader(blockhashString)
-      .toFutureOr
+  /**
+   * Try to retrieve a blockHeader by height, in case the query argument
+   * is not a valid height, we assume it might be a blockhash and try to
+   * retrieve the blockHeader by blockhash.
+   */
+  def getBlockHeader(query: String) = public { _ =>
+    val (cache, resultF) = Try(query.toInt)
+      .map(Height.apply)
       .map { value =>
-        val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+        "no-store" -> blockService.getBlockHeader(value)
       }
-      .toFuture
+      .getOrElse {
+        "public, max-age=31536000" -> blockService.getBlockHeader(query)
+      }
+
+    resultF.toFutureOr.map { value =>
+      val response = Ok(Json.toJson(value))
+      response.withHeaders("Cache-Control" -> cache)
+    }.toFuture
   }
 
   /**

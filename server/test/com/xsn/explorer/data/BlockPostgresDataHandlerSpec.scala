@@ -219,7 +219,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "getHeader" should {
 
-    "return the blockHeader" in {
+    "return the blockHeader by blockhash" in {
       val block = BlockLoader
         .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
         .copy(previousBlockhash = None, nextBlockhash = None)
@@ -227,6 +227,19 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
       val header = block.into[BlockHeader.Simple].transform
       val result = dataHandler.getHeader(block.hash)
+
+      result.isGood mustEqual true
+      matches(header, result.get)
+    }
+
+    "return the blockHeader by height" in {
+      val block = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      insert(block).isGood mustEqual true
+
+      val header = block.into[BlockHeader.Simple].transform
+      val result = dataHandler.getHeader(block.height)
 
       result.isGood mustEqual true
       matches(header, result.get)

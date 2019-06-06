@@ -30,6 +30,8 @@ trait BlockDataHandler[F[_]] {
   ): F[List[BlockHeader]]
 
   def getHeader(blockhash: Blockhash): F[BlockHeader]
+
+  def getHeader(height: Height): F[BlockHeader]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

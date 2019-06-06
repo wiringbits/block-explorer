@@ -57,4 +57,7 @@ class BlockFutureDataHandler @Inject()(blockBlockingDataHandler: BlockBlockingDa
     blockBlockingDataHandler.getHeader(blockhash)
   }
 
+  override def getHeader(height: Height): FutureApplicationResult[BlockHeader] = Future {
+    blockBlockingDataHandler.getHeader(height)
+  }
 }

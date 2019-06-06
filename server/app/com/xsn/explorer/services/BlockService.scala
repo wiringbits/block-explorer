@@ -60,6 +60,10 @@ class BlockService @Inject()(
     result.toFuture
   }
 
+  def getBlockHeader(height: Height): FutureApplicationResult[BlockHeader] = {
+    blockDataHandler.getHeader(height)
+  }
+
   private def canCacheResult(
       ordering: OrderingCondition,
       expectedSize: Int,
