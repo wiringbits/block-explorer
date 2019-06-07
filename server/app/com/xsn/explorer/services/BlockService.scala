@@ -51,17 +51,17 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def getBlockHeader(blockhashString: String): FutureApplicationResult[BlockHeader] = {
+  def getBlockHeader(blockhashString: String, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
-      header <- blockDataHandler.getHeader(blockhash).toFutureOr
+      header <- blockDataHandler.getHeader(blockhash, includeFilter).toFutureOr
     } yield header
 
     result.toFuture
   }
 
-  def getBlockHeader(height: Height): FutureApplicationResult[BlockHeader] = {
-    blockDataHandler.getHeader(height)
+  def getBlockHeader(height: Height, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = {
+    blockDataHandler.getHeader(height, includeFilter)
   }
 
   private def canCacheResult(

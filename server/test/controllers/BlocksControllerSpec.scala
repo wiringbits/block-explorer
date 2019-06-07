@@ -396,10 +396,10 @@ class BlocksControllerSpec extends MyAPISpec {
 
       when(
         blockBlockingDataHandlerMock
-          .getHeader(eqTo(block.hash))
+          .getHeader(eqTo(block.hash), eqTo(true))
       ).thenReturn(result)
 
-      val response = GET(s"/block-headers/${block.hash}")
+      val response = GET(s"/block-headers/${block.hash}?includeFilter=true")
       status(response) mustEqual OK
       val json = contentAsJson(response)
       matchBlockHeader(blockheader, json)
@@ -421,7 +421,55 @@ class BlocksControllerSpec extends MyAPISpec {
 
       when(
         blockBlockingDataHandlerMock
-          .getHeader(eqTo(block.height))
+          .getHeader(eqTo(block.height), eqTo(true))
+      ).thenReturn(result)
+
+      val response = GET(s"/block-headers/${block.height}?includeFilter=true")
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      matchBlockHeader(blockheader, json)
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "no-store"
+    }
+
+    "return the blockHeader for the given blockhash no filter" in {
+
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      val blockheader =
+        block
+          .into[BlockHeader.Simple]
+          .transform
+      val result = Good(blockheader)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getHeader(eqTo(block.hash), eqTo(false))
+      ).thenReturn(result)
+
+      val response = GET(s"/block-headers/${block.hash}?includeFilter=false")
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      matchBlockHeader(blockheader, json)
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "public, max-age=31536000"
+    }
+
+    "return the blockHeader for the given height no filter" in {
+
+      val block = BlockLoader.get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+
+      val blockheader =
+        block
+          .into[BlockHeader.Simple]
+          .transform
+      val result = Good(blockheader)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getHeader(eqTo(block.height), eqTo(false))
       ).thenReturn(result)
 
       val response = GET(s"/block-headers/${block.height}")
@@ -432,6 +480,7 @@ class BlocksControllerSpec extends MyAPISpec {
       val cacheHeader = header("Cache-Control", response)
       cacheHeader.value mustEqual "no-store"
     }
+
   }
 
   private def matchBlock(expected: Block, actual: JsValue) = {

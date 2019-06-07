@@ -46,14 +46,14 @@ class BlocksController @Inject()(
    * is not a valid height, we assume it might be a blockhash and try to
    * retrieve the blockHeader by blockhash.
    */
-  def getBlockHeader(query: String) = public { _ =>
+  def getBlockHeader(query: String, includeFilter: Boolean) = public { _ =>
     val (cache, resultF) = Try(query.toInt)
       .map(Height.apply)
       .map { value =>
-        "no-store" -> blockService.getBlockHeader(value)
+        "no-store" -> blockService.getBlockHeader(value, includeFilter)
       }
       .getOrElse {
-        "public, max-age=31536000" -> blockService.getBlockHeader(query)
+        "public, max-age=31536000" -> blockService.getBlockHeader(query, includeFilter)
       }
 
     resultF.toFutureOr.map { value =>

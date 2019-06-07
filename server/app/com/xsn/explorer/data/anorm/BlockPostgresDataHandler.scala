@@ -68,15 +68,15 @@ class BlockPostgresDataHandler @Inject()(override val database: Database, blockP
     Good(result)
   }
 
-  override def getHeader(blockhash: Blockhash): ApplicationResult[BlockHeader] =
+  override def getHeader(blockhash: Blockhash, includeFilter: Boolean): ApplicationResult[BlockHeader] =
     withConnection { implicit conn =>
-      val maybe = blockPostgresDAO.getHeader(blockhash)
+      val maybe = blockPostgresDAO.getHeader(blockhash, includeFilter)
       Or.from(maybe, One(BlockNotFoundError))
     }
 
-  override def getHeader(height: Height): ApplicationResult[BlockHeader] =
+  override def getHeader(height: Height, includeFilter: Boolean): ApplicationResult[BlockHeader] =
     withConnection { implicit conn =>
-      val maybe = blockPostgresDAO.getHeader(height)
+      val maybe = blockPostgresDAO.getHeader(height, includeFilter)
       Or.from(maybe, One(BlockNotFoundError))
     }
 

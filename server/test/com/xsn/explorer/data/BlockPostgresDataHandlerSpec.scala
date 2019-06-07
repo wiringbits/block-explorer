@@ -5,7 +5,7 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, Paginated
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
-import com.xsn.explorer.gcs.GolombCodedSet
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.{BlockLoader, DataHandlerObjects}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.{Block, BlockHeader}
@@ -23,12 +23,21 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
   }
 
   val dao = blockPostgresDAO
+  val blockFilterDAO = blockFilterPostgresDAO
   val defaultOrdering = FieldOrdering(BlockField.Height, OrderingCondition.AscendingOrder)
   lazy val dataHandler = new BlockPostgresDataHandler(database, dao)
 
   def insert(block: Block) = {
     database.withConnection { implicit conn =>
       val maybe = dao.insert(block)
+      Or.from(maybe, One(BlockNotFoundError))
+    }
+  }
+
+  def insert(block: Block, filter: GolombCodedSet) = {
+    database.withConnection { implicit conn =>
+      val maybe = dao.insert(block)
+      blockFilterDAO.insert(block.hash, filter)
       Or.from(maybe, One(BlockNotFoundError))
     }
   }
@@ -219,27 +228,63 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   "getHeader" should {
 
-    "return the blockHeader by blockhash" in {
+    "return the blockHeader by blockhash no filter" in {
       val block = BlockLoader
         .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
         .copy(previousBlockhash = None, nextBlockhash = None)
       insert(block).isGood mustEqual true
 
       val header = block.into[BlockHeader.Simple].transform
-      val result = dataHandler.getHeader(block.hash)
+      val result = dataHandler.getHeader(block.hash, false)
 
       result.isGood mustEqual true
       matches(header, result.get)
     }
 
-    "return the blockHeader by height" in {
+    "return the blockHeader by blockhash with filter" in {
       val block = BlockLoader
-        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
         .copy(previousBlockhash = None, nextBlockhash = None)
-      insert(block).isGood mustEqual true
+
+      val blockFilter = GolombCodedSet(1, 1, 1, List(new UnsignedByte(10.toByte)))
+      insert(block, blockFilter).isGood mustEqual true
+
+      val header =
+        block.into[BlockHeader.Simple].transform.withFilter(blockFilter)
+      val result = dataHandler.getHeader(block.hash, true)
+
+      result.isGood mustEqual true
+      matches(header, result.get)
+    }
+
+    "return the blockHeader by height no filter" in {
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+
+      val blockFilter = GolombCodedSet(1, 1, 1, List(new UnsignedByte(10.toByte)))
+      insert(block, blockFilter).isGood mustEqual true
 
       val header = block.into[BlockHeader.Simple].transform
-      val result = dataHandler.getHeader(block.height)
+
+      val result = dataHandler.getHeader(block.height, false)
+
+      result.isGood mustEqual true
+      matches(header, result.get)
+    }
+
+    "return the blockHeader by height with filter" in {
+      val block = BlockLoader
+        .get("00000267225f7dba55d9a3493740e7f0dde0f28a371d2c3b42e7676b5728d020")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+
+      val blockFilter = GolombCodedSet(1, 1, 1, List(new UnsignedByte(10.toByte)))
+      insert(block, blockFilter).isGood mustEqual true
+
+      val header =
+        block.into[BlockHeader.Simple].transform.withFilter(blockFilter)
+
+      val result = dataHandler.getHeader(block.height, true)
 
       result.isGood mustEqual true
       matches(header, result.get)
@@ -248,7 +293,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
     "fail on block not found" in {
       val blockhash = Blockhash.from("b858d38a3552c83aea58f66fe00ae220352a235e33fcf1f3af04507a61a9dc32").get
 
-      val result = dataHandler.getHeader(blockhash)
+      val result = dataHandler.getHeader(blockhash, true)
       result mustEqual Bad(BlockNotFoundError).accumulating
     }
   }

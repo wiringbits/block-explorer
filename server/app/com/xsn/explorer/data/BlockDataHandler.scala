@@ -29,9 +29,9 @@ trait BlockDataHandler[F[_]] {
       lastSeenHash: Option[Blockhash]
   ): F[List[BlockHeader]]
 
-  def getHeader(blockhash: Blockhash): F[BlockHeader]
+  def getHeader(blockhash: Blockhash, includeFilter: Boolean): F[BlockHeader]
 
-  def getHeader(height: Height): F[BlockHeader]
+  def getHeader(height: Height, includeFilter: Boolean): F[BlockHeader]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

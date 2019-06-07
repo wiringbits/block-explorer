@@ -215,7 +215,7 @@ class BlockPostgresDAO @Inject()(
       .getOrElse(header)
   }
 
-  def getHeader(blockhash: Blockhash)(implicit conn: Connection): Option[BlockHeader] = {
+  def getHeader(blockhash: Blockhash, includeFilter: Boolean)(implicit conn: Connection): Option[BlockHeader] = {
     val blockMaybe = SQL(
       """
         |SELECT blockhash, previous_blockhash, merkle_root, height, time
@@ -227,16 +227,14 @@ class BlockPostgresDAO @Inject()(
       )
       .as(parseHeader.singleOpt)
 
-    for {
-      header <- blockMaybe
-      filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
-    } yield filterMaybe
-      .map(header.withFilter)
-      .getOrElse(header)
-
+    if (includeFilter) {
+      blockMaybe.map(attachFilter)
+    } else {
+      blockMaybe
+    }
   }
 
-  def getHeader(height: Height)(implicit conn: Connection): Option[BlockHeader] = {
+  def getHeader(height: Height, includeFilter: Boolean)(implicit conn: Connection): Option[BlockHeader] = {
     val blockMaybe = SQL(
       """
         |SELECT blockhash, previous_blockhash, merkle_root, height, time
@@ -248,13 +246,19 @@ class BlockPostgresDAO @Inject()(
       )
       .as(parseHeader.singleOpt)
 
-    for {
-      header <- blockMaybe
-      filterMaybe = blockFilterPostgresDAO.getBy(header.hash)
-    } yield filterMaybe
-      .map(header.withFilter)
-      .getOrElse(header)
+    if (includeFilter) {
+      blockMaybe.map(attachFilter)
+    } else {
+      blockMaybe
+    }
+  }
 
+  private def attachFilter(blockheader: BlockHeader)(implicit conn: Connection): BlockHeader = {
+    val filterMaybe = blockFilterPostgresDAO.getBy(blockheader.hash)
+
+    filterMaybe
+      .map(blockheader.withFilter)
+      .getOrElse(blockheader)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

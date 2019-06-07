@@ -53,11 +53,11 @@ class BlockFutureDataHandler @Inject()(blockBlockingDataHandler: BlockBlockingDa
     blockBlockingDataHandler.getHeaders(limit, orderingCondition, lastSeenHash)
   }
 
-  override def getHeader(blockhash: Blockhash): FutureApplicationResult[BlockHeader] = Future {
-    blockBlockingDataHandler.getHeader(blockhash)
+  override def getHeader(blockhash: Blockhash, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = Future {
+    blockBlockingDataHandler.getHeader(blockhash, includeFilter)
   }
 
-  override def getHeader(height: Height): FutureApplicationResult[BlockHeader] = Future {
-    blockBlockingDataHandler.getHeader(height)
+  override def getHeader(height: Height, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = Future {
+    blockBlockingDataHandler.getHeader(height, includeFilter)
   }
 }
