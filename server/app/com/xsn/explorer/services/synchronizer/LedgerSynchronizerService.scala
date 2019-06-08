@@ -17,7 +17,8 @@ class LedgerSynchronizerService @Inject()(
     ledgerDataHandler: LedgerFutureDataHandler,
     syncStatusService: LedgerSynchronizationStatusService,
     syncOps: LedgerSynchronizationOps
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends LedgerSynchronizer {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 

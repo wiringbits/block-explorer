@@ -3,8 +3,8 @@ package com.xsn.explorer.tasks
 import akka.actor.ActorSystem
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.config.LedgerSynchronizerConfig
-import com.xsn.explorer.services
 import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.services.synchronizer.{LedgerSynchronizerService, LegacyLedgerSynchronizerService}
 import javax.inject.Inject
 import org.scalactic.Bad
 import org.slf4j.LoggerFactory
@@ -16,8 +16,8 @@ class PollerSynchronizerTask @Inject()(
     config: LedgerSynchronizerConfig,
     actorSystem: ActorSystem,
     xsnService: XSNService,
-    ledgerSynchronizerService: services.LedgerSynchronizerService,
-    newSynchronizer: services.synchronizer.LedgerSynchronizerService
+    ledgerSynchronizerService: LegacyLedgerSynchronizerService,
+    newSynchronizer: LedgerSynchronizerService
 )(implicit ec: ExecutionContext) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
