@@ -161,7 +161,8 @@ class BlockPostgresDAO @Inject()(
 
     val headers = SQL(
       s"""
-        |SELECT blockhash, previous_blockhash, merkle_root, height, time
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |ORDER BY height $order
         |LIMIT {limit}
@@ -195,7 +196,8 @@ class BlockPostgresDAO @Inject()(
         |  FROM blocks
         |  WHERE blockhash = {lastSeenHash}
         |)
-        |SELECT b.blockhash, b.previous_blockhash, b.merkle_root, b.height, b.time
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM CTE CROSS JOIN blocks b
         |WHERE b.height $comparator lastSeenHeight
         |ORDER BY height $order
@@ -218,7 +220,8 @@ class BlockPostgresDAO @Inject()(
   def getHeader(blockhash: Blockhash, includeFilter: Boolean)(implicit conn: Connection): Option[BlockHeader] = {
     val blockMaybe = SQL(
       """
-        |SELECT blockhash, previous_blockhash, merkle_root, height, time
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |WHERE blockhash = {blockhash}
       """.stripMargin
@@ -237,7 +240,8 @@ class BlockPostgresDAO @Inject()(
   def getHeader(height: Height, includeFilter: Boolean)(implicit conn: Connection): Option[BlockHeader] = {
     val blockMaybe = SQL(
       """
-        |SELECT blockhash, previous_blockhash, merkle_root, height, time
+        |SELECT blockhash, previous_blockhash, next_blockhash, tpos_contract, merkle_root, size,
+        |       height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
         |FROM blocks
         |WHERE height = {height}
       """.stripMargin

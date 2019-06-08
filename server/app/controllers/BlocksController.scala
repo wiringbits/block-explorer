@@ -4,6 +4,7 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.models.LightWalletTransaction
+import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.values.Height
 import com.xsn.explorer.services.{BlockService, TransactionService}
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
@@ -26,6 +27,7 @@ class BlocksController @Inject()(
   }
 
   def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
+    implicit val codec: Writes[BlockHeader] = BlockHeader.partialWrites
     blockService
       .getBlockHeaders(Limit(limit), lastSeenHash, orderingCondition)
       .toFutureOr
@@ -47,6 +49,7 @@ class BlocksController @Inject()(
    * retrieve the blockHeader by blockhash.
    */
   def getBlockHeader(query: String, includeFilter: Boolean) = public { _ =>
+    implicit val codec: Writes[BlockHeader] = BlockHeader.completeWrites
     val (cache, resultF) = Try(query.toInt)
       .map(Height.apply)
       .map { value =>

@@ -77,8 +77,53 @@ object BlockParsers {
       )
   }
 
-  val parseHeader = (parseBlockhash() ~ parsePreviousBlockhash.? ~ parseMerkleRoot ~ parseHeight ~ parseTime).map {
-    case blockhash ~ previousBlockhash ~ merkleRoot ~ height ~ time =>
-      BlockHeader.Simple(blockhash, previousBlockhash, merkleRoot, height, time)
+  val parseHeader = (parseBlockhash() ~
+    parseNextBlockhash.? ~
+    parsePreviousBlockhash.? ~
+    parseTposContract.? ~
+    parseMerkleRoot ~
+    parseSize ~
+    parseHeight ~
+    parseVersion ~
+    parseTime ~
+    parseMedianTime ~
+    parseNonce ~
+    parseBits ~
+    parseChainwork ~
+    parseDifficulty ~
+    parseExtractionMethod).map {
+
+    case hash ~
+          nextBlockhash ~
+          previousBlockhash ~
+          tposContract ~
+          merkleRoot ~
+          size ~
+          height ~
+          version ~
+          time ~
+          medianTime ~
+          nonce ~
+          bits ~
+          chainwork ~
+          difficulty ~
+          extractionMethod =>
+      BlockHeader.Simple(
+        hash = hash,
+        previousBlockhash = previousBlockhash,
+        nextBlockhash = nextBlockhash,
+        tposContract = tposContract,
+        merkleRoot = merkleRoot,
+        size = size,
+        height = height,
+        time = time,
+        medianTime = medianTime,
+        nonce = nonce,
+        bits = bits,
+        chainwork = chainwork,
+        difficulty = difficulty,
+        version = version,
+        extractionMethod = extractionMethod
+      )
   }
 }

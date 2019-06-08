@@ -508,13 +508,21 @@ class BlocksControllerSpec extends MyAPISpec {
     val block = expected
 
     (jsonBlockHeader \ "hash").as[Blockhash] mustEqual block.hash
+    (jsonBlockHeader \ "size").as[Size] mustEqual block.size
+    (jsonBlockHeader \ "bits").as[String] mustEqual block.bits
+    (jsonBlockHeader \ "chainwork").as[String] mustEqual block.chainwork
+    (jsonBlockHeader \ "difficulty").as[BigDecimal] mustEqual block.difficulty
     (jsonBlockHeader \ "height").as[Height] mustEqual block.height
+    (jsonBlockHeader \ "medianTime").as[Long] mustEqual block.medianTime
     (jsonBlockHeader \ "time").as[Long] mustEqual block.time
     (jsonBlockHeader \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+    (jsonBlockHeader \ "version").as[Long] mustEqual block.version
+    (jsonBlockHeader \ "nonce").as[Int] mustEqual block.nonce
     (jsonBlockHeader \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+    (jsonBlockHeader \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
 
     block match {
-      case BlockHeader.HasFilter(_, _, _, _, _, filter) => {
+      case BlockHeader.HasFilter(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, filter) => {
         val jsonFilter = (jsonBlockHeader \ "filter").as[JsValue]
 
         (jsonFilter \ "n").as[Int] mustEqual filter.n
@@ -522,7 +530,7 @@ class BlocksControllerSpec extends MyAPISpec {
         (jsonFilter \ "p").as[Int] mustEqual filter.p
         (jsonFilter \ "hex").as[String] mustEqual filter.hex.string
       }
-      case BlockHeader.Simple(_, _, _, _, _) => ()
+      case BlockHeader.Simple(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => ()
     }
   }
 

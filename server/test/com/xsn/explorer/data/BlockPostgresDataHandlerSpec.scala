@@ -318,10 +318,19 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
 
   private def matches(expected: BlockHeader, result: BlockHeader) = {
     result.hash mustEqual expected.hash
+    result.tposContract mustEqual expected.tposContract
+    result.nextBlockhash mustEqual expected.nextBlockhash
     result.previousBlockhash mustEqual expected.previousBlockhash
     result.merkleRoot mustEqual expected.merkleRoot
+    result.size mustEqual expected.size
     result.height mustEqual expected.height
+    result.version mustEqual expected.version
+    result.medianTime mustEqual expected.medianTime
     result.time mustEqual expected.time
+    result.bits mustEqual expected.bits
+    result.chainwork mustEqual expected.chainwork
+    result.difficulty mustEqual expected.difficulty
+    result.nonce mustEqual expected.nonce
 
     (expected, result) match {
       case (e: BlockHeader.HasFilter, r: BlockHeader.HasFilter) => matchFilter(e.filter, r.filter)
