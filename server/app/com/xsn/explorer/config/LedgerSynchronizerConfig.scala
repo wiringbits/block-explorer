@@ -1,7 +1,6 @@
 package com.xsn.explorer.config
 
 import javax.inject.Inject
-
 import play.api.Configuration
 
 import scala.concurrent.duration.{DurationLong, FiniteDuration}
@@ -13,6 +12,8 @@ trait LedgerSynchronizerConfig {
   def initialDelay: FiniteDuration
 
   def interval: FiniteDuration
+
+  def useNewSynchronizer: Boolean
 }
 
 class LedgerSynchronizerPlayConfig @Inject()(config: Configuration) extends LedgerSynchronizerConfig {
@@ -24,4 +25,7 @@ class LedgerSynchronizerPlayConfig @Inject()(config: Configuration) extends Ledg
 
   override lazy val interval: FiniteDuration =
     config.getOptional[FiniteDuration]("synchronizer.interval").getOrElse(60.seconds)
+
+  override lazy val useNewSynchronizer: Boolean =
+    config.getOptional[Boolean]("synchronizer.useNewSynchronizer").getOrElse(false)
 }
