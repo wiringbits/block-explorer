@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.async.StatisticsFutureDataHandler
-import com.xsn.explorer.models.StatisticsDetails
+import com.xsn.explorer.models.{StatisticsDetails, SynchronizationProgress}
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 
@@ -23,6 +23,18 @@ class StatisticsService @Inject()(xsnService: XSNService, statisticsFutureDataHa
       count <- discardErrors(rpcStats).toFutureOr
       difficulty <- discardErrors(difficultyF).toFutureOr
     } yield StatisticsDetails(stats, count, difficulty)
+
+    result.toFuture
+  }
+
+  def getSynchronizationProgress: FutureApplicationResult[SynchronizationProgress] = {
+    val dbStats = statisticsFutureDataHandler.getStatistics()
+    val rpcBlock = xsnService.getLatestBlock()
+
+    val result = for {
+      stats <- dbStats.toFutureOr
+      latestBlock <- rpcBlock.toFutureOr
+    } yield SynchronizationProgress(total = latestBlock.height.int, synced = stats.blocks)
 
     result.toFuture
   }
