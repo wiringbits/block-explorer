@@ -43,6 +43,13 @@
     <logger name="play" level="INFO" />
     <logger name="application" level="DEBUG" />
 
+    <!-- produces invalid CORS warnings, client is not authorized to call this from its own domain -->
+    <logger name="play.filters.cors.CORSFilter" level="ERROR" />
+    <!-- produces host not allowed warnings, client is not allowed to call the host directly -->
+    <logger name="play.filters.hosts.AllowedHostsFilter" level="ERROR" />
+    <!-- produces illegal request warnings, client sends corrupted request -->
+    <logger name="akka.actor.ActorSystemImpl" level="ERROR" />
+
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
     <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
     <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF" />
