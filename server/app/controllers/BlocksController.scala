@@ -84,12 +84,6 @@ class BlocksController @Inject()(
       .getOrElse(blockService.getRawBlock(query))
   }
 
-  def getTransactions(blockhash: String, offset: Int, limit: Int, orderBy: String) = public { _ =>
-    val query = PaginatedQuery(Offset(offset), Limit(limit))
-    val ordering = OrderingQuery(orderBy)
-    transactionService.getByBlockhash(blockhash, query, ordering)
-  }
-
   def getTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getByBlockhash(blockhash, Limit(limit), lastSeenTxid)
   }

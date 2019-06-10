@@ -11,7 +11,6 @@ GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransa
 POST  /transactions              controllers.TransactionsController.sendRawTransaction()
 
 GET   /addresses/:address                            controllers.AddressesController.getBy(address: String)
-# GET   /addresses/:address/transactions               controllers.AddressesController.getTransactions(address: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /addresses/:address/tposcontracts              controllers.AddressesController.getTPoSContracts(address: String)
 GET   /v2/addresses/:address/transactions            controllers.AddressesController.getLightWalletTransactions(address: String, limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc")
 GET   /addresses/:address/utxos                      controllers.AddressesController.getUnspentOutputs(address: String)
@@ -23,13 +22,11 @@ GET   /blocks/estimate-fee               controllers.BlocksController.estimateFe
 
 GET   /blocks/:query                     controllers.BlocksController.getDetails(query: String)
 GET   /blocks/:query/raw                 controllers.BlocksController.getRawBlock(query: String)
-# GET   /blocks/:blockhash/transactions    controllers.BlocksController.getTransactions(blockhash: String, offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /v2/blocks/:blockhash/transactions controllers.BlocksController.getTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 GET   /v2/blocks/:blockhash/light-wallet-transactions controllers.BlocksController.getLightTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 
 GET   /stats                 controllers.StatisticsController.getStatus()
 
-# GET   /balances              controllers.BalancesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")
 GET   /v2/balances           controllers.BalancesController.getHighest(limit: Int ?= 10, lastSeenAddress: Option[String])
 
 GET   /masternodes           controllers.MasternodesController.get(offset: Int ?= 0, limit: Int ?= 10, orderBy: String ?= "")

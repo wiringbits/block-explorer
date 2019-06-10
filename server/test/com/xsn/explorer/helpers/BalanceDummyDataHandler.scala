@@ -20,11 +20,6 @@ class BalanceDummyDataHandler extends BalanceBlockingDataHandler {
 
   override def getBy(address: Address): ApplicationResult[Balance] = ???
 
-  override def getNonZeroBalances(
-      query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField]
-  ): ApplicationResult[PaginatedResult[Balance]] = ???
-
   override def getHighestBalances(
       limit: pagination.Limit,
       lastSeenAddress: Option[Address]

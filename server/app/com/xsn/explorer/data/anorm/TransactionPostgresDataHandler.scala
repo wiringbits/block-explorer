@@ -21,18 +21,6 @@ class TransactionPostgresDataHandler @Inject()(
 ) extends TransactionBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def getBy(
-      address: Address,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = withConnection { implicit conn =>
-    val transactions = transactionPostgresDAO.getBy(address, paginatedQuery, ordering)
-    val total = transactionPostgresDAO.countBy(address)
-    val result = PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, total, transactions)
-
-    Good(result)
-  }
-
   def getBy(
       address: Address,
       limit: Limit,
@@ -56,18 +44,6 @@ class TransactionPostgresDataHandler @Inject()(
     implicit conn =>
       val maybe = transactionOutputDAO.getOutput(txid, index)
       Or.from(maybe, One(TransactionError.OutputNotFound(txid, index)))
-  }
-
-  override def getByBlockhash(
-      blockhash: Blockhash,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = withConnection { implicit conn =>
-    val transactions = transactionPostgresDAO.getByBlockhash(blockhash, paginatedQuery, ordering)
-    val total = transactionPostgresDAO.countByBlockhash(blockhash)
-    val result = PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, total, transactions)
-
-    Good(result)
   }
 
   override def getByBlockhash(

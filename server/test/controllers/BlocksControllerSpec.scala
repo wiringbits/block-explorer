@@ -258,52 +258,6 @@ class BlocksControllerSpec extends MyAPISpec {
     }
   }
 
-  "GET /blocks/:blockhash/transactions" should {
-    "return the transactions for the given block" in {
-      pending
-
-      val blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get
-
-      val result = {
-        val transactions = BlockLoader
-          .getRPC(blockhash.string)
-          .transactions
-          .map(_.string)
-          .map(TransactionLoader.get)
-          .map { tx =>
-            TransactionWithValues(
-              id = tx.id,
-              blockhash = blockhash,
-              time = tx.time,
-              size = tx.size,
-              sent = tx.vin.collect { case x: TransactionVIN.HasValues => x }.map(_.value).sum,
-              received = tx.vout.map(_.value).sum
-            )
-          }
-
-        val page = PaginatedResult(Offset(0), Limit(10), Count(transactions.size), transactions.take(5))
-
-        Good(page)
-      }
-
-      when(
-        transactionDataHandlerMock
-          .getByBlockhash(eqTo(blockhash), any[PaginatedQuery], any[FieldOrdering[TransactionField]])
-      ).thenReturn(result)
-      val response = GET(s"/blocks/$blockhash/transactions")
-
-      status(response) mustEqual OK
-
-      val json = contentAsJson(response)
-      (json \ "total").as[Int] mustEqual 1
-      (json \ "offset").as[Int] mustEqual 0
-      (json \ "limit").as[Int] mustEqual 10
-
-      val data = (json \ "data").as[List[JsValue]]
-      data.size mustEqual 1
-    }
-  }
-
   "GET /v2/blocks/:blockhash/light-wallet-transactions" should {
     "return the transactions" in {
       val blockhash = Blockhash.from("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7").get

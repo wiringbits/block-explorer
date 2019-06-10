@@ -14,12 +14,6 @@ trait TransactionDataHandler[F[_]] {
 
   def getBy(
       address: Address,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): F[PaginatedResult[TransactionWithValues]]
-
-  def getBy(
-      address: Address,
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
@@ -28,12 +22,6 @@ trait TransactionDataHandler[F[_]] {
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 
   def getOutput(txid: TransactionId, index: Int): F[Transaction.Output]
-
-  def getByBlockhash(
-      blockhash: Blockhash,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): F[PaginatedResult[TransactionWithValues]]
 
   def getByBlockhash(
       blockhash: Blockhash,

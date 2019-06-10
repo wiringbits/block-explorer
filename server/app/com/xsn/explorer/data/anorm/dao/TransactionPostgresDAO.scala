@@ -3,13 +3,12 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
-import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{Count, Limit, PaginatedQuery}
+import com.alexitc.playsonify.models.ordering.OrderingCondition
+import com.alexitc.playsonify.models.pagination.{Count, Limit}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import javax.inject.Inject
@@ -255,75 +254,6 @@ class TransactionPostgresDAO @Inject()(
       val outputs = transactionOutputDAO.getOutputs(tx.id, address)
       Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
-  }
-
-  def getBy(address: Address, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField])(
-      implicit conn: Connection
-  ): List[TransactionWithValues] = {
-
-    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
-
-    SQL(
-      s"""
-         |SELECT t.txid, t.blockhash, t.time, t.size, a.sent, a.received
-         |FROM transactions t
-         |INNER JOIN address_transaction_details a USING (txid)
-         |WHERE a.address = {address}
-         |$orderBy
-         |OFFSET {offset}
-         |LIMIT {limit}
-      """.stripMargin
-    ).on(
-        'address -> address.string,
-        'offset -> paginatedQuery.offset.int,
-        'limit -> paginatedQuery.limit.int
-      )
-      .as(parseTransactionWithValues.*)
-  }
-
-  def countBy(address: Address)(implicit conn: Connection): Count = {
-    val result = SQL(
-      """
-        |  SELECT COUNT(*)
-        |  FROM address_transaction_details
-        |  WHERE address = {address}
-      """.stripMargin
-    ).on(
-        'address -> address.string
-      )
-      .as(SqlParser.scalar[Int].single)
-
-    Count(result)
-  }
-
-  def getByBlockhash(blockhash: Blockhash, paginatedQuery: PaginatedQuery, ordering: FieldOrdering[TransactionField])(
-      implicit conn: Connection
-  ): List[TransactionWithValues] = {
-
-    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
-
-    /**
-     * TODO: The query is very slow while aggregating the spent and received values,
-     *       it might be worth creating an index-like table to get the accumulated
-     *       values directly.
-     */
-    SQL(
-      s"""
-         |SELECT t.txid, blockhash, t.time, t.size,
-         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
-         |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
-         |FROM transactions t JOIN blocks USING (blockhash)
-         |WHERE blockhash = {blockhash}
-         |$orderBy
-         |OFFSET {offset}
-         |LIMIT {limit}
-      """.stripMargin
-    ).on(
-        'blockhash -> blockhash.string,
-        'offset -> paginatedQuery.offset.int,
-        'limit -> paginatedQuery.limit.int
-      )
-      .as(parseTransactionWithValues.*)
   }
 
   def countByBlockhash(blockhash: Blockhash)(implicit conn: Connection): Count = {

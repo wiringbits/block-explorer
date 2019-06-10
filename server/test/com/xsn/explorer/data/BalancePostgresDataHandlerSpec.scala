@@ -113,34 +113,6 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
   }
 
-  "getNonZeroBalances" should {
-    val balances = List(
-      Balance(
-        address = DataHelper.createAddress("XiHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
-        received = BigDecimal("0"),
-        spent = BigDecimal("0")
-      )
-    ).sortBy(_.available).reverse
-
-    def prepare() = {
-      clearDatabase()
-
-      balances
-        .map(dataHandler.upsert)
-        .foreach(_.isGood mustEqual true)
-    }
-
-    "ignore addresses with balance = 0" in {
-      prepare()
-      val query = PaginatedQuery(Offset(0), Limit(1))
-      val expected = List.empty[Balance]
-
-      val result = dataHandler.getNonZeroBalances(query, defaultOrdering)
-      result.map(_.data) mustEqual Good(expected)
-      result.get.total.int mustEqual balances.size - 1
-    }
-  }
-
   "getHighestBalances" should {
 
     val balances = List(

@@ -56,18 +56,6 @@ class AddressesControllerSpec extends MyAPISpec {
 
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
-    override def getBy(
-        address: Address,
-        paginatedQuery: PaginatedQuery,
-        ordering: FieldOrdering[TransactionField]
-    ): ApplicationResult[PaginatedResult[TransactionWithValues]] = {
-      if (address == addressForTransactions) {
-        Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(1), List(addressTransaction)))
-      } else {
-        Good(PaginatedResult(paginatedQuery.offset, paginatedQuery.limit, Count(0), List.empty))
-      }
-    }
-
     override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = {
       if (address == addressForUtxos) {
         Good(utxosResponse)

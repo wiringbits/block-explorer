@@ -14,12 +14,6 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
 
   override def getBy(
       address: Address,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
-
-  override def getBy(
-      address: Address,
       limit: pagination.Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
@@ -28,12 +22,6 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = ???
 
   override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = ???
-
-  override def getByBlockhash(
-      blockhash: Blockhash,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): ApplicationResult[PaginatedResult[TransactionWithValues]] = ???
 
   override def getByBlockhash(
       blockhash: Blockhash,

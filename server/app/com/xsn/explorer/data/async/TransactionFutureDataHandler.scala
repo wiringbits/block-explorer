@@ -19,15 +19,6 @@ class TransactionFutureDataHandler @Inject()(blockingDataHandler: TransactionBlo
 
   override def getBy(
       address: Address,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): FuturePaginatedResult[TransactionWithValues] = Future {
-
-    blockingDataHandler.getBy(address, paginatedQuery, ordering)
-  }
-
-  override def getBy(
-      address: Address,
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
@@ -42,15 +33,6 @@ class TransactionFutureDataHandler @Inject()(blockingDataHandler: TransactionBlo
 
   override def getOutput(txid: TransactionId, index: Int): FutureApplicationResult[Transaction.Output] = Future {
     blockingDataHandler.getOutput(txid, index)
-  }
-
-  override def getByBlockhash(
-      blockhash: Blockhash,
-      paginatedQuery: PaginatedQuery,
-      ordering: FieldOrdering[TransactionField]
-  ): FuturePaginatedResult[TransactionWithValues] = Future {
-
-    blockingDataHandler.getByBlockhash(blockhash, paginatedQuery, ordering)
   }
 
   override def getByBlockhash(

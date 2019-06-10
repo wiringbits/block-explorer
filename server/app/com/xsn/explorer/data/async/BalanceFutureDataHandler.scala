@@ -30,14 +30,6 @@ class BalanceFutureDataHandler @Inject()(blockingDataHandler: BalanceBlockingDat
     blockingDataHandler.getBy(address)
   }
 
-  override def getNonZeroBalances(
-      query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField]
-  ): FuturePaginatedResult[Balance] = Future {
-
-    blockingDataHandler.getNonZeroBalances(query, ordering)
-  }
-
   override def getHighestBalances(
       limit: pagination.Limit,
       lastSeenAddress: Option[Address]

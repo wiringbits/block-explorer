@@ -17,8 +17,6 @@ trait BalanceDataHandler[F[_]] {
 
   def getBy(address: Address): F[Balance]
 
-  def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): F[PaginatedResult[Balance]]
-
   def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): F[List[Balance]]
 }
 

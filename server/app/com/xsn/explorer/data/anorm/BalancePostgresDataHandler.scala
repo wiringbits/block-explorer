@@ -42,17 +42,6 @@ class BalancePostgresDataHandler @Inject()(override val database: Database, bala
     Good(balance)
   }
 
-  override def getNonZeroBalances(
-      query: PaginatedQuery,
-      ordering: FieldOrdering[BalanceField]
-  ): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
-    val balances = balancePostgresDAO.getNonZeroBalances(query, ordering)
-    val total = balancePostgresDAO.countNonZeroBalances
-    val result = PaginatedResult(query.offset, query.limit, total, balances)
-
-    Good(result)
-  }
-
   override def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] =
     withConnection { implicit conn =>
       val result = lastSeenAddress

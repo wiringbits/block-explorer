@@ -24,12 +24,6 @@ class AddressesController @Inject()(
     addressService.getBy(address)
   }
 
-  def getTransactions(address: String, offset: Int, limit: Int, ordering: String) = public { _ =>
-    val paginatedQuery = PaginatedQuery(Offset(offset), Limit(limit))
-
-    transactionService.getTransactions(address, paginatedQuery, OrderingQuery(ordering))
-  }
-
   def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
     public { _ =>
       transactionService.getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)

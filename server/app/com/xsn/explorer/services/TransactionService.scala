@@ -29,22 +29,6 @@ class TransactionService @Inject()(
 
   private val maxTransactionsPerQuery = 100
 
-  def getTransactions(
-      addressString: String,
-      paginatedQuery: PaginatedQuery,
-      orderingQuery: OrderingQuery
-  ): FuturePaginatedResult[TransactionWithValues] = {
-
-    val result = for {
-      address <- addressValidator.validate(addressString).toFutureOr
-      paginatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
-      ordering <- transactionOrderingParser.from(orderingQuery).toFutureOr
-      transactions <- transactionFutureDataHandler.getBy(address, paginatedQuery, ordering).toFutureOr
-    } yield transactions
-
-    result.toFuture
-  }
-
   def getLightWalletTransactions(
       addressString: String,
       limit: Limit,
@@ -65,21 +49,6 @@ class TransactionService @Inject()(
 
       WrappedResult(lightTxs)
     }
-
-    result.toFuture
-  }
-
-  def getByBlockhash(
-      blockhashString: String,
-      paginatedQuery: PaginatedQuery,
-      orderingQuery: OrderingQuery
-  ): FuturePaginatedResult[TransactionWithValues] = {
-    val result = for {
-      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
-      validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
-      order <- transactionOrderingParser.from(orderingQuery).toFutureOr
-      r <- transactionFutureDataHandler.getByBlockhash(blockhash, validatedQuery, order).toFutureOr
-    } yield r
 
     result.toFuture
   }

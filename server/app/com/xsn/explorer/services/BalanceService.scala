@@ -21,16 +21,6 @@ class BalanceService @Inject()(
     balanceFutureDataHandler: BalanceFutureDataHandler
 )(implicit ec: ExecutionContext) {
 
-  def get(paginatedQuery: PaginatedQuery, orderingQuery: OrderingQuery): FuturePaginatedResult[Balance] = {
-    val result = for {
-      validatedQuery <- paginatedQueryValidator.validate(paginatedQuery, 100).toFutureOr
-      ordering <- balanceOrderingParser.from(orderingQuery).toFutureOr
-      balances <- balanceFutureDataHandler.getNonZeroBalances(validatedQuery, ordering).toFutureOr
-    } yield balances
-
-    result.toFuture
-  }
-
   def getHighest(
       limit: Limit,
       lastSeenAddressString: Option[String]

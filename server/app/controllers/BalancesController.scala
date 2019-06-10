@@ -11,13 +11,6 @@ class BalancesController @Inject()(balanceService: BalanceService, cc: MyJsonCon
 
   import Codecs._
 
-  def get(offset: Int, limit: Int, ordering: String) = public { _ =>
-    val paginatedQuery = PaginatedQuery(Offset(offset), Limit(limit))
-    val orderingQuery = OrderingQuery(ordering)
-
-    balanceService.get(paginatedQuery, orderingQuery)
-  }
-
   def getHighest(limit: Int, lastSeenAddress: Option[String]) = public { _ =>
     balanceService.getHighest(Limit(limit), lastSeenAddress)
   }

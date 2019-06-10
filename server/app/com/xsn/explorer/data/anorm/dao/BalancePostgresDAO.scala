@@ -62,30 +62,6 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
       .as(parseBalance.*)
   }
 
-  def getNonZeroBalances(query: PaginatedQuery, ordering: FieldOrdering[BalanceField])(
-      implicit conn: Connection
-  ): List[Balance] = {
-
-    val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
-    SQL(
-      s"""
-         |SELECT address, received, spent
-         |FROM balances
-         |WHERE address NOT IN (
-         |  SELECT address
-         |  FROM hidden_addresses) AND
-         |      (received - spent) > 0
-         |$orderBy
-         |OFFSET {offset}
-         |LIMIT {limit}
-      """.stripMargin
-    ).on(
-        'offset -> query.offset.int,
-        'limit -> query.limit.int
-      )
-      .as(parseBalance.*)
-  }
-
   def count(implicit conn: Connection): Count = {
     val result = SQL(
       """
@@ -112,21 +88,6 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         'address -> address.string
       )
       .as(parseBalance.singleOpt)
-  }
-
-  def countNonZeroBalances(implicit conn: Connection): Count = {
-    val result = SQL(
-      """
-        |SELECT COUNT(*)
-        |FROM balances
-        |WHERE address NOT IN (
-        |  SELECT address
-        |  FROM hidden_addresses) AND
-        |      (received - spent) > 0
-      """.stripMargin
-    ).as(SqlParser.scalar[Int].single)
-
-    Count(result)
   }
 
   /**
