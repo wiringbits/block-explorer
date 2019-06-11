@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction or ip address',
 
       // actions
-      'action.find': 'Find',
+      'action.find': 'Search',
 
       // labels
       'label.searchField': 'Transaction id, Blockhash, Block number, Address, IP address',

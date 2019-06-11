@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { TickerService } from '../../services/ticker.service';
 import { ServerStats } from '../../models/ticker';
+import { Config } from '../../config';
 
 
 @Component({
@@ -12,6 +13,7 @@ import { ServerStats } from '../../models/ticker';
 export class TickerComponent implements OnInit {
 
   ticker: ServerStats;
+  config = Config;
 
   constructor(private tickerService: TickerService) { }
 

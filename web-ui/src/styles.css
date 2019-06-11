@@ -12,4 +12,6 @@ body {
    margin: 0px;
    min-height: 100%;
    width: 100%;
+   background: linear-gradient( #141829 60%, #f8f8f8 40%);
+   background-attachment:fixed;
 }

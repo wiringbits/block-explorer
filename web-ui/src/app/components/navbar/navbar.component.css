@@ -3,3 +3,10 @@
   height: 35px;
   margin-top: -7.5px;
 }
+
+.navbar-brand {
+  font-family: InterUI-Bold;
+  font-size: 24px;
+  color: #141829;
+  font-weight: bold;
+}

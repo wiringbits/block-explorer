@@ -4,3 +4,39 @@ span.help {
   font-size: 16px;
   float: right;
 }
+
+div.panel-default {
+  border: 1px solid #6672A6;
+  border-radius: 8px;
+  border-radius: 8px;
+  background-color: #141829;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+
+div.data {
+  opacity: 0.9;
+  font-family: sans-serif;
+  font-size: 20px;
+  color: #FFFFFF;
+  letter-spacing: 0;
+  padding: 15px;
+  padding-bottom: 0px;
+  font-weight: bold;
+}
+
+div.lbl-bottom {
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #8192DB;
+  letter-spacing: 0.9px;
+  padding: 15px;
+  padding-top: 0px;
+  font-weight: bold;
+}
+
+small.currency {
+  font-size: 10px;
+  vertical-align: text-top;
+  padding-top: 10px;
+}
