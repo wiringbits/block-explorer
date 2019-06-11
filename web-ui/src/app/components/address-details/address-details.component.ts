@@ -9,6 +9,7 @@ import { ErrorService } from '../../services/error.service';
 import { LightWalletTransaction } from '../..//models/light-wallet-transaction';
 
 import { getNumberOfRowsForScreen } from '../../utils';
+import { addressLabels } from '../../config';
 
 @Component({
   selector: 'app-address-details',
@@ -19,6 +20,7 @@ export class AddressDetailsComponent implements OnInit {
 
   address: Balance;
   addressString: string;
+  addressLabel = addressLabels;
 
   // pagination
   limit = 30;

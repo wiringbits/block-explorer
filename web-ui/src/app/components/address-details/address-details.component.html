@@ -4,7 +4,9 @@
   </div>
   <div *ngIf="address != null">
     <div class="row">
-      <h2 class="col-xs-12">{{'label.address' | translate}}</h2>
+        <h2 *ngIf="!addressLabel[addressString]" class="col-xs-12">{{'label.address' | translate}}</h2>
+        <h2 *ngIf="addressLabel[addressString]" class="col-xs-12">{{ addressLabel[addressString]}}</h2>
+
     </div>
     <div class="row">
       <div class="col-xs-12 col-md-4">

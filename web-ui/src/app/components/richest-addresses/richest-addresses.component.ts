@@ -2,9 +2,6 @@
 import {tap} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 
-
-
-
 import { Balance } from '../../models/balance';
 
 import { BalancesService } from '../../services/balances.service';
@@ -12,6 +9,7 @@ import { TickerService } from '../../services/ticker.service';
 import { ServerStats } from '../../models/ticker';
 
 import { getNumberOfRowsForScreen } from '../../utils';
+import { addressLabels } from '../../config';
 
 @Component({
   selector: 'app-richest-addresses',
@@ -26,6 +24,8 @@ export class RichestAddressesComponent implements OnInit {
   // pagination
   limit = 30;
   items: Balance[] = [];
+
+  addressLabel = addressLabels;
 
   constructor(
     private balancesService: BalancesService,
