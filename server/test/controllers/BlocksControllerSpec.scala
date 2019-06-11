@@ -1,25 +1,22 @@
 package controllers
 
-import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers._
-import com.xsn.explorer.models._
-import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.{BlockHeader, Transaction}
-import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
+import io.scalaland.chimney.dsl._
 import org.mockito.ArgumentMatchersSugar._
 import org.mockito.MockitoSugar._
 import org.scalactic.Good
 import play.api.inject.bind
-import play.api.libs.json.{JsValue}
+import play.api.libs.json.JsValue
 import play.api.test.Helpers._
-import io.scalaland.chimney.dsl._
 
 class BlocksControllerSpec extends MyAPISpec {
 

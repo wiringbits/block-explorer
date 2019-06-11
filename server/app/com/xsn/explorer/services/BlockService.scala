@@ -1,6 +1,6 @@
 package com.xsn.explorer.services
 
-import com.alexitc.playsonify.core.{FutureApplicationResult}
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
@@ -15,10 +15,9 @@ import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.validators._
-import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
-import play.api.libs.json.{JsValue, Writes}
+import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,8 +34,10 @@ class BlockService @Inject()(
 
   private val maxHeadersPerQuery = 1000
 
-  def getBlockHeaders(limit: Limit, lastSeenHashString: Option[String], orderingConditionString: String)(
-      implicit writes: Writes[BlockHeader]
+  def getBlockHeaders(
+      limit: Limit,
+      lastSeenHashString: Option[String],
+      orderingConditionString: String
   ): FutureApplicationResult[(WrappedResult[List[BlockHeader]], Boolean)] = {
 
     val result = for {
@@ -75,20 +76,6 @@ class BlockService @Inject()(
     result.size == expectedSize && // a complete query
     expectedSize > 0 && // non empty result
     result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
-  }
-
-  private def getCacheableHeaders(limit: Limit, orderingCondition: OrderingCondition, lastSeenHash: Option[Blockhash])(
-      implicit writes: Writes[BlockHeader]
-  ) = {
-
-    val cacheKey = BlockHeaderCache.Key(limit, orderingCondition, lastSeenHash)
-    blockHeaderCache.getOrSet(cacheKey, maxHeadersPerQuery) {
-      val result = for {
-        headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
-      } yield WrappedResult(headers)
-
-      result.toFuture
-    }
   }
 
   def getRawBlock(blockhashString: String): FutureApplicationResult[JsValue] = {
@@ -136,9 +123,11 @@ class BlockService @Inject()(
         .getBlock(blockhash)
         .toFutureOr
 
-      rewards <- getBlockRewards(block).toFutureOr
-        .map(Option.apply)
-        .recoverFrom(BlockRewardsNotFoundError)(Option.empty)
+      rewards <- getBlockRewards(block).map {
+        case Good(value) => Good(Some(value))
+        case Bad(_) => Good(None)
+      }.toFutureOr
+
     } yield BlockDetails(block, rewards)
 
     result.toFuture
@@ -198,15 +187,17 @@ class BlockService @Inject()(
   }
 
   private def getBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
-    if (block.transactions.isEmpty) {
-      Future.successful(Bad(BlockRewardsNotFoundError).accumulating)
-    } else if (block.isPoW) {
-      getPoWBlockRewards(block)
-    } else if (block.isPoS) {
-      getPoSBlockRewards(block)
-    } else {
-      getTPoSBlockRewards(block)
-    }
+    val result = for {
+      method <- extractionMethod(block).toFutureOr
+
+      rewards <- method match {
+        case BlockExtractionMethod.ProofOfWork => getPoWBlockRewards(block).toFutureOr
+        case BlockExtractionMethod.ProofOfStake => getPoSBlockRewards(block).toFutureOr
+        case BlockExtractionMethod.TrustlessProofOfStake => getTPoSBlockRewards(block).toFutureOr
+      }
+    } yield rewards
+
+    result.toFuture
   }
 
   private def getPoWBlockRewards(block: Block): FutureApplicationResult[PoWBlockRewards] = {
