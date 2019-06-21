@@ -37,14 +37,6 @@ object SipHashKey {
   }
 
   def fromBtcutil(hash: Blockhash): SipHashKey = {
-    val bytes = hash.string
-      .take(32)
-      .grouped(2)
-      .map { hex =>
-        Integer.parseInt(hex, 16).asInstanceOf[Byte]
-      }
-      .toList
-
-    fromBtcutil(bytes)
+    fromBtcutil(hash.toBytesLE.take(16))
   }
 }
