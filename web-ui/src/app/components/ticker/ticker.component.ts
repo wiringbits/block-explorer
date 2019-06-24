@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TickerService } from '../../services/ticker.service';
 import { ServerStats } from '../../models/ticker';
 
+
 @Component({
   selector: 'app-ticker',
   templateUrl: './ticker.component.html',

@@ -1,0 +1,6 @@
+span.help {
+  color: blue;
+  cursor: help;
+  font-size: 16px;
+  float: right;
+}
