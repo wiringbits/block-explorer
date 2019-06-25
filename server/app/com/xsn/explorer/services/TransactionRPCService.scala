@@ -34,7 +34,7 @@ class TransactionRPCService @Inject()(
     val result = for {
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       transaction <- xsnService.getTransaction(txid).toFutureOr
-      vin <- transactionCollectorService.getRPCTransactionVIN(transaction.vin, List.empty).toFutureOr
+      vin <- transactionCollectorService.getRPCTransactionVIN(transaction.vin).toFutureOr
     } yield TransactionDetails.from(transaction.copy(vin = vin))
 
     result.toFuture

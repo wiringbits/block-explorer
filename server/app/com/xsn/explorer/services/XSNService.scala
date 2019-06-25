@@ -26,13 +26,15 @@ trait XSNService {
 
   def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
 
-  def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block]
+  def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical]
+
+  def getFullBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]]
 
   def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue]
 
   def getBlockhash(height: Height): FutureApplicationResult[Blockhash]
 
-  def getLatestBlock(): FutureApplicationResult[rpc.Block]
+  def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical]
 
   def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics]
 
@@ -52,7 +54,7 @@ trait XSNService {
 
   def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue]
 
-  def cleanGenesisBlock(block: rpc.Block): rpc.Block = {
+  def cleanGenesisBlock(block: rpc.Block.Canonical): rpc.Block.Canonical = {
     Option(block)
       .filter(_.hash == genesisBlockhash)
       .map(_.copy(transactions = List.empty))
@@ -164,17 +166,42 @@ class XSNServiceRPCImpl @Inject()(ws: WSClient, rpcConfig: RPCConfig, explorerCo
       }
   }
 
-  override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = {
+  override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
     server
       .post(body)
       .map { response =>
-        val maybe = getResult[rpc.Block](response, errorCodeMapper)
+        val maybe = getResult[rpc.Block.Canonical](response, errorCodeMapper)
         maybe
           .map {
             case Good(block) => Good(cleanGenesisBlock(block))
+            case x => x
+          }
+          .getOrElse {
+            logger.warn(
+              s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+      }
+  }
+
+  override def getFullBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
+    val errorCodeMapper = Map(-5 -> BlockNotFoundError)
+    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
+
+    server
+      .post(body)
+      .map { response =>
+        val maybe = getResult[rpc.Block.HasTransactions[rpc.TransactionVIN]](response, errorCodeMapper)
+        maybe
+          .map {
+            case Good(block) => Good(block)
             case x => x
           }
           .getOrElse {
@@ -223,7 +250,7 @@ class XSNServiceRPCImpl @Inject()(ws: WSClient, rpcConfig: RPCConfig, explorerCo
       }
   }
 
-  override def getLatestBlock(): FutureApplicationResult[rpc.Block] = {
+  override def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",

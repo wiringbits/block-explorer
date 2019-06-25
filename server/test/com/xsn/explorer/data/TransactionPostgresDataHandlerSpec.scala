@@ -278,7 +278,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     }
   }
 
-  private def createBlock(block: Block) = {
+  private def createBlock(block: Block.Canonical) = {
     val transactions = block.transactions
       .map(_.string)
       .map(TransactionLoader.getWithValues)
@@ -290,13 +290,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     result.isGood mustEqual true
   }
 
-  private def createBlock(block: Block, transactions: List[Transaction.HasIO]) = {
+  private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
     val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
 
     result.isGood mustEqual true
   }
 
-  private def prepareBlock(block: Block) = {
+  private def prepareBlock(block: Block.Canonical) = {
     try {
       database.withConnection { implicit conn =>
         val maybe = blockPostgresDAO.insert(block)

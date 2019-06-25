@@ -24,8 +24,14 @@ class FileBasedXSNService extends DummyXSNService {
     }
     .toMap
 
-  override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+  override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block.Canonical] = {
     val maybe = blockMap.get(blockhash)
+    val result = Or.from(maybe, One(BlockNotFoundError))
+    Future.successful(result)
+  }
+
+  override def getFullBlock(blockhash: Blockhash): FutureApplicationResult[Block.HasTransactions[TransactionVIN]] = {
+    val maybe = BlockLoader.getFullRPCOpt(blockhash.string)
     val result = Or.from(maybe, One(BlockNotFoundError))
     Future.successful(result)
   }
@@ -44,7 +50,7 @@ class FileBasedXSNService extends DummyXSNService {
     Future.successful(result)
   }
 
-  override def getLatestBlock(): FutureApplicationResult[Block] = {
+  override def getLatestBlock(): FutureApplicationResult[Block.Canonical] = {
     val block = blockMap.values.maxBy(_.height.int)
     Future.successful(Good(block))
   }

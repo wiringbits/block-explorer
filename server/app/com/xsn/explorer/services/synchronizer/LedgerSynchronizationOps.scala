@@ -35,7 +35,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       .toFuture
   }
 
-  def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block] = {
+  def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical] = {
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
@@ -52,10 +52,35 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
     result.toFuture
   }
 
-  def getBlockData(rpcBlock: rpc.Block): FutureApplicationResult[BlockData] = {
+  def getFullRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
+
+    import io.scalaland.chimney.dsl._
+
+    val result = for {
+      // we need to get the canonical block in order to evalu
+      rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
+    } yield {
+      if (explorerConfig.liteVersionConfig.enabled &&
+        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
+
+        // lite version, ignore transactions
+        val liteBlock = rpcBlock
+          .into[rpc.Block.HasTransactions[rpc.TransactionVIN]]
+          .withFieldConst(_.transactions, List.empty)
+          .transform
+        Future.successful(Good(liteBlock))
+      } else {
+        xsnService.getFullBlock(blockhash)
+      }
+    }
+
+    result.flatMap(_.toFutureOr).toFuture
+  }
+
+  def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
-      data <- transactionCollectorService.collect(rpcBlock.transactions, ExcludedTransactions).toFutureOr
+      data <- transactionCollectorService.collect(rpcBlock).toFutureOr
       (transactions, contracts) = data
       validContracts <- getValidContracts(contracts).toFutureOr
       filteredTransactions = transactions.filter(_.blockhash == rpcBlock.hash)

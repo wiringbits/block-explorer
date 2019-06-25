@@ -39,7 +39,7 @@ private[synchronizer] class LedgerSynchronizationStatusService @Inject()(
    * @param candidate the block that we need to store
    * @return the state that needs to be applied in order to store the candidate block
    */
-  def getSyncingStatus(candidate: rpc.Block): FutureApplicationResult[SynchronizationStatus] = {
+  def getSyncingStatus(candidate: rpc.Block[_]): FutureApplicationResult[SynchronizationStatus] = {
     syncOps.getLatestLedgerBlock.toFutureOr.flatMap {
       case Some(latestLedgerBlock) =>
         for {
@@ -64,7 +64,7 @@ private[synchronizer] class LedgerSynchronizationStatusService @Inject()(
     }.toFuture
   }
 
-  def findLeastCommonAncestor(candidate: rpc.Block, existing: persisted.Block): FutureOr[BlockPointer] = {
+  def findLeastCommonAncestor(candidate: rpc.Block[_], existing: persisted.Block): FutureOr[BlockPointer] = {
     if (candidate.height.int <= existing.height.int) {
       // the candidate might be already stored
       // otherwise, find the newest block from the chain that is stored in the database
@@ -76,7 +76,7 @@ private[synchronizer] class LedgerSynchronizationStatusService @Inject()(
     }
   }
 
-  private def findNewestStoredBlockFromChain(candidate: rpc.Block): FutureOr[BlockPointer] = {
+  private def findNewestStoredBlockFromChain(candidate: rpc.Block[_]): FutureOr[BlockPointer] = {
     blockDataHandler
       .getBy(candidate.hash)
       .toFutureOr

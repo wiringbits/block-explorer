@@ -37,4 +37,25 @@ object Transaction {
       Transaction(id, size, blockHash, time.getOrElse(0), blockTime.getOrElse(0), confirmations, vin, vout)
     }
   }
+
+  def batchReads(
+      blockhash: Blockhash,
+      confirmations: Confirmations,
+      blocktime: Long
+  ): Reads[Transaction[TransactionVIN]] = {
+    val builder = (__ \ 'txid).read[TransactionId] and
+      (__ \ 'size).read[Size] and
+      (__ \ 'time).readNullable[Long] and
+      (__ \ 'vout).read[List[TransactionVOUT]] and
+      (__ \ 'vin)
+        .readNullable[List[JsValue]]
+        .map(_ getOrElse List.empty)
+        .map { list =>
+          list.flatMap(_.asOpt[TransactionVIN])
+        }
+
+    builder.apply { (id, size, time, vout, vin) =>
+      Transaction(id, size, blockhash, time.getOrElse(0), blocktime, confirmations, vin, vout)
+    }
+  }
 }

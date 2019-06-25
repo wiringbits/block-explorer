@@ -9,7 +9,7 @@ import org.scalactic.{Bad, Good, One, Or}
 
 class BlockLogic {
 
-  def getCoinbase(block: Block): ApplicationResult[TransactionId] = {
+  def getCoinbase[Tx](block: Block[Tx]): ApplicationResult[Tx] = {
     val maybe = block.transactions.headOption
 
     Or.from(maybe, One(TransactionError.CoinbaseNotFound(block.hash)))
@@ -22,13 +22,13 @@ class BlockLogic {
    * - the 1st one is empty
    * - the 2nd one is the Coinstake transaction.
    */
-  def getCoinstakeTransactionId(block: Block): ApplicationResult[TransactionId] = {
+  def getCoinstakeTransaction[Tx](block: Block[Tx]): ApplicationResult[Tx] = {
     val maybe = block.transactions.lift(1)
 
     Or.from(maybe, One(BlockNotFoundError))
   }
 
-  def getTPoSTransactionId(block: Block): ApplicationResult[TransactionId] = {
+  def getTPoSTransactionId(block: Block[_]): ApplicationResult[TransactionId] = {
     val maybe = block.tposContract
 
     Or.from(maybe, One(BlockNotFoundError))
@@ -137,7 +137,7 @@ class BlockLogic {
     Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
   }
 
-  def isPoS(block: rpc.Block, coinbase: rpc.Transaction[_]): Boolean = {
+  def isPoS(block: rpc.Block[_], coinbase: rpc.Transaction[_]): Boolean = {
     block.nonce == 0 &&
     coinbase.vin.isEmpty &&
     coinbase.vout.flatMap(_.addresses.getOrElse(List.empty)).isEmpty

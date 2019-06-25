@@ -43,9 +43,9 @@ trait DataGenerator {
       blockhash: Blockhash = randomBlockhash,
       previousBlockhash: Option[Blockhash] = None,
       nextBlockhash: Option[Blockhash] = None
-  ): Block = {
+  ): Block.Canonical = {
 
-    Block(
+    Block.Canonical(
       hash = blockhash,
       previousBlockhash = previousBlockhash,
       nextBlockhash = nextBlockhash,

@@ -9,7 +9,7 @@ import io.scalaland.chimney.dsl._
  */
 package object transformers {
 
-  def toPersistedBlock(rpcBlock: rpc.Block, extractionMethod: BlockExtractionMethod): persisted.Block = {
+  def toPersistedBlock(rpcBlock: rpc.Block[_], extractionMethod: BlockExtractionMethod): persisted.Block = {
     rpcBlock
       .into[Block]
       .withFieldConst(_.extractionMethod, extractionMethod)

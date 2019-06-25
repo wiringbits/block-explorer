@@ -133,7 +133,7 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def getLatestBlocks(): FutureApplicationResult[List[Block]] = {
+  def getLatestBlocks(): FutureApplicationResult[List[Block.Canonical]] = {
 
     /**
      * Temporal workaround to retrieve the latest blocks, they
@@ -155,7 +155,7 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def extractionMethod(block: rpc.Block): FutureApplicationResult[BlockExtractionMethod] = {
+  def extractionMethod(block: rpc.Block[_]): FutureApplicationResult[BlockExtractionMethod] = {
     if (block.tposContract.isDefined) {
       Future.successful(Good(BlockExtractionMethod.TrustlessProofOfStake))
     } else if (block.transactions.isEmpty) {
@@ -177,16 +177,15 @@ class BlockService @Inject()(
     }
   }
 
-  private def isPoS(block: rpc.Block): FutureApplicationResult[Boolean] = {
+  private def isPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {
     val result = for {
-      coinbaseTxid <- blockLogic.getCoinbase(block).toFutureOr
-      coinbase <- xsnService.getTransaction(coinbaseTxid).toFutureOr
+      coinbase <- getCoinbase(block).toFutureOr
     } yield blockLogic.isPoS(block, coinbase)
 
     result.toFuture
   }
 
-  private def getBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
+  private def getBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
     val result = for {
       method <- extractionMethod(block).toFutureOr
 
@@ -200,11 +199,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getPoWBlockRewards(block: Block): FutureApplicationResult[PoWBlockRewards] = {
+  private def getPoWBlockRewards(block: Block[_]): FutureApplicationResult[PoWBlockRewards] = {
     val result = for {
-      txid <- blockLogic.getCoinbase(block).toFutureOr
-      // TODO: handle tx not found
-      tx <- xsnService.getTransaction(txid).toFutureOr
+      tx <- getCoinbase(block).toFutureOr
       vout <- transactionLogic.getVOUT(0, tx, BlockRewardsNotFoundError).toFutureOr
       address <- transactionLogic.getAddress(vout, BlockRewardsNotFoundError).toFutureOr
     } yield PoWBlockRewards(BlockReward(address, vout.value))
@@ -212,14 +209,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getPoSBlockRewards(block: Block): FutureApplicationResult[PoSBlockRewards] = {
+  private def getPoSBlockRewards(block: Block[_]): FutureApplicationResult[PoSBlockRewards] = {
     val result = for {
-      coinstakeTxId <- blockLogic
-        .getCoinstakeTransactionId(block)
-        .toFutureOr
-      coinstakeTx <- xsnService
-        .getTransaction(coinstakeTxId)
-        .toFutureOr
+      coinstakeTx <- getCoinstakeTransaction(block).toFutureOr
       coinstakeTxVIN <- transactionLogic
         .getVIN(coinstakeTx, BlockRewardsNotFoundError)
         .toFutureOr
@@ -243,14 +235,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getTPoSBlockRewards(block: Block): FutureApplicationResult[BlockRewards] = {
+  private def getTPoSBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
     val result = for {
-      coinstakeTxId <- blockLogic
-        .getCoinstakeTransactionId(block)
-        .toFutureOr
-      coinstakeTx <- xsnService
-        .getTransaction(coinstakeTxId)
-        .toFutureOr
+      coinstakeTx <- getCoinstakeTransaction(block).toFutureOr
       coinstakeTxVIN <- transactionLogic
         .getVIN(coinstakeTx, BlockRewardsNotFoundError)
         .toFutureOr
@@ -293,6 +280,38 @@ class BlockService @Inject()(
     coinstakeTxVIN match {
       case TransactionVIN.HasValues(_, _, value, _) => Future.successful(Good(value))
       case _ => loadFromTx
+    }
+  }
+
+  private def getCoinbase(block: rpc.Block[_]): FutureApplicationResult[rpc.Transaction[_]] = {
+    block match {
+      case b: Block.Canonical =>
+        val result = for {
+          coinbaseTxid <- blockLogic.getCoinbase(b).toFutureOr
+          coinbase <- xsnService.getTransaction(coinbaseTxid).toFutureOr
+        } yield coinbase
+
+        result.toFuture
+
+      case b: Block.HasTransactions[_] =>
+        val result = blockLogic.getCoinbase(b)
+        Future.successful(result)
+    }
+  }
+
+  private def getCoinstakeTransaction(block: Block[_]): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
+    block match {
+      case b: Block.Canonical =>
+        val result = for {
+          coinstakeTxid <- blockLogic.getCoinstakeTransaction(b).toFutureOr
+          coinstake <- xsnService.getTransaction(coinstakeTxid).toFutureOr
+        } yield coinstake
+
+        result.toFuture
+
+      case b: Block.HasTransactions[rpc.TransactionVIN] =>
+        val result = blockLogic.getCoinstakeTransaction(b)
+        Future.successful(result)
     }
   }
 }

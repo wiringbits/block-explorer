@@ -3,7 +3,7 @@ package com.xsn.explorer.models
 import com.xsn.explorer.models.rpc.Block
 import play.api.libs.json.{Json, Writes}
 
-case class BlockDetails(block: Block, rewards: Option[BlockRewards])
+case class BlockDetails(block: Block.Canonical, rewards: Option[BlockRewards])
 
 object BlockDetails {
 

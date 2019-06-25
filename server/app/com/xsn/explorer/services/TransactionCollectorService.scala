@@ -35,13 +35,10 @@ class TransactionCollectorService @Inject()(
    * When dealing with the RPC API, we try to get the details in parallel, if the server gets overloaded,
    * we'll try to load the data sequentially.
    */
-  def collect(
-      txidList: List[TransactionId],
-      excludedTransactions: List[TransactionId]
-  ): FutureApplicationResult[Result] = {
+  def collect(block: rpc.Block[_]): FutureApplicationResult[Result] = {
     val futureOr = for {
-      rpcTransactions <- getRPCTransactions(txidList).toFutureOr
-      completeTransactions <- completeValues(rpcTransactions, excludedTransactions).toFutureOr
+      rpcTransactions <- getRPCTransactions(block).toFutureOr
+      completeTransactions <- completeValues(rpcTransactions).toFutureOr
     } yield {
       val result = completeTransactions.map(persisted.Transaction.fromRPC)
       val contracts = result.flatMap(_._2)
@@ -53,8 +50,7 @@ class TransactionCollectorService @Inject()(
   }
 
   private[services] def completeValues(
-      rpcTransactions: List[RPCTransaction],
-      excludedTransactions: List[TransactionId]
+      rpcTransactions: List[RPCTransaction]
   ): FutureApplicationResult[List[RPCCompleteTransaction]] = {
     val neutral: FutureApplicationResult[List[rpc.Transaction[rpc.TransactionVIN.HasValues]]] =
       Future.successful(Good(List.empty))
@@ -62,7 +58,7 @@ class TransactionCollectorService @Inject()(
       case (acc, tx) =>
         val result = for {
           previous <- acc.toFutureOr
-          completeVIN <- getRPCTransactionVIN(tx.vin, excludedTransactions).toFutureOr
+          completeVIN <- getRPCTransactionVIN(tx.vin).toFutureOr
           completeTX = tx.copy(vin = completeVIN)
         } yield completeTX :: previous
 
@@ -82,11 +78,9 @@ class TransactionCollectorService @Inject()(
    * - The ones that weren't retrieved are retried sequentially using the RPC API.
    */
   private[services] def getRPCTransactionVIN(
-      vinList: List[rpc.TransactionVIN],
-      excludedTransactions: List[TransactionId]
+      vinList: List[rpc.TransactionVIN]
   ): FutureApplicationResult[List[rpc.TransactionVIN.HasValues]] = {
-    val filtered = vinList.filterNot(excludedTransactions contains _.txid)
-    getDBPartialVINList(filtered)
+    getDBPartialVINList(vinList)
       .flatMap(completeRPCVINSequentially)
   }
 
@@ -129,6 +123,16 @@ class TransactionCollectorService @Inject()(
     result.toFutureOr
       .map(_.reverse)
       .toFuture
+  }
+
+  private[services] def getRPCTransactions(block: rpc.Block[_]): FutureApplicationResult[List[RPCTransaction]] = {
+    block match {
+      case b: rpc.Block.Canonical =>
+        getRPCTransactions(b.transactions)
+
+      case b: rpc.Block.HasTransactions[rpc.TransactionVIN] =>
+        Future.successful(Good(b.transactions))
+    }
   }
 
   /**

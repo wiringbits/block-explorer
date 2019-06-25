@@ -45,7 +45,7 @@ class LegacyLedgerSynchronizerService @Inject()(
     result.toFuture
   }
 
-  private def synchronize(block: rpc.Block): FutureApplicationResult[Unit] = {
+  private def synchronize(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     logger.info(s"Synchronize block ${block.height}, hash = ${block.hash}")
 
     val result = for {
@@ -71,7 +71,7 @@ class LegacyLedgerSynchronizerService @Inject()(
    * 1.1. the given block is the genensis block, it is added.
    * 1.2. the given block is not the genesis block, sync everything until the given block.
    */
-  private def onEmptyLedger(block: rpc.Block): FutureApplicationResult[Unit] = {
+  private def onEmptyLedger(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     if (block.height.int == 0) {
       logger.info(s"Synchronize genesis block on empty ledger, hash = ${block.hash}")
       appendBlock(block)
@@ -94,7 +94,7 @@ class LegacyLedgerSynchronizerService @Inject()(
    * 2.4. if H <= N, if the hash already exists, it is ignored.
    * 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included), then, add the new H.
    */
-  private def onLatestBlock(ledgerBlock: Block, newBlock: rpc.Block): FutureApplicationResult[Unit] = {
+  private def onLatestBlock(ledgerBlock: Block, newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     if (ledgerBlock.height.int + 1 == newBlock.height.int &&
       newBlock.previousBlockhash.contains(ledgerBlock.hash)) {
 
@@ -147,7 +147,7 @@ class LegacyLedgerSynchronizerService @Inject()(
     }
   }
 
-  private def appendBlock(newBlock: rpc.Block): FutureApplicationResult[Unit] = {
+  private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts) = data

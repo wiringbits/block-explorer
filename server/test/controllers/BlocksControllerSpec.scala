@@ -434,7 +434,7 @@ class BlocksControllerSpec extends MyAPISpec {
 
   }
 
-  private def matchBlock(expected: Block, actual: JsValue) = {
+  private def matchBlock(expected: Block.Canonical, actual: JsValue) = {
     val jsonBlock = actual
     val block = expected
 

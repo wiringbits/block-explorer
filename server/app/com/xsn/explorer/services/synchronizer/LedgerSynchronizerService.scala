@@ -78,7 +78,7 @@ class LedgerSynchronizerService @Inject()(
         val result = for {
           _ <- previous.toFutureOr
           blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-          block <- syncOps.getRPCBlock(blockhash).toFutureOr
+          block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
           _ <- append(block).toFutureOr
         } yield ()
 
@@ -103,7 +103,7 @@ class LedgerSynchronizerService @Inject()(
       }
   }
 
-  private def append(newBlock: rpc.Block): FutureApplicationResult[Unit] = {
+  private def append(newBlock: rpc.Block.HasTransactions[_]): FutureApplicationResult[Unit] = {
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts) = data

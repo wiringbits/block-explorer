@@ -9,7 +9,7 @@ import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.LedgerHelper._
 import com.xsn.explorer.helpers._
-import com.xsn.explorer.models.rpc.Block
+import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
@@ -27,7 +27,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   lazy val transactionDataHandler = createTransactionDataHandler(database)
   lazy val blockDataHandler = createBlockDataHandler(database)
 
-  val genesis = blockList(0)
+  val genesis = fullBlockList.head
 
   before {
     clearDatabase()
@@ -36,7 +36,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   testWith("legacy")(legacyConstructor)
   testWith("new")(newConstructor)
 
-  private def testWith(tag: String)(implicit constructor: XSNService => LedgerSynchronizer) = {
+  private def testWith(tag: String)(implicit constructor: XSNService => LedgerSynchronizer): Unit = {
     s"synchronize - $tag" should {
       "add the genensis block to the empty ledger" in {
         val synchronizer = ledgerSynchronizerService(genesis)
@@ -48,36 +48,36 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       }
 
       "add the old missing blocks  blocks while adding block N to the empty ledger" in {
-        val block = blockList.last
-        val synchronizer = ledgerSynchronizerService(blockList: _*)
+        val block = fullBlockList.last
+        val synchronizer = ledgerSynchronizerService(fullBlockList: _*)
         whenReady(synchronizer.synchronize(block.hash)) { result =>
           result mustEqual Good(())
-          verifyLedger(blockList: _*)
+          verifyLedger(fullBlockList: _*)
         }
       }
 
       "append a block to the latest block" in {
-        val synchronizer = ledgerSynchronizerService(blockList: _*)
+        val synchronizer = ledgerSynchronizerService(fullBlockList: _*)
 
         whenReady(synchronizer.synchronize(genesis.hash)) {
           _ mustEqual Good(())
         }
 
-        blockList.drop(1).foreach { block =>
+        fullBlockList.drop(1).foreach { block =>
           whenReady(synchronizer.synchronize(block.hash)) {
             _ mustEqual Good(())
           }
         }
 
-        verifyLedger(blockList: _*)
+        verifyLedger(fullBlockList: _*)
       }
 
       "ignore a duplicated block" in {
-        val synchronizer = ledgerSynchronizerService(blockList: _*)
+        val synchronizer = ledgerSynchronizerService(fullBlockList: _*)
 
-        createBlocks(synchronizer, blockList: _*)
+        createBlocks(synchronizer, fullBlockList: _*)
 
-        val block = blockList(3)
+        val block = fullBlockList(3)
         whenReady(synchronizer.synchronize(block.hash)) {
           _ mustEqual Good(())
         }
@@ -86,12 +86,12 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       }
 
       "add the old missing blocks  blocks while adding block N to a ledger with some blocks" in {
-        val initialBlocks = blockList.take(3)
-        val synchronizer = ledgerSynchronizerService(blockList: _*)
+        val initialBlocks = fullBlockList.take(3)
+        val synchronizer = ledgerSynchronizerService(fullBlockList: _*)
 
         createBlocks(synchronizer, initialBlocks: _*)
 
-        val block = blockList.last
+        val block = fullBlockList.last
         whenReady(synchronizer.synchronize(block.hash)) { result =>
           result mustEqual Good(())
           verifyLedger(blockList: _*)
@@ -99,11 +99,13 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       }
 
       "handle reorganization, ledger has 3 blocks, a rechain occurs from block 2 while adding new block 3" in {
-        val block1 = blockList(1)
-        val block2 = blockList(2)
-        val block3 = blockList(3)
-        val newBlock2 = blockList(4).copy(previousBlockhash = block2.previousBlockhash, height = block2.height)
-        val newBlock3 = blockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(3))
+        val block1 = fullBlockList(1)
+        val block2 = fullBlockList(2)
+        val block3 = fullBlockList(3)
+        val newBlock2 =
+          fullBlockList(4).copy(previousBlockhash = Some(block1.hash), height = Height(block1.height.int + 1))
+        val newBlock3 =
+          fullBlockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(newBlock2.height.int + 1))
 
         val initialBlocks = List(genesis, block1, block2, block3)
         createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
@@ -123,12 +125,12 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       }
 
       "handle reorganization, ledger has 3 blocks, a rechain occurs from block 2 while adding new block 4" in {
-        val block1 = blockList(1)
-        val block2 = blockList(2)
-        val block3 = blockList(3)
-        val newBlock2 = blockList(4).copy(previousBlockhash = block2.previousBlockhash, height = block2.height)
-        val newBlock3 = blockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(3))
-        val newBlock4 = blockList(6).copy(previousBlockhash = Some(newBlock3.hash), height = Height(4))
+        val block1 = fullBlockList(1)
+        val block2 = fullBlockList(2)
+        val block3 = fullBlockList(3)
+        val newBlock2 = fullBlockList(4).copy(previousBlockhash = block2.previousBlockhash, height = block2.height)
+        val newBlock3 = fullBlockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(3))
+        val newBlock4 = fullBlockList(6).copy(previousBlockhash = Some(newBlock3.hash), height = Height(4))
 
         val initialBlocks = List(genesis, block1, block2, block3)
         createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
@@ -149,11 +151,11 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       }
 
       "handle reorganization, ledger has 6 blocks, a rechain occurs from block 2 while adding new block 2" in {
-        val initialBlocks = blockList.take(6)
+        val initialBlocks = fullBlockList.take(6)
         createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
 
-        val block1 = blockList(1)
-        val newBlock2 = blockList.drop(6).head.copy(previousBlockhash = Some(block1.hash), height = Height(2))
+        val block1 = fullBlockList(1)
+        val newBlock2 = fullBlockList.drop(6).head.copy(previousBlockhash = Some(block1.hash), height = Height(2))
         val finalBlocks = List(
           genesis,
           block1.copy(nextBlockhash = Some(newBlock2.hash)),
@@ -169,7 +171,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     }
   }
 
-  private def verifyLedger(blocks: Block*) = {
+  private def verifyLedger(blocks: Block[_]*): Unit = {
     countBlocks() mustEqual blocks.size
     blocks.foreach { block =>
       val dbBlock = blockDataHandler.getBy(block.hash).get
@@ -190,7 +192,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     }
   }
 
-  private def createBlocks(synchronizer: LedgerSynchronizer, blocks: Block*) = {
+  private def createBlocks(synchronizer: LedgerSynchronizer, blocks: Block[_]*): Unit = {
     blocks
       .foreach { block =>
         whenReady(synchronizer.synchronize(block.hash)) { result =>
@@ -200,11 +202,36 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   }
 
   private def ledgerSynchronizerService(
-      blocks: Block*
+      blocks: Block.HasTransactions[TransactionVIN]*
   )(implicit constructor: XSNService => LedgerSynchronizer): LedgerSynchronizer = {
+
+    import io.scalaland.chimney.dsl._
+
+    val canonicalBlocks = blocks.map { fullBlock =>
+      val block = fullBlock
+        .into[Block.Canonical]
+        .withFieldComputed(_.transactions, _.transactions.map(_.id))
+        .transform
+
+      block
+    }
+
     val xsnService = new FileBasedXSNService {
-      override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block] = {
+      override def getFullBlock(
+          blockhash: Blockhash
+      ): FutureApplicationResult[Block.HasTransactions[TransactionVIN]] = {
         blocks
+          .find(_.hash == blockhash)
+          .map { block =>
+            Future.successful(Good(block))
+          }
+          .getOrElse {
+            Future.successful(Bad(BlockNotFoundError).accumulating)
+          }
+      }
+
+      override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block.Canonical] = {
+        canonicalBlocks
           .find(_.hash == blockhash)
           .map { block =>
             Future.successful(Good(cleanGenesisBlock(block)))
@@ -214,8 +241,8 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
           }
       }
 
-      override def getLatestBlock(): FutureApplicationResult[Block] = {
-        val block = cleanGenesisBlock(blocks.maxBy(_.height.int))
+      override def getLatestBlock(): FutureApplicationResult[Block.Canonical] = {
+        val block = cleanGenesisBlock(canonicalBlocks.maxBy(_.height.int))
         Future.successful(Good(block))
       }
 
