@@ -9,10 +9,10 @@
     - node_user: xsn
     - node_group: xsn
     - node_data_folder: '.xsncore'
-    - node_download_url: https://github.com/X9Developers/XSN/releases/download/1.0.18/xsn-1.0.18-x86_64-linux-gnu.tar.gz
-    - node_download_checksum: sha1:b657a9e5dce6193d051d64eab4c40686f41e0b98
+    - node_download_url: https://github.com/X9Developers/XSN/releases/download/v1.0.20/xsn-1.0.20-x86_64-linux-gnu.tar.gz
+    - node_download_checksum: sha1:742c836121fa968660e938e05ba5fa9a5d273ed3
     - node_compressed_file: /home/ubuntu/xsn.tar.gz
-    - node_daemon_file: xsn-1.0.18/bin/xsnd
+    - node_daemon_file: xsn-1.0.20/bin/xsnd
     - node_config_file: config/nodes/xsn.conf
     - node_config_filename: xsn.conf
     - node_executable: xsnd
