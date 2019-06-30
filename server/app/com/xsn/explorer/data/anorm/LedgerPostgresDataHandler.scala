@@ -9,9 +9,9 @@ import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models.TPoSContract
-import com.xsn.explorer.models.persisted.{Balance, Block, Transaction}
-import com.xsn.explorer.models.values.Address
+import com.xsn.explorer.models.persisted.{Balance, Block}
 import com.xsn.explorer.util.Extensions.ListOptionExt
+import com.xsn.explorer.util.TransactionBalancesHelper
 import javax.inject.Inject
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
@@ -88,7 +88,7 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
 
       // balances
-      balanceList = balances(block.transactions)
+      balanceList = TransactionBalancesHelper.computeBalances(block.transactions)
       _ <- insertBalanceBatch(balanceList).toList.everything
 
       // compute aggregated amount
@@ -114,7 +114,7 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- blockPostgresDAO.delete(block.hash)
 
       // balances
-      balanceList = balances(deletedTransactions)
+      balanceList = TransactionBalancesHelper.computeBalances(deletedTransactions)
       _ <- balanceList
         .map { b =>
           b.copy(spent = -b.spent, received = -b.received)
@@ -135,56 +135,5 @@ class LedgerPostgresDataHandler @Inject()(
     balanceList.map { b =>
       balancePostgresDAO.upsert(b)
     }
-  }
-
-  private def spendMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
-    val addressValueList = for {
-      tx <- transactions
-      input <- tx.inputs
-      address <- input.addresses
-    } yield address -> input.value
-
-    addressValueList
-      .groupBy(_._1)
-      .mapValues { list =>
-        list.map(_._2).sum
-      }
-  }
-
-  private def receiveMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
-    val addressValueList = for {
-      tx <- transactions
-      output <- tx.outputs
-      address <- output.addresses
-    } yield address -> output.value
-
-    addressValueList
-      .groupBy(_._1)
-      .mapValues { list =>
-        list.map(_._2).sum
-      }
-  }
-
-  private def balances(transactions: List[Transaction.HasIO]) = {
-    val spentList = spendMap(transactions).map {
-      case (address, spent) =>
-        Balance(address, spent = spent)
-    }
-
-    val receiveList = receiveMap(transactions).map {
-      case (address, received) =>
-        Balance(address, received = received)
-    }
-
-    val result = (spentList ++ receiveList)
-      .groupBy(_.address)
-      .mapValues { _.reduce(mergeBalances) }
-      .values
-
-    result
-  }
-
-  private def mergeBalances(a: Balance, b: Balance): Balance = {
-    Balance(a.address, spent = a.spent + b.spent, received = a.received + b.received)
   }
 }
