@@ -10,9 +10,8 @@ import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
-import org.scalactic.Good
+import org.scalactic.{Bad, Good}
 import play.api.db.Database
-import play.api.libs.json._
 
 import scala.concurrent.Future
 
@@ -45,16 +44,21 @@ class MaintenanceController @Inject()(
         } yield ()
     }
 
-    finalState.toFuture.map(_ => Good(JsObject.empty)).recoverWith {
-      case error: Exception => Future.successful(Good(Json.parse(s"""{"error": "${error.getMessage}"}""")))
-    }
+    finalState.toFuture
+      .map {
+        case Good(_) => Good("")
+        case Bad(errors) => Good(errors.toString)
+      }
+      .recoverWith {
+        case error: Exception => Future.successful(Good(error.getMessage))
+      }
   }
 
   def logProgress(startingHeight: Int, migratedHeight: Int) = {
-    val blockToMigrate: Int = startingHeight
+    val blocksToMigrate: Int = startingHeight + 1
     val migratedBlocks: Int = startingHeight - migratedHeight + 1
-    val percentage: Int = 100 * migratedBlocks / blockToMigrate
-    val previousPercentage: Int = 100 * (migratedBlocks - 1) / blockToMigrate
+    val percentage: Int = 100 * migratedBlocks / blocksToMigrate
+    val previousPercentage: Int = 100 * (migratedBlocks - 1) / blocksToMigrate
 
     if (percentage != 0 && percentage != previousPercentage) {
       logger.info(s"migrated block at height ${migratedHeight}, ${percentage}% done")
