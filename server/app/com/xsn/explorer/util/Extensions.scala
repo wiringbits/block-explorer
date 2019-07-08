@@ -1,6 +1,6 @@
 package com.xsn.explorer.util
 
-import com.alexitc.playsonify.core.FutureOr
+import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult, FutureOr}
 import com.alexitc.playsonify.models.ApplicationError
 import org.scalactic.{Bad, Good, One}
 
@@ -28,6 +28,23 @@ object Extensions {
         Some(inner.flatten)
       } else {
         None
+      }
+    }
+  }
+
+  implicit class FutureApplicationResultListExt[A](val inner: List[FutureApplicationResult[A]]) extends AnyVal {
+
+    def sequence(implicit ec: ExecutionContext): FutureApplicationResult[List[A]] = {
+      Future.sequence(inner).map { list =>
+        val partial = list
+          .foldLeft[ApplicationResult[List[A]]](Good(List.empty[A])) {
+            case (Bad(accErrors), Bad(curErrors)) => Bad(accErrors ++ curErrors)
+            case (Bad(accErrors), _) => Bad(accErrors)
+            case (_, Bad(curErrors)) => Bad(curErrors)
+            case (Good(accList), Good(cur)) => Good(cur :: accList)
+          }
+
+        partial.map(_.reverse)
       }
     }
   }
