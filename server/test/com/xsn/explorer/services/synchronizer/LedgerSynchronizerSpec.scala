@@ -13,6 +13,8 @@ import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
+import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
+import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.services.validators.BlockhashValidator
 import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
 import org.scalactic.{Bad, Good, One, Or}
@@ -26,6 +28,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   lazy val dataHandler = createLedgerDataHandler(database)
   lazy val transactionDataHandler = createTransactionDataHandler(database)
   lazy val blockDataHandler = createBlockDataHandler(database)
+  lazy val blockChunkRepository = createBlockChunkRepository(database)
 
   val genesis = fullBlockList.head
 
@@ -281,11 +284,17 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       transactionCollectorService
     )
     val syncStatusService = new LedgerSynchronizationStatusService(syncOps, xsnService, blockFutureDataHandler)
+    val blockChunkFutureRepository = new BlockChunkRepository.FutureImpl(blockChunkRepository)
+    val addOps = new BlockParallelChunkAddOps(blockChunkFutureRepository)
+    val blockParallelChunkSynchronizer =
+      new BlockParallelChunkSynchronizer(blockChunkFutureRepository, addOps)
     new LedgerSynchronizerService(
       xsnService,
       new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
       syncStatusService,
-      syncOps
+      syncOps,
+      blockChunkFutureRepository,
+      blockParallelChunkSynchronizer
     )
   }
 

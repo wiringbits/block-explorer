@@ -3,11 +3,13 @@ package com.xsn.explorer.services.synchronizer
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr}
 import com.xsn.explorer.data.async.LedgerFutureDataHandler
+import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import javax.inject.Inject
-import org.scalactic.Good
+import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,7 +18,9 @@ class LedgerSynchronizerService @Inject()(
     xsnService: XSNService,
     ledgerDataHandler: LedgerFutureDataHandler,
     syncStatusService: LedgerSynchronizationStatusService,
-    syncOps: LedgerSynchronizationOps
+    syncOps: LedgerSynchronizationOps,
+    blockChunkRepository: BlockChunkRepository.FutureImpl,
+    blockParallelChunkSynchronizer: BlockParallelChunkSynchronizer
 )(implicit ec: ExecutionContext)
     extends LedgerSynchronizer {
 
@@ -30,12 +34,40 @@ class LedgerSynchronizerService @Inject()(
    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
+      _ <- applyPendingUpdate().toFutureOr
       candidate <- syncOps.getRPCBlock(blockhash).toFutureOr
       status <- syncStatusService.getSyncingStatus(candidate).toFutureOr
       _ <- sync(status).toFutureOr
     } yield ()
 
     result.toFuture
+  }
+
+  private def applyPendingUpdate(): FutureApplicationResult[Unit] = {
+    val result = for {
+      blockhashMaybe <- blockChunkRepository.findSyncingBlock().toFutureOr
+    } yield blockhashMaybe match {
+      case None => Future.successful(Good(())).toFutureOr
+      case Some(blockhash) =>
+        logger.info(s"The block $blockhash was being synced, retrying")
+        val inner = for {
+          block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
+          data <- syncOps.getBlockData(block).toFutureOr
+          _ <- blockParallelChunkSynchronizer.sync(data._1, data._2).toFutureOr
+        } yield ()
+
+        inner.toFuture.flatMap {
+          case Good(_) => Future.successful(Good(()))
+          case Bad(One(BlockNotFoundError)) =>
+            logger.warn(s"The block $blockhash was partially synced but is not in the node anymore, rolling back")
+            blockParallelChunkSynchronizer.rollback(blockhash)
+          case Bad(e) =>
+            logger.warn(s"The block $blockhash was partially synced but it wasn't retrieved from the node, errors = $e")
+            Future.successful(Bad(e))
+        }.toFutureOr
+    }
+
+    result.flatMap(identity).toFuture
   }
 
   private def sync(status: SynchronizationStatus): FutureApplicationResult[Unit] = {
@@ -107,7 +139,7 @@ class LedgerSynchronizerService @Inject()(
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts) = data
-      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts).toFutureOr
+      _ <- blockParallelChunkSynchronizer.sync(blockWithTransactions.asTip, tposContracts).toFutureOr
     } yield {
       if (blockWithTransactions.height.int % 5000 == 0) {
         logger.info(s"Caught up to block ${blockWithTransactions.height}")
