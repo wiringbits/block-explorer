@@ -1,5 +1,6 @@
 package com.xsn.explorer.helpers
 
+import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{TransactionId, _}
@@ -65,18 +66,23 @@ trait DataGenerator {
     )
   }
 
-  def randomOutput: Transaction.Output = {
+  def randomOutput(txid: TransactionId = randomTransactionId, index: Int = nextInt(100)): Transaction.Output = {
     Transaction.Output(
-      txid = randomTransactionId,
-      index = nextInt(100),
+      txid = txid,
+      index = index,
       value = nextInt(1000000),
       address = randomAddress,
       script = randomHexString(8)
     )
   }
 
-  def randomOutputs(n: Int = nextInt(5) + 1): List[Transaction.Output] = {
-    (0 until n).map(x => randomOutput.copy(index = x)).toList
+  def randomOutputs(
+      howMany: Int = nextInt(5) + 1,
+      txid: TransactionId = randomTransactionId
+  ): List[Transaction.Output] = {
+    (0 until howMany).map { index =>
+      randomOutput(txid, index)
+    }.toList
   }
 
   def randomInput(utxos: List[Transaction.Output]): Transaction.Input = {
@@ -131,9 +137,19 @@ trait DataGenerator {
           fromOutputIndex = output.index,
           index = index,
           value = output.value,
-          address = randomAddress
+          addresses = output.addresses
         )
     }
+  }
+
+  def randomTPoSContract(
+      txid: TransactionId = randomTransactionId,
+      index: Int = scala.util.Random.nextInt(100)
+  ): TPoSContract = {
+    val state = randomItem(TPoSContract.State.values.toList)
+    val commission = TPoSContract.Commission.from(scala.util.Random.nextInt(50) + 1).get
+    val details = TPoSContract.Details(randomAddress, randomAddress, commission)
+    TPoSContract(TPoSContract.Id(txid, index), details = details, time = System.currentTimeMillis(), state)
   }
 }
 

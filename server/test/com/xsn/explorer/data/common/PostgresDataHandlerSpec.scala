@@ -59,6 +59,7 @@ trait PostgresDataHandlerSpec
 
   protected def clearDatabase() = {
     database.withConnection { implicit conn =>
+      _root_.anorm.SQL("""DELETE FROM tpos_contracts""").execute()
       _root_.anorm.SQL("""DELETE FROM transaction_inputs""").execute()
       _root_.anorm.SQL("""DELETE FROM transaction_outputs""").execute()
       _root_.anorm.SQL("""DELETE FROM address_transaction_details""").execute()
@@ -67,6 +68,8 @@ trait PostgresDataHandlerSpec
       _root_.anorm.SQL("""DELETE FROM blocks""").execute()
       _root_.anorm.SQL("""DELETE FROM balances""").execute()
       _root_.anorm.SQL("""DELETE FROM hidden_addresses""").execute()
+      _root_.anorm.SQL("""DELETE FROM aggregated_amounts""").execute()
+      _root_.anorm.SQL("""DELETE FROM block_synchronization_progress""").execute()
     }
   }
 }

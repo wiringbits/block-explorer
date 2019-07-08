@@ -2,7 +2,13 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao._
-import com.xsn.explorer.data.anorm.{BlockPostgresDataHandler, LedgerPostgresDataHandler, TransactionPostgresDataHandler}
+import com.xsn.explorer.data.anorm.{
+  BlockPostgresDataHandler,
+  LedgerPostgresDataHandler,
+  TPoSContractPostgresDataHandler,
+  TransactionPostgresDataHandler
+}
+import com.xsn.explorer.services.synchronizer.repository._
 import play.api.db.Database
 
 trait DataHandlerObjects {
@@ -26,6 +32,7 @@ trait DataHandlerObjects {
   lazy val blockPostgresDAO = new BlockPostgresDAO(blockFilterPostgresDAO, fieldOrderingSQLInterpreter)
   lazy val balancePostgresDAO = new BalancePostgresDAO(fieldOrderingSQLInterpreter)
   lazy val aggregatedAmountPostgresDAO = new AggregatedAmountPostgresDAO
+  lazy val blockSynchronizationProgressDAO = new BlockSynchronizationProgressDAO
 
   def createLedgerDataHandler(database: Database) = {
     new LedgerPostgresDataHandler(
@@ -44,6 +51,29 @@ trait DataHandlerObjects {
 
   def createTransactionDataHandler(database: Database) = {
     new TransactionPostgresDataHandler(database, transactionOutputDAO, transactionPostgresDAO)
+  }
+
+  def createTPoSContractDataHandler(database: Database) = {
+    new TPoSContractPostgresDataHandler(database, tposContractDAO)
+  }
+
+  def createBlockChunkRepository(
+      database: Database,
+      blockSynchronizationProgressDAO: BlockSynchronizationProgressDAO = blockSynchronizationProgressDAO
+  ) = {
+    new BlockChunkPostgresRepository(
+      database,
+      blockSynchronizationProgressDAO,
+      blockPostgresDAO,
+      blockFilterPostgresDAO,
+      transactionPostgresDAO,
+      transactionInputDAO,
+      transactionOutputDAO,
+      addressTransactionDetailsDAO,
+      balancePostgresDAO,
+      aggregatedAmountPostgresDAO,
+      tposContractDAO
+    )
   }
 }
 
