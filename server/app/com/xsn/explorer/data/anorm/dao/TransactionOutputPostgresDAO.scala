@@ -104,6 +104,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |SELECT txid, index, hex_script, value, addresses
         |FROM transaction_outputs
         |WHERE txid = {txid}
+        |ORDER BY index
       """.stripMargin
     ).on(
         'txid -> txid.string
@@ -118,6 +119,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |FROM transaction_outputs
         |WHERE txid = {txid} AND
         |      {address} = ANY(addresses)
+        |ORDER BY index
       """.stripMargin
     ).on(
         'txid -> txid.string,
