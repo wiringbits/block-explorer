@@ -9,9 +9,10 @@ class AggregatedAmountPostgresDAO {
   def updateAvailableCoins(delta: BigDecimal)(implicit conn: Connection): Unit = {
     val affectedRows = SQL(
       """
-        |UPDATE aggregated_amounts
-        |SET value = value + {delta}
-        |WHERE name = 'available_coins'
+        |INSERT INTO aggregated_amounts (name, value)
+        |VALUES ('available_coins', {delta})
+        |ON CONFLICT (name) DO
+        |UPDATE SET value = aggregated_amounts.value + EXCLUDED.value
       """.stripMargin
     ).on(
         'delta -> delta
