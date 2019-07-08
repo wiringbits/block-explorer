@@ -375,9 +375,7 @@ class TransactionPostgresDAO @Inject()(
     }
   }
 
-  private def upsertTransaction(index: Int, transaction: Transaction)(
-      implicit conn: Connection
-  ): Option[Transaction] = {
+  def upsertTransaction(index: Int, transaction: Transaction)(implicit conn: Connection): Option[Transaction] = {
     SQL(
       """
         |INSERT INTO transactions

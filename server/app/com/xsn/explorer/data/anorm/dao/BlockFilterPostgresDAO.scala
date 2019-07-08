@@ -30,6 +30,29 @@ class BlockFilterPostgresDAO {
       .as(parseFilter.single)
   }
 
+  def upsert(blockhash: Blockhash, filter: GolombCodedSet)(implicit conn: Connection): Unit = {
+    SQL(
+      """
+        |INSERT INTO block_address_gcs
+        |  (blockhash, m, n, p, hex)
+        |VALUES
+        |  ({blockhash}, {m}, {n}, {p}, {hex})
+        |ON CONFLICT (blockhash) DO UPDATE
+        |SET blockhash = EXCLUDED.blockhash,
+        |    m = EXCLUDED.m,
+        |    n = EXCLUDED.n,
+        |    hex = EXCLUDED.hex
+      """.stripMargin
+    ).on(
+        'blockhash -> blockhash.string,
+        'm -> filter.m,
+        'n -> filter.n,
+        'p -> filter.p,
+        'hex -> filter.hex.string
+      )
+      .execute()
+  }
+
   def delete(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
     SQL(
       """

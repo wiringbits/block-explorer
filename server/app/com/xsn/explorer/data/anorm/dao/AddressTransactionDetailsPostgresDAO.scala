@@ -58,6 +58,30 @@ class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerCon
     }
   }
 
+  def upsert(details: AddressTransactionDetails)(implicit conn: Connection): Unit = {
+    val _ = SQL(
+      """
+        |INSERT INTO address_transaction_details
+        |  (address, txid, received, sent, time)
+        |VALUES
+        |  ({address}, {txid}, {received}, {sent}, {time})
+        |ON CONFLICT (address, txid) DO UPDATE
+        |SET address = EXCLUDED.address,
+        |    txid = EXCLUDED.txid,
+        |    received = EXCLUDED.received,
+        |    sent = EXCLUDED.sent,
+        |    time = EXCLUDED.time
+      """.stripMargin
+    ).on(
+        'address -> details.address.string,
+        'txid -> details.txid.string,
+        'received -> details.received,
+        'sent -> details.sent,
+        'time -> details.time
+      )
+      .executeUpdate()
+  }
+
   def deleteDetails(txid: TransactionId)(implicit conn: Connection): List[AddressTransactionDetails] = {
     val result = SQL(
       """

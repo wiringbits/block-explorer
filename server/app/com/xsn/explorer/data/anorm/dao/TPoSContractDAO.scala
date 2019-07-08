@@ -32,6 +32,34 @@ class TPoSContractDAO {
       .as(parseTPoSContract.single)
   }
 
+  def upsert(contract: TPoSContract)(implicit conn: Connection): Unit = {
+    val _ = SQL(
+      """
+        |INSERT INTO tpos_contracts
+        |  (txid, index, owner, merchant, merchant_commission, state, time)
+        |VALUES
+        |  ({txid}, {index}, {owner}, {merchant}, {merchant_commission}, {state}::TPOS_CONTRACT_STATE, {time})
+        |ON CONFLICT (txid, index) DO UPDATE
+        |SET txid = EXCLUDED.txid,
+        |    index = EXCLUDED.index,
+        |    owner = EXCLUDED.owner,
+        |    merchant = EXCLUDED.merchant,
+        |    merchant_commission = EXCLUDED.merchant_commission,
+        |    state = EXCLUDED.state,
+        |    time = EXCLUDED.time
+      """.stripMargin
+    ).on(
+        'txid -> contract.id.txid.string,
+        'index -> contract.id.index,
+        'owner -> contract.details.owner.string,
+        'merchant -> contract.details.merchant.string,
+        'merchant_commission -> contract.details.merchantCommission.int,
+        'state -> contract.state.entryName,
+        'time -> contract.time
+      )
+      .executeUpdate()
+  }
+
   def deleteBy(txid: TransactionId)(implicit conn: Connection): Option[TPoSContract] = {
     SQL(
       """

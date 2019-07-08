@@ -83,6 +83,29 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
     }
   }
 
+  def upsert(output: Transaction.Output)(implicit conn: Connection): Unit = {
+    val _ = SQL("""
+        |INSERT INTO transaction_outputs
+        |  (txid, index, value, addresses, hex_script)
+        |VALUES
+        |  ({txid}, {index}, {value}, {addresses}, {hex_script})
+        |ON CONFLICT (txid, index) DO UPDATE
+        |SET txid = EXCLUDED.txid,
+        |    index = EXCLUDED.index,
+        |    value = EXCLUDED.value,
+        |    addresses = EXCLUDED.addresses,
+        |    hex_script = EXCLUDED.hex_script
+      """.stripMargin)
+      .on(
+        'txid -> output.txid.string,
+        'index -> output.index,
+        'value -> output.value,
+        'addresses -> output.addresses.map(_.string).toArray,
+        'hex_script -> output.script.string
+      )
+      .execute()
+  }
+
   def deleteOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
     val result = SQL(
       """
@@ -167,5 +190,17 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
           None
         }
     }
+  }
+
+  def spend(txid: TransactionId, index: Int, spentOn: TransactionId)(implicit conn: Connection): Unit = {
+    val _ = SQL(
+      s"""
+         |UPDATE transaction_outputs
+         |SET spent_on = {spent_on}
+         |WHERE txid = {txid} AND
+         |      index = {index}
+        """.stripMargin
+    ).on("txid" -> txid.string, "index" -> index, "spent_on" -> spentOn.string)
+      .executeUpdate()
   }
 }

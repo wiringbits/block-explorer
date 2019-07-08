@@ -8,11 +8,8 @@ import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def batchInsertInputs(
       inputs: List[(TransactionId, Transaction.Input)]
@@ -55,6 +52,32 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
           None
         }
     }
+  }
+
+  def upsert(txid: TransactionId, input: Transaction.Input)(implicit conn: Connection): Unit = {
+    val _ = SQL(
+      """
+        |INSERT INTO transaction_inputs
+        |  (txid, index, from_txid, from_output_index, value, addresses)
+        |VALUES
+        |  ({txid}, {index}, {from_txid}, {from_output_index}, {value}, {addresses})
+        |ON CONFLICT (txid, index) DO UPDATE
+        |SET txid = EXCLUDED.txid,
+        |    index = EXCLUDED.index,
+        |    from_txid = EXCLUDED.from_txid,
+        |    from_output_index = EXCLUDED.from_output_index,
+        |    value = EXCLUDED.value,
+        |    addresses = EXCLUDED.addresses
+      """.stripMargin
+    ).on(
+        'txid -> txid.string,
+        'index -> input.index,
+        'from_txid -> input.fromTxid.string,
+        'from_output_index -> input.fromOutputIndex,
+        'value -> input.value,
+        'addresses -> input.addresses.map(_.string).toArray
+      )
+      .execute()
   }
 
   def deleteInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
