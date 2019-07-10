@@ -2,6 +2,7 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
+import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.values.Blockhash
@@ -25,12 +26,16 @@ class BlockParallelChunkSynchronizer @Inject()(
   /**
    * Synchronize the given block (continuing from the last step if it is partially synchronized).
    */
-  def sync(block: Block.HasTransactions, tposContracts: List[TPoSContract]): FutureApplicationResult[Unit] = {
+  def sync(
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract],
+      filterFactory: () => GolombCodedSet
+  ): FutureApplicationResult[Unit] = {
     val start = System.currentTimeMillis()
     val result = for {
       stateMaybe <- blockChunkRepository.findSyncState(block.hash).toFutureOr
       currentState = stateMaybe.getOrElse(BlockSynchronizationState.StoringBlock)
-      _ <- addOps.continueFromState(currentState, block, tposContracts).toFutureOr
+      _ <- addOps.continueFromState(currentState, block, tposContracts, filterFactory).toFutureOr
       _ = logger.debug(s"Synced ${block.height}, took ${System.currentTimeMillis() - start} ms")
     } yield ()
 

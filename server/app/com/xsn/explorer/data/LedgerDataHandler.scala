@@ -1,6 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
+import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.Block
 
@@ -17,7 +18,11 @@ trait LedgerDataHandler[F[_]] {
    * - The ledger is empty and the block is the genesis one.
    * - The ledger has some blocks and the block goes just after the latest one.
    */
-  def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): F[Unit]
+  def push(
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract],
+      filterFactory: () => GolombCodedSet
+  ): F[Unit]
 
   /**
    * Remove the latest block from the ledger, it will succeed only if the ledger is not empty.

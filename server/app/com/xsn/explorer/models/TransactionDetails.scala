@@ -25,7 +25,7 @@ object TransactionDetails {
 
   def from(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): TransactionDetails = {
     val input = tx.vin.map { vin =>
-      TransactionValue(vin.addresses, vin.value)
+      TransactionValue(vin.addresses, vin.value, vin.pubKeyScript)
     }
 
     val output = tx.vout.flatMap(TransactionValue.from)

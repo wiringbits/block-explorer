@@ -32,11 +32,12 @@ object TransactionParsers {
       TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
-  val parseTransactionInput = (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses)
-    .map {
-      case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
-        Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
-    }
+  val parseTransactionInput =
+    (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses)
+      .map {
+        case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
+          Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
+      }
 
   val parseTransactionOutput = (parseTransactionId() ~
     parseIndex ~

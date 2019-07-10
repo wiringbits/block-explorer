@@ -81,7 +81,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
       data <- transactionCollectorService.collect(rpcBlock).toFutureOr
-      (transactions, contracts) = data
+      (transactions, contracts, filterFactory) = data
       validContracts <- getValidContracts(contracts).toFutureOr
       filteredTransactions = transactions.filter(_.blockhash == rpcBlock.hash)
     } yield {
@@ -93,7 +93,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       }
 
       val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
-      (block, validContracts)
+      (block, validContracts, filterFactory)
     }
 
     result.toFuture

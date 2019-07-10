@@ -15,7 +15,7 @@ object LedgerHelper {
     "0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85"
   )
 
-  val blockList = list.map(BlockLoader.getRPC)
+  val blockList = list.map(BlockLoader.getRPC(_))
 
   val fullBlockList = list.map { cur =>
     BlockLoader.getFullRPC(cur)
@@ -24,7 +24,7 @@ object LedgerHelper {
   def getTransactions(block: rpc.Block.Canonical): List[Transaction.HasIO] = {
     block.transactions
       .map(_.string)
-      .map(TransactionLoader.getWithValues)
+      .map(TransactionLoader.getWithValues(_))
       .map(Transaction.fromRPC)
       .map(_._1)
   }

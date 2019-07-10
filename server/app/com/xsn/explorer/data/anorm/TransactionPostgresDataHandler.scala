@@ -1,13 +1,12 @@
 package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.ordering.OrderingCondition
+import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import javax.inject.Inject

@@ -4,11 +4,11 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.DataHelper._
 import com.xsn.explorer.helpers.{DataGenerator, LedgerHelper, TransactionLoader}
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
@@ -20,6 +20,8 @@ import org.scalatest.EitherValues._
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   import DataGenerator._
+
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
@@ -285,17 +287,17 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   private def createBlock(block: Block.Canonical) = {
     val transactions = block.transactions
       .map(_.string)
-      .map(TransactionLoader.getWithValues)
+      .map(TransactionLoader.getWithValues(_))
       .map(Transaction.fromRPC)
       .map(_._1)
 
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
 
     result.isGood mustEqual true
   }
 
   private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
 
     result.isGood mustEqual true
   }

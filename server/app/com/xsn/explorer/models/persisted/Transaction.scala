@@ -24,7 +24,13 @@ object Transaction {
 
   object Input {
 
-    def apply(fromTxid: TransactionId, fromOutputIndex: Int, index: Int, value: BigDecimal, address: Address): Input = {
+    def apply(
+        fromTxid: TransactionId,
+        fromOutputIndex: Int,
+        index: Int,
+        value: BigDecimal,
+        address: Address
+    ): Input = {
 
       Input(fromTxid, fromOutputIndex, index, value, List(address))
     }

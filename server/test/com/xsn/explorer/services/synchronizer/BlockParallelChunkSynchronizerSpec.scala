@@ -4,6 +4,7 @@ import java.sql.Connection
 
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.models.persisted.Block
@@ -16,6 +17,8 @@ import org.scalactic.Good
 import org.scalatest.{BeforeAndAfter, WordSpec}
 
 class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandlerSpec with BeforeAndAfter {
+
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val blockDataHandler = createBlockDataHandler(database)
   lazy val transactionDataHandler = createTransactionDataHandler(database)
@@ -74,7 +77,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
   "sync" should {
     "sync a block" in {
       val synchronizer = createSynchronizer()
-      whenReady(synchronizer.sync(blockWithTransactions, tposContracts)) { result =>
+      whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory)) { result =>
         result must be(Good(()))
         verifyDatabase(blockWithTransactions, tposContracts)
       }
@@ -85,10 +88,10 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
         val dao = daoFailingOnceAt(state)
         val synchronizer = createSynchronizer(dao)
         intercept[RuntimeException] {
-          synchronizer.sync(blockWithTransactions, tposContracts).futureValue
+          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory).futureValue
         }
 
-        whenReady(synchronizer.sync(blockWithTransactions, tposContracts)) { result =>
+        whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory)) { result =>
           result must be(Good(()))
           verifyDatabase(blockWithTransactions, tposContracts)
         }
@@ -107,7 +110,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
         val dao = daoFailingOnceAt(state)
         val synchronizer = createSynchronizer(dao)
         intercept[RuntimeException] {
-          synchronizer.sync(blockWithTransactions, tposContracts).futureValue
+          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory).futureValue
         }
 
         whenReady(synchronizer.rollback(block.hash)) { result =>

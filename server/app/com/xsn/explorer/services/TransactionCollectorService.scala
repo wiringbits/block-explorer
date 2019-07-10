@@ -4,10 +4,12 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.TransactionError
+import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
+import io.scalaland.chimney.dsl._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,10 +42,14 @@ class TransactionCollectorService @Inject()(
       rpcTransactions <- getRPCTransactions(block).toFutureOr
       completeTransactions <- completeValues(rpcTransactions).toFutureOr
     } yield {
+      val completeBlock = block
+        .into[rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]]
+        .withFieldConst(_.transactions, completeTransactions)
+        .transform
       val result = completeTransactions.map(persisted.Transaction.fromRPC)
       val contracts = result.flatMap(_._2)
       val txs = result.map(_._1)
-      (txs, contracts)
+      (txs, contracts, () => GolombEncoding.encode(completeBlock))
     }
 
     futureOr.toFuture
@@ -90,7 +96,7 @@ class TransactionCollectorService @Inject()(
         .getOutput(vin.txid, vin.voutIndex)
         .toFutureOr
         .map { output =>
-          vin.withValues(value = output.value, addresses = output.addresses)
+          vin.withValues(value = output.value, addresses = output.addresses, output.script)
         }
         .toFuture
         .map(vin -> _)
@@ -203,7 +209,7 @@ class TransactionCollectorService @Inject()(
 
     transactionValue.map {
       case Good(value) =>
-        val newVIN = vin.withValues(value = value.value, addresses = value.addresses)
+        val newVIN = vin.withValues(value = value.value, addresses = value.addresses, value.pubKeyScript)
         Good(newVIN)
 
       case Bad(e) => Bad(e)
@@ -213,7 +219,7 @@ class TransactionCollectorService @Inject()(
 
 object TransactionCollectorService {
 
-  type Result = (List[persisted.Transaction.HasIO], List[TPoSContract])
+  type Result = (List[persisted.Transaction.HasIO], List[TPoSContract], () => GolombCodedSet)
 
   private type RPCTransaction = rpc.Transaction[rpc.TransactionVIN]
   private type RPCCompleteTransaction = rpc.Transaction[rpc.TransactionVIN.HasValues]
