@@ -283,7 +283,7 @@ class BlockService @Inject()(
     }
 
     coinstakeTxVIN match {
-      case TransactionVIN.HasValues(_, _, value, _) => Future.successful(Good(value))
+      case TransactionVIN.HasValues(_, _, value, _, _) => Future.successful(Good(value))
       case _ => loadFromTx
     }
   }

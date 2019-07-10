@@ -72,7 +72,7 @@ class LedgerPostgresDataHandler @Inject()(
 
   private def upsertBlockCascade(
       block: Block.HasTransactions,
-      filter: Option[GolombCodedSet],
+      filter: GolombCodedSet,
       tposContracts: List[TPoSContract]
   )(implicit conn: Connection): Option[Unit] = {
 
@@ -80,9 +80,7 @@ class LedgerPostgresDataHandler @Inject()(
       // block
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
-      _ = filter.foreach { f =>
-        blockFilterPostgresDAO.insert(block.hash, f)
-      }
+      _ = blockFilterPostgresDAO.insert(block.hash, filter)
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)

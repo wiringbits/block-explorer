@@ -1,7 +1,7 @@
 package com.xsn.explorer.gcs
 
 import com.google.common.hash.Hashing
-import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models._
 
 import scala.collection.SortedSet
 
@@ -20,17 +20,20 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   /**
    * Encodes the given word set.
    */
-  def encode(words: Set[String]): Option[GolombCodedSet] = {
-    if (words.isEmpty) {
-      Option.empty
+  def encode(words: Set[String]): GolombCodedSet = {
+    encodeData(words.map(_.getBytes))
+  }
+
+  def encodeData(data: Set[Array[Byte]]): GolombCodedSet = {
+    if (data.isEmpty) {
+      GolombCodedSet.apply(p = p, m = m, n = data.size, data = List[UnsignedByte]())
     } else {
-      val gcs = encodeNonEmptySet(words)
-      Option(gcs)
+      encodeNonEmptySet(data)
     }
   }
 
-  private def encodeNonEmptySet(words: Set[String]): GolombCodedSet = {
-    val sortedHashes = hashes(words)
+  private def encodeNonEmptySet(data: Set[Array[Byte]]): GolombCodedSet = {
+    val sortedHashes = hashes(data)
     val diffList = differences(sortedHashes)
     val encodedBits = diffList.flatMap(golombEncode)
     val encodedBytes = encodedBits
@@ -40,7 +43,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
       }
       .toList
 
-    GolombCodedSet.apply(p = p, m = m, n = words.size, data = encodedBytes)
+    GolombCodedSet.apply(p = p, m = m, n = data.size, data = encodedBytes)
   }
 
   /**
@@ -70,10 +73,10 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   /**
    * Maps the word set to a sorted set of hashes.
    */
-  private[gcs] def hashes(words: Set[String]): SortedSet[BigInt] = {
-    val modulus = BigInt(m) * words.size
+  private[gcs] def hashes(data: Set[Array[Byte]]): SortedSet[BigInt] = {
+    val modulus = BigInt(m) * data.size
     val f = fastReduction(_: BigInt, modulus)
-    words
+    data
       .map(hash)
       .map(f)
       .to[SortedSet]
@@ -107,8 +110,8 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
       .toList
   }
 
-  private def hash(string: String): BigInt = {
-    val x = hasher.hashBytes(string.getBytes)
+  private def hash(bytes: Array[Byte]): BigInt = {
+    val x = hasher.hashBytes(bytes)
     BigInt(java.lang.Long.toUnsignedString(x.asLong()))
   }
 
@@ -182,10 +185,20 @@ object GolombEncoding {
     new GolombEncoding(p = DefaultP, m = DefaultM, key = key)
   }
 
-  def encode(block: Block.HasTransactions): Option[GolombCodedSet] = {
+  def encode(block: rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]): GolombCodedSet = {
     val key = SipHashKey.fromBtcutil(block.hash)
     val encoder = default(key)
-    val addresses = block.collectAddresses
-    encoder.encode(addresses.map(_.string))
+
+    val pubKeyScripts = block.transactions.flatMap { transaction =>
+      val inputScripts = transaction.vin.map(_.pubKeyScript)
+      val outputScripts = transaction.vout.collect {
+        case output if output.scriptPubKey.isDefined && !output.scriptPubKey.get.asm.contains("OP_RETURN") =>
+          output.scriptPubKey.get.hex
+      }
+      inputScripts ::: outputScripts
+    }
+
+    val data = pubKeyScripts.distinct.map(_.toBytes).filterNot(_.isEmpty).toSet
+    encoder.encodeData(data)
   }
 }

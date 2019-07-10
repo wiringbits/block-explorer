@@ -36,10 +36,11 @@ class TransactionCollectorServiceSpec extends WordSpec {
     val address = DataGenerator.randomAddress
 
     "return the values" in {
-      val expected = vin.withValues(100, address)
+      val pubKeyScript = createScript(address)
+      val expected = vin.withValues(100, address, pubKeyScript.hex)
       val xsnService = new DummyXSNService {
         override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
-          val output = rpc.TransactionVOUT(100, outputIndex, Some(createScript(address)))
+          val output = rpc.TransactionVOUT(100, outputIndex, Some(pubKeyScript))
           val tx = createTransaction(txid, List(output))
           Future.successful(Good(tx))
         }

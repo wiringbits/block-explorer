@@ -90,7 +90,7 @@ class TransactionCollectorService @Inject()(
         .getOutput(vin.txid, vin.voutIndex)
         .toFutureOr
         .map { output =>
-          vin.withValues(value = output.value, addresses = output.addresses)
+          vin.withValues(value = output.value, addresses = output.addresses, output.script)
         }
         .toFuture
         .map(vin -> _)
@@ -203,7 +203,7 @@ class TransactionCollectorService @Inject()(
 
     transactionValue.map {
       case Good(value) =>
-        val newVIN = vin.withValues(value = value.value, addresses = value.addresses)
+        val newVIN = vin.withValues(value = value.value, addresses = value.addresses, value.pubKeyScript)
         Good(newVIN)
 
       case Bad(e) => Bad(e)

@@ -96,22 +96,28 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
   def getInputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Input] = {
     SQL(
       """
-        |SELECT txid, index, from_txid, from_output_index, value, addresses
-        |FROM transaction_inputs
+        |SELECT i.txid, i.index, from_txid, from_output_index, i.value, i.addresses, hex_script
+        |FROM transaction_inputs i
+        |INNER JOIN LATERAL(
+        |  select hex_script from transaction_outputs where txid = i.from_txid and index = i.from_output_index
+        |) o on true
         |WHERE txid = {txid}
         |ORDER BY index
       """.stripMargin
     ).on(
         'txid -> txid.string
       )
-      .as(parseTransactionInput.*)
+      .as(parseTransactionInputWithPubKeyScript.*)
   }
 
   def getInputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Input] = {
     SQL(
       """
-        |SELECT txid, index, from_txid, from_output_index, value, addresses
-        |FROM transaction_inputs
+        |SELECT i.txid, i.index, from_txid, from_output_index, i.value, i.addresses, hex_script
+        |FROM transaction_inputs i
+        |INNER JOIN LATERAL(
+        |  select hex_script from transaction_outputs where txid = i.from_txid and index = i.from_output_index
+        |) o on true
         |WHERE txid = {txid} AND
         |      {address} = ANY(addresses)
         |ORDER BY index
@@ -120,6 +126,6 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         'txid -> txid.string,
         'address -> address.string
       )
-      .as(parseTransactionInput.*)
+      .as(parseTransactionInputWithPubKeyScript.*)
   }
 }

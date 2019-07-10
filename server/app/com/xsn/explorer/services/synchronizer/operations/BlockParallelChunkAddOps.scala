@@ -70,10 +70,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringTransactions
     val filterF = Future { GolombEncoding.encode(block) }
-      .flatMap {
-        case None => Future.successful(Good(()))
-        case Some(filter) => blockChunkRepository.upsertFilter(block.hash, filter)
-      }
+      .flatMap(blockChunkRepository.upsertFilter(block.hash, _))
 
     val linkF = block.previousBlockhash match {
       case None => Future.successful(Good(()))

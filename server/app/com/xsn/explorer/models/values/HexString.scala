@@ -3,6 +3,8 @@ package com.xsn.explorer.models.values
 class HexString private (val string: String) extends AnyVal {
 
   override def toString: String = string
+
+  def toBytes: Array[Byte] = string.grouped(2).map(Integer.parseInt(_, 16).asInstanceOf[Byte]).toArray
 }
 
 object HexString {

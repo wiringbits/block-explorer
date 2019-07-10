@@ -194,6 +194,18 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
         result must be(empty)
       }
+
+      s"[$tag] return inputs with their pubkeyscript" in {
+        prepare()
+        val transaction = dataHandler.getBy(address, Limit(1), None, condition).get
+
+        transaction.head.inputs.foreach {
+          case input =>
+            val expectedPubKeyScript = dataHandler.getOutput(input.fromTxid, input.fromOutputIndex).get.script
+
+            input.pubKeyScript.get must be(expectedPubKeyScript)
+        }
+      }
     }
 
     testOrdering("desc", OrderingCondition.DescendingOrder)
@@ -285,7 +297,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   private def createBlock(block: Block.Canonical) = {
     val transactions = block.transactions
       .map(_.string)
-      .map(TransactionLoader.getWithValues)
+      .map(TransactionLoader.getWithValues(_))
       .map(Transaction.fromRPC)
       .map(_._1)
 

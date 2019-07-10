@@ -62,15 +62,21 @@ class TransactionsControllerSpec extends MyAPISpec {
 
     "return non-coinbase transaction" in {
       val input =
-        List(TransactionValue(createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"), BigDecimal("2343749.965625")))
-          .map { v =>
-            rpc.TransactionVIN.HasValues(
-              createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"),
-              0,
-              v.value,
-              v.addresses
-            )
-          }
+        List(
+          TransactionValue(
+            createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
+            BigDecimal("2343749.965625"),
+            HexString.from("00").get
+          )
+        ).map { v =>
+          rpc.TransactionVIN.HasValues(
+            createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"),
+            0,
+            v.value,
+            v.addresses,
+            v.pubKeyScript
+          )
+        }
 
       val tx = nonCoinbaseTx.copy(vin = input)
 
@@ -108,7 +114,11 @@ class TransactionsControllerSpec extends MyAPISpec {
     "return a transaction with several inputs" in {
       val tx = severalInputsTx
       val inputValue =
-        TransactionValue(createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"), BigDecimal("73242.18642578"))
+        TransactionValue(
+          createAddress("XgEGH3y7RfeKEdn2hkYEvBnrnmGBr7zvjL"),
+          BigDecimal("73242.18642578"),
+          HexString.from("00").get
+        )
 
       val response = GET(url(tx.id.string))
 

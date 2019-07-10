@@ -9,26 +9,29 @@ object TransactionLoader {
 
   private val BasePath = "transactions"
 
-  def get(txid: String): Transaction[TransactionVIN] = {
-    json(txid).as[Transaction[TransactionVIN]]
+  def get(txid: String, coin: String = "xsn"): Transaction[TransactionVIN] = {
+    json(txid, coin).as[Transaction[TransactionVIN]]
   }
 
-  def getWithValues(txid: String): Transaction[TransactionVIN.HasValues] = {
-    val plain = json(txid).as[Transaction[TransactionVIN]]
+  def getWithValues(txid: String, coin: String = "xsn"): Transaction[TransactionVIN.HasValues] = {
+    val plain = json(txid, coin).as[Transaction[TransactionVIN]]
     val newVIN = plain.vin.flatMap { vin =>
-      get(vin.txid.string).vout
+      get(vin.txid.string, coin).vout
         .find(_.n == vin.voutIndex)
         .flatMap { prev =>
-          prev.addresses.map { vin.withValues(prev.value, _) }
+          for {
+            addresses <- prev.addresses
+            scriptPubKey <- prev.scriptPubKey
+          } yield vin.withValues(prev.value, addresses, scriptPubKey.hex)
         }
     }
 
     plain.copy(vin = newVIN)
   }
 
-  def json(txid: String): JsValue = {
+  def json(txid: String, coin: String = "xsn"): JsValue = {
     try {
-      val resource = s"$BasePath/$txid"
+      val resource = s"$BasePath/$coin/$txid"
       val json = scala.io.Source.fromResource(resource).getLines().mkString("\n")
       Json.parse(json)
     } catch {
@@ -36,12 +39,12 @@ object TransactionLoader {
     }
   }
 
-  def all(): List[Transaction[TransactionVIN]] = {
-    val uri = getClass.getResource(s"/$BasePath")
+  def all(coin: String = "xsn"): List[Transaction[TransactionVIN]] = {
+    val uri = getClass.getResource(s"/$BasePath/$coin")
     new File(uri.getPath)
       .listFiles()
       .toList
       .map(_.getName)
-      .map(get)
+      .map(get(_, coin))
   }
 }

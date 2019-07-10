@@ -19,22 +19,26 @@ object BlockLoader {
   }
 
   def getWithTransactions(blockhash: String): persisted.Block.HasTransactions = {
-    val rpcBlock = getRPC(blockhash)
+    getWithTransactions(blockhash, "xsn")
+  }
+
+  def getWithTransactions(blockhash: String, coin: String): persisted.Block.HasTransactions = {
+    val rpcBlock = getRPC(blockhash, coin)
     val block = Converters.toPersistedBlock(rpcBlock)
     val transactions = rpcBlock.transactions
       .map(_.string)
-      .map(TransactionLoader.getWithValues)
+      .map(TransactionLoader.getWithValues(_, coin))
       .map(persisted.Transaction.fromRPC)
       .map(_._1)
 
     persisted.Block.HasTransactions(block, transactions)
   }
 
-  def getWithTransactions(rpcBlock: rpc.Block.Canonical): persisted.Block.HasTransactions = {
+  def getWithTransactions(rpcBlock: rpc.Block.Canonical, coin: String = "xsn"): persisted.Block.HasTransactions = {
     val block = Converters.toPersistedBlock(rpcBlock)
     val transactions = rpcBlock.transactions
       .map(_.string)
-      .map(TransactionLoader.getWithValues)
+      .map(TransactionLoader.getWithValues(_, coin))
       .map(_.copy(blockhash = rpcBlock.hash))
       .map(persisted.Transaction.fromRPC)
       .map(_._1)
@@ -42,8 +46,8 @@ object BlockLoader {
     persisted.Block.HasTransactions(block, transactions)
   }
 
-  def getRPC(blockhash: String): rpc.Block.Canonical = {
-    val partial = json(blockhash).as[rpc.Block.Canonical]
+  def getRPC(blockhash: String, coin: String = "xsn"): rpc.Block.Canonical = {
+    val partial = json(blockhash, coin).as[rpc.Block.Canonical]
     cleanGenesisBlock(partial)
   }
 
@@ -52,12 +56,24 @@ object BlockLoader {
     jsonFromResource(resource).as[rpc.Block.HasTransactions[rpc.TransactionVIN]]
   }
 
+  def getFullRPCWithValues(blockhash: String, coin: String = "xsn"): rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues] = {
+    val block = json(blockhash, coin).as[rpc.Block.Canonical]
+    val transactionsWithValues = block.transactions.map(_.toString).map(TransactionLoader.getWithValues(_, coin))
+
+    rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues](
+      block.hash, block.previousBlockhash, block.nextBlockhash, block.merkleRoot,
+      transactionsWithValues, block.confirmations, block.size, block.height, block.version,
+      block.time, block.medianTime, block.nonce, block.bits, block.chainwork, block.difficulty,
+      block.tposContract
+    )
+  }
+
   def getFullRPCOpt(blockhash: String, coin: String = "xsn"): Option[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
     Try(getFullRPC(blockhash, coin)).toOption
   }
 
-  def json(blockhash: String): JsValue = {
-    val resource = s"$BasePath/$blockhash"
+  def json(blockhash: String, coin: String = "xsn"): JsValue = {
+    val resource = s"$BasePath/$coin/$blockhash"
     jsonFromResource(resource)
   }
 
@@ -66,13 +82,13 @@ object BlockLoader {
       .map(Converters.toPersistedBlock)
   }
 
-  def allRPC(): List[rpc.Block.Canonical] = {
-    val uri = getClass.getResource(s"/$BasePath")
+  def allRPC(coin: String = "xsn"): List[rpc.Block.Canonical] = {
+    val uri = getClass.getResource(s"/$BasePath/$coin")
     new File(uri.getPath)
       .listFiles()
       .toList
       .map(_.getName)
-      .map(getRPC)
+      .map(getRPC(_, coin))
   }
 
   def cleanGenesisBlock(block: rpc.Block.Canonical): rpc.Block.Canonical = {
