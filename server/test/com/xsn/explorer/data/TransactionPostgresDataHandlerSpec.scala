@@ -31,7 +31,11 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
   val block = DataGenerator.randomBlock()
 
-  val dummyTransaction = randomTransaction(blockhash = block.hash, utxos = List.empty)
+  val dummyTransaction = {
+    val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
+    val outputs = DataGenerator.randomOutputs(3).map(_.copy(txid = tx.id))
+    tx.copy(outputs = outputs)
+  }
 
   before {
     clearDatabase()
