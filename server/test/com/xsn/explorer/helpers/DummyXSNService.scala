@@ -13,8 +13,6 @@ class DummyXSNService extends XSNService {
     Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
   override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = ???
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = ???
-  override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = ???
-  override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = ???
   override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical] = ???
   override def getFullBlock(blockhash: Blockhash): FutureApplicationResult[Block.HasTransactions[TransactionVIN]] = ???
   override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = ???

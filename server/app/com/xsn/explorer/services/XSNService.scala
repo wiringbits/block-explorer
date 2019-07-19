@@ -22,10 +22,6 @@ trait XSNService {
 
   def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue]
 
-  def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance]
-
-  def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]]
-
   def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical]
 
   def getFullBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]]
@@ -103,62 +99,6 @@ class XSNServiceRPCImpl @Inject()(ws: WSClient, rpcConfig: RPCConfig, explorerCo
         maybe.getOrElse {
           logger.warn(
             s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}"
-          )
-
-          Bad(XSNUnexpectedResponseError).accumulating
-        }
-      }
-  }
-
-  override def getAddressBalance(address: Address): FutureApplicationResult[rpc.AddressBalance] = {
-    val body = s"""
-         |{
-         |  "jsonrpc": "1.0",
-         |  "method": "getaddressbalance",
-         |  "params": [
-         |    { "addresses": ["${address.string}"] }
-         |  ]
-         |}
-         |""".stripMargin
-
-    // the network returns 0 for valid addresses
-    val errorCodeMapper = Map(-5 -> AddressFormatError)
-
-    server
-      .post(body)
-      .map { response =>
-        val maybe = getResult[rpc.AddressBalance](response, errorCodeMapper)
-        maybe.getOrElse {
-          logger.warn(
-            s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}"
-          )
-
-          Bad(XSNUnexpectedResponseError).accumulating
-        }
-      }
-  }
-
-  override def getTransactions(address: Address): FutureApplicationResult[List[TransactionId]] = {
-    val body = s"""
-                  |{
-                  |  "jsonrpc": "1.0",
-                  |  "method": "getaddresstxids",
-                  |  "params": [
-                  |    { "addresses": ["${address.string}"] }
-                  |  ]
-                  |}
-                  |""".stripMargin
-
-    // the network returns 0 for valid addresses
-    val errorCodeMapper = Map(-5 -> AddressFormatError)
-
-    server
-      .post(body)
-      .map { response =>
-        val maybe = getResult[List[TransactionId]](response, errorCodeMapper)
-        maybe.getOrElse {
-          logger.warn(
-            s"Unexpected response from XSN Server, status = ${response.status}, address = ${address.string}, response = ${response.body}"
           )
 
           Bad(XSNUnexpectedResponseError).accumulating
