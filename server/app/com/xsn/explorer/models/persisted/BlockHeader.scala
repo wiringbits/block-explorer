@@ -92,6 +92,9 @@ object BlockHeader {
       "merkleRoot" -> obj.merkleRoot,
       "height" -> obj.height,
       "time" -> obj.time,
+      "version" -> obj.version,
+      "nonce" -> obj.nonce,
+      "bits" -> obj.bits,
       "filter" -> filterMaybe
     )
   }
