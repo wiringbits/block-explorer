@@ -46,6 +46,11 @@ class BlockService @Inject()(
       orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
 
       headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+      _ <- (headers, lastSeenHash) match {
+        // if there are no headers but a hash was seen, check whether the given hash actually exists
+        case (Nil, Some(hash)) => blockDataHandler.getHeader(hash, includeFilter = false).toFutureOr
+        case _ => Future.successful(Good(())).toFutureOr
+      }
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
     } yield (WrappedResult(headers), canCacheResult(orderingCondition, limit.int, latestBlock, headers))
 
