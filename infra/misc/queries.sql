@@ -1,5 +1,3 @@
--- clear data
-delete from blocks; delete from transactions; delete from transaction_inputs; delete from transaction_outputs; delete from balances;
 
 -- avg time to get a new block
 SELECT AVG(b.time - a.time) AS new_block_avg_time
@@ -20,57 +18,30 @@ SELECT address, one.available AS one, (two.received - two.spent) AS two
 FROM (
     SELECT address, received - spent AS available
     FROM (
-        SELECT address, SUM(value) AS spent
+        SELECT addresses[1] AS address, SUM(value) AS spent
         FROM transaction_inputs
-        GROUP BY address
+        WHERE array_length(addresses, 1) > 0
+        GROUP BY addresses[1]
       ) s JOIN
       (
-        SELECT address, SUM(value) AS received
+        SELECT addresses[1] AS address, SUM(value) AS received
         FROM transaction_outputs
-        GROUP BY address
+        WHERE array_length(addresses, 1) > 0
+        GROUP BY addresses[1]
       ) r USING (address)
   ) one JOIN balances two USING (address)
-WHERE one.available <> (two.received - two.spent);
---
+WHERE one.available <> (two.received - two.spent)
+ORDER BY two.received
+LIMIT 10;
 
--- rebuild balances table
--- 1. count number of balances
-SELECT COUNT(*)
-FROM balances;
-
--- 2. verify you would write the same amount
-SELECT COUNT(*)
-FROM
-  (
-    SELECT address, SUM(value) AS received
-    FROM transaction_outputs
-    GROUP BY address
-  ) r LEFT JOIN (
-      SELECT address, SUM(value) AS spent
-      FROM transaction_inputs
-      GROUP BY address
-  ) s USING (address);
-
--- 3. delete balances, be sure that the explorer is turned off
-DELETE FROM balances;
-
--- 4. insert the balances
-INSERT INTO balances
-  (
-    SELECT address, received, COALESCE(spent, 0) AS spent
-    FROM
-      (
-        SELECT address, SUM(value) AS received
-        FROM transaction_outputs
-        GROUP BY address
-      ) r LEFT JOIN (
-          SELECT address, SUM(value) AS spent
-          FROM transaction_inputs
-          GROUP BY address
-      ) s USING (address)
-  );
-
--- 5. verify you have the same amount
-SELECT COUNT(*) FROM balances;
-
--- 6. start explorer
+-- rebuild existing balances from the address_transaction_details table
+UPDATE balances b
+SET received = (
+  SELECT COALESCE(SUM(received), 0) AS received
+  FROM address_transaction_details
+  WHERE address = b.address
+), spent = (
+  SELECT COALESCE(SUM(sent), 0) AS received
+  FROM address_transaction_details
+  WHERE address = b.address
+);
