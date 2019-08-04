@@ -2,6 +2,7 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr}
+import com.xsn.explorer.config.LedgerSynchronizerConfig
 import com.xsn.explorer.data.async.LedgerFutureDataHandler
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.{ExecutionContext, Future}
 
 class LedgerSynchronizerService @Inject()(
+    synchronizerConfig: LedgerSynchronizerConfig,
     xsnService: XSNService,
     ledgerDataHandler: LedgerFutureDataHandler,
     syncStatusService: LedgerSynchronizationStatusService,
@@ -139,7 +141,11 @@ class LedgerSynchronizerService @Inject()(
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts) = data
-      _ <- blockParallelChunkSynchronizer.sync(blockWithTransactions.asTip, tposContracts).toFutureOr
+      _ <- if (synchronizerConfig.parallelSynchronizer) {
+        blockParallelChunkSynchronizer.sync(blockWithTransactions.asTip, tposContracts).toFutureOr
+      } else {
+        ledgerDataHandler.push(blockWithTransactions.asTip, tposContracts).toFutureOr
+      }
     } yield {
       if (blockWithTransactions.height.int % 5000 == 0) {
         logger.info(s"Caught up to block ${blockWithTransactions.height}")

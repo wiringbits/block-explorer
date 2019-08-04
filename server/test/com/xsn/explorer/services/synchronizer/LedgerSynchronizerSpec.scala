@@ -3,6 +3,7 @@ package com.xsn.explorer.services.synchronizer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
+import com.xsn.explorer.config.LedgerSynchronizerConfig
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -22,6 +23,7 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter with ScalaFutures {
 
@@ -37,7 +39,8 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   }
 
   testWith("legacy")(legacyConstructor)
-  testWith("new")(newConstructor)
+  testWith("new-parallel-synchronizer")(newConstructor(useParallelSynchronizer = true))
+  testWith("new-no-parallel-synchronizer")(newConstructor(useParallelSynchronizer = false))
 
   private def testWith(tag: String)(implicit constructor: XSNService => LedgerSynchronizer): Unit = {
     s"synchronize - $tag" should {
@@ -259,7 +262,18 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     constructor(xsnService)
   }
 
-  private def newConstructor(xsnService: XSNService): LedgerSynchronizer = {
+  private def newConstructor(useParallelSynchronizer: Boolean)(xsnService: XSNService): LedgerSynchronizer = {
+    val synchronizerConfig = new LedgerSynchronizerConfig {
+      override def enabled: Boolean = true
+
+      override def initialDelay: FiniteDuration = 1.second
+
+      override def interval: FiniteDuration = 30.seconds
+
+      override def useNewSynchronizer: Boolean = true
+
+      override def parallelSynchronizer: Boolean = useParallelSynchronizer
+    }
     val blockFutureDataHandler = new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC)
     val blockService = new BlockService(
       xsnService,
@@ -289,6 +303,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     val blockParallelChunkSynchronizer =
       new BlockParallelChunkSynchronizer(blockChunkFutureRepository, addOps)
     new LedgerSynchronizerService(
+      synchronizerConfig,
       xsnService,
       new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
       syncStatusService,

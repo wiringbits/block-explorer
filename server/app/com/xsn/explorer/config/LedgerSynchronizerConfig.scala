@@ -14,6 +14,8 @@ trait LedgerSynchronizerConfig {
   def interval: FiniteDuration
 
   def useNewSynchronizer: Boolean
+
+  def parallelSynchronizer: Boolean
 }
 
 class LedgerSynchronizerPlayConfig @Inject()(config: Configuration) extends LedgerSynchronizerConfig {
@@ -28,4 +30,8 @@ class LedgerSynchronizerPlayConfig @Inject()(config: Configuration) extends Ledg
 
   override lazy val useNewSynchronizer: Boolean =
     config.getOptional[Boolean]("synchronizer.useNewSynchronizer").getOrElse(false)
+
+  override lazy val parallelSynchronizer: Boolean = {
+    config.getOptional[Boolean]("synchronizer.parallelSynchronizer").getOrElse(false)
+  }
 }
