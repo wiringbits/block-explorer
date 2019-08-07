@@ -1,12 +1,12 @@
 package com.xsn.explorer.gcs
 
-import com.xsn.explorer.models.values.HexString
-import com.xsn.explorer.models.values.VarInt
+import com.xsn.explorer.models.values.{CompactSizeInt, HexString}
 
 class GolombCodedSet(val p: Int, val m: Int, val n: Int, val hex: HexString) {
 
   def getHexString() = {
-    HexString.from(VarInt.from(n) + hex.string).get
+    val compactSizeInt = CompactSizeInt(n)
+    HexString.from(compactSizeInt.hex + hex.string).get
   }
 }
 
