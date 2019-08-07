@@ -1,8 +1,14 @@
 package com.xsn.explorer.gcs
 
 import com.xsn.explorer.models.values.HexString
+import com.xsn.explorer.models.values.VarInt
 
-class GolombCodedSet(val p: Int, val m: Int, val n: Int, val hex: HexString)
+class GolombCodedSet(val p: Int, val m: Int, val n: Int, val hex: HexString) {
+
+  def getHexString() = {
+    HexString.from(VarInt.from(n) + hex.string).get
+  }
+}
 
 object GolombCodedSet {
 

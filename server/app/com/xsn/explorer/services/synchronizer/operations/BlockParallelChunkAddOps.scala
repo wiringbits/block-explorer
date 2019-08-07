@@ -2,9 +2,10 @@ package com.xsn.explorer.services.synchronizer.operations
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.xsn.explorer.gcs.GolombEncoding
+import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.Block
+import com.xsn.explorer.models.values.HexString
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.util.Extensions.FutureApplicationResultListExt
@@ -69,7 +70,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       tposContracts: List[TPoSContract]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringTransactions
-    val filterF = Future { GolombEncoding.encode(block) }
+    val filterF = Future { new GolombCodedSet(0, 0, 0, HexString.from("").get) /*GolombEncoding.encode(block)*/ }
       .flatMap(blockChunkRepository.upsertFilter(block.hash, _))
 
     val linkF = block.previousBlockhash match {

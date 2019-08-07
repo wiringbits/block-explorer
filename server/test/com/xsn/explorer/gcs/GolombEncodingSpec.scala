@@ -99,44 +99,47 @@ func main() {
       encoded.hex.string must be(expected)
     }
 
-    "calculate expected filters for BIP-158 test cases" in {
+    "calculate expected filters for BIP-158 test cases" should {
       val testCases = List(
-        ("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943", "9dfca8"),
-        ("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820", "74a170"),
-        ("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10", "6cf7a0"),
-        ("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad", "3c3710"),
+        // Test cases https://github.com/bitcoin/bips/blob/master/bip-0158/testnet-19.json
+        ("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943", "019dfca8"),
+        ("000000006c02c8ea6e4ff69651f7fcde348fb9d557a06e6957b65552002a7820", "0174a170"),
+        ("000000008b896e272758da5297bcd98fdc6d97c9b765ecec401e286dc1fdbe10", "016cf7a0"),
+        ("0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad", "013c3710"),
         (
           "0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c",
-          "fbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"
+          "0afbc2920af1b027f31f87b592276eb4c32094bb4d3697021b4c6380"
         ),
         (
           "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a",
-          "b414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"
+          "0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"
         ),
         (
           "000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313",
-          "027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"
+          "09027acea61b6cc3fb33f5d52f7d088a6b2f75d234e89ca800"
         ),
         (
           "0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79",
-          "0c0b40"
+          "010c0b40"
         ),
         (
           "000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33",
-          "85acb4f0fe889ef0"
+          "0385acb4f0fe889ef0"
         ),
         (
           "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1",
-          ""
+          "00"
         )
       )
 
       testCases.foreach {
         case (blockhash, expectedFilter) =>
           val block = BlockLoader.getFullRPCWithValues(blockhash, "btc")
-          val blockFilter = GolombEncoding.encode(block)
+          s"succeed on block ${block.height}" in {
+            val blockFilter = GolombEncoding.encode(block)
 
-          blockFilter.hex.string must be(expectedFilter)
+            blockFilter.getHexString.string must be(expectedFilter)
+          }
       }
     }
   }

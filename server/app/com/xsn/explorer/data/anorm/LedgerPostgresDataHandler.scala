@@ -10,6 +10,7 @@ import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockM
 import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.{Balance, Block}
+import com.xsn.explorer.models.values.HexString
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import com.xsn.explorer.util.TransactionBalancesHelper
 import javax.inject.Inject
@@ -36,7 +37,7 @@ class LedgerPostgresDataHandler @Inject()(
   override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
-    val filter = GolombEncoding.encode(block)
+    val filter = new GolombCodedSet(0, 0, 0, HexString.from("").get) //GolombEncoding.encode(block)
     val result = withTransaction { implicit conn =>
       val result = for {
         _ <- upsertBlockCascade(block.asTip, filter, tposContracts)
