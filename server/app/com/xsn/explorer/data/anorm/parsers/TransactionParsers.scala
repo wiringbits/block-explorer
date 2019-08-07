@@ -36,14 +36,7 @@ object TransactionParsers {
     (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses)
       .map {
         case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
-          Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses, None)
-      }
-
-  val parseTransactionInputWithPubKeyScript =
-    (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses ~ parseHexScript)
-      .map {
-        case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses ~ pubKeyScript =>
-          Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses, Some(pubKeyScript))
+          Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
       }
 
   val parseTransactionOutput = (parseTransactionId() ~

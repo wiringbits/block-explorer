@@ -16,8 +16,7 @@ object Transaction {
       fromOutputIndex: Int,
       index: Int,
       value: BigDecimal,
-      addresses: List[Address],
-      pubKeyScript: Option[HexString]
+      addresses: List[Address]
   ) {
 
     def address: Option[Address] = addresses.headOption
@@ -33,7 +32,7 @@ object Transaction {
         address: Address
     ): Input = {
 
-      Input(fromTxid, fromOutputIndex, index, value, List(address), None)
+      Input(fromTxid, fromOutputIndex, index, value, List(address))
     }
   }
 
@@ -72,7 +71,7 @@ object Transaction {
     val inputs = tx.vin.zipWithIndex
       .map {
         case (vin, index) =>
-          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.addresses, Some(vin.pubKeyScript))
+          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.addresses)
       }
 
     val outputs = tx.vout.flatMap { vout =>

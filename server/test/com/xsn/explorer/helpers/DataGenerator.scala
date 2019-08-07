@@ -137,8 +137,7 @@ trait DataGenerator {
           fromOutputIndex = output.index,
           index = index,
           value = output.value,
-          addresses = output.addresses,
-          Some(output.script)
+          addresses = output.addresses
         )
     }
   }

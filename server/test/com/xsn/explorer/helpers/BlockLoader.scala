@@ -56,14 +56,29 @@ object BlockLoader {
     jsonFromResource(resource).as[rpc.Block.HasTransactions[rpc.TransactionVIN]]
   }
 
-  def getFullRPCWithValues(blockhash: String, coin: String = "xsn"): rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues] = {
+  def getFullRPCWithValues(
+      blockhash: String,
+      coin: String = "xsn"
+  ): rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues] = {
     val block = json(blockhash, coin).as[rpc.Block.Canonical]
     val transactionsWithValues = block.transactions.map(_.toString).map(TransactionLoader.getWithValues(_, coin))
 
     rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues](
-      block.hash, block.previousBlockhash, block.nextBlockhash, block.merkleRoot,
-      transactionsWithValues, block.confirmations, block.size, block.height, block.version,
-      block.time, block.medianTime, block.nonce, block.bits, block.chainwork, block.difficulty,
+      block.hash,
+      block.previousBlockhash,
+      block.nextBlockhash,
+      block.merkleRoot,
+      transactionsWithValues,
+      block.confirmations,
+      block.size,
+      block.height,
+      block.version,
+      block.time,
+      block.medianTime,
+      block.nonce,
+      block.bits,
+      block.chainwork,
+      block.difficulty,
       block.tposContract
     )
   }

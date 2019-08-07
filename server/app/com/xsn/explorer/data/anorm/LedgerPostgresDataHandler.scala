@@ -7,10 +7,9 @@ import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
-import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
+import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.persisted.{Balance, Block}
-import com.xsn.explorer.models.values.HexString
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import com.xsn.explorer.util.TransactionBalancesHelper
 import javax.inject.Inject
@@ -34,10 +33,14 @@ class LedgerPostgresDataHandler @Inject()(
    * Push a block into the database chain, note that even if the block is supposed
    * to have a next block, we remove the link because that block is not stored yet.
    */
-  override def push(block: Block.HasTransactions, tposContracts: List[TPoSContract]): ApplicationResult[Unit] = {
+  override def push(
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract],
+      filterFactory: () => GolombCodedSet
+  ): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
-    val filter = new GolombCodedSet(0, 0, 0, HexString.from("").get) //GolombEncoding.encode(block)
+    val filter = filterFactory()
     val result = withTransaction { implicit conn =>
       val result = for {
         _ <- upsertBlockCascade(block.asTip, filter, tposContracts)

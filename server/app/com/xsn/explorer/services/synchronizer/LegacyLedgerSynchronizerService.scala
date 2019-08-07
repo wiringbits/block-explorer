@@ -150,8 +150,8 @@ class LegacyLedgerSynchronizerService @Inject()(
   private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
-      (blockWithTransactions, tposContracts) = data
-      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts).toFutureOr
+      (blockWithTransactions, tposContracts, filterFactory) = data
+      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory).toFutureOr
     } yield ()
 
     result.toFuture

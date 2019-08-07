@@ -4,11 +4,11 @@ import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.DataHelper._
 import com.xsn.explorer.helpers.{DataGenerator, LedgerHelper, TransactionLoader}
-import com.xsn.explorer.models._
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
@@ -20,6 +20,8 @@ import org.scalatest.EitherValues._
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   import DataGenerator._
+
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
@@ -194,18 +196,6 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
         result must be(empty)
       }
-
-      s"[$tag] return inputs with their pubkeyscript" in {
-        prepare()
-        val transaction = dataHandler.getBy(address, Limit(1), None, condition).get
-
-        transaction.head.inputs.foreach {
-          case input =>
-            val expectedPubKeyScript = dataHandler.getOutput(input.fromTxid, input.fromOutputIndex).get.script
-
-            input.pubKeyScript.get must be(expectedPubKeyScript)
-        }
-      }
     }
 
     testOrdering("desc", OrderingCondition.DescendingOrder)
@@ -301,13 +291,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       .map(Transaction.fromRPC)
       .map(_._1)
 
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
 
     result.isGood mustEqual true
   }
 
   private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty)
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
 
     result.isGood mustEqual true
   }

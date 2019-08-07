@@ -4,7 +4,7 @@ import com.xsn.explorer.models.values.{CompactSizeInt, HexString}
 
 class GolombCodedSet(val p: Int, val m: Int, val n: Int, val hex: HexString) {
 
-  def getHexString() = {
+  def getHexString: HexString = {
     val compactSizeInt = CompactSizeInt(n)
     HexString.from(compactSizeInt.hex + hex.string).get
   }

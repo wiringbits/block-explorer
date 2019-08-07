@@ -1,10 +1,9 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.ordering.OrderingCondition
+import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 

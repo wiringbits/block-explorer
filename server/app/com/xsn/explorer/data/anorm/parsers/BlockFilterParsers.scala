@@ -3,6 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.gcs.GolombCodedSet
+import com.xsn.explorer.models.values.{CompactSizeInt, HexString}
 
 object BlockFilterParsers {
 
@@ -15,11 +16,12 @@ object BlockFilterParsers {
 
   val parseFilter = (parseN ~ parseM ~ parseP ~ parseHex).map {
     case n ~ m ~ p ~ hex =>
+      val compactN = CompactSizeInt(n)
       new GolombCodedSet(
         n = n,
         m = m,
         p = p,
-        hex = hex
+        hex = HexString.from(hex.string.drop(compactN.hex.length)).get
       )
   }
 }
