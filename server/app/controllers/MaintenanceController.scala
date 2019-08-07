@@ -1,23 +1,24 @@
 package controllers
 
-import com.alexitc.playsonify.models.pagination.Limit
-import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
-import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockFilterPostgresDAO
 import com.xsn.explorer.executors.DatabaseExecutionContext
+import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.values.{Blockhash, Height}
+import com.xsn.explorer.services.{TransactionCollectorService, XSNService}
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import play.api.db.Database
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class MaintenanceController @Inject()(
-    blockDataHandler: BlockFutureDataHandler,
-    transactionDataHandler: TransactionFutureDataHandler,
+    xsnService: XSNService,
+    transactionCollectorService: TransactionCollectorService,
     db: DBMigration,
     components: MyJsonControllerComponents
 ) extends MyJsonController(components) {
@@ -32,26 +33,22 @@ class MaintenanceController @Inject()(
       case (result, height) =>
         for {
           _ <- result
-          block <- blockDataHandler.getBy(Height(height)).toFutureOr
-          transactions <- transactionDataHandler.getTransactionsWithIOBy(block.hash, Limit(100000), None).toFutureOr
-          blockWithTransactions = block.withTransactions(transactions)
-          filter = GolombEncoding.encode(blockWithTransactions)
-          _ <- filter
-            .map(f => db.updateBlockFilter(block.hash, f))
-            .getOrElse(Future.failed(new RuntimeException(s"Failed to generate filter at height ${height}")))
-            .toFutureOr
+          blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
+          block <- xsnService.getFullBlock(blockhash).toFutureOr
+          data <- transactionCollectorService.collect(block).toFutureOr
+          (_, _, filterFactory) = data
+          _ <- db.updateBlockFilter(block.hash, filterFactory()).toFutureOr
           _ = logProgress(startingHeight, height)
         } yield ()
     }
 
-    finalState.toFuture
-      .map {
-        case Good(_) => Good("")
-        case Bad(errors) => Good(errors.toString)
-      }
-      .recoverWith {
-        case error: Exception => Future.successful(Good(error.getMessage))
-      }
+    finalState.toFuture.onComplete {
+      case Failure(ex) => logger.error("Migration failed", ex)
+      case Success(Bad(e)) => logger.error(s"Migration failed, errors = $e")
+      case Success(Good(_)) => logger.info("Migration completed")
+    }
+
+    Future.successful(Good("Ok"))
   }
 
   def logProgress(startingHeight: Int, migratedHeight: Int) = {
@@ -70,15 +67,11 @@ class DBMigration @Inject()(override val database: Database, blockFilterPostgres
     implicit dbEC: DatabaseExecutionContext
 ) extends AnormPostgresDataHandler {
 
-  def updateBlockFilter(blockhash: Blockhash, newFilter: GolombCodedSet) = {
+  def updateBlockFilter(blockhash: Blockhash, newFilter: GolombCodedSet): FutureApplicationResult[Unit] = {
     Future {
-      withTransaction { implicit conn =>
-        val result = for {
-          _ <- blockFilterPostgresDAO.delete(blockhash)
-          _ <- Some(blockFilterPostgresDAO.insert(blockhash, newFilter))
-        } yield ()
-
-        result.map(Good(_)).getOrElse(throw new RuntimeException(s"Unable to recreate filter for ${blockhash}"))
+      withConnection { implicit conn =>
+        blockFilterPostgresDAO.upsert(blockhash, newFilter)
+        Good(())
       }
     }
   }
