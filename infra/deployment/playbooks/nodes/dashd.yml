@@ -9,10 +9,10 @@
     - node_user: dash
     - node_group: dash
     - node_data_folder: '.dashcore'
-    - node_download_url: https://github.com/dashpay/dash/releases/download/v0.13.3.0/dashcore-0.13.3.0-x86_64-linux-gnu.tar.gz
-    - node_download_checksum: sha1:b9779f4feaeb8b1fe3699d7e36aecf4d0fd09745
+    - node_download_url: https://github.com/dashpay/dash/releases/download/v0.14.0.2/dashcore-0.14.0.2-x86_64-linux-gnu.tar.gz
+    - node_download_checksum: sha1:6dd71f99b3891ff95e08ef82d5418b562d165ac9
     - node_compressed_file: /home/ubuntu/dash.tar.gz
-    - node_daemon_file: dashcore-0.13.3/bin/dashd
+    - node_daemon_file: dashcore-0.14.0/bin/dashd
     - node_config_file: config/nodes/dash.conf
     - node_config_filename: dash.conf
     - node_executable: dashd
