@@ -25,7 +25,7 @@ class BlockFilterPostgresDAO {
         'm -> filter.m,
         'n -> filter.n,
         'p -> filter.p,
-        'hex -> filter.getHexString.string
+        'hex -> filter.getHexString.toBytes
       )
       .as(parseFilter.single)
   }
@@ -48,7 +48,7 @@ class BlockFilterPostgresDAO {
         'm -> filter.m,
         'n -> filter.n,
         'p -> filter.p,
-        'hex -> filter.getHexString.string
+        'hex -> filter.getHexString.toBytes
       )
       .execute()
   }

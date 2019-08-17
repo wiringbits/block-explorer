@@ -1,5 +1,7 @@
 package com.xsn.explorer.models.values
 
+import javax.xml.bind.DatatypeConverter
+
 class HexString private (val string: String) extends AnyVal {
 
   override def toString: String = string
@@ -26,6 +28,15 @@ object HexString {
       Option(new HexString(string))
     } else {
       None
+    }
+  }
+
+  def fromBytesBE(bytes: Array[Byte]): HexString = {
+    if (bytes.isEmpty) {
+      Empty
+    } else {
+      val string = DatatypeConverter.printHexBinary(bytes).toLowerCase()
+      new HexString(string)
     }
   }
 }

@@ -5,6 +5,12 @@ import com.xsn.explorer.models.values._
 
 object CommonParsers {
 
+  // TODO: replace the parseBlockhash method with this one after all fields blockhash fields are migrated to bytea
+  def parseBlockhashBytes(field: String) =
+    byteArray(field)
+      .map(Blockhash.fromBytesBE)
+      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+
   def parseBlockhash(field: String = "blockhash") =
     str(field)
       .map(Blockhash.from)
@@ -35,10 +41,7 @@ object CommonParsers {
       .map(TransactionId.from)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
-  def parseHexString(field: String) =
-    str(field)
-      .map(HexString.from)
-      .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
+  def parseHexString(field: String) = byteArray(field).map(HexString.fromBytesBE)
 
   val parseTime = long("time")
   val parseSize = int("size").map(Size.apply)

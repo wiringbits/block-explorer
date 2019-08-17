@@ -3,7 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.values.{CompactSizeInt, HexString}
+import com.xsn.explorer.models.values.CompactSizeInt
 
 object BlockFilterParsers {
 

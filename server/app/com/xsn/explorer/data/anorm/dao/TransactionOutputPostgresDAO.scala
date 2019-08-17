@@ -57,7 +57,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
             'addresses -> output.addresses.map(_.string).toArray: NamedParameter,
-            'hex_script -> output.script.string: NamedParameter
+            'hex_script -> output.script.toBytes: NamedParameter
           )
         }
 
@@ -101,7 +101,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         'index -> output.index,
         'value -> output.value,
         'addresses -> output.addresses.map(_.string).toArray,
-        'hex_script -> output.script.string
+        'hex_script -> output.script.toBytes
       )
       .execute()
   }

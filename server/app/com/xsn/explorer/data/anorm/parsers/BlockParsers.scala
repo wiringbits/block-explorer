@@ -13,7 +13,7 @@ object BlockParsers {
   val parseNextBlockhash = parseBlockhash("next_blockhash")
   val parsePreviousBlockhash = parseBlockhash("previous_blockhash")
   val parseTposContract = parseTransactionId("tpos_contract")
-  val parseMerkleRoot = parseBlockhash("merkle_root")
+  val parseMerkleRoot = parseBlockhashBytes("merkle_root")
 
   val parseExtractionMethod = str("extraction_method")
     .map(BlockExtractionMethod.withNameInsensitiveOption)
