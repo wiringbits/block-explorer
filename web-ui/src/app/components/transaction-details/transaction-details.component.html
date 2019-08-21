@@ -4,96 +4,102 @@
   </div>
   <div *ngIf="transaction != null">
     <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-        <table class="table table-condensed table-bordered table-striped table-hover">
-          <thead>
-            <tr>
-              <th class="col-xs-3 col-sm-3 col-md-2 col-lg-2">{{'label.summary' | translate}}</th>
-              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
-            </tr>
-          </thead>
+      <div class="col-xs-12">
+        <div class="table-responsive">
+          <table class="table table-condensed table-borderless table-striped table-hover">
+            <thead>
+              <tr>
+                <th>{{'label.summary' | translate}}</th>
+                <th></th>
+              </tr>
+            </thead>
 
-          <tbody>
-            <tr>
-              <td>{{'label.transactionId' | translate}}</td>
-              <td>{{transaction.id}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.confirmations' | translate}}</td>
-              <td>{{transaction.confirmations}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.blockhash' | translate}}</td>
-              <td>
-                <a routerLink="/blocks/{{transaction.blockhash}}">{{transaction.blockhash}}</a>
-              </td>
-            </tr>
-            <tr>
-              <td>{{'label.blocktime' | translate}}</td>
-              <td>{{transaction.blocktime * 1000 | explorerDatetime}}</td>
-            </tr>
-            <tr>
-              <td>{{'label.fee' | translate}}</td>
-              <td>{{getFee(transaction) | explorerCurrency}}</td>
-            </tr>
-          </tbody>
-        </table>
+            <tbody>
+              <tr>
+                <td>{{'label.transactionId' | translate}}</td>
+                <td>{{transaction.id}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.confirmations' | translate}}</td>
+                <td>{{transaction.confirmations}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.blockhash' | translate}}</td>
+                <td>
+                  <a routerLink="/blocks/{{transaction.blockhash}}">{{transaction.blockhash}}</a>
+                </td>
+              </tr>
+              <tr>
+                <td>{{'label.blocktime' | translate}}</td>
+                <td>{{transaction.blocktime * 1000 | explorerDatetime}}</td>
+              </tr>
+              <tr>
+                <td>{{'label.fee' | translate}}</td>
+                <td>{{getFee(transaction) | explorerCurrency}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
+    <hr>
+
     <div class="row">
       <!-- Input -->
-      <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-        <table class="table table-condensed table-bordered table-striped table-hover">
-          <thead>
-            <tr *ngIf="transaction.input == null || transaction.input.length == 0">
-              <th class="col-xs-4 col-sm-4 col-md-3 col-lg-3">{{'label.noInput' | translate}}</th>
-              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
-            </tr>
-            <tr *ngIf="transaction.input != null && transaction.input.length != 0">
-              <th class="col-xs-4 col-sm-4 col-md-3 col-lg-3">{{'label.from' | translate}}</th>
-              <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4">{{ getTotal(collapsedInput) | explorerCurrency }}</th>
-            </tr>
-          </thead>
+      <div class="col-xs-12">
+        <div class="table-responsive">
+          <table class="table table-condensed table-borderless table-striped table-hover">
+            <thead>
+              <tr *ngIf="transaction.input == null || transaction.input.length == 0">
+                <th class="col-xs-4 col-sm-4 col-md-3 col-lg-3">{{'label.noInput' | translate}}</th>
+                <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4"></th>
+              </tr>
+              <tr *ngIf="transaction.input != null && transaction.input.length != 0">
+                <th class="col-xs-4 col-sm-4 col-md-3 col-lg-3">{{'label.from' | translate}}</th>
+                <th class="col-xs-5 col-sm-5 col-md-4 col-lg-4">{{ getTotal(collapsedInput) | explorerCurrency }}</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            <tr *ngIf="transaction.input == null || transaction.input.length == 0">
-              <td>{{'label.coinbase' | translate}}</td>
-              <td></td>
-            </tr>
-            <tr *ngFor="let item of collapsedInput">
-              <td *ngIf="count(item.address, transaction.input) != 1">
-                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a> ({{count(item.address, transaction.input)}})
-              </td>
-              <td *ngIf="count(item.address, transaction.input) == 1">
-                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
-              </td>
-              <td>{{item.value | explorerCurrency}}</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-            </tr>
+            <tbody>
+              <tr *ngIf="transaction.input == null || transaction.input.length == 0">
+                <td>{{'label.coinbase' | translate}}</td>
+                <td></td>
+              </tr>
+              <tr *ngFor="let item of collapsedInput">
+                <td *ngIf="count(item.address, transaction.input) != 1">
+                  <a routerLink="/addresses/{{item.address}}">{{item.address}}</a> ({{count(item.address, transaction.input)}})
+                </td>
+                <td *ngIf="count(item.address, transaction.input) == 1">
+                  <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+                </td>
+                <td>{{item.value | explorerCurrency}}</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+              </tr>
 
-            <!-- Output -->
-            <tr>
-              <td><strong>{{'label.output' | translate}}</strong></td>
-              <td *ngIf="transaction.output == null || transaction.output.length == 0"></td>
-              <th *ngIf="transaction.output != null && transaction.output.length != 0">
-                  {{ getTotal(collapsedOutput) | explorerCurrency }}
-              </th>
-            </tr>
-            <tr *ngFor="let item of collapsedOutput">
-              <td *ngIf="count(item.address, transaction.output) != 1">
-                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a> ({{count(item.address, transaction.output)}})
-              </td>
-              <td *ngIf="count(item.address, transaction.output) == 1">
-                <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
-              </td>
-              <td>{{item.value | explorerCurrency}}</td>
-            </tr>
-          </tbody>
-        </table>
+              <!-- Output -->
+              <tr>
+                <td><strong>{{'label.output' | translate}}</strong></td>
+                <td *ngIf="transaction.output == null || transaction.output.length == 0"></td>
+                <th *ngIf="transaction.output != null && transaction.output.length != 0">
+                    {{ getTotal(collapsedOutput) | explorerCurrency }}
+                </th>
+              </tr>
+              <tr *ngFor="let item of collapsedOutput">
+                <td *ngIf="count(item.address, transaction.output) != 1">
+                  <a routerLink="/addresses/{{item.address}}">{{item.address}}</a> ({{count(item.address, transaction.output)}})
+                </td>
+                <td *ngIf="count(item.address, transaction.output) == 1">
+                  <a routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+                </td>
+                <td>{{item.value | explorerCurrency}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -1,83 +1,89 @@
 <div>
-  <div [hidden]="address != null">
-    <alert>{{'message.addressNotFound' | translate}}</alert>
-  </div>
-  <div *ngIf="address != null">
-    <div class="row">
-        <h2 *ngIf="!addressLabel[addressString]" class="col-xs-12">{{'label.address' | translate}}</h2>
-        <h2 *ngIf="addressLabel[addressString]" class="col-xs-12">{{ addressLabel[addressString]}}</h2>
+  <div class="row">
+    <div class="col-xs-12 col-md-offset-2 col-md-8 table-container">
+      <div [hidden]="address != null">
+        <alert>{{'message.addressNotFound' | translate}}</alert>
+      </div>
+      <div *ngIf="address != null">
+        <div class="row">
+          <h2 *ngIf="!addressLabel[addressString]" class="col-xs-12">{{'label.address' | translate}}</h2>
+          <h2 *ngIf="addressLabel[addressString]" class="col-xs-12">{{ addressLabel[addressString]}}</h2>
 
-    </div>
-    <div class="row">
-      <div class="col-xs-12 col-md-4">
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="table-responsive">
+              <table class="table table-condensed table-borderless table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.summary' | translate}}</th>
+                    <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1"></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>{{'label.address' | translate}}</td>
+                    <td>{{addressString}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'label.balance' | translate}}</td>
+                    <td>{{address.available | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'label.received' | translate}}</td>
+                    <td>{{address.received | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{'label.spent' | translate}}</td>
+                    <td>{{address.spent | explorerCurrency}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+          <h2 class="col-xs-12">{{'label.transactions' | translate}}</h2>
+        </div>
         <div class="table-responsive">
-          <table class="table table-condensed table-bordered table-striped table-hover">
+          <table class="table table-condensed table-borderless table-striped table-hover">
             <thead>
               <tr>
-                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.summary' | translate}}</th>
-                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1"></th>
+                <th class="col-xs-1">#</th>
+                <th class="col-xs-2">{{'label.transaction' | translate}}</th>
+                <th class="col-xs-2">{{'label.blockhash' | translate}}</th>
+                <th class="col-xs-2">{{'label.date' | translate}}</th>
+                <th class="col-xs-3">{{'label.value' | translate}}</th>
+                <th class="col-xs-2">{{'label.size' | translate}}</th>
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>{{'label.address' | translate}}</td>
-                <td>{{addressString}}</td>
-              </tr>
-              <tr>
-                <td>{{'label.balance' | translate}}</td>
-                <td>{{address.available | explorerCurrency}}</td>
-              </tr>
-              <tr>
-                <td>{{'label.received' | translate}}</td>
-                <td>{{address.received | explorerCurrency}}</td>
-              </tr>
-              <tr>
-                <td>{{'label.spent' | translate}}</td>
-                <td>{{address.spent | explorerCurrency}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <tbody
+            infiniteScroll
+            [infiniteScrollDistance]="1"
+            [infiniteScrollThrottle]="300"
+            (scrolled)="load()"
+            [scrollWindow]="true">
+            <tr *ngFor="let index = index; let item of items">
+              <td>{{index + 1}}</td>
+              <td>
+                <a routerLink="/transactions/{{item.id}}">{{item.id | slice:0:15}}...</a>
+              </td>
+              <td>
+                <a routerLink="/blocks/{{item.blockhash}}">{{item.blockhash | slice:0:15}}...</a>
+              </td>
+              <td>{{item.time * 1000 | explorerDatetime}}</td>
+              <td>{{renderValue(item) | explorerCurrency}}</td>
+              <td>{{item.size}} bytes</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
-    <div class="row">
-      <h2 class="col-xs-12">{{'label.transactions' | translate}}</h2>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped table-hover">
-        <thead>
-          <tr>
-            <th class="col-xs-1">#</th>
-            <th class="col-xs-2">{{'label.transaction' | translate}}</th>
-            <th class="col-xs-2">{{'label.blockhash' | translate}}</th>
-            <th class="col-xs-2">{{'label.date' | translate}}</th>
-            <th class="col-xs-3">{{'label.value' | translate}}</th>
-            <th class="col-xs-2">{{'label.size' | translate}}</th>
-          </tr>
-        </thead>
-
-        <tbody
-        infiniteScroll
-        [infiniteScrollDistance]="1"
-        [infiniteScrollThrottle]="300"
-        (scrolled)="load()"
-        [scrollWindow]="true">
-          <tr *ngFor="let index = index; let item of items">
-            <td>{{index + 1}}</td>
-            <td>
-              <a routerLink="/transactions/{{item.id}}">{{item.id | slice:0:15}}...</a>
-            </td>
-            <td>
-              <a routerLink="/blocks/{{item.blockhash}}">{{item.blockhash | slice:0:15}}...</a>
-            </td>
-            <td>{{item.time * 1000 | explorerDatetime}}</td>
-            <td>{{renderValue(item) | explorerCurrency}}</td>
-            <td>{{item.size}} bytes</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
+</div>
 </div>

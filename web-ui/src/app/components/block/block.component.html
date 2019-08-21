@@ -1,10 +1,14 @@
 <div>
-  <tabset class="col-xs-12 col-sm-12 col-md-12 col-xs-12">
-    <tab heading="{{'label.details' | translate}}" (select)="selectView('details')">
-      <app-block-details *ngIf="isSelected('details')"></app-block-details>
-    </tab>
-    <tab heading="{{'label.raw' | translate}}" (select)="selectView('raw')">
-      <app-block-raw *ngIf="isSelected('raw')"></app-block-raw>
-    </tab>
-  </tabset>
+  <div class="row">
+    <div class="col-xs-12 col-md-offset-2 col-md-8 table-container">
+      	<tabset class="col-xs-12">
+		    <tab heading="{{'label.details' | translate}}" (select)="selectView('details')">
+		      <app-block-details *ngIf="isSelected('details')"></app-block-details>
+		    </tab>
+		    <tab heading="{{'label.raw' | translate}}" (select)="selectView('raw')">
+		      <app-block-raw *ngIf="isSelected('raw')"></app-block-raw>
+		    </tab>
+		</tabset>
+    </div>
+  </div>
 </div>
