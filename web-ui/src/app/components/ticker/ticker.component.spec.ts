@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TickerComponent } from './ticker.component';
 import { ExplorerCurrencyPipe } from '../../pipes/explorer-currency.pipe';
+import { ExplorerAmountPipe } from '../../pipes/explorer-amount.pipe';
 
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -20,7 +21,8 @@ describe('TickerComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         TickerComponent,
-        ExplorerCurrencyPipe
+        ExplorerCurrencyPipe,
+        ExplorerAmountPipe
       ],
       imports: [
         TranslateModule.forRoot()
@@ -29,7 +31,7 @@ describe('TickerComponent', () => {
         { provide: TickerService, useValue: tickerServiceSpy }
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -84,7 +84,7 @@ export class AppComponent implements OnInit {
       'message.loadingRichestAddresses': 'Loading richest addresses...',
       'message.transactionsNotAvailable': 'The transactions are not available, please try again in some minutes',
       'message.totalSupply': 'The total number of coins generated (excluding the burned coins)',
-      'message.circulatingSupply': 'The total number of coins that are circulating (excludes the burned coins, and the treasury)',
+      'message.circulatingSupply': 'The total number of coins that are in circulation (excludes burned coins and the treasury)',
 
       // error messages
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction or ip address',
