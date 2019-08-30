@@ -11,6 +11,21 @@
 
 3. Run the application with: `sbt run`
 
+## Troubleshooting
+
+1. If you get the following error while running the explorer: `error: Could not locate RPC credentials.`, then, create a file at `~/.xsncore/xsn.conf` with this content:
+    ```
+    rpcuser=dummy
+    rpcpassword=replaceme
+    rpcport=51473
+    txindex=1
+    ```
+    Now, xsnd can be started without arguments, for example, `./bin/xsnd`.
+
+2. If the xsnd node is not getting any blocks/peers, try disabling IPv6, and remove the peers file (`~/.xsncore/peers.dat`), restarting xsnd should get peers now.
+
+3. If connection problems persist, try increasing the open files limit in your operating system.
+
 ## Bitcoin
 If you want to run the explorer for Bitcoin, checkout the `bitcoin` branch and then, apply manually the following SQL commands:
 ```sql
