@@ -1,6 +1,7 @@
 package com.xsn.explorer.services
 
-import com.xsn.explorer.config.{ExplorerConfig, RPCConfig}
+import akka.actor.ActorSystem
+import com.xsn.explorer.config.{ExplorerConfig, RPCConfig, RetryConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models.rpc.Masternode
@@ -9,22 +10,28 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{mock => _, _}
 import org.scalactic.{Bad, Good}
 import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.mockito.MockitoSugar._
-import org.scalatest.time.{Seconds, Span}
 import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
-class XSNServiceRPCImplSpec extends WordSpec {
+class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
+
+  override def afterAll: Unit = {
+    actorSystem.terminate()
+    ()
+  }
 
   import DataHelper._
 
   val ws = mock[WSClient]
   val ec = Executors.externalServiceEC
+  val actorSystem = ActorSystem()
+  val scheduler = actorSystem.scheduler
 
   val rpcConfig = new RPCConfig {
     override def password: RPCConfig.Password = RPCConfig.Password("pass")
@@ -39,13 +46,15 @@ class XSNServiceRPCImplSpec extends WordSpec {
     override def liteVersionConfig: ExplorerConfig.LiteVersionConfig = ???
   }
 
+  val retryConfig = RetryConfig(1.millisecond, 2.milliseconds)
+
   val request = mock[WSRequest]
   val response = mock[WSResponse]
   when(ws.url(anyString)).thenReturn(request)
   when(request.withAuth(anyString(), anyString(), any())).thenReturn(request)
   when(request.withHttpHeaders(any())).thenReturn(request)
 
-  val service = new XSNServiceRPCImpl(ws, rpcConfig, explorerConfig)(ec)
+  val service = new XSNServiceRPCImpl(ws, rpcConfig, explorerConfig, retryConfig)(ec, scheduler)
 
   def createRPCSuccessfulResponse(result: JsValue): String = {
     s"""
@@ -179,7 +188,7 @@ class XSNServiceRPCImplSpec extends WordSpec {
 
       mockRequest(request, response)(200, json)
 
-      whenReady(service.getTransaction(txid)) { result =>
+      service.getTransaction(txid).map { result =>
         result mustEqual Bad(XSNWorkQueueDepthExceeded).accumulating
       }
     }
@@ -191,9 +200,21 @@ class XSNServiceRPCImplSpec extends WordSpec {
 
       mockRequestString(request, response)(500, responseBody)
 
-      val timeout = Timeout(Span(5, Seconds))
-      whenReady(service.getTransaction(txid), timeout) { result =>
+      service.getTransaction(txid).map { result =>
         result mustEqual Bad(XSNWorkQueueDepthExceeded).accumulating
+      }
+    }
+
+    "handle xsn server warming up" in {
+      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+
+      val responseBody = createRPCErrorResponse(-28, "Loading block index...")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      service.getTransaction(txid).map { result =>
+        result mustEqual Bad(XSNWarmingUp).accumulating
       }
     }
   }

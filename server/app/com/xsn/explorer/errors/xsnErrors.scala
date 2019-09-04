@@ -34,3 +34,11 @@ case object XSNWorkQueueDepthExceeded extends XSNServerError {
     List(error)
   }
 }
+
+case object XSNWarmingUp extends XSNServerError {
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+    val message = i18nService.render("xsn.server.unexpectedError")
+    val error = GenericPublicError(message)
+    List(error)
+  }
+}
