@@ -8,6 +8,7 @@ import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
 
 import scala.concurrent.Future
+import scala.util.Try
 
 class FileBasedXSNService extends DummyXSNService {
 
@@ -62,7 +63,8 @@ class FileBasedXSNService extends DummyXSNService {
   }
 
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
-    val tx = TransactionLoader.json(txid.string)
-    Future.successful(Good(tx))
+    val maybe = Try(TransactionLoader.json(txid.string)).toOption
+    val result = Or.from(maybe, One(TransactionError.NotFound(txid)))
+    Future.successful(result)
   }
 }

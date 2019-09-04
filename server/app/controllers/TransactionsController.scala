@@ -21,4 +21,8 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
   def sendRawTransaction() = publicInput { ctx: HasModel[SendRawTransactionRequest] =>
     transactionRPCService.sendRawTransaction(ctx.model.hex)
   }
+
+  def getTransactionLite(txid: String) = public { _ =>
+    transactionRPCService.getTransactionLite(txid)
+  }
 }

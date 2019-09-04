@@ -48,4 +48,20 @@ class TransactionRPCService @Inject()(
 
     result.toFuture
   }
+
+  def getTransactionLite(txidString: String): FutureApplicationResult[JsValue] = {
+    val result = for {
+      txid <- transactionIdValidator.validate(txidString).toFutureOr
+      jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
+      hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
+      blockhash <- Or
+        .from((jsonTransaction \ "blockhash").asOpt[Blockhash], One(TransactionError.NotFound(txid)))
+        .toFutureOr
+      block <- xsnService.getBlock(blockhash).toFutureOr
+      index = block.transactions.indexOf(txid)
+      height = block.height
+    } yield Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height)
+
+    result.toFuture
+  }
 }

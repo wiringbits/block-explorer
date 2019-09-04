@@ -199,4 +199,45 @@ class TransactionsControllerSpec extends MyAPISpec {
       json mustEqual expected
     }
   }
+
+  "GET transactions/:txid/lite" should {
+    def url(txid: String) = s"/transactions/$txid/lite"
+
+    "return transaction lite" in {
+      val tx = nonCoinbaseTx
+      val response = GET(url(tx.id.string))
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+
+      val txHex =
+        "0100000001d967897603771672654db507a02ceb65dea8a682d2333ee819cac80950ec5c58020000006a473044022059a0cc21ad24ae18726d128c85328a0b54dab62aeb41ffbcad368ece6fdf9d2602200e477332401ce1296d379dc5f797720e854e40fc5af0a268f585e7dae64d38e5012103624fbfb0079e85bbc9aaeba6f48581326ad01194b3c54ce22852a27b1d2892d1ffffffff03000000000000000000220935d7946a00001976a9143cc9ede1da2d7351aaebaf6a25d2657e0b05a71688ac220935d7946a00001976a9143cc9ede1da2d7351aaebaf6a25d2657e0b05a71688ac00000000"
+      (json \ "hex").as[String] mustEqual txHex
+      (json \ "blockhash").as[Blockhash] mustEqual tx.blockhash
+      (json \ "index").as[Int] mustEqual 1
+      (json \ "height").as[Height] mustEqual Height(809)
+    }
+
+    "bad txid format" in {
+      val response = GET(url("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c6"))
+
+      status(response) mustEqual BAD_REQUEST
+      val json = contentAsJson(response)
+
+      val errors = (json \ "errors").as[List[JsValue]]
+      (errors.head \ "field").as[String] mustEqual "transactionId"
+      (errors.head \ "message").as[String] mustEqual "Invalid transaction format"
+    }
+
+    "when transaction doesn't exists" in {
+      val response = GET(url("a3c43d22bbba31a6e5c00f465cb9c5a1a365407df4cc90efa8a865656b52c1ec"))
+
+      status(response) mustEqual BAD_REQUEST
+      val json = contentAsJson(response)
+
+      val errors = (json \ "errors").as[List[JsValue]]
+      (errors.head \ "field").as[String] mustEqual "transactionId"
+      (errors.head \ "message").as[String] mustEqual "Transaction not found"
+    }
+  }
 }
