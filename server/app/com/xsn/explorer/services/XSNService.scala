@@ -1,5 +1,7 @@
 package com.xsn.explorer.services
 
+import java.net.ConnectException
+
 import akka.actor.Scheduler
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
@@ -16,7 +18,8 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSResponse}
 
-import scala.util.{Success, Try}
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 trait XSNService {
 
@@ -89,6 +92,7 @@ class XSNServiceRPCImpl @Inject()(
     val shouldRetry: Try[ApplicationResult[A]] => Boolean = {
       case Success(Bad(One(XSNWorkQueueDepthExceeded))) => true
       case Success(Bad(One(XSNWarmingUp))) => true
+      case Failure(_: ConnectException) => true
       case _ => false
     }
 
