@@ -3,6 +3,7 @@ package com.xsn.explorer.modules
 import com.google.inject.AbstractModule
 import com.xsn.explorer.data._
 import com.xsn.explorer.data.anorm._
+import com.xsn.explorer.data.async.{RetryableDataHandler, RetryableFutureDataHandler}
 import com.xsn.explorer.services.synchronizer.repository.{BlockChunkPostgresRepository, BlockChunkRepository}
 
 class DataHandlerModule extends AbstractModule {
@@ -15,5 +16,6 @@ class DataHandlerModule extends AbstractModule {
     bind(classOf[LedgerBlockingDataHandler]).to(classOf[LedgerPostgresDataHandler])
     bind(classOf[TPoSContractBlockingDataHandler]).to(classOf[TPoSContractPostgresDataHandler])
     bind(classOf[BlockChunkRepository.Blocking]).to(classOf[BlockChunkPostgresRepository])
+    bind(classOf[RetryableDataHandler]).to(classOf[RetryableFutureDataHandler])
   }
 }

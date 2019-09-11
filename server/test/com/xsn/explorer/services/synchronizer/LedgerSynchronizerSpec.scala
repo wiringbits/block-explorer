@@ -274,7 +274,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
 
       override def parallelSynchronizer: Boolean = useParallelSynchronizer
     }
-    val blockFutureDataHandler = new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC)
+    val dummyRetryableDataHandler = new DummyRetryableDataHandler
+    val blockFutureDataHandler =
+      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
     val blockService = new BlockService(
       xsnService,
       blockFutureDataHandler,
@@ -287,7 +289,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
-      new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
+      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
     )
 
     val syncOps = new LedgerSynchronizationOps(
@@ -305,7 +307,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     new LedgerSynchronizerService(
       synchronizerConfig,
       xsnService,
-      new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
+      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(Executors.databaseEC),
       syncStatusService,
       syncOps,
       blockChunkFutureRepository,
@@ -314,7 +316,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   }
 
   private def legacyConstructor(xsnService: XSNService): LedgerSynchronizer = {
-    val blockFutureDataHandler = new BlockFutureDataHandler(blockDataHandler)(Executors.databaseEC)
+    val dummyRetryableDataHandler = new DummyRetryableDataHandler
+    val blockFutureDataHandler =
+      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
     val blockService = new BlockService(
       xsnService,
       blockFutureDataHandler,
@@ -327,7 +331,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
-      new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
+      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
     )
     val syncOps = new LedgerSynchronizationOps(
       Config.explorerConfig,
@@ -341,7 +345,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       xsnService,
       blockService,
       transactionCollectorService,
-      new LedgerFutureDataHandler(dataHandler)(Executors.databaseEC),
+      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(Executors.databaseEC),
       blockFutureDataHandler,
       syncOps
     )

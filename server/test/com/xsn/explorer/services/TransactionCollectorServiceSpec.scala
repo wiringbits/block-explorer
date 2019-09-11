@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{DataGenerator, DummyXSNService, Executors}
+import com.xsn.explorer.helpers.{DataGenerator, DummyRetryableDataHandler, DummyXSNService, Executors}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
@@ -25,7 +25,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
       transactionDataHandler: TransactionBlockingDataHandler
   ): TransactionCollectorService = {
 
-    val futureDataHandler = new TransactionFutureDataHandler(transactionDataHandler)(Executors.databaseEC)
+    val dummyRetryableDataHandler = new DummyRetryableDataHandler
+    val futureDataHandler =
+      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
     new TransactionCollectorService(xsnService, futureDataHandler)
   }
 

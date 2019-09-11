@@ -13,51 +13,73 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class BlockFutureDataHandler @Inject()(blockBlockingDataHandler: BlockBlockingDataHandler)(
+class BlockFutureDataHandler @Inject()(
+    blockBlockingDataHandler: BlockBlockingDataHandler,
+    retryableFutureDataHandler: RetryableDataHandler
+)(
     implicit ec: DatabaseExecutionContext
 ) extends BlockDataHandler[FutureApplicationResult] {
 
-  override def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.getBy(blockhash)
+  override def getBy(blockhash: Blockhash): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getBy(blockhash)
+    }
   }
 
-  override def getBy(height: Height): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.getBy(height)
+  override def getBy(height: Height): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getBy(height)
+    }
   }
 
   override def getBy(
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[BlockField]
-  ): FuturePaginatedResult[Block] = Future {
-    blockBlockingDataHandler.getBy(paginatedQuery, ordering)
+  ): FuturePaginatedResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getBy(paginatedQuery, ordering)
+    }
   }
 
-  override def delete(blockhash: Blockhash): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.delete(blockhash)
+  override def delete(blockhash: Blockhash): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.delete(blockhash)
+    }
   }
 
-  override def getLatestBlock(): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.getLatestBlock()
+  override def getLatestBlock(): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getLatestBlock()
+    }
   }
 
-  override def getFirstBlock(): FutureApplicationResult[Block] = Future {
-    blockBlockingDataHandler.getFirstBlock()
+  override def getFirstBlock(): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getFirstBlock()
+    }
   }
 
   override def getHeaders(
       limit: pagination.Limit,
       orderingCondition: OrderingCondition,
       lastSeenHash: Option[Blockhash]
-  ): FutureApplicationResult[List[BlockHeader]] = Future {
-
-    blockBlockingDataHandler.getHeaders(limit, orderingCondition, lastSeenHash)
+  ): FutureApplicationResult[List[BlockHeader]] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getHeaders(limit, orderingCondition, lastSeenHash)
+    }
   }
 
-  override def getHeader(blockhash: Blockhash, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = Future {
-    blockBlockingDataHandler.getHeader(blockhash, includeFilter)
-  }
+  override def getHeader(blockhash: Blockhash, includeFilter: Boolean): FutureApplicationResult[BlockHeader] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockBlockingDataHandler.getHeader(blockhash, includeFilter)
+      }
+    }
 
-  override def getHeader(height: Height, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = Future {
-    blockBlockingDataHandler.getHeader(height, includeFilter)
-  }
+  override def getHeader(height: Height, includeFilter: Boolean): FutureApplicationResult[BlockHeader] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockBlockingDataHandler.getHeader(height, includeFilter)
+      }
+    }
 }

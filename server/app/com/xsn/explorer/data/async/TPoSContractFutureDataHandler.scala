@@ -9,11 +9,17 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class TPoSContractFutureDataHandler @Inject()(blockingDataHandler: TPoSContractBlockingDataHandler)(
+class TPoSContractFutureDataHandler @Inject()(
+    blockingDataHandler: TPoSContractBlockingDataHandler,
+    retryableFutureDataHandler: RetryableDataHandler
+)(
     implicit ec: DatabaseExecutionContext
 ) extends TPoSContractDataHandler[FutureApplicationResult] {
 
-  override def getBy(address: Address): FutureApplicationResult[List[TPoSContract]] = Future {
-    blockingDataHandler.getBy(address)
-  }
+  override def getBy(address: Address): FutureApplicationResult[List[TPoSContract]] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getBy(address)
+      }
+    }
 }

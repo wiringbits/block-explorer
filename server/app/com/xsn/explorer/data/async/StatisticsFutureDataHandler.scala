@@ -9,11 +9,16 @@ import com.xsn.explorer.models.Statistics
 
 import scala.concurrent.Future
 
-class StatisticsFutureDataHandler @Inject()(blockingDataHandler: StatisticsBlockingDataHandler)(
+class StatisticsFutureDataHandler @Inject()(
+    blockingDataHandler: StatisticsBlockingDataHandler,
+    retryableFutureDataHandler: RetryableDataHandler
+)(
     implicit ec: DatabaseExecutionContext
 ) extends StatisticsDataHandler[FutureApplicationResult] {
 
-  override def getStatistics(): FutureApplicationResult[Statistics] = Future {
-    blockingDataHandler.getStatistics()
+  override def getStatistics(): FutureApplicationResult[Statistics] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.getStatistics()
+    }
   }
 }

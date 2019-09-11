@@ -13,27 +13,38 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class BalanceFutureDataHandler @Inject()(blockingDataHandler: BalanceBlockingDataHandler)(
+class BalanceFutureDataHandler @Inject()(
+    blockingDataHandler: BalanceBlockingDataHandler,
+    retryableFutureDataHandler: RetryableDataHandler
+)(
     implicit ec: DatabaseExecutionContext
 ) extends BalanceDataHandler[FutureApplicationResult] {
 
-  override def upsert(balance: Balance): FutureApplicationResult[Balance] = Future {
-    blockingDataHandler.upsert(balance)
+  override def upsert(balance: Balance): FutureApplicationResult[Balance] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.upsert(balance)
+    }
   }
 
   override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] =
-    Future {
-      blockingDataHandler.get(query, ordering)
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.get(query, ordering)
+      }
     }
 
-  override def getBy(address: Address): FutureApplicationResult[Balance] = Future {
-    blockingDataHandler.getBy(address)
+  override def getBy(address: Address): FutureApplicationResult[Balance] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.getBy(address)
+    }
   }
 
   override def getHighestBalances(
       limit: pagination.Limit,
       lastSeenAddress: Option[Address]
-  ): FutureApplicationResult[List[Balance]] = Future {
-    blockingDataHandler.getHighestBalances(limit, lastSeenAddress)
+  ): FutureApplicationResult[List[Balance]] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.getHighestBalances(limit, lastSeenAddress)
+    }
   }
 }

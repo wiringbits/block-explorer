@@ -10,7 +10,10 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class LedgerFutureDataHandler @Inject()(blockingDataHandler: LedgerBlockingDataHandler)(
+class LedgerFutureDataHandler @Inject()(
+    blockingDataHandler: LedgerBlockingDataHandler,
+    retryableFutureDataHandler: RetryableDataHandler
+)(
     implicit ec: DatabaseExecutionContext
 ) extends LedgerDataHandler[FutureApplicationResult] {
 
@@ -19,12 +22,16 @@ class LedgerFutureDataHandler @Inject()(blockingDataHandler: LedgerBlockingDataH
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet
   ): FutureApplicationResult[Unit] = {
-    Future {
-      blockingDataHandler.push(block, tposContracts, filterFactory)
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.push(block, tposContracts, filterFactory)
+      }
     }
   }
 
-  override def pop(): FutureApplicationResult[Block] = Future {
-    blockingDataHandler.pop()
+  override def pop(): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.pop()
+    }
   }
 }
