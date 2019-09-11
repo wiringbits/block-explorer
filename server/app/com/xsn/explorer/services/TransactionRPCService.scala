@@ -4,6 +4,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models.TransactionDetails
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.validators.TransactionIdValidator
 import javax.inject.Inject
@@ -49,8 +50,13 @@ class TransactionRPCService @Inject()(
     result.toFuture
   }
 
-  def getTransactionLite(txidString: String): FutureApplicationResult[JsValue] = {
+  private def canCacheResult(latestKnownBlock: Block.Canonical, height: Height): Boolean = {
+    height.int + 20 < latestKnownBlock.height.int // there are at least 20 more blocks (unlikely to occur rollbacks)
+  }
+
+  def getTransactionLite(txidString: String): FutureApplicationResult[(JsValue, Boolean)] = {
     val result = for {
+      latestBlock <- xsnService.getLatestBlock().toFutureOr
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
       hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
@@ -60,7 +66,10 @@ class TransactionRPCService @Inject()(
       block <- xsnService.getBlock(blockhash).toFutureOr
       index = block.transactions.indexOf(txid)
       height = block.height
-    } yield Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height)
+    } yield (
+      Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height),
+      canCacheResult(latestBlock, height)
+    )
 
     result.toFuture
   }

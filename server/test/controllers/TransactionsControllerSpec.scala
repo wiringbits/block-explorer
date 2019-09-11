@@ -216,8 +216,13 @@ class TransactionsControllerSpec extends MyAPISpec {
       (json \ "blockhash").as[Blockhash] mustEqual tx.blockhash
       (json \ "index").as[Int] mustEqual 1
       (json \ "height").as[Height] mustEqual Height(809)
-    }
 
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "public, max-age=31536000"
+    }
+    "return recent transaction lite" in {
+      pending
+    }
     "bad txid format" in {
       val response = GET(url("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c6"))
 
@@ -227,6 +232,9 @@ class TransactionsControllerSpec extends MyAPISpec {
       val errors = (json \ "errors").as[List[JsValue]]
       (errors.head \ "field").as[String] mustEqual "transactionId"
       (errors.head \ "message").as[String] mustEqual "Invalid transaction format"
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader mustBe None
     }
 
     "when transaction doesn't exists" in {
@@ -238,6 +246,9 @@ class TransactionsControllerSpec extends MyAPISpec {
       val errors = (json \ "errors").as[List[JsValue]]
       (errors.head \ "field").as[String] mustEqual "transactionId"
       (errors.head \ "message").as[String] mustEqual "Transaction not found"
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader mustBe None
     }
   }
 }

@@ -1,9 +1,11 @@
 package controllers
 
+import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.models.request.SendRawTransactionRequest
 import com.xsn.explorer.services.TransactionRPCService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
+import play.api.libs.json.Json
 
 class TransactionsController @Inject()(transactionRPCService: TransactionRPCService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
@@ -23,6 +25,18 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
   }
 
   def getTransactionLite(txid: String) = public { _ =>
-    transactionRPCService.getTransactionLite(txid)
+    transactionRPCService
+      .getTransactionLite(txid)
+      .toFutureOr
+      .map {
+        case (value, cacheable) =>
+          val response = Ok(value)
+          if (cacheable) {
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+          } else {
+            response.withHeaders("Cache-Control" -> "no-store")
+          }
+      }
+      .toFuture
   }
 }
