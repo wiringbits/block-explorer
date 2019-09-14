@@ -7,17 +7,17 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.{BlockRewardsNotFoundError, XSNMessageError}
+import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
-import com.xsn.explorer.models.values.{Blockhash, Height}
+import com.xsn.explorer.models.values.{Blockhash, Height, Size}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.validators._
 import javax.inject.Inject
-import org.scalactic.{Bad, Good}
-import play.api.libs.json.JsValue
+import org.scalactic.{Bad, Good, One, Or}
+import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -180,6 +180,51 @@ class BlockService @Inject()(
       val error = XSNMessageError("The nBlocks should be between 1 and 1000")
       Future.successful(Bad(error).accumulating)
     }
+  }
+
+  def getBlockLite(blockhashString: String): FutureApplicationResult[(JsValue, Boolean)] = {
+    val result = for {
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
+      json <- xsnService.getFullRawBlock(blockhash).toFutureOr
+      size <- Or.from((json \ "size").asOpt[Size], One(BlockNotFoundError)).toFutureOr
+      height <- Or.from((json \ "height").asOpt[Height], One(BlockNotFoundError)).toFutureOr
+      version <- Or.from((json \ "version").asOpt[Int], One(BlockNotFoundError)).toFutureOr
+      merkleRoot <- Or.from((json \ "merkleroot").asOpt[Blockhash], One(BlockNotFoundError)).toFutureOr
+      time <- Or.from((json \ "time").asOpt[Long], One(BlockNotFoundError)).toFutureOr
+      medianTime <- Or.from((json \ "mediantime").asOpt[Long], One(BlockNotFoundError)).toFutureOr
+      nonce <- Or.from((json \ "nonce").asOpt[Long], One(BlockNotFoundError)).toFutureOr
+      bits <- Or.from((json \ "bits").asOpt[String], One(BlockNotFoundError)).toFutureOr
+      chainwork <- Or.from((json \ "chainwork").asOpt[String], One(BlockNotFoundError)).toFutureOr
+      difficulty <- Or.from((json \ "difficulty").asOpt[BigDecimal], One(BlockNotFoundError)).toFutureOr
+      latestBlock <- xsnService.getLatestBlock().toFutureOr
+      previousBlockhash = (json \ "previousblockhash").asOpt[Blockhash]
+      nextBlockhash = (json \ "nextblockhash").asOpt[Blockhash]
+      hexList = getHexFromTransactions((json \ "tx").as[List[JsValue]])
+    } yield (
+      Json.obj(
+        "hash" -> blockhashString,
+        "size" -> size,
+        "height" -> height,
+        "version" -> version,
+        "merkleRoot" -> merkleRoot,
+        "time" -> time,
+        "medianTime" -> medianTime,
+        "nonce" -> nonce,
+        "bits" -> bits,
+        "chainwork" -> chainwork,
+        "difficulty" -> difficulty,
+        "previousBlockhash" -> previousBlockhash,
+        "nextBlockhash" -> nextBlockhash,
+        "transactions" -> hexList
+      ),
+      height.int + 20 < latestBlock.height.int
+    )
+
+    result.toFuture
+  }
+
+  private def getHexFromTransactions(list: List[JsValue]): List[String] = list.map { tx =>
+    (tx \ "hex").as[String]
   }
 
   private def isPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {
