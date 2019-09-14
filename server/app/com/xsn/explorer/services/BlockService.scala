@@ -7,7 +7,7 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.{BlockRewardsNotFoundError, XSNMessageError}
+import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
@@ -16,8 +16,8 @@ import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.validators._
 import javax.inject.Inject
-import org.scalactic.{Bad, Good}
-import play.api.libs.json.JsValue
+import org.scalactic.{Bad, Good, One, Or}
+import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -180,6 +180,48 @@ class BlockService @Inject()(
       val error = XSNMessageError("The nBlocks should be between 1 and 1000")
       Future.successful(Bad(error).accumulating)
     }
+  }
+
+  def getBlockLite(blockhashString: String): FutureApplicationResult[(JsValue, Boolean)] = {
+    val result = for {
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
+      json <- xsnService.getFullRawBlock(blockhash).toFutureOr
+      header <- blockDataHandler.getHeader(blockhash, includeFilter = false).toFutureOr
+      size <- Or.from((json \ "size").asOpt[Int], One(BlockNotFoundError)).toFutureOr
+      height <- Or.from((json \ "height").asOpt[Int], One(BlockNotFoundError)).toFutureOr
+      version <- Or.from((json \ "version").asOpt[Int], One(BlockNotFoundError)).toFutureOr
+      merkleroot <- Or.from((json \ "merkleroot").asOpt[String], One(BlockNotFoundError)).toFutureOr
+      hexList = getHexFromTransactions((json \ "tx").as[List[JsValue]])
+      time = header.time
+      medianTime = header.medianTime
+      nonce = header.nonce
+      bits = header.bits
+      chainwork = header.chainwork
+      difficulty = header.difficulty.toString()
+      latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
+    } yield (
+      Json.obj(
+        "hash" -> blockhashString,
+        "size" -> size,
+        "height" -> height,
+        "version" -> version,
+        "merkleroot" -> merkleroot,
+        "time" -> time,
+        "medianTime" -> medianTime,
+        "nonce" -> nonce,
+        "bits" -> bits,
+        "chainwork" -> chainwork,
+        "difficulty" -> difficulty,
+        "transactions" -> hexList
+      ),
+      height + 20 < latestBlock.height.int
+    )
+
+    result.toFuture
+  }
+
+  private def getHexFromTransactions(list: List[JsValue]): List[String] = list.map { tx =>
+    (tx \ "hex").as[String]
   }
 
   private def isPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {

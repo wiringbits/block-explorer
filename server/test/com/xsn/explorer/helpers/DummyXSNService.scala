@@ -29,4 +29,5 @@ class DummyXSNService extends XSNService {
   override def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue] = ???
   override def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue] =
     ???
+  override def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = ???
 }

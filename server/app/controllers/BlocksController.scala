@@ -1,8 +1,7 @@
 package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.alexitc.playsonify.models.ordering.OrderingQuery
-import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
+import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.values.Height
@@ -94,6 +93,23 @@ class BlocksController @Inject()(
 
   def estimateFee(nBlocks: Int) = public { _ =>
     blockService.estimateFee(nBlocks)
+  }
+
+  def getBlockLite(blockhash: String) = public { _ =>
+    blockService
+      .getBlockLite(blockhash)
+      .toFutureOr
+      .map {
+        case (value, cacheable) => {
+          val response = Ok(Json.toJson(value))
+          if (cacheable) {
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+          } else {
+            response.withHeaders("Cache-Control" -> "no-store")
+          }
+        }
+      }
+      .toFuture
   }
 }
 

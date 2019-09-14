@@ -33,6 +33,8 @@ trait XSNService {
 
   def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue]
 
+  def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue]
+
   def getBlockhash(height: Height): FutureApplicationResult[Blockhash]
 
   def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical]
@@ -242,6 +244,33 @@ class XSNServiceRPCImpl @Inject()(
 
     result.foreach {
       case Bad(errors) => logger.warn(s"Failed to get raw block $blockhash, errors = $errors")
+      case _ => ()
+    }
+
+    result
+  }
+
+  override def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+    val errorCodeMapper = Map(-5 -> BlockNotFoundError)
+    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
+
+    val result = retrying {
+      server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[JsValue](response, errorCodeMapper)
+          maybe.getOrElse {
+            logger.debug(
+              s"Unexpected response from XSN Server, blockhash = ${blockhash.string}, status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+    }
+
+    result.foreach {
+      case Bad(errors) => logger.warn(s"Failed to get full raw block $blockhash, errors = $errors")
       case _ => ()
     }
 
