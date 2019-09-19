@@ -7,10 +7,11 @@ import com.xsn.explorer.models.TransactionDetails
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.validators.TransactionIdValidator
+import com.xsn.explorer.util.Extensions.BigDecimalExt
 import javax.inject.Inject
 import org.scalactic.{One, Or}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json._
 
 import scala.concurrent.ExecutionContext
 
@@ -70,6 +71,23 @@ class TransactionRPCService @Inject()(
       Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height),
       canCacheResult(latestBlock, height)
     )
+
+    result.toFuture
+  }
+
+  def getTransactionUtxoByIndex(
+      txidString: String,
+      index: Int,
+      includeMempool: Boolean
+  ): FutureApplicationResult[JsValue] = {
+    val result = for {
+      txid <- transactionIdValidator.validate(txidString).toFutureOr
+      jsvalue <- xsnService.getTxOut(txid, index, includeMempool).toFutureOr
+      value <- Or.from((jsvalue \ "value").asOpt[BigDecimal], One(TransactionError.NotFound(txid))).toFutureOr
+      jsonScriptHex <- Or
+        .from((jsvalue \ "scriptPubKey" \ "hex").asOpt[String], One(TransactionError.NotFound(txid)))
+        .toFutureOr
+    } yield Json.obj("value" -> value.toSatoshis.toString, "script" -> jsonScriptHex)
 
     result.toFuture
   }

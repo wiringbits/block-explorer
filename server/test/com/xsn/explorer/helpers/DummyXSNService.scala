@@ -27,4 +27,6 @@ class DummyXSNService extends XSNService {
   override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = ???
   override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = ???
   override def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue] = ???
+  override def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue] =
+    ???
 }

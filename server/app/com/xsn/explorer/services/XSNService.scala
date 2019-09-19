@@ -55,6 +55,8 @@ trait XSNService {
 
   def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue]
 
+  def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue]
+
   def cleanGenesisBlock(block: rpc.Block.Canonical): rpc.Block.Canonical = {
     Option(block)
       .filter(_.hash == genesisBlockhash)
@@ -631,6 +633,38 @@ class XSNServiceRPCImpl @Inject()(
 
     result.foreach {
       case Bad(errors) => logger.warn(s"Failed to estimate smart fee $confirmationsTarget, errors = $errors")
+      case _ => ()
+    }
+
+    result
+  }
+
+  override def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "gettxout",
+                  |  "params": ["${txid.string}", $index, $includeMempool]
+                  |}
+                  |""".stripMargin
+
+    val result = retrying {
+      server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[JsValue](response)
+          maybe.getOrElse {
+            logger.debug(
+              s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+    }
+
+    result.foreach {
+      case Bad(errors) => logger.warn(s"Failed to get TxOut, errors = $errors")
       case _ => ()
     }
 

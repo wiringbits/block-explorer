@@ -10,6 +10,7 @@ GET   /transactions/:txid        controllers.TransactionsController.getTransacti
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
 POST  /transactions              controllers.TransactionsController.sendRawTransaction()
 GET   /transactions/:txid/lite   controllers.TransactionsController.getTransactionLite(txid: String)
+GET   /transactions/:txid/utxos/:index               controllers.TransactionsController.getTransactionUtxoByIndex(txid: String, index: Int, includeMempool: Boolean ?= true)
 
 GET   /addresses/:address                            controllers.AddressesController.getBy(address: String)
 GET   /addresses/:address/tposcontracts              controllers.AddressesController.getTPoSContracts(address: String)

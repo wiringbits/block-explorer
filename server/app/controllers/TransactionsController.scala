@@ -39,4 +39,8 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
       }
       .toFuture
   }
+
+  def getTransactionUtxoByIndex(txid: String, index: Int, includeMempool: Boolean) = public { _ =>
+    transactionRPCService.getTransactionUtxoByIndex(txid, index, includeMempool)
+  }
 }
