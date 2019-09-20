@@ -579,6 +579,54 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
   }
 
+  "getTxOut" should {
+    "return value" in {
+      val content =
+        """
+          |{
+          |    "bestblock": "02b785c79a55c70beb120920a3df1d3e130724bd2ce188286f9d51c435bd5538",
+          |    "coinbase": false,
+          |    "confirmations": 1141,
+          |    "scriptPubKey": {
+          |        "addresses": [
+          |            "Xccc7iGpKfgNhLsScUUWZwmTKmPYwb43qN"
+          |        ],
+          |        "asm": "OP_DUP OP_HASH160 1523235378b73bad58c8e580b7ecc59057e923fa OP_EQUALVERIFY OP_CHECKSIG",
+          |        "hex": "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac",
+          |        "reqSigs": 1,
+          |        "type": "pubkeyhash"
+          |    },
+          |    "value": 3233.5
+          |}
+          |""".stripMargin
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val txid = createTransactionId("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b")
+      whenReady(service.getTxOut(txid, index = 1, includeMempool = true)) { result =>
+        result.isGood mustEqual true
+        (result.get \ "scriptPubKey" \ "hex")
+          .as[String] mustEqual "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac"
+        (result.get \ "value").as[Double] mustEqual 3233.5
+      }
+    }
+
+    "return a non exist transaction" in {
+      val content = "null".stripMargin
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val txid = createTransactionId("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54c")
+      whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) { result =>
+        result mustEqual Good(JsNull)
+      }
+    }
+  }
+
   private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
