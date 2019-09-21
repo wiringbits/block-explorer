@@ -10,8 +10,8 @@ object BlockParsers {
 
   import CommonParsers._
 
-  val parseNextBlockhash = parseBlockhash("next_blockhash")
-  val parsePreviousBlockhash = parseBlockhash("previous_blockhash")
+  val parseNextBlockhash = parseBlockhashBytes("next_blockhash")
+  val parsePreviousBlockhash = parseBlockhashBytes("previous_blockhash")
   val parseTposContract = parseTransactionId("tpos_contract")
   val parseMerkleRoot = parseBlockhashBytes("merkle_root")
 
@@ -27,7 +27,7 @@ object BlockParsers {
   val parseChainwork = str("chainwork")
   val parseDifficulty = get[BigDecimal]("difficulty")
 
-  val parseBlock = (parseBlockhash() ~
+  val parseBlock = (parseBlockhashBytes() ~
     parseNextBlockhash.? ~
     parsePreviousBlockhash.? ~
     parseTposContract.? ~
@@ -77,7 +77,7 @@ object BlockParsers {
       )
   }
 
-  val parseHeader = (parseBlockhash() ~
+  val parseHeader = (parseBlockhashBytes() ~
     parseNextBlockhash.? ~
     parsePreviousBlockhash.? ~
     parseTposContract.? ~

@@ -101,7 +101,7 @@ class TransactionPostgresDAO @Inject()(
           case (transaction, index) =>
             List(
               'txid -> transaction.id.string: NamedParameter,
-              'blockhash -> transaction.blockhash.string: NamedParameter,
+              'blockhash -> transaction.blockhash.toBytesBE.toArray: NamedParameter,
               'time -> transaction.time: NamedParameter,
               'size -> transaction.size.int: NamedParameter,
               'index -> index: NamedParameter
@@ -140,7 +140,7 @@ class TransactionPostgresDAO @Inject()(
         |ORDER BY index DESC
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.string
+        'blockhash -> blockhash.toBytesBE.toArray
       )
       .as(parseTransaction.*)
 
@@ -168,7 +168,7 @@ class TransactionPostgresDAO @Inject()(
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.string
+        'blockhash -> blockhash.toBytesBE.toArray
       )
       .as(parseTransaction.*)
 
@@ -264,7 +264,7 @@ class TransactionPostgresDAO @Inject()(
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.string
+        'blockhash -> blockhash.toBytesBE.toArray
       )
       .as(SqlParser.scalar[Int].single)
 
@@ -284,7 +284,7 @@ class TransactionPostgresDAO @Inject()(
       """.stripMargin
     ).on(
         'limit -> limit.int,
-        'blockhash -> blockhash.string
+        'blockhash -> blockhash.toBytesBE.toArray
       )
       .as(parseTransactionWithValues.*)
   }
@@ -310,7 +310,7 @@ class TransactionPostgresDAO @Inject()(
       """.stripMargin
     ).on(
         'limit -> limit.int,
-        'blockhash -> blockhash.string,
+        'blockhash -> blockhash.toBytesBE.toArray,
         'lastSeenTxid -> lastSeenTxid.string
       )
       .as(parseTransactionWithValues.*)
@@ -329,7 +329,7 @@ class TransactionPostgresDAO @Inject()(
       """.stripMargin
     ).on(
         'limit -> limit.int,
-        'blockhash -> blockhash.string
+        'blockhash -> blockhash.toBytesBE.toArray
       )
       .as(parseTransaction.*)
 
@@ -361,7 +361,7 @@ class TransactionPostgresDAO @Inject()(
       """.stripMargin
     ).on(
         'limit -> limit.int,
-        'blockhash -> blockhash.string,
+        'blockhash -> blockhash.toBytesBE.toArray,
         'lastSeenTxid -> lastSeenTxid.string
       )
       .as(parseTransaction.*)
@@ -391,7 +391,7 @@ class TransactionPostgresDAO @Inject()(
       """.stripMargin
     ).on(
         'txid -> transaction.id.string,
-        'blockhash -> transaction.blockhash.string,
+        'blockhash -> transaction.blockhash.toBytesBE.toArray,
         'time -> transaction.time,
         'size -> transaction.size.int,
         'index -> index

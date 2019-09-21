@@ -20,7 +20,7 @@ class BlockSynchronizationProgressDAO {
         |ON CONFLICT (blockhash) DO UPDATE
         |  SET state = EXCLUDED.state
       """.stripMargin
-    ).on("blockhash" -> blockhash.string, "state" -> state.entryName).execute()
+    ).on("blockhash" -> blockhash.toBytesBE.toArray, "state" -> state.entryName).execute()
   }
 
   def find(blockhash: Blockhash)(implicit conn: Connection): Option[BlockSynchronizationState] = {
@@ -30,7 +30,7 @@ class BlockSynchronizationProgressDAO {
         |FROM block_synchronization_progress
         |WHERE blockhash = {blockhash}
       """.stripMargin
-    ).on("blockhash" -> blockhash.string).as(scalar[String].singleOpt)
+    ).on("blockhash" -> blockhash.toBytesBE.toArray).as(scalar[String].singleOpt)
 
     maybe.map(BlockSynchronizationState.withNameInsensitive)
   }
@@ -42,7 +42,7 @@ class BlockSynchronizationProgressDAO {
         |FROM block_synchronization_progress
         |LIMIT 1
       """.stripMargin
-    ).as(parseBlockhash().singleOpt)
+    ).as(parseBlockhashBytes().singleOpt)
   }
 
   def delete(blockhash: Blockhash)(implicit conn: Connection): Unit = {
@@ -51,6 +51,6 @@ class BlockSynchronizationProgressDAO {
         |DELETE FROM block_synchronization_progress
         |WHERE blockhash = {blockhash}
       """.stripMargin
-    ).on("blockhash" -> blockhash.string).execute()
+    ).on("blockhash" -> blockhash.toBytesBE.toArray).execute()
   }
 }

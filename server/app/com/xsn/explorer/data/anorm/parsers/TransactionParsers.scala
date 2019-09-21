@@ -17,12 +17,12 @@ object TransactionParsers {
   val parseValue = get[BigDecimal]("value")
   val parseHexScript = parseHexString("hex_script")
 
-  val parseTransaction = (parseTransactionId() ~ parseBlockhash() ~ parseTime ~ parseSize).map {
+  val parseTransaction = (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map {
     case txid ~ blockhash ~ time ~ size => Transaction(txid, blockhash, time, size)
   }
 
   val parseTransactionWithValues = (parseTransactionId() ~
-    parseBlockhash() ~
+    parseBlockhashBytes() ~
     parseTime ~
     parseSize ~
     parseSent ~
