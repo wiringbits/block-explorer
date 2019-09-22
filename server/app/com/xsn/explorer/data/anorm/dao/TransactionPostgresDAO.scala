@@ -100,7 +100,7 @@ class TransactionPostgresDAO @Inject()(
         val params = transactions.zipWithIndex.map {
           case (transaction, index) =>
             List(
-              'txid -> transaction.id.string: NamedParameter,
+              'txid -> transaction.id.toBytesBE.toArray: NamedParameter,
               'blockhash -> transaction.blockhash.toBytesBE.toArray: NamedParameter,
               'time -> transaction.time: NamedParameter,
               'size -> transaction.size.int: NamedParameter,
@@ -243,7 +243,7 @@ class TransactionPostgresDAO @Inject()(
     ).on(
         'address -> address.string,
         'limit -> limit.int,
-        'lastSeenTxid -> lastSeenTxid.string
+        'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
       )
       .as(parseTransaction.*)
 
@@ -311,7 +311,7 @@ class TransactionPostgresDAO @Inject()(
     ).on(
         'limit -> limit.int,
         'blockhash -> blockhash.toBytesBE.toArray,
-        'lastSeenTxid -> lastSeenTxid.string
+        'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
       )
       .as(parseTransactionWithValues.*)
   }
@@ -362,7 +362,7 @@ class TransactionPostgresDAO @Inject()(
     ).on(
         'limit -> limit.int,
         'blockhash -> blockhash.toBytesBE.toArray,
-        'lastSeenTxid -> lastSeenTxid.string
+        'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
       )
       .as(parseTransaction.*)
 
@@ -390,7 +390,7 @@ class TransactionPostgresDAO @Inject()(
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
-        'txid -> transaction.id.string,
+        'txid -> transaction.id.toBytesBE.toArray,
         'blockhash -> transaction.blockhash.toBytesBE.toArray,
         'time -> transaction.time,
         'size -> transaction.size.int,

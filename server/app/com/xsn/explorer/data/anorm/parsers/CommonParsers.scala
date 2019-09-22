@@ -31,8 +31,8 @@ object CommonParsers {
       }
 
   def parseTransactionId(field: String = "txid") =
-    str(field)
-      .map(TransactionId.from)
+    byteArray(field)
+      .map(TransactionId.fromBytesBE)
       .map { _.getOrElse(throw new RuntimeException(s"corrupted $field")) }
 
   def parseHexString(field: String) = byteArray(field).map(HexString.fromBytesBE)

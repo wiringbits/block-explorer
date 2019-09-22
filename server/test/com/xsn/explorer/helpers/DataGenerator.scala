@@ -26,12 +26,12 @@ trait DataGenerator {
   }
 
   def randomBlockhash: Blockhash = {
-    val hex = randomHexString(Blockhash.Length)
+    val hex = randomHexString(SHA256Value.Length)
     Blockhash.from(hex.string).get
   }
 
   def randomTransactionId: TransactionId = {
-    val hex = randomHexString(TransactionId.Length)
+    val hex = randomHexString(SHA256Value.Length)
     TransactionId.from(hex.string).get
   }
 

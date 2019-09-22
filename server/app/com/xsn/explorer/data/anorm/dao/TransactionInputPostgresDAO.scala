@@ -22,9 +22,9 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         val params = inputs.map {
           case (txid, input) =>
             List(
-              'txid -> txid.string: NamedParameter,
+              'txid -> txid.toBytesBE.toArray: NamedParameter,
               'index -> input.index: NamedParameter,
-              'from_txid -> input.fromTxid.string: NamedParameter,
+              'from_txid -> input.fromTxid.toBytesBE.toArray: NamedParameter,
               'from_output_index -> input.fromOutputIndex: NamedParameter,
               'value -> input.value: NamedParameter,
               'addresses -> input.addresses.map(_.string).toArray: NamedParameter
@@ -70,9 +70,9 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |    addresses = EXCLUDED.addresses
       """.stripMargin
     ).on(
-        'txid -> txid.string,
+        'txid -> txid.toBytesBE.toArray,
         'index -> input.index,
-        'from_txid -> input.fromTxid.string,
+        'from_txid -> input.fromTxid.toBytesBE.toArray,
         'from_output_index -> input.fromOutputIndex,
         'value -> input.value,
         'addresses -> input.addresses.map(_.string).toArray
@@ -88,7 +88,7 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, from_txid, from_output_index, value, addresses
       """.stripMargin
     ).on(
-        'txid -> txid.string
+        'txid -> txid.toBytesBE.toArray
       )
       .as(parseTransactionInput.*)
   }
@@ -102,7 +102,7 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.string
+        'txid -> txid.toBytesBE.toArray
       )
       .as(parseTransactionInput.*)
   }
@@ -117,7 +117,7 @@ class TransactionInputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.string,
+        'txid -> txid.toBytesBE.toArray,
         'address -> address.string
       )
       .as(parseTransactionInput.*)

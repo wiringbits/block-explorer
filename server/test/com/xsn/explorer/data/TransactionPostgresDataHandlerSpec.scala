@@ -254,11 +254,11 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
         val spentOn = SQL(
           s"""
-            |SELECT spent_on
+            |SELECT ENCODE(spent_on, 'hex') as spent_on_str
             |FROM transaction_outputs
-            |WHERE txid = '${transaction.id.string}'
+            |WHERE txid = DECODE('${transaction.id.string}', 'hex')
           """.stripMargin
-        ).as(SqlParser.str("spent_on").*)
+        ).as(SqlParser.str("spent_on_str").*)
 
         spentOn.foreach(_ mustEqual transaction2.id.string)
       }
@@ -269,13 +269,13 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
         val query = SQL(
           s"""
-             |SELECT from_txid, from_output_index
+             |SELECT ENCODE(from_txid, 'hex') AS from_txid_str, from_output_index
              |FROM transaction_inputs
-             |WHERE txid = '${transaction2.id.string}'
+             |WHERE txid = DECODE('${transaction2.id}', 'hex')
           """.stripMargin
         )
 
-        val fromTxid = query.as(SqlParser.str("from_txid").*)
+        val fromTxid = query.as(SqlParser.str("from_txid_str").*)
         fromTxid.foreach(_ mustEqual transaction.id.string)
 
         val fromOutputIndex = query.as(SqlParser.int("from_output_index").*)

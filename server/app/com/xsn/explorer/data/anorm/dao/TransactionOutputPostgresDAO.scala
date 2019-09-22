@@ -38,7 +38,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |      index = {index}
       """.stripMargin
     ).on(
-        'txid -> txid.string,
+        'txid -> txid.toBytesBE.toArray,
         'index -> index
       )
       .as(parseTransactionOutput.singleOpt)
@@ -53,7 +53,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
       case _ =>
         val params = outputs.map { output =>
           List(
-            'txid -> output.txid.string: NamedParameter,
+            'txid -> output.txid.toBytesBE.toArray: NamedParameter,
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
             'addresses -> output.addresses.map(_.string).toArray: NamedParameter,
@@ -97,7 +97,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |    hex_script = EXCLUDED.hex_script
       """.stripMargin)
       .on(
-        'txid -> output.txid.string,
+        'txid -> output.txid.toBytesBE.toArray,
         'index -> output.index,
         'value -> output.value,
         'addresses -> output.addresses.map(_.string).toArray,
@@ -114,7 +114,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, hex_script, value, addresses
       """.stripMargin
     ).on(
-        'txid -> txid.string
+        'txid -> txid.toBytesBE.toArray
       )
       .as(parseTransactionOutput.*)
 
@@ -130,7 +130,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.string
+        'txid -> txid.toBytesBE.toArray
       )
       .as(parseTransactionOutput.*)
   }
@@ -145,7 +145,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.string,
+        'txid -> txid.toBytesBE.toArray,
         'address -> address.string
       )
       .as(parseTransactionOutput.*)
@@ -170,9 +170,9 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
              |SET spent_on = tmp.spent_on
              |FROM (
              |  WITH CTE AS (
-             |    SELECT '${txid.string}' AS spent_on
+             |    SELECT DECODE('${txid.string}', 'hex') AS spent_on
              |  )
-             |  SELECT spent_on, txid, index
+             |  SELECT spent_on, DECODE(txid, 'hex') AS txid, index
              |  FROM CTE CROSS JOIN (SELECT
              |       UNNEST(array$indexArray) AS index,
              |       UNNEST(array$txidArray) AS txid) x
@@ -200,7 +200,7 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
          |WHERE txid = {txid} AND
          |      index = {index}
         """.stripMargin
-    ).on("txid" -> txid.string, "index" -> index, "spent_on" -> spentOn.string)
+    ).on("txid" -> txid.toBytesBE.toArray, "index" -> index, "spent_on" -> spentOn.toBytesBE.toArray)
       .executeUpdate()
   }
 }

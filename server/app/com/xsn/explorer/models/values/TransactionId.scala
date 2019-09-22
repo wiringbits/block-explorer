@@ -1,24 +1,17 @@
 package com.xsn.explorer.models.values
 
-import com.alexitc.playsonify.models.WrappedString
 import play.api.libs.json._
 
-class TransactionId private (val string: String) extends AnyVal with WrappedString
+class TransactionId private (val string: String) extends AnyVal with SHA256Value
 
 object TransactionId {
 
-  val Length = 64
-
-  private val pattern = "^[a-f0-9]{64}$".r.pattern
-
   def from(string: String): Option[TransactionId] = {
-    val lowercaseString = string.toLowerCase
+    SHA256Value.from(string).map(x => new TransactionId(x.string))
+  }
 
-    if (pattern.matcher(lowercaseString).matches()) {
-      Some(new TransactionId(lowercaseString))
-    } else {
-      None
-    }
+  def fromBytesBE(bytes: Array[Byte]): Option[TransactionId] = {
+    SHA256Value.fromBytesBE(bytes).map(x => new TransactionId(x.string))
   }
 
   implicit val reads: Reads[TransactionId] = Reads { json =>
