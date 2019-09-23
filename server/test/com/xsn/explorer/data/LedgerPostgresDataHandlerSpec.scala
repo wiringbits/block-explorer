@@ -24,7 +24,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory) mustEqual Good(())
+        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, None) mustEqual Good(())
       }
     }
 
@@ -33,7 +33,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         val transactions = getTransactions(block)
 
         dataHandler
-          .push(block.withTransactions(transactions), List.empty, emptyFilterFactory) mustEqual Bad(
+          .push(block.withTransactions(transactions), List.empty, emptyFilterFactory, None) mustEqual Bad(
           PreviousBlockMissingError
         ).accumulating
       }
@@ -41,22 +41,22 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
     "succeed storing a repeated block by hash" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory) mustEqual Good(
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, None) mustEqual Good(
         ()
       )
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory) mustEqual Good(
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, None) mustEqual Good(
         ()
       )
     }
 
     "fail to store a repeated block by height" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory) mustEqual Good(
+      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, None) mustEqual Good(
         ()
       )
 
       val block = blockList(1).copy(previousBlockhash = None, height = genesis.height)
-      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty, emptyFilterFactory) mustEqual Bad(
+      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty, emptyFilterFactory, None) mustEqual Bad(
         RepeatedBlockHeightError
       ).accumulating
     }
@@ -76,7 +76,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory) mustEqual Good(())
+        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, None) mustEqual Good(())
       }
 
       blockList.reverse.foreach { block =>

@@ -17,6 +17,7 @@ object BlockSynchronizationState extends Enum[BlockSynchronizationState] {
   final case object StoringAddressTransactionDetails
       extends BlockSynchronizationState("STORING_ADDRESS_TRANSACTION_DETAILS")
   final case object UpdatingTPoSContracts extends BlockSynchronizationState("UPDATING_TPOS_CONTRACTS")
+  final case object StoringRewards extends BlockSynchronizationState("STORING_REWARDS")
   final case object UpdatingBalances extends BlockSynchronizationState("UPDATING_BALANCES")
 
 }

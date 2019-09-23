@@ -2,7 +2,7 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.Block
 
 import scala.language.higherKinds
@@ -21,7 +21,8 @@ trait LedgerDataHandler[F[_]] {
   def push(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: Option[BlockRewards]
   ): F[Unit]
 
   /**

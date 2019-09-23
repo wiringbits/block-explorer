@@ -122,6 +122,25 @@ class BlockService @Inject()(
     result.toFuture
   }
 
+  def getBlockRewards(height: Height): FutureApplicationResult[Option[BlockRewards]] = {
+    val result = for {
+      blockhash <- xsnService
+        .getBlockhash(height)
+        .toFutureOr
+
+      block <- xsnService
+        .getBlock(blockhash)
+        .toFutureOr
+
+      rewards <- getBlockRewards(block).map {
+        case Good(value) => Good(Some(value))
+        case Bad(_) => Good(None)
+      }.toFutureOr
+    } yield rewards
+
+    result.toFuture
+  }
+
   private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
     val result = for {
       block <- xsnService

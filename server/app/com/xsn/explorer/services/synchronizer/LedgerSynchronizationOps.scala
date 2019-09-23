@@ -80,6 +80,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
   def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
+      rewards <- blockService.getBlockRewards(rpcBlock.height).toFutureOr
       data <- transactionCollectorService.collect(rpcBlock).toFutureOr
       (transactions, contracts, filterFactory) = data
       validContracts <- getValidContracts(contracts).toFutureOr
@@ -91,9 +92,8 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
           s"The block = ${rpcBlock.hash} has phantom ${transactions.size - filteredTransactions.size} transactions, they are being discarded"
         )
       }
-
       val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
-      (block, validContracts, filterFactory)
+      (block, validContracts, filterFactory, rewards)
     }
 
     result.toFuture

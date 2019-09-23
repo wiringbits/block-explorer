@@ -8,8 +8,9 @@ import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, PoSBlockRewards, PoWBlockRewards, TPoSBlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{Balance, Block}
+import com.xsn.explorer.models.values.Blockhash
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import com.xsn.explorer.util.TransactionBalancesHelper
 import javax.inject.Inject
@@ -23,7 +24,8 @@ class LedgerPostgresDataHandler @Inject()(
     blockFilterPostgresDAO: BlockFilterPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
     balancePostgresDAO: BalancePostgresDAO,
-    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO
+    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO,
+    blockRewardDAO: BlockRewardPostgresDAO
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
@@ -36,14 +38,15 @@ class LedgerPostgresDataHandler @Inject()(
   override def push(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: Option[BlockRewards]
   ): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
     val filter = filterFactory()
     val result = withTransaction { implicit conn =>
       val result = for {
-        _ <- upsertBlockCascade(block.asTip, filter, tposContracts)
+        _ <- upsertBlockCascade(block.asTip, filter, tposContracts, rewards)
       } yield ()
 
       result
@@ -77,7 +80,8 @@ class LedgerPostgresDataHandler @Inject()(
   private def upsertBlockCascade(
       block: Block.HasTransactions,
       filter: GolombCodedSet,
-      tposContracts: List[TPoSContract]
+      tposContracts: List[TPoSContract],
+      rewards: Option[BlockRewards]
   )(implicit conn: Connection): Option[Unit] = {
 
     val result = for {
@@ -85,6 +89,12 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
       _ = blockFilterPostgresDAO.insert(block.hash, filter)
+      _ = rewards match {
+        case Some(r: PoWBlockRewards) => storePoWReward(block.hash, r)
+        case Some(r: PoSBlockRewards) => storePoSReward(block.hash, r)
+        case Some(r: TPoSBlockRewards) => storeTPoSReward(block.hash, r)
+        case _ => ()
+      }
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
@@ -137,5 +147,18 @@ class LedgerPostgresDataHandler @Inject()(
     balanceList.map { b =>
       balancePostgresDAO.upsert(b)
     }
+  }
+
+  private def storePoWReward(blockhash: Blockhash, powReward: PoWBlockRewards)(implicit conn: Connection) = {
+    blockRewardDAO.upsert(blockhash, powReward.reward)
+  }
+
+  private def storePoSReward(blockhash: Blockhash, posReward: PoSBlockRewards)(implicit conn: Connection) = {
+    blockRewardDAO.upsert(blockhash, posReward.coinstake)
+  }
+
+  private def storeTPoSReward(blockhash: Blockhash, tposReward: TPoSBlockRewards)(implicit conn: Connection) = {
+    blockRewardDAO.upsert(blockhash, tposReward.owner)
+    blockRewardDAO.upsert(blockhash, tposReward.merchant)
   }
 }

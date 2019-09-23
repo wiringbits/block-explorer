@@ -33,6 +33,7 @@ trait DataHandlerObjects {
   lazy val balancePostgresDAO = new BalancePostgresDAO(fieldOrderingSQLInterpreter)
   lazy val aggregatedAmountPostgresDAO = new AggregatedAmountPostgresDAO
   lazy val blockSynchronizationProgressDAO = new BlockSynchronizationProgressDAO
+  lazy val blockRewardPostgresDAO = new BlockRewardPostgresDAO
 
   def createLedgerDataHandler(database: Database) = {
     new LedgerPostgresDataHandler(
@@ -41,7 +42,8 @@ trait DataHandlerObjects {
       blockFilterPostgresDAO,
       transactionPostgresDAO,
       balancePostgresDAO,
-      aggregatedAmountPostgresDAO
+      aggregatedAmountPostgresDAO,
+      blockRewardPostgresDAO
     )
   }
 
@@ -65,6 +67,7 @@ trait DataHandlerObjects {
       database,
       blockSynchronizationProgressDAO,
       blockPostgresDAO,
+      blockRewardPostgresDAO,
       blockFilterPostgresDAO,
       transactionPostgresDAO,
       transactionInputDAO,
