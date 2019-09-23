@@ -55,7 +55,7 @@ class LedgerSynchronizerService @Inject()(
         val inner = for {
           block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
           data <- syncOps.getBlockData(block).toFutureOr
-          _ <- blockParallelChunkSynchronizer.sync(data._1, data._2, data._3).toFutureOr
+          _ <- blockParallelChunkSynchronizer.sync(data._1, data._2, data._3, data._4).toFutureOr
         } yield ()
 
         inner.toFuture.flatMap {
@@ -140,11 +140,13 @@ class LedgerSynchronizerService @Inject()(
   private def append(newBlock: rpc.Block.HasTransactions[_]): FutureApplicationResult[Unit] = {
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
-      (blockWithTransactions, tposContracts, filterFactory) = data
+      (blockWithTransactions, tposContracts, filterFactory, rewards) = data
       _ <- if (synchronizerConfig.parallelSynchronizer) {
-        blockParallelChunkSynchronizer.sync(blockWithTransactions.asTip, tposContracts, filterFactory).toFutureOr
+        blockParallelChunkSynchronizer
+          .sync(blockWithTransactions.asTip, tposContracts, filterFactory, rewards)
+          .toFutureOr
       } else {
-        ledgerDataHandler.push(blockWithTransactions.asTip, tposContracts, filterFactory).toFutureOr
+        ledgerDataHandler.push(blockWithTransactions.asTip, tposContracts, filterFactory, rewards).toFutureOr
       }
     } yield {
       if (blockWithTransactions.height.int % 5000 == 0) {

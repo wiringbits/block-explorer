@@ -149,9 +149,15 @@ class LegacyLedgerSynchronizerService @Inject()(
 
   private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     val result = for {
-      data <- syncOps.getBlockData(newBlock).toFutureOr
-      (blockWithTransactions, tposContracts, filterFactory) = data
-      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory).toFutureOr
+      // if newBlock is the genesis block we need to retrieve the full block in order to get the block transactions
+      block <- Option(newBlock)
+        .filter(_.hash != xsnService.genesisBlockhash)
+        .map(b => Future.successful(Good(b)))
+        .getOrElse(xsnService.getFullBlock(newBlock.hash))
+        .toFutureOr
+      data <- syncOps.getBlockData(block).toFutureOr
+      (blockWithTransactions, tposContracts, filterFactory, rewards) = data
+      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture

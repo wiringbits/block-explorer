@@ -8,7 +8,7 @@ import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{Balance, Block}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import com.xsn.explorer.util.TransactionBalancesHelper
@@ -23,7 +23,8 @@ class LedgerPostgresDataHandler @Inject()(
     blockFilterPostgresDAO: BlockFilterPostgresDAO,
     transactionPostgresDAO: TransactionPostgresDAO,
     balancePostgresDAO: BalancePostgresDAO,
-    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO
+    aggregatedAmountPostgresDAO: AggregatedAmountPostgresDAO,
+    blockRewardDAO: BlockRewardPostgresDAO
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
@@ -36,14 +37,15 @@ class LedgerPostgresDataHandler @Inject()(
   override def push(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
     val filter = filterFactory()
     val result = withTransaction { implicit conn =>
       val result = for {
-        _ <- upsertBlockCascade(block.asTip, filter, tposContracts)
+        _ <- upsertBlockCascade(block.asTip, filter, tposContracts, rewards)
       } yield ()
 
       result
@@ -77,7 +79,8 @@ class LedgerPostgresDataHandler @Inject()(
   private def upsertBlockCascade(
       block: Block.HasTransactions,
       filter: GolombCodedSet,
-      tposContracts: List[TPoSContract]
+      tposContracts: List[TPoSContract],
+      rewards: BlockRewards
   )(implicit conn: Connection): Option[Unit] = {
 
     val result = for {
@@ -85,6 +88,7 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
       _ = blockFilterPostgresDAO.insert(block.hash, filter)
+      _ = blockRewardDAO.upsert(block.hash, rewards)
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
@@ -111,6 +115,7 @@ class LedgerPostgresDataHandler @Inject()(
     // transactions
     val deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
     val _ = blockFilterPostgresDAO.delete(block.hash)
+    blockRewardDAO.deleteBy(block.hash)
     for {
       // block
       _ <- blockPostgresDAO.delete(block.hash)

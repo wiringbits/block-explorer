@@ -9,7 +9,15 @@ import com.xsn.explorer.helpers.DataGenerator
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.values.Blockhash
-import com.xsn.explorer.models.{BlockExtractionMethod, TPoSContract}
+import com.xsn.explorer.models.{
+  BlockExtractionMethod,
+  BlockReward,
+  BlockRewards,
+  PoSBlockRewards,
+  PoWBlockRewards,
+  TPoSBlockRewards,
+  TPoSContract
+}
 import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
 import com.xsn.explorer.services.synchronizer.repository.{BlockChunkRepository, BlockSynchronizationProgressDAO}
 import io.scalaland.chimney.dsl._
@@ -68,6 +76,8 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
 
   val blockWithTransactions = Block.HasTransactions(block, List(tx1, tx2, tx3))
 
+  val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
+
   val tposContracts = List(
     DataGenerator.randomTPoSContract(tx1.id, 0),
     DataGenerator.randomTPoSContract(tx2.id, 0),
@@ -77,9 +87,47 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
   "sync" should {
     "sync a block" in {
       val synchronizer = createSynchronizer()
-      whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory)) { result =>
+      whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory, reward)) { result =>
         result must be(Good(()))
-        verifyDatabase(blockWithTransactions, tposContracts)
+        verifyDatabase(blockWithTransactions, tposContracts, None)
+      }
+    }
+
+    "store PoW reward" in {
+      val powBlock = blockWithTransactions.copy(
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfWork)
+      )
+      val powReward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 1000))
+      val synchronizer = createSynchronizer()
+      whenReady(synchronizer.sync(powBlock, tposContracts, emptyFilterFactory, powReward)) { result =>
+        result must be(Good(()))
+        verifyDatabase(powBlock, tposContracts, Some(powReward))
+      }
+    }
+
+    "store PoS reward" in {
+      val posBlock = blockWithTransactions.copy(
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
+      )
+      val posReward = PoSBlockRewards(BlockReward(DataGenerator.randomAddress, 1000), None)
+      val synchronizer = createSynchronizer()
+      whenReady(synchronizer.sync(posBlock, tposContracts, emptyFilterFactory, posReward)) { result =>
+        result must be(Good(()))
+        verifyDatabase(posBlock, tposContracts, Some(posReward))
+      }
+    }
+
+    "store TPoS reward" in {
+      val tposBlock = blockWithTransactions.copy(
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
+      )
+      val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
+      val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
+      val tposReward = TPoSBlockRewards(ownerReward, merchantReward, None)
+      val synchronizer = createSynchronizer()
+      whenReady(synchronizer.sync(tposBlock, tposContracts, emptyFilterFactory, tposReward)) { result =>
+        result must be(Good(()))
+        verifyDatabase(tposBlock, tposContracts, Some(tposReward))
       }
     }
 
@@ -88,12 +136,12 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
         val dao = daoFailingOnceAt(state)
         val synchronizer = createSynchronizer(dao)
         intercept[RuntimeException] {
-          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory).futureValue
+          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory, reward).futureValue
         }
 
-        whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory)) { result =>
+        whenReady(synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory, reward)) { result =>
           result must be(Good(()))
-          verifyDatabase(blockWithTransactions, tposContracts)
+          verifyDatabase(blockWithTransactions, tposContracts, None)
         }
       }
     }
@@ -110,7 +158,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
         val dao = daoFailingOnceAt(state)
         val synchronizer = createSynchronizer(dao)
         intercept[RuntimeException] {
-          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory).futureValue
+          synchronizer.sync(blockWithTransactions, tposContracts, emptyFilterFactory, reward).futureValue
         }
 
         whenReady(synchronizer.rollback(block.hash)) { result =>
@@ -145,13 +193,66 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
     blockParallelChunkSynchronizer
   }
 
-  private def verifyDatabase(block: Block.HasTransactions, tposContracts: List[TPoSContract]) = {
+  private def verifyDatabase(
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract],
+      reward: Option[BlockRewards]
+  ) = {
     blockDataHandler.getBy(block.hash) must be(Good(block.block))
     transactionDataHandler.getTransactionsWithIOBy(block.hash, Limit(100), None) must be(Good(block.transactions))
     tposContracts.foreach { contract =>
       val result = tposContractDataHandler.getBy(contract.details.owner)
       result.isGood must be(true)
       result.get.contains(contract) must be(true)
+    }
+
+    reward match {
+      case Some(r: PoWBlockRewards) => verifyPoWReward(block.hash, r)
+      case Some(r: PoSBlockRewards) => verifyPoSReward(block.hash, r)
+      case Some(r: TPoSBlockRewards) => verifyTPoSReward(block.hash, r)
+      case _ => succeed
+    }
+  }
+
+  private def verifyPoWReward(blockhash: Blockhash, powReward: PoWBlockRewards) = {
+    database.withConnection { implicit conn =>
+      val reward = blockRewardPostgresDAO.getBy(blockhash)
+      reward match {
+        case r: PoWBlockRewards => {
+          r.reward.address mustEqual powReward.reward.address
+          r.reward.value mustEqual powReward.reward.value
+        }
+        case _ => fail
+      }
+    }
+  }
+
+  private def verifyPoSReward(blockhash: Blockhash, posReward: PoSBlockRewards) = {
+    database.withConnection { implicit conn =>
+      val reward = blockRewardPostgresDAO.getBy(blockhash)
+      reward match {
+        case r: PoSBlockRewards => {
+          r.coinstake.address mustEqual posReward.coinstake.address
+          r.coinstake.value mustEqual posReward.coinstake.value
+        }
+        case _ => fail
+      }
+    }
+  }
+
+  private def verifyTPoSReward(blockhash: Blockhash, tposReward: TPoSBlockRewards) = {
+    database.withConnection { implicit conn =>
+      val reward = blockRewardPostgresDAO.getBy(blockhash)
+      reward match {
+        case r: TPoSBlockRewards => {
+          r.owner.address mustEqual tposReward.owner.address
+          r.owner.value mustEqual tposReward.owner.value
+
+          r.merchant.address mustEqual tposReward.merchant.address
+          r.merchant.value mustEqual tposReward.merchant.value
+        }
+        case _ => fail
+      }
     }
   }
 }

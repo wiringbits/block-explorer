@@ -9,6 +9,7 @@ import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.DataHelper._
 import com.xsn.explorer.helpers.{DataGenerator, LedgerHelper, TransactionLoader}
+import com.xsn.explorer.models.{BlockReward, PoWBlockRewards}
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
@@ -291,13 +292,15 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       .map(Transaction.fromRPC)
       .map(_._1)
 
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
+    val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward)
 
     result.isGood mustEqual true
   }
 
   private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory)
+    val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
+    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward)
 
     result.isGood mustEqual true
   }

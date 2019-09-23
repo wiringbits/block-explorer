@@ -2,6 +2,7 @@ package com.xsn.explorer.helpers
 
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.values.Address
 
 object LedgerHelper {
 
@@ -27,5 +28,19 @@ object LedgerHelper {
       .map(TransactionLoader.getWithValues(_))
       .map(Transaction.fromRPC)
       .map(_._1)
+  }
+
+  def getPoWReward(block: rpc.Block.Canonical): PoWBlockRewards = {
+    PoWBlockRewards(BlockReward(Address.from(list.head).get, 1000))
+  }
+
+  def getPoSReward(block: rpc.Block.Canonical): PoSBlockRewards = {
+    PoSBlockRewards(BlockReward(Address.from(list.head).get, 1000), None)
+  }
+
+  def getTPoSReward(block: rpc.Block.Canonical): TPoSBlockRewards = {
+    val ownerReward = BlockReward(Address.from(list.head).get, 1000)
+    val merchantReward = BlockReward(Address.from(list(1)).get, 100)
+    TPoSBlockRewards(ownerReward, merchantReward, None)
   }
 }

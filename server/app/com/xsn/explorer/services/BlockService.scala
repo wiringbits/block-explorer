@@ -242,15 +242,21 @@ class BlockService @Inject()(
     block.tposContract.map(xsnService.isTPoSContract).getOrElse(Future.successful(Good(false)))
   }
 
+  def getBlockRewards(
+      block: Block[_],
+      extractionMethod: BlockExtractionMethod
+  ): FutureApplicationResult[BlockRewards] = {
+    extractionMethod match {
+      case BlockExtractionMethod.ProofOfWork => getPoWBlockRewards(block)
+      case BlockExtractionMethod.ProofOfStake => getPoSBlockRewards(block)
+      case BlockExtractionMethod.TrustlessProofOfStake => getTPoSBlockRewards(block)
+    }
+  }
+
   private def getBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
     val result = for {
       method <- extractionMethod(block).toFutureOr
-
-      rewards <- method match {
-        case BlockExtractionMethod.ProofOfWork => getPoWBlockRewards(block).toFutureOr
-        case BlockExtractionMethod.ProofOfStake => getPoSBlockRewards(block).toFutureOr
-        case BlockExtractionMethod.TrustlessProofOfStake => getTPoSBlockRewards(block).toFutureOr
-      }
+      rewards <- getBlockRewards(block, method).toFutureOr
     } yield rewards
 
     result.toFuture

@@ -3,7 +3,7 @@ package com.xsn.explorer.services.synchronizer.operations
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
@@ -22,18 +22,29 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       state: BlockSynchronizationState,
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = state match {
-    case BlockSynchronizationState.StoringBlock => storeBlock(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.StoringBlockData => storeBlockData(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.StoringTransactions => storeTransactions(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.StoringOutputs => storeOutputs(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.StoringInputs => storeInputs(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.SpendingOutputs => spendOutputs(block, tposContracts, filterFactory)
+    case BlockSynchronizationState.StoringBlock =>
+      storeBlock(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.StoringBlockData =>
+      storeBlockData(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.StoringTransactions =>
+      storeTransactions(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.StoringOutputs =>
+      storeOutputs(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.StoringInputs =>
+      storeInputs(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.SpendingOutputs =>
+      spendOutputs(block, tposContracts, filterFactory, rewards)
     case BlockSynchronizationState.StoringAddressTransactionDetails =>
-      storeAddressTransactionDetails(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.UpdatingTPoSContracts => updateTPoSContracts(block, tposContracts, filterFactory)
-    case BlockSynchronizationState.UpdatingBalances => updateBalances(block)
+      storeAddressTransactionDetails(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.UpdatingTPoSContracts =>
+      updateTPoSContracts(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.StoringRewards =>
+      storeRewards(block, tposContracts, filterFactory, rewards)
+    case BlockSynchronizationState.UpdatingBalances =>
+      updateBalances(block)
   }
 
   /**
@@ -44,7 +55,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeBlock(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val initialState = BlockSynchronizationState.StoringBlock
     val nextState = BlockSynchronizationState.StoringBlockData
@@ -53,7 +65,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       _ <- blockChunkRepository.upsertSyncState(block.hash, initialState).toFutureOr
       _ <- blockChunkRepository.upsertBlock(block.block).toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -69,7 +81,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeBlockData(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringTransactions
     val filterF = Future { filterFactory() }
@@ -84,7 +97,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       _ <- filterF.toFutureOr
       _ <- linkF.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -98,7 +111,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeTransactions(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringOutputs
     val storeTransactionsF = block.transactions.zipWithIndex.map {
@@ -109,7 +123,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
     val result = for {
       _ <- storeTransactionsF.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -123,7 +137,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeOutputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringInputs
     val storeOutputsF =
@@ -133,7 +148,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
     val result = for {
       _ <- storeOutputsF.sequence.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -147,7 +162,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeInputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.SpendingOutputs
     val storeInputsF =
@@ -157,7 +173,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
     val result = for {
       _ <- storeInputsF.sequence.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -171,7 +187,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def spendOutputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringAddressTransactionDetails
     val spendOutputsF =
@@ -181,7 +198,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
     val result = for {
       _ <- spendOutputsF.sequence.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -195,7 +212,8 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def storeAddressTransactionDetails(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.UpdatingTPoSContracts
     val storeDetailsF =
@@ -205,7 +223,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
     val result = for {
       _ <- storeDetailsF.sequence.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture
@@ -219,9 +237,10 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
   private def updateTPoSContracts(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
-      filterFactory: () => GolombCodedSet
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
   ): FutureApplicationResult[Unit] = {
-    val nextState = BlockSynchronizationState.UpdatingBalances
+    val nextState = BlockSynchronizationState.StoringRewards
 
     val createContractsF = tposContracts.map { contract =>
       blockChunkRepository.upsertContract(contract)
@@ -241,7 +260,27 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       _ <- createContractsF.sequence.toFutureOr
       _ <- closeContractsF.sequence.toFutureOr
       _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
-      _ <- continueFromState(nextState, block, tposContracts, filterFactory).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
+    } yield ()
+
+    result.toFuture
+  }
+
+  /**
+   * Stores the block rewards and then mark the next state to continue synchronizing.
+   */
+  private def storeRewards(
+      block: Block.HasTransactions,
+      tposContracts: List[TPoSContract],
+      filterFactory: () => GolombCodedSet,
+      rewards: BlockRewards
+  ): FutureApplicationResult[Unit] = {
+    val nextState = BlockSynchronizationState.UpdatingBalances
+
+    val result = for {
+      _ <- blockChunkRepository.upsertBlockReward(block.hash, rewards).toFutureOr
+      _ <- blockChunkRepository.upsertSyncState(block.hash, nextState).toFutureOr
+      _ <- continueFromState(nextState, block, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
     result.toFuture

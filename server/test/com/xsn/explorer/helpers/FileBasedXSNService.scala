@@ -67,4 +67,6 @@ class FileBasedXSNService extends DummyXSNService {
     val result = Or.from(maybe, One(TransactionError.NotFound(txid)))
     Future.successful(result)
   }
+
+  override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = Future.successful(Good(true))
 }

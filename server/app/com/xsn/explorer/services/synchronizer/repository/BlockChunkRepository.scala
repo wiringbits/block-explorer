@@ -2,7 +2,7 @@ package com.xsn.explorer.services.synchronizer.repository
 
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Balance, Block, Transaction}
 import com.xsn.explorer.models.values.{Blockhash, TransactionId}
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
@@ -54,6 +54,8 @@ trait BlockChunkRepository[F[_]] {
    * Rollback a block atomically, the sync status must be deleted too.
    */
   def atomicRollback(blockhash: Blockhash): F[Unit]
+
+  def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): F[Unit]
 }
 
 object BlockChunkRepository {
@@ -134,6 +136,10 @@ object BlockChunkRepository {
 
     override def atomicRollback(blockhash: Blockhash): FutureApplicationResult[Unit] = Future {
       blocking.atomicRollback(blockhash)
+    }
+
+    override def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): FutureApplicationResult[Unit] = Future {
+      blocking.upsertBlockReward(blockhash, reward)
     }
   }
 }

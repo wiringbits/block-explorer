@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Balance, Block, Transaction}
 import com.xsn.explorer.models.values.{Blockhash, TransactionId}
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
@@ -18,6 +18,7 @@ class BlockChunkPostgresRepository @Inject()(
     override val database: Database,
     synchronizationProgressDAO: BlockSynchronizationProgressDAO,
     blockDAO: BlockPostgresDAO,
+    blockRewardDAO: BlockRewardPostgresDAO,
     blockFilterDAO: BlockFilterPostgresDAO,
     transactionDAO: TransactionPostgresDAO,
     transactionInputDAO: TransactionInputPostgresDAO,
@@ -143,6 +144,7 @@ class BlockChunkPostgresRepository @Inject()(
     // transactions
     val deletedTransactions = transactionDAO.deleteBy(blockhash)
     val _ = blockFilterDAO.delete(blockhash)
+    blockRewardDAO.deleteBy(blockhash)
     val maybe = for {
       // block
       _ <- blockDAO.delete(blockhash)
@@ -166,5 +168,12 @@ class BlockChunkPostgresRepository @Inject()(
     } yield ()
 
     maybe.map(x => Good(x)).getOrElse(throw new RuntimeException(s"Failed to rollback block $blockhash"))
+  }
+
+  override def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): ApplicationResult[Unit] = {
+    withConnection { implicit conn =>
+      blockRewardDAO.upsert(blockhash, reward)
+      Good(())
+    }
   }
 }
