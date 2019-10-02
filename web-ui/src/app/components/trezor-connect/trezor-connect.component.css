@@ -1,0 +1,33 @@
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(12, [col-start] 1fr);
+    grid-gap: 20px;
+}
+.begin {
+    grid-column: col-start 2 / span 6;
+    color: white;
+}
+.tab-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 8px;
+}
+.first-position {
+    grid-column: 1;
+}
+.second-position {
+    grid-column: 2;
+}
+.third-position {
+    grid-column: 3;
+}
+.complete {
+    grid-column: span 2;
+}
+select {
+    color: white;
+    background: #337AB7;
+}
+.black-text {
+    color: black;
+}

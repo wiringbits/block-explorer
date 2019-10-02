@@ -28,6 +28,7 @@ import { NavigatorService } from './services/navigator.service';
 import { NotificationService } from './services/notification.service';
 import { TickerService } from './services/ticker.service';
 import { TransactionsService } from './services/transactions.service';
+import { TrezorRepositoryService } from './services/trezor-repository.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -49,6 +50,7 @@ import { BlockRawComponent } from './components/block-raw/block-raw.component';
 import { ExplorerDatetimePipe } from './pipes/explorer-datetime.pipe';
 import { ExplorerCurrencyPipe } from './pipes/explorer-currency.pipe';
 import { ExplorerAmountPipe } from './pipes/explorer-amount.pipe';
+import { TrezorConnectComponent } from './components/trezor-connect/trezor-connect.component';
 
 @NgModule({
   declarations: [
@@ -71,7 +73,8 @@ import { ExplorerAmountPipe } from './pipes/explorer-amount.pipe';
     BlockRawComponent,
     ExplorerDatetimePipe,
     ExplorerCurrencyPipe,
-    ExplorerAmountPipe
+    ExplorerAmountPipe,
+    TrezorConnectComponent
   ],
   imports: [
     AppRoutingModule,
@@ -104,7 +107,8 @@ import { ExplorerAmountPipe } from './pipes/explorer-amount.pipe';
     NavigatorService,
     NotificationService,
     TickerService,
-    TransactionsService
+    TransactionsService,
+    TrezorRepositoryService
   ],
   bootstrap: [AppComponent]
 })

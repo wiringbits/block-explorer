@@ -33,6 +33,7 @@
     "ngx-toastr": "^9.1.0",
     "rxjs": "~6.3.3",
     "rxjs-compat": "^6.3.3",
+    "trezor-connect": "^7.0.2",
     "zone.js": "~0.8.28"
   },
   "devDependencies": {

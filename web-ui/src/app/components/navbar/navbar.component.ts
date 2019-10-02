@@ -14,6 +14,10 @@ class Tab {
 export class NavbarComponent implements OnInit {
 
   public tabs: Tab[] = [
+    {
+      label: 'Trezor Wallet',
+      path: '/trezor'
+    }
   ];
 
   constructor(private location: Location) { }

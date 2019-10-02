@@ -85,12 +85,17 @@ export class AppComponent implements OnInit {
       'message.transactionsNotAvailable': 'The transactions are not available, please try again in some minutes',
       'message.totalSupply': 'The total number of coins generated (excluding the burned coins)',
       'message.circulatingSupply': 'The total number of coins that are in circulation (excludes burned coins and the treasury)',
+      'messages.invalidScriptType': 'Unknown script type',
+      'messages.invalidAddressType': 'Unknown address type',
+      'messages.invalidNegativeAmount': 'Invalid negative amount',
+      'message.more': 'More',
 
       // error messages
       'error.nothingFound': 'That doesn\'t seem to be a valid address, nor valid block, neither a valid transaction or ip address',
 
       // actions
-      'action.find': 'Search',
+      'action.find': 'Find',
+      'action.verifyAddress': 'Show full address',
 
       // labels
       'label.searchField': 'Transaction id, Blockhash, Block number, Address, IP address',
@@ -106,6 +111,15 @@ export class AppComponent implements OnInit {
       'label.to': 'To',
       'label.value': 'Amount',
       'label.fee': 'Fee',
+      'label.receiveXSN': 'Receive XSN',
+      'label.sendXSN': 'Send XSN',
+      'label.tpos': 'TPOS',
+      'label.send': 'Send',
+      'label.resetWallet': 'Reset Wallet',
+      'label.highFee': 'High',
+      'label.normalFee': 'Normal',
+      'label.lowFee': 'Low',
+      'label.satoshis': 'Satoshis',
 
       'label.address': 'Address',
       'label.balance': 'Balance',

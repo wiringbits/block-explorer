@@ -1,0 +1,73 @@
+<div class="wrapper">
+
+  <label class="begin">Trezor Wallet</label>
+  <div class="begin">
+    <tabset>
+      <label>Balance {{ satoshiToXsn(getAvailableSatoshis()) | explorerCurrency }}</label><br>
+      <tab heading="Receive">
+        <label> {{ 'label.receiveXSN' | translate }}</label><br>
+        <ul id="addressList">
+          <li *ngFor="let item of trezorAddresses">
+            <label>Address: {{item.serializedPath}}</label>
+            <p *ngIf="isTrezorAddressVerified(item.address) else elseBlock">
+              <label>{{item.address}}</label><br>
+              <a routerLink="/addresses/{{item.address}}">{{ 'message.more' | translate }}</a>
+            </p>
+            <ng-template #elseBlock>
+              <p>
+                <input type="button" class="btn btn-primary btn-serach" value="{{ 'action.verifyAddress' | translate }}" (click)="verifyAddress(item)"><br>
+              </p>
+            </ng-template>
+          </li>
+        </ul>
+        <select #selectedAddressType (change) = "refresh()">
+          <option value=44>Legacy</option>
+          <option value=84>Segwit</option>
+          <option value=49 selected>P2shsegwit</option>
+        </select>
+        <br>
+        <br>
+        <input type="button" class="btn btn-primary btn-serach" value="Add" (click)="generateNextAddress(+selectedAddressType.value)">
+      </tab>
+      <tab heading="Send">
+        <div class="tab-wrapper">
+          <label class="first-position"> {{ 'label.sendXSN' | translate }}</label>
+          <div class="first-position">{{ 'label.address' | translate }}</div>
+          <input class="second-position complete black-text" #destinationAddress type="text">
+          <div class="first-position">{{ 'label.amount' | translate }}</div>
+          <input class="second-position complete black-text" #amountValue (change)="precise(amountValue)" #amountXSN type="number" min="0" step="0.00000001">
+          <div class="first-position">{{ 'label.fee' | translate }}</div>
+          <select class="second-position" #selectedFee (change) = "refresh()">
+            <option value="1000">{{ 'label.highFee' | translate }}</option>
+            <option value="500" selected>{{ 'label.normalFee' | translate }}</option>
+            <option value="100">{{ 'label.lowFee' | translate }}</option>
+          </select>
+          <div class="third-position complete">{{ selectedFee.value }} {{ 'label.satoshis' | translate }}</div>
+          <input class="first-position btn btn-primary btn-serach" type="button" value="{{ 'label.send' | translate }}"
+          (click)="signTransaction(destinationAddress.value, amountXSN.value, selectedFee.value)">
+        </div>
+        <br>
+        <label>Generated transaction id: </label>
+        <br>
+        <a routerLink="/transactions/{{ txid }}">{{ txid }}</a>
+      </tab>
+      <tab heading="TPOS">
+        <b>Coming soon</b>
+        <!-- <label> {{ 'label.tpos' | translate }}</label><br>
+        Merchant address:<br>
+        <input class="black-text" #merchantAddress type="text"><br>
+        MerchantStake address:<br>
+        <select #selectedStakeAddress>
+          <option *ngFor="let item of trezorAddresses">{{ item.address }}</option>
+        </select><br>
+        Comisión:<br>
+        <input class="black-text" #commisionXSN type="number" min="0"><br>
+        <br>
+        <input type="button" class="btn btn-primary btn-serach" value="{{ 'label.send' | translate }}" (click)="sendTPOS()"> -->
+      </tab>
+    </tabset>
+    <br>
+    <input type="button" class="btn btn-primary btn-serach" value="{{ 'label.resetWallet' | translate }}" (click)="resetWallet()">
+    <br>
+  </div>
+</div>

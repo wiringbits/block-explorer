@@ -26,4 +26,13 @@ export class TransactionsService {
     const url = `${this.baseUrl}/${txid}/raw`;
     return this.http.get<any>(url);
   }
+
+  push(hex: string): Observable<any> {
+    const url = this.baseUrl;
+    const body = {
+      hex: hex
+    };
+
+    return this.http.post<any>(url, body, httpOptions);
+  }
 }
