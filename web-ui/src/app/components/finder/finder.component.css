@@ -7,7 +7,7 @@
 ::-webkit-input-placeholder {
   /* Edge */
   opacity: 0.8;
-  font-family: InterUI-Regular;
+  font-family: helvetica neue, Helvetica, Arial, sans-serif;
   font-size: 12px;
   color: #141829;
 }
@@ -15,14 +15,14 @@
 :-ms-input-placeholder {
   /* Internet Explorer */
   opacity: 0.8;
-  font-family: InterUI-Regular;
+  font-family: helvetica neue, Helvetica, Arial, sans-serif;
   font-size: 12px;
   color: #141829;
 }
 
 ::placeholder {
   opacity: 0.8;
-  font-family: InterUI-Regular;
+  font-family: helvetica neue, Helvetica, Arial, sans-serif;
   font-size: 12px;
   color: #141829;
 }
