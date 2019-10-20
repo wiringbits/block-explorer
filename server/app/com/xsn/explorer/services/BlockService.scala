@@ -161,16 +161,19 @@ class BlockService @Inject()(
   }
 
   def extractionMethod(block: rpc.Block[_]): FutureApplicationResult[BlockExtractionMethod] = {
-    if (block.tposContract.isDefined) {
-      Future.successful(Good(BlockExtractionMethod.TrustlessProofOfStake))
-    } else if (block.transactions.isEmpty) {
-      Future.successful(Good(BlockExtractionMethod.ProofOfWork))
-    } else {
-      isPoS(block).toFutureOr.map {
-        case true => BlockExtractionMethod.ProofOfStake
-        case false => BlockExtractionMethod.ProofOfWork
-      }.toFuture
-    }
+    isTPoS(block).toFutureOr.flatMap {
+      case true => Future.successful(Good(BlockExtractionMethod.TrustlessProofOfStake)).toFutureOr
+      case false => {
+        if (block.transactions.isEmpty) {
+          Future.successful(Good(BlockExtractionMethod.ProofOfWork)).toFutureOr
+        } else {
+          isPoS(block).toFutureOr.map {
+            case true => BlockExtractionMethod.ProofOfStake
+            case false => BlockExtractionMethod.ProofOfWork
+          }
+        }
+      }
+    }.toFuture
   }
 
   def estimateFee(nBlocks: Int): FutureApplicationResult[JsValue] = {
@@ -233,6 +236,10 @@ class BlockService @Inject()(
     } yield blockLogic.isPoS(block, coinbase)
 
     result.toFuture
+  }
+
+  private def isTPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {
+    block.tposContract.map(xsnService.isTPoSContract).getOrElse(Future.successful(Good(false)))
   }
 
   private def getBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
