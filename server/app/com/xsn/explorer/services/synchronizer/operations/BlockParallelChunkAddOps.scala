@@ -23,7 +23,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = state match {
     case BlockSynchronizationState.StoringBlock =>
       storeBlock(block, tposContracts, filterFactory, rewards)
@@ -56,7 +56,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val initialState = BlockSynchronizationState.StoringBlock
     val nextState = BlockSynchronizationState.StoringBlockData
@@ -82,7 +82,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringTransactions
     val filterF = Future { filterFactory() }
@@ -112,7 +112,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringOutputs
     val storeTransactionsF = block.transactions.zipWithIndex.map {
@@ -138,7 +138,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringInputs
     val storeOutputsF =
@@ -163,7 +163,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.SpendingOutputs
     val storeInputsF =
@@ -188,7 +188,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringAddressTransactionDetails
     val spendOutputsF =
@@ -213,7 +213,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.UpdatingTPoSContracts
     val storeDetailsF =
@@ -238,7 +238,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringRewards
 
@@ -273,7 +273,7 @@ class BlockParallelChunkAddOps @Inject()(blockChunkRepository: BlockChunkReposit
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.UpdatingBalances
 

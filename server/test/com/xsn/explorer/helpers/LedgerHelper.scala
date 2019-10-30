@@ -35,12 +35,17 @@ object LedgerHelper {
   }
 
   def getPoSReward(block: rpc.Block.Canonical): PoSBlockRewards = {
-    PoSBlockRewards(BlockReward(Address.from(list.head).get, 1000), None)
+    val reward = BlockReward(Address.from(list.head).get, 1000)
+    val masternodeReward = BlockReward(Address.from(list.head).get, 250)
+
+    PoSBlockRewards(reward, Some(masternodeReward))
   }
 
   def getTPoSReward(block: rpc.Block.Canonical): TPoSBlockRewards = {
     val ownerReward = BlockReward(Address.from(list.head).get, 1000)
     val merchantReward = BlockReward(Address.from(list(1)).get, 100)
-    TPoSBlockRewards(ownerReward, merchantReward, None)
+    val masternodeReward = BlockReward(Address.from(list.head).get, 250)
+
+    TPoSBlockRewards(ownerReward, merchantReward, Some(masternodeReward))
   }
 }

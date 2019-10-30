@@ -21,7 +21,7 @@ class LedgerFutureDataHandler @Inject()(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     retryableFutureDataHandler.retrying {
       Future {

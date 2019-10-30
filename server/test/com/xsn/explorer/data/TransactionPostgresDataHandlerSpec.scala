@@ -293,14 +293,16 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       .map(_._1)
 
     val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward)
+    val result =
+      ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, Some(reward))
 
     result.isGood mustEqual true
   }
 
   private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
     val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
-    val result = ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward)
+    val result =
+      ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, Some(reward))
 
     result.isGood mustEqual true
   }

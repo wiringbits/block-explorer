@@ -80,7 +80,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
   def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
-      rewards <- blockService.getBlockRewards(rpcBlock, extractionMethod).toFutureOr
+      rewards <- getBlockRewards(rpcBlock, extractionMethod).toFutureOr
       data <- transactionCollectorService.collect(rpcBlock).toFutureOr
       (transactions, contracts, filterFactory) = data
       validContracts <- getValidContracts(contracts).toFutureOr
@@ -97,6 +97,16 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
     }
 
     result.toFuture
+  }
+
+  private def getBlockRewards(
+      rpcBlock: rpc.Block[_],
+      extractionMethod: BlockExtractionMethod
+  ): FutureApplicationResult[Option[BlockRewards]] = {
+    blockService.getBlockRewards(rpcBlock, extractionMethod).map {
+      case Good(reward) => Good(Some(reward))
+      case Bad(_) => Good(None)
+    }
   }
 
   private def getValidContracts(contracts: List[TPoSContract]): FutureApplicationResult[List[TPoSContract]] = {

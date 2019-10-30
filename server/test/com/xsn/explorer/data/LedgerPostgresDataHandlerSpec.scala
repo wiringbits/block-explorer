@@ -13,7 +13,7 @@ import org.scalatest.BeforeAndAfter
 class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
-  private val reward = getPoWReward(blockList.head)
+  private val reward = Some(getPoWReward(blockList.head))
   lazy val dataHandler = createLedgerDataHandler(database)
 
   before {
@@ -64,6 +64,19 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       ).accumulating
     }
 
+    "store block without reward" in {
+      val block = blockList.head
+
+      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty, emptyFilterFactory, None) mustEqual Good(
+        ()
+      )
+
+      database.withConnection { implicit conn =>
+        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        reward mustEqual None
+      }
+    }
+
     "store PoW block rewards" in {
       val block = blockList.head
       val powReward = getPoWReward(block)
@@ -71,12 +84,12 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.ProofOfWork)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(powBlock, List.empty, emptyFilterFactory, powReward) mustEqual Good(())
+      dataHandler.push(powBlock, List.empty, emptyFilterFactory, Some(powReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
         val reward = blockRewardPostgresDAO.getBy(block.hash)
         reward match {
-          case r: PoWBlockRewards => {
+          case Some(r: PoWBlockRewards) => {
             r.reward.address mustEqual powReward.reward.address
             r.reward.value mustEqual powReward.reward.value
           }
@@ -92,14 +105,40 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(posBlock, List.empty, emptyFilterFactory, posReward) mustEqual Good(())
+      dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
         val reward = blockRewardPostgresDAO.getBy(block.hash)
         reward match {
-          case r: PoSBlockRewards => {
+          case Some(r: PoSBlockRewards) => {
             r.coinstake.address mustEqual posReward.coinstake.address
             r.coinstake.value mustEqual posReward.coinstake.value
+
+            r.masternode.get.address mustEqual posReward.masternode.get.address
+            r.masternode.get.value mustEqual posReward.masternode.get.value
+          }
+          case _ => fail
+        }
+      }
+    }
+
+    "store PoS block rewards without masternode" in {
+      val block = blockList.head
+      val posReward = getPoSReward(block).copy(masternode = None)
+      val posBlock = toPersistedBlock(block)
+        .copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
+        .withTransactions(getTransactions(block))
+
+      dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
+
+      database.withConnection { implicit conn =>
+        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        reward match {
+          case Some(r: PoSBlockRewards) => {
+            r.coinstake.address mustEqual posReward.coinstake.address
+            r.coinstake.value mustEqual posReward.coinstake.value
+
+            r.masternode mustBe None
           }
           case _ => fail
         }
@@ -113,17 +152,46 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(tposBlock, List.empty, emptyFilterFactory, tposReward) mustEqual Good(())
+      dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
         val reward = blockRewardPostgresDAO.getBy(block.hash)
         reward match {
-          case r: TPoSBlockRewards => {
+          case Some(r: TPoSBlockRewards) => {
             r.owner.address mustEqual tposReward.owner.address
             r.owner.value mustEqual tposReward.owner.value
 
             r.merchant.address mustEqual tposReward.merchant.address
             r.merchant.value mustEqual tposReward.merchant.value
+
+            r.masternode.get.address mustEqual tposReward.masternode.get.address
+            r.masternode.get.value mustEqual tposReward.masternode.get.value
+          }
+          case _ => fail
+        }
+      }
+    }
+
+    "store TPoS block rewards without masternode" in {
+      val block = blockList.head
+      val tposReward = getTPoSReward(block).copy(masternode = None)
+      val tposBlock = toPersistedBlock(block)
+        .copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
+        .withTransactions(getTransactions(block))
+
+      dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
+
+      database.withConnection { implicit conn =>
+        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        reward match {
+          case Some(r: TPoSBlockRewards) => {
+            r.owner.address mustEqual tposReward.owner.address
+            r.owner.value mustEqual tposReward.owner.value
+
+            r.merchant.address mustEqual tposReward.merchant.address
+            r.merchant.value mustEqual tposReward.merchant.value
+
+            r.masternode mustBe None
           }
           case _ => fail
         }

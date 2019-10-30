@@ -170,9 +170,9 @@ class BlockChunkPostgresRepository @Inject()(
     maybe.map(x => Good(x)).getOrElse(throw new RuntimeException(s"Failed to rollback block $blockhash"))
   }
 
-  override def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): ApplicationResult[Unit] = {
+  override def upsertBlockReward(blockhash: Blockhash, reward: Option[BlockRewards]): ApplicationResult[Unit] = {
     withConnection { implicit conn =>
-      blockRewardDAO.upsert(blockhash, reward)
+      reward.foreach(blockRewardDAO.upsert(blockhash, _))
       Good(())
     }
   }

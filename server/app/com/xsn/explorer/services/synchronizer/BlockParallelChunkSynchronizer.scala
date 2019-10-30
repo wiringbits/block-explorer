@@ -30,7 +30,7 @@ class BlockParallelChunkSynchronizer @Inject()(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val start = System.currentTimeMillis()
     val result = for {

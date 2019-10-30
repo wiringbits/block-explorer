@@ -22,7 +22,7 @@ trait LedgerDataHandler[F[_]] {
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): F[Unit]
 
   /**

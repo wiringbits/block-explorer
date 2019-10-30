@@ -55,7 +55,7 @@ trait BlockChunkRepository[F[_]] {
    */
   def atomicRollback(blockhash: Blockhash): F[Unit]
 
-  def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): F[Unit]
+  def upsertBlockReward(blockhash: Blockhash, reward: Option[BlockRewards]): F[Unit]
 }
 
 object BlockChunkRepository {
@@ -138,8 +138,9 @@ object BlockChunkRepository {
       blocking.atomicRollback(blockhash)
     }
 
-    override def upsertBlockReward(blockhash: Blockhash, reward: BlockRewards): FutureApplicationResult[Unit] = Future {
-      blocking.upsertBlockReward(blockhash, reward)
-    }
+    override def upsertBlockReward(blockhash: Blockhash, reward: Option[BlockRewards]): FutureApplicationResult[Unit] =
+      Future {
+        blocking.upsertBlockReward(blockhash, reward)
+      }
   }
 }

@@ -20,17 +20,20 @@ class BlockRewardPostgresDAO {
     getRewards(reward).foreach(r => upsert(blockhash, r._1, r._2))
   }
 
-  def getBy(blockhash: Blockhash)(implicit conn: Connection): BlockRewards = {
+  def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[BlockRewards] = {
     val rewards = getRewards(blockhash)
     rewards match {
-      case (r: BlockReward, RewardType.PoW) :: Nil =>
-        PoWBlockRewards(r)
-      case (r: BlockReward, RewardType.PoS) :: Nil =>
-        PoSBlockRewards(r, None)
-      case (ownerReward: BlockReward, RewardType.TPoSOwner) :: (merchantReward: BlockReward, RewardType.TPoSMerchant) :: Nil =>
-        TPoSBlockRewards(ownerReward, merchantReward, None)
-      case (merchantReward: BlockReward, RewardType.TPoSMerchant) :: (ownerReward: BlockReward, RewardType.TPoSOwner) :: Nil =>
-        TPoSBlockRewards(ownerReward, merchantReward, None)
+      case (r, RewardType.PoW) :: Nil =>
+        Some(PoWBlockRewards(r))
+      case (r, RewardType.PoS) :: Nil =>
+        Some(PoSBlockRewards(r, None))
+      case (r, RewardType.PoS) :: (masternode, RewardType.Masternode) :: Nil =>
+        Some(PoSBlockRewards(r, Some(masternode)))
+      case (owner, RewardType.TPoSOwner) :: (merchant, RewardType.TPoSMerchant) :: Nil =>
+        Some(TPoSBlockRewards(owner, merchant, None))
+      case (masternode, RewardType.Masternode) :: (owner, RewardType.TPoSOwner) :: (merchant, RewardType.TPoSMerchant) :: Nil =>
+        Some(TPoSBlockRewards(owner, merchant, Some(masternode)))
+      case Nil => None
       case _ =>
         throw new RuntimeException("Unknown reward type")
     }
@@ -79,6 +82,7 @@ class BlockRewardPostgresDAO {
         |SELECT address, value, type
         |FROM block_rewards
         |WHERE blockhash = {blockhash}
+        |ORDER BY type
     """.stripMargin
     ).on(
         "blockhash" -> blockhash.toBytesBE.toArray
@@ -88,13 +92,16 @@ class BlockRewardPostgresDAO {
 
   private def getRewards(reward: BlockRewards): List[(BlockReward, RewardType)] = {
     reward match {
-      case r: PoWBlockRewards => List((r.reward, RewardType.PoW))
-      case r: PoSBlockRewards => List((r.coinstake, RewardType.PoS))
+      case r: PoWBlockRewards =>
+        List((r.reward, RewardType.PoW))
+      case r: PoSBlockRewards =>
+        val rewards = List((r.coinstake, RewardType.PoS))
+
+        rewards ++ r.masternode.map((_, RewardType.Masternode))
       case r: TPoSBlockRewards =>
-        List(
-          (r.owner, RewardType.TPoSOwner),
-          (r.merchant, RewardType.TPoSMerchant)
-        )
+        val rewards = List((r.owner, RewardType.TPoSOwner), (r.merchant, RewardType.TPoSMerchant))
+
+        rewards ++ r.masternode.map((_, RewardType.Masternode))
     }
   }
 }

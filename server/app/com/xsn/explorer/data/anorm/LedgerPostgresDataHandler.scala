@@ -38,7 +38,7 @@ class LedgerPostgresDataHandler @Inject()(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
       filterFactory: () => GolombCodedSet,
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   ): ApplicationResult[Unit] = {
 
     // the filter is computed outside the transaction to avoid unnecessary locking
@@ -80,7 +80,7 @@ class LedgerPostgresDataHandler @Inject()(
       block: Block.HasTransactions,
       filter: GolombCodedSet,
       tposContracts: List[TPoSContract],
-      rewards: BlockRewards
+      rewards: Option[BlockRewards]
   )(implicit conn: Connection): Option[Unit] = {
 
     val result = for {
@@ -88,7 +88,7 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
       _ = blockFilterPostgresDAO.insert(block.hash, filter)
-      _ = blockRewardDAO.upsert(block.hash, rewards)
+      _ = rewards.foreach(blockRewardDAO.upsert(block.hash, _))
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
