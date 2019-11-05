@@ -1,7 +1,7 @@
 package controllers.common
 
 import com.alexitc.playsonify.test.PlayAPISpec
-import com.xsn.explorer.modules.PollerSynchronizerModule
+import com.xsn.explorer.modules.{DatabaseMigrationsModule, PollerSynchronizerModule}
 import org.slf4j.LoggerFactory
 import play.api.db.{DBApi, Database, Databases}
 import play.api.inject.bind
@@ -48,6 +48,7 @@ trait MyAPISpec extends PlayAPISpec {
     GuiceApplicationBuilder(loadConfiguration = loadConfigWithoutEvolutions)
       .in(Mode.Test)
       .disable(classOf[PollerSynchronizerModule])
+      .disable(classOf[DatabaseMigrationsModule])
       .overrides(bind[Database].to(dummyDB))
       .overrides(bind[DBApi].to(dummyDBApi))
 }
