@@ -109,7 +109,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       )
       val reward = BlockReward(DataGenerator.randomAddress, 1000)
       val masternodeReward = BlockReward(DataGenerator.randomAddress, 250)
-      val posReward = PoSBlockRewards(reward, Some(masternodeReward))
+      val posReward = PoSBlockRewards(reward, Some(masternodeReward), 10000, 120000)
       val synchronizer = createSynchronizer()
       whenReady(synchronizer.sync(posBlock, tposContracts, emptyFilterFactory, Some(posReward))) { result =>
         result must be(Good(()))
@@ -121,7 +121,8 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       val posBlock = blockWithTransactions.copy(
         block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
       )
-      val posReward = PoSBlockRewards(BlockReward(DataGenerator.randomAddress, 1000), None)
+      val reward = BlockReward(DataGenerator.randomAddress, 1000)
+      val posReward = PoSBlockRewards(reward, None, 10000, 120000)
       val synchronizer = createSynchronizer()
       whenReady(synchronizer.sync(posBlock, tposContracts, emptyFilterFactory, Some(posReward))) { result =>
         result must be(Good(()))
@@ -136,7 +137,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
       val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
       val masternodeReward = BlockReward(DataGenerator.randomAddress, 250)
-      val tposReward = TPoSBlockRewards(ownerReward, merchantReward, Some(masternodeReward))
+      val tposReward = TPoSBlockRewards(ownerReward, merchantReward, Some(masternodeReward), 10000, 120000)
       val synchronizer = createSynchronizer()
       whenReady(synchronizer.sync(tposBlock, tposContracts, emptyFilterFactory, Some(tposReward))) { result =>
         result must be(Good(()))
@@ -150,7 +151,7 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       )
       val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
       val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
-      val tposReward = TPoSBlockRewards(ownerReward, merchantReward, None)
+      val tposReward = TPoSBlockRewards(ownerReward, merchantReward, None, 10000, 120000)
       val synchronizer = createSynchronizer()
       whenReady(synchronizer.sync(tposBlock, tposContracts, emptyFilterFactory, Some(tposReward))) { result =>
         result must be(Good(()))
@@ -258,6 +259,9 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
         case Some(r: PoSBlockRewards) =>
           verifyReward(r.coinstake, posReward.coinstake)
           verifyMasterNodeReward(r.masternode, posReward.masternode)
+
+          r.stakedAmount mustEqual posReward.stakedAmount
+          r.stakedDuration mustEqual posReward.stakedDuration
         case _ => fail
       }
     }
@@ -271,6 +275,9 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
           verifyReward(r.owner, tposReward.owner)
           verifyReward(r.merchant, tposReward.merchant)
           verifyMasterNodeReward(r.masternode, tposReward.masternode)
+
+          r.stakedAmount mustEqual tposReward.stakedAmount
+          r.stakedDuration mustEqual tposReward.stakedDuration
         case _ => fail
       }
     }

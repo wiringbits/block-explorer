@@ -116,6 +116,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
             r.masternode.get.address mustEqual posReward.masternode.get.address
             r.masternode.get.value mustEqual posReward.masternode.get.value
+
+            r.stakedAmount mustEqual posReward.stakedAmount
+            r.stakedDuration mustEqual posReward.stakedDuration
           }
           case _ => fail
         }
@@ -139,6 +142,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.coinstake.value mustEqual posReward.coinstake.value
 
             r.masternode mustBe None
+
+            r.stakedAmount mustEqual posReward.stakedAmount
+            r.stakedDuration mustEqual posReward.stakedDuration
           }
           case _ => fail
         }
@@ -166,6 +172,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
             r.masternode.get.address mustEqual tposReward.masternode.get.address
             r.masternode.get.value mustEqual tposReward.masternode.get.value
+
+            r.stakedAmount mustEqual tposReward.stakedAmount
+            r.stakedDuration mustEqual tposReward.stakedDuration
           }
           case _ => fail
         }
@@ -192,6 +201,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.merchant.value mustEqual tposReward.merchant.value
 
             r.masternode mustBe None
+
+            r.stakedAmount mustEqual tposReward.stakedAmount
+            r.stakedDuration mustEqual tposReward.stakedDuration
           }
           case _ => fail
         }

@@ -39,6 +39,10 @@ class StatisticsService @Inject()(xsnService: XSNService, statisticsFutureDataHa
     result.toFuture
   }
 
+  def getRewardsSummary(numberOfBlocks: Int) = {
+    statisticsFutureDataHandler.getRewardsSummary(numberOfBlocks)
+  }
+
   private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
     value
       .map {

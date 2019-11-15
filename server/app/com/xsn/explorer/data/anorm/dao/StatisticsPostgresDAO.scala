@@ -3,8 +3,9 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
+import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseSummary
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
-import com.xsn.explorer.models.Statistics
+import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
 
 class StatisticsPostgresDAO {
 
@@ -27,6 +28,23 @@ class StatisticsPostgresDAO {
     ).as(StatisticsParsers.parseStatistics.single)
 
     result
+  }
+
+  def getSummary(numberOfBlocks: Int)(implicit conn: Connection): BlockRewardsSummary = {
+    SQL(
+      """
+        |SELECT
+        |  AVG(r.value) as average_reward, AVG(r.staked_amount) as average_input,
+        |  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY r.staked_time) as median_wait_time
+        |FROM (
+        |    SELECT * FROM blocks ORDER BY height DESC LIMIT {number_of_blocks}
+        |) b
+        |INNER JOIN block_rewards r ON r.blockhash = b.blockhash
+      """.stripMargin
+    ).on(
+        'number_of_blocks -> numberOfBlocks
+      )
+      .as(parseSummary.single)
   }
 }
 

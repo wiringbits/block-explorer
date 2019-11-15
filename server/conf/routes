@@ -29,6 +29,7 @@ GET   /v2/blocks/:blockhash/transactions controllers.BlocksController.getTransac
 GET   /v2/blocks/:blockhash/light-wallet-transactions controllers.BlocksController.getLightTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 
 GET   /stats                 controllers.StatisticsController.getStatus()
+GET   /rewards-summary       controllers.StatisticsController.getBlockRewardsSummary()
 
 GET   /v2/balances           controllers.BalancesController.getHighest(limit: Int ?= 10, lastSeenAddress: Option[String])
 

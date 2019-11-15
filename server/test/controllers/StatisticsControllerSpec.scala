@@ -3,10 +3,12 @@ package controllers
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.Statistics
+import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
+import org.mockito.ArgumentMatchersSugar.eqTo
 import org.mockito.Mockito.{mock => _, _}
+import org.mockito.MockitoSugar.when
 import org.scalactic.{Bad, Good}
 import org.scalatest.mockito.MockitoSugar._
 import play.api.inject.bind
@@ -25,6 +27,8 @@ class StatisticsControllerSpec extends MyAPISpec {
 
   val dataHandler = new StatisticsBlockingDataHandler {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
+
+    override def getRewardsSummary(numberOfBlocks: Int) = Good(BlockRewardsSummary(1000, 5000, 60000))
   }
 
   val xsnService = mock[XSNService]
@@ -83,6 +87,18 @@ class StatisticsControllerSpec extends MyAPISpec {
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
 
       missingDifficultyTest(masternodes)
+    }
+  }
+
+  "GET /rewards-summary" should {
+    "get rewards summary" in {
+      val response = GET(s"/rewards-summary")
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      (json \ "averageReward").as[BigDecimal] mustEqual 1000
+      (json \ "averageInput").as[BigDecimal] mustEqual 5000
+      (json \ "medianWaitTime").as[BigDecimal] mustEqual 60000
     }
   }
 
