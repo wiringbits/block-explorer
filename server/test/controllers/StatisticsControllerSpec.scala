@@ -3,10 +3,11 @@ package controllers
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.Statistics
+import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import org.mockito.Mockito.{mock => _, _}
+import org.mockito.MockitoSugar.when
 import org.scalactic.{Bad, Good}
 import org.scalatest.mockito.MockitoSugar._
 import play.api.inject.bind
@@ -25,6 +26,17 @@ class StatisticsControllerSpec extends MyAPISpec {
 
   val dataHandler = new StatisticsBlockingDataHandler {
     override def getStatistics(): ApplicationResult[Statistics] = Good(stats)
+
+    override def getRewardsSummary(numberOfBlocks: Int) =
+      Good(
+        BlockRewardsSummary(
+          BigDecimal("1000.12345678123"),
+          BigDecimal("4800.12345678123"),
+          BigDecimal("5000.12345678123"),
+          BigDecimal("4500.12345678123"),
+          BigDecimal("60000.12345678123")
+        )
+      )
   }
 
   val xsnService = mock[XSNService]
@@ -83,6 +95,20 @@ class StatisticsControllerSpec extends MyAPISpec {
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
 
       missingDifficultyTest(masternodes)
+    }
+  }
+
+  "GET /rewards-summary" should {
+    "get rewards summary" in {
+      val response = GET(s"/rewards-summary")
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal("1000.12345678")
+      (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal("4800.12345678")
+      (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
+      (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
+      (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
     }
   }
 

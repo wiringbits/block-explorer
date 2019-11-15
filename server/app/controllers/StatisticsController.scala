@@ -10,4 +10,8 @@ class StatisticsController @Inject()(statisticsService: StatisticsService, cc: M
   def getStatus() = public { _ =>
     statisticsService.getStatistics()
   }
+
+  def getBlockRewardsSummary() = public { _ =>
+    statisticsService.getRewardsSummary(1000)
+  }
 }

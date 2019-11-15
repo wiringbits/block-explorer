@@ -10,7 +10,7 @@ import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
-import com.xsn.explorer.models.rpc.{Block, TransactionVIN}
+import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Height, Size}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
@@ -291,7 +291,7 @@ class BlockService @Inject()(
         .toFutureOr
 
       rewards <- blockLogic
-        .getPoSRewards(coinstakeTx, coinstakeAddress, previousToCoinstakeVOUT.value)
+        .getPoSRewards(coinstakeTx, coinstakeAddress, previousToCoinstakeTx, previousToCoinstakeVOUT.value)
         .toFutureOr
     } yield rewards
 
@@ -305,7 +305,12 @@ class BlockService @Inject()(
         .getVIN(coinstakeTx, BlockRewardsNotFoundError)
         .toFutureOr
 
-      coinstakeInput <- getCoinstakeInput(coinstakeTxVIN).toFutureOr
+      previousToCoinstakeTx <- xsnService
+        .getTransaction(coinstakeTxVIN.txid)
+        .toFutureOr
+      previousToCoinstakeVOUT <- transactionLogic
+        .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
+        .toFutureOr
 
       tposTxId <- blockLogic
         .getTPoSTransactionId(block)
@@ -319,31 +324,11 @@ class BlockService @Inject()(
         .toFutureOr
 
       rewards <- blockLogic
-        .getTPoSRewards(coinstakeTx, contract, coinstakeInput)
+        .getTPoSRewards(coinstakeTx, contract, previousToCoinstakeTx, previousToCoinstakeVOUT.value)
         .toFutureOr
     } yield rewards
 
     result.toFuture
-  }
-
-  private def getCoinstakeInput(coinstakeTxVIN: TransactionVIN): FutureApplicationResult[BigDecimal] = {
-    def loadFromTx = {
-      val result = for {
-        previousToCoinstakeTx <- xsnService
-          .getTransaction(coinstakeTxVIN.txid)
-          .toFutureOr
-        previousToCoinstakeVOUT <- transactionLogic
-          .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
-          .toFutureOr
-      } yield previousToCoinstakeVOUT.value
-
-      result.toFuture
-    }
-
-    coinstakeTxVIN match {
-      case TransactionVIN.HasValues(_, _, value, _, _) => Future.successful(Good(value))
-      case _ => loadFromTx
-    }
   }
 
   private def getCoinbase(block: rpc.Block[_]): FutureApplicationResult[rpc.Transaction[_]] = {

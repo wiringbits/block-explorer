@@ -119,11 +119,12 @@ trait DataGenerator {
   def randomTransaction(
       blockhash: Blockhash,
       id: TransactionId = randomTransactionId,
-      utxos: List[Transaction.Output]
+      utxos: List[Transaction.Output],
+      time: Long = java.lang.System.currentTimeMillis()
   ): Transaction.HasIO = {
 
     Transaction.HasIO(
-      Transaction(id = id, blockhash = blockhash, time = java.lang.System.currentTimeMillis(), Size(1000)),
+      Transaction(id = id, blockhash = blockhash, time = time, Size(1000)),
       createInputs(utxos),
       randomOutputs().map(_.copy(txid = id))
     )

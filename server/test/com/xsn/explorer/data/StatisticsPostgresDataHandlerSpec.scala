@@ -4,16 +4,27 @@ import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO}
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.helpers.DataHelper
+import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
+import com.xsn.explorer.helpers.DataGenerator.randomTransaction
+import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
+import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
+import com.xsn.explorer.models.{BlockExtractionMethod, BlockReward, BlockRewards, PoSBlockRewards, TPoSBlockRewards}
 import com.xsn.explorer.models.persisted.Balance
-import com.xsn.explorer.models.values.Address
-import org.scalatest.OptionValues._
+import com.xsn.explorer.models.values.{Address, Height}
+import org.scalactic.Good
+import org.scalatest.BeforeAndAfter
 
-class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
+class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
+  val secondsInOneDay = 24 * 60 * 60
   lazy val dataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
+  lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val balanceDataHandler =
     new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+
+  before {
+    clearDatabase()
+  }
 
   "getStatistics" should {
     "succeed even if there is no data" in {
@@ -41,7 +52,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
-      result.circulatingSupply.value mustEqual circulatingSupply
+      result.circulatingSupply.getOrElse(0) mustEqual circulatingSupply
     }
 
     "exclude the burn address from the total supply" in {
@@ -54,8 +65,200 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
-      result.totalSupply.value mustEqual totalSupply
+      result.totalSupply.getOrElse(0) mustEqual totalSupply
     }
+  }
+
+  "getRewardsSummary" should {
+    "get the correct rewards summary when requesting as much blocks as there are stored" in {
+      pushPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        100,
+        1500,
+        1 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        300,
+        1234,
+        3 * secondsInOneDay
+      )
+      pushPoSBlock(
+        "000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924",
+        3,
+        400,
+        4321,
+        4 * secondsInOneDay
+      )
+
+      dataHandler.getRewardsSummary(4) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
+          areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(s.averagePoSInput, (1500 + 4321) / 2.0) mustBe true
+          areAlmostEqual(s.averageTPoSInput, (9999 + 1234) / 2.0) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
+        case _ => fail
+      }
+    }
+
+    "get the correct rewards summary when requesting less blocks than there are stored" in {
+      pushPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        100,
+        1500,
+        1 * secondsInOneDay
+      )
+      pushPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        300,
+        1234,
+        3 * secondsInOneDay
+      )
+      pushPoSBlock(
+        "000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924",
+        3,
+        400,
+        4321,
+        4 * secondsInOneDay
+      )
+
+      dataHandler.getRewardsSummary(2) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, (300 + 400) / 2.0) mustBe true
+          areAlmostEqual(s.averageInput, (1234 + 4321) / 2.0) mustBe true
+          areAlmostEqual(s.averagePoSInput, 4321) mustBe true
+          areAlmostEqual(s.averageTPoSInput, 1234) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
+        case _ => fail
+      }
+    }
+
+    "get the correct rewards summary when requesting more blocks than there are stored" in {
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        100,
+        1500,
+        1 * secondsInOneDay
+      )
+      pushPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        300,
+        1234,
+        3 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "000001ff95f22b8d82db14a5c5e9f725e8239e548be43c668766e7ddaee81924",
+        3,
+        400,
+        4321,
+        4 * secondsInOneDay
+      )
+
+      dataHandler.getRewardsSummary(999) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
+          areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(s.averagePoSInput, 9999) mustBe true
+          areAlmostEqual(s.averageTPoSInput, (1500 + 1234 + 4321) / 3.0) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
+        case _ => fail
+      }
+    }
+
+    "get the correct rewards summary when requesting only TPoS blocks" in {
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        100,
+        1500,
+        1 * secondsInOneDay
+      )
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay
+      )
+
+      dataHandler.getRewardsSummary(2) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, (100 + 200) / 2.0) mustBe true
+          areAlmostEqual(s.averageInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.averagePoSInput, 0) mustBe true
+          areAlmostEqual(s.averageTPoSInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+        case _ => fail
+      }
+    }
+
+    "get the correct rewards summary when requesting only PoS blocks" in {
+      pushPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        100,
+        1500,
+        1 * secondsInOneDay
+      )
+      pushPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay
+      )
+
+      dataHandler.getRewardsSummary(2) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, (100 + 200) / 2.0) mustBe true
+          areAlmostEqual(s.averageInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.averagePoSInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.averageTPoSInput, 0) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+        case _ => fail
+      }
+    }
+
+    "get the correct rewards summary when there are no blocks" in {
+      dataHandler.getRewardsSummary(2) match {
+        case Good(s) =>
+          areAlmostEqual(s.averageReward, 0) mustBe true
+          areAlmostEqual(s.averageInput, 0) mustBe true
+          areAlmostEqual(s.averagePoSInput, 0) mustBe true
+          areAlmostEqual(s.averageTPoSInput, 0) mustBe true
+          areAlmostEqual(s.medianWaitTime, 0) mustBe true
+        case _ => fail
+      }
+    }
+
   }
 
   private def setAvailableCoins(total: BigDecimal) = {
@@ -70,5 +273,66 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
         )
         .executeUpdate()
     }
+  }
+
+  private def pushBlock(
+      blockhash: String,
+      blockHeight: Int,
+      extractionMethod: BlockExtractionMethod,
+      reward: BlockRewards
+  ) = {
+    val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+
+    val block = BlockLoader
+      .get(blockhash)
+      .copy(
+        previousBlockhash = None,
+        nextBlockhash = None,
+        height = Height(blockHeight),
+        extractionMethod = extractionMethod
+      )
+
+    val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
+    val blockWithTransactions = block.withTransactions(List(tx))
+    ledgerDataHandler.push(blockWithTransactions, List.empty, emptyFilterFactory, Some(reward)).isGood mustEqual true
+  }
+
+  private def pushPoSBlock(
+      blockhash: String,
+      blockHeight: Int,
+      rewardValue: BigDecimal,
+      rewardStakedValue: BigDecimal,
+      rewardStakeWaitTime: Long
+  ) = {
+    val reward = PoSBlockRewards(
+      BlockReward(DataGenerator.randomAddress, rewardValue),
+      None,
+      rewardStakedValue,
+      rewardStakeWaitTime
+    )
+
+    pushBlock(blockhash, blockHeight, BlockExtractionMethod.ProofOfStake, reward)
+  }
+
+  private def pushTPoSBlock(
+      blockhash: String,
+      blockHeight: Int,
+      rewardValue: BigDecimal,
+      rewardStakedValue: BigDecimal,
+      rewardStakeWaitTime: Long
+  ) = {
+    val reward = TPoSBlockRewards(
+      BlockReward(DataGenerator.randomAddress, rewardValue * 0.9),
+      BlockReward(DataGenerator.randomAddress, rewardValue * 0.1),
+      None,
+      rewardStakedValue,
+      rewardStakeWaitTime
+    )
+
+    pushBlock(blockhash, blockHeight, BlockExtractionMethod.TrustlessProofOfStake, reward)
+  }
+
+  private def areAlmostEqual(n1: BigDecimal, n2: BigDecimal, epsilon: Double = 1e-6) = {
+    n1 === (n2 +- epsilon)
   }
 }

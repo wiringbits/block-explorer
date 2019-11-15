@@ -1,5 +1,6 @@
 package com.xsn.explorer.data
 
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
@@ -72,7 +73,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       )
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward mustEqual None
       }
     }
@@ -87,7 +88,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(powBlock, List.empty, emptyFilterFactory, Some(powReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward match {
           case Some(r: PoWBlockRewards) => {
             r.reward.address mustEqual powReward.reward.address
@@ -108,7 +109,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward match {
           case Some(r: PoSBlockRewards) => {
             r.coinstake.address mustEqual posReward.coinstake.address
@@ -116,6 +117,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
             r.masternode.get.address mustEqual posReward.masternode.get.address
             r.masternode.get.value mustEqual posReward.masternode.get.value
+
+            r.stakedAmount mustEqual posReward.stakedAmount
+            r.stakedDuration mustEqual posReward.stakedDuration
           }
           case _ => fail
         }
@@ -132,13 +136,16 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward match {
           case Some(r: PoSBlockRewards) => {
             r.coinstake.address mustEqual posReward.coinstake.address
             r.coinstake.value mustEqual posReward.coinstake.value
 
             r.masternode mustBe None
+
+            r.stakedAmount mustEqual posReward.stakedAmount
+            r.stakedDuration mustEqual posReward.stakedDuration
           }
           case _ => fail
         }
@@ -155,7 +162,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward match {
           case Some(r: TPoSBlockRewards) => {
             r.owner.address mustEqual tposReward.owner.address
@@ -166,6 +173,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
             r.masternode.get.address mustEqual tposReward.masternode.get.address
             r.masternode.get.value mustEqual tposReward.masternode.get.value
+
+            r.stakedAmount mustEqual tposReward.stakedAmount
+            r.stakedDuration mustEqual tposReward.stakedDuration
           }
           case _ => fail
         }
@@ -182,7 +192,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = blockRewardPostgresDAO.getBy(block.hash)
+        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
         reward match {
           case Some(r: TPoSBlockRewards) => {
             r.owner.address mustEqual tposReward.owner.address
@@ -192,6 +202,9 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.merchant.value mustEqual tposReward.merchant.value
 
             r.masternode mustBe None
+
+            r.stakedAmount mustEqual tposReward.stakedAmount
+            r.stakedDuration mustEqual tposReward.stakedDuration
           }
           case _ => fail
         }

@@ -3,7 +3,7 @@ package com.xsn.explorer.services.logic
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{Block, Transaction}
+import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import org.scalactic.{Bad, Good, One, Or}
 
@@ -64,6 +64,7 @@ class BlockLogic {
   def getPoSRewards(
       coinstakeTx: Transaction[_],
       coinstakeAddress: Address,
+      stakedTx: Transaction[TransactionVIN],
       coinstakeInput: BigDecimal
   ): ApplicationResult[PoSBlockRewards] = {
 
@@ -86,7 +87,7 @@ class BlockLogic {
         )
       }
 
-      Good(PoSBlockRewards(coinstakeReward, masternodeRewardMaybe))
+      Good(PoSBlockRewards(coinstakeReward, masternodeRewardMaybe, coinstakeInput, coinstakeTx.time - stakedTx.time))
     } else {
       Bad(BlockNotFoundError).accumulating
     }
@@ -95,6 +96,7 @@ class BlockLogic {
   def getTPoSRewards(
       coinstakeTx: Transaction[_],
       contract: TPoSContract.Details,
+      stakedTx: Transaction[TransactionVIN],
       coinstakeInput: BigDecimal
   ): ApplicationResult[TPoSBlockRewards] = {
 
@@ -134,7 +136,15 @@ class BlockLogic {
       )
     }
 
-    Good(TPoSBlockRewards(ownerReward, merchantReward, masternodeRewardMaybe))
+    Good(
+      TPoSBlockRewards(
+        ownerReward,
+        merchantReward,
+        masternodeRewardMaybe,
+        coinstakeInput,
+        coinstakeTx.time - stakedTx.time
+      )
+    )
   }
 
   def isPoS(block: rpc.Block[_], coinbase: rpc.Transaction[_]): Boolean = {

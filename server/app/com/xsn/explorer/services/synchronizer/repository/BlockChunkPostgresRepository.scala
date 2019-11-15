@@ -3,6 +3,7 @@ package com.xsn.explorer.services.synchronizer.repository
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.anorm.dao._
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Balance, Block, Transaction}
@@ -172,7 +173,10 @@ class BlockChunkPostgresRepository @Inject()(
 
   override def upsertBlockReward(blockhash: Blockhash, reward: Option[BlockRewards]): ApplicationResult[Unit] = {
     withConnection { implicit conn =>
-      reward.foreach(blockRewardDAO.upsert(blockhash, _))
+      reward
+        .map(BlockRewardPostgresSerializer.serialize)
+        .foreach(_.foreach(r => blockRewardDAO.upsert(blockhash, r)))
+
       Good(())
     }
   }

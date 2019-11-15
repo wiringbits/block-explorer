@@ -6,6 +6,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
@@ -88,7 +89,9 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- deleteBlockCascade(block.block).orElse(Some(()))
       _ <- blockPostgresDAO.insert(block.block)
       _ = blockFilterPostgresDAO.insert(block.hash, filter)
-      _ = rewards.foreach(blockRewardDAO.upsert(block.hash, _))
+      _ = rewards
+        .map(BlockRewardPostgresSerializer.serialize)
+        .foreach(_.foreach(r => blockRewardDAO.upsert(block.hash, r)))
 
       // batch insert
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)

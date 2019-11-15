@@ -3,48 +3,42 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 
 import anorm._
-import com.xsn.explorer.models.{
-  BlockReward,
-  BlockRewards,
-  PoSBlockRewards,
-  PoWBlockRewards,
-  RewardType,
-  TPoSBlockRewards
-}
 import com.xsn.explorer.models.values.Blockhash
 import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseBlockReward
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.Reward
 
 class BlockRewardPostgresDAO {
 
-  def upsert(blockhash: Blockhash, reward: BlockRewards)(implicit conn: Connection): Unit = {
-    getRewards(reward).foreach(r => upsert(blockhash, r._1, r._2))
+  def upsert(blockhash: Blockhash, reward: Reward)(implicit conn: Connection): Unit = {
+    SQL(
+      """
+        |INSERT INTO block_rewards(blockhash, value, address, type, staked_amount, staked_time)
+        |VALUES({blockhash}, {value}, {address}, {type}::REWARD_TYPE, {staked_amount}, {staked_time})
+        |ON CONFLICT (blockhash, type) DO UPDATE
+        |SET blockhash = EXCLUDED.blockhash,
+        |    value = EXCLUDED.value,
+        |    address = EXCLUDED.address,
+        |    type = EXCLUDED.type,
+        |    staked_amount = EXCLUDED.staked_amount,
+        |    staked_time = EXCLUDED.staked_time
+      """.stripMargin
+    ).on(
+        'blockhash -> blockhash.toBytesBE.toArray,
+        'value -> reward.blockReward.value,
+        'address -> reward.blockReward.address.string,
+        'type -> reward.rewardType.entryName,
+        'staked_amount -> reward.stake.map(_.stakedAmount),
+        'staked_time -> reward.stake.map(_.stakedTime)
+      )
+      .execute()
   }
 
-  def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[BlockRewards] = {
-    val rewards = getRewards(blockhash)
-    rewards match {
-      case (r, RewardType.PoW) :: Nil =>
-        Some(PoWBlockRewards(r))
-      case (r, RewardType.PoS) :: Nil =>
-        Some(PoSBlockRewards(r, None))
-      case (r, RewardType.PoS) :: (masternode, RewardType.Masternode) :: Nil =>
-        Some(PoSBlockRewards(r, Some(masternode)))
-      case (owner, RewardType.TPoSOwner) :: (merchant, RewardType.TPoSMerchant) :: Nil =>
-        Some(TPoSBlockRewards(owner, merchant, None))
-      case (masternode, RewardType.Masternode) :: (owner, RewardType.TPoSOwner) :: (merchant, RewardType.TPoSMerchant) :: Nil =>
-        Some(TPoSBlockRewards(owner, merchant, Some(masternode)))
-      case Nil => None
-      case _ =>
-        throw new RuntimeException("Unknown reward type")
-    }
-  }
-
-  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[(BlockReward, RewardType)] = {
+  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Reward] = {
     SQL(
       """
         |DELETE FROM block_rewards
         |WHERE blockhash = {blockhash}
-        |RETURNING address, value, type
+        |RETURNING address, value, type, staked_amount, staked_time
       """.stripMargin
     ).on(
         'blockhash -> blockhash.toBytesBE.toArray
@@ -52,34 +46,10 @@ class BlockRewardPostgresDAO {
       .as(parseBlockReward.*)
   }
 
-  private def upsert(blockhash: Blockhash, reward: BlockReward, rewardType: RewardType)(
-      implicit conn: Connection
-  ): Unit = {
+  def getBy(blockhash: Blockhash)(implicit conn: Connection): List[Reward] = {
     SQL(
       """
-        |INSERT INTO block_rewards(blockhash, value, address, type)
-        |VALUES({blockhash}, {value}, {address}, {type}::REWARD_TYPE)
-        |ON CONFLICT (blockhash, type) DO UPDATE
-        |SET blockhash = EXCLUDED.blockhash,
-        |    value = EXCLUDED.value,
-        |    address = EXCLUDED.address,
-        |    type = EXCLUDED.type
-      """.stripMargin
-    ).on(
-        'blockhash -> blockhash.toBytesBE.toArray,
-        'value -> reward.value,
-        'address -> reward.address.string,
-        'type -> rewardType.entryName
-      )
-      .execute()
-  }
-
-  private def getRewards(blockhash: Blockhash)(
-      implicit conn: Connection
-  ): List[(BlockReward, RewardType)] = {
-    SQL(
-      """
-        |SELECT address, value, type
+        |SELECT address, value, type, staked_amount, staked_time
         |FROM block_rewards
         |WHERE blockhash = {blockhash}
         |ORDER BY type
@@ -88,20 +58,5 @@ class BlockRewardPostgresDAO {
         "blockhash" -> blockhash.toBytesBE.toArray
       )
       .as(parseBlockReward.*)
-  }
-
-  private def getRewards(reward: BlockRewards): List[(BlockReward, RewardType)] = {
-    reward match {
-      case r: PoWBlockRewards =>
-        List((r.reward, RewardType.PoW))
-      case r: PoSBlockRewards =>
-        val rewards = List((r.coinstake, RewardType.PoS))
-
-        rewards ++ r.masternode.map((_, RewardType.Masternode))
-      case r: TPoSBlockRewards =>
-        val rewards = List((r.owner, RewardType.TPoSOwner), (r.merchant, RewardType.TPoSMerchant))
-
-        rewards ++ r.masternode.map((_, RewardType.Masternode))
-    }
   }
 }
