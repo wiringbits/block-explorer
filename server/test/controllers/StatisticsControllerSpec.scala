@@ -1,21 +1,28 @@
 package controllers
 
+import akka.actor.{Actor, ActorSystem, Props}
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
 import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
 import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import controllers.common.MyAPISpec
 import org.mockito.Mockito.{mock => _, _}
 import org.mockito.MockitoSugar.when
 import org.scalactic.{Bad, Good}
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.mockito.MockitoSugar._
 import play.api.inject.bind
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-class StatisticsControllerSpec extends MyAPISpec {
+class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
+  override def afterAll: Unit = {
+    actorSystem.terminate()
+    ()
+  }
 
   val stats = Statistics(
     blocks = 45454,
@@ -40,11 +47,21 @@ class StatisticsControllerSpec extends MyAPISpec {
   }
 
   val xsnService = mock[XSNService]
+  val actorSystem = ActorSystem()
 
   override val application = guiceApplicationBuilder
     .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
     .overrides(bind[XSNService].to(xsnService))
+    .overrides(bind[ActorSystem].to(actorSystem))
     .build()
+
+  class CurrencyActorMock extends Actor {
+    override def receive: Receive = {
+      case CurrencySynchronizerActor.GetCurrency =>
+        val reply: (BigDecimal, BigDecimal) = (0.071231351, 0.063465494)
+        sender() ! reply
+    }
+  }
 
   "GET /stats" should {
     "return the server statistics" in {
@@ -109,6 +126,19 @@ class StatisticsControllerSpec extends MyAPISpec {
       (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
       (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
       (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
+    }
+  }
+
+  "GET /currency" should {
+    "get currency values" in {
+      actorSystem.actorOf(Props(classOf[CurrencyActorMock], this), "currency_synchronizer")
+
+      val response = GET("/prices")
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      (json \ "usd").as[BigDecimal] mustEqual 0.071231351
+      (json \ "eur").as[BigDecimal] mustEqual 0.063465494
     }
   }
 

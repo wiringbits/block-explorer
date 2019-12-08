@@ -10,24 +10,28 @@ class StatisticsController @Inject()(statisticsService: StatisticsService, cc: M
     extends MyJsonController(cc) {
 
   def getStatus() = public { _ =>
-    statisticsService.getStatistics()
-    .toFutureOr
-    .map {
-      value =>
+    statisticsService
+      .getStatistics()
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getBlockRewardsSummary() = public { _ =>
-    statisticsService.getRewardsSummary(1000)
-    .toFutureOr
-    .map {
-      value =>
+    statisticsService
+      .getRewardsSummary(1000)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
+  }
+
+  def getCurrency() = public { _ =>
+    statisticsService.getPrices
   }
 }

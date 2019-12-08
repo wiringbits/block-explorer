@@ -9,5 +9,7 @@ class ConfigModule extends AbstractModule {
     bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig])
     bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig])
     bind(classOf[ExplorerConfig]).to(classOf[ExplorerConfig.Play])
+    bind(classOf[CoinMarketCapConfig]).to(classOf[PlayCoinMarketCapConfig])
+    bind(classOf[CurrencySynchronizerConfig]).to(classOf[PlayCurrencySynchronizerConfig])
   }
 }

@@ -1,15 +1,24 @@
 package com.xsn.explorer.services
 
+import akka.pattern.ask
+import akka.actor.ActorSystem
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.async.StatisticsFutureDataHandler
-import com.xsn.explorer.models.{StatisticsDetails, SynchronizationProgress}
+import com.xsn.explorer.models.{Prices, StatisticsDetails, SynchronizationProgress}
+import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
+import akka.util.Timeout
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 
-class StatisticsService @Inject()(xsnService: XSNService, statisticsFutureDataHandler: StatisticsFutureDataHandler)(
+class StatisticsService @Inject()(
+    xsnService: XSNService,
+    actorSystem: ActorSystem,
+    statisticsFutureDataHandler: StatisticsFutureDataHandler
+)(
     implicit ec: ExecutionContext
 ) {
 
@@ -41,6 +50,16 @@ class StatisticsService @Inject()(xsnService: XSNService, statisticsFutureDataHa
 
   def getRewardsSummary(numberOfBlocks: Int) = {
     statisticsFutureDataHandler.getRewardsSummary(numberOfBlocks)
+  }
+
+  def getPrices(): FutureApplicationResult[Prices] = {
+    val currencyActor = actorSystem.actorSelection("user/currency_synchronizer")
+    implicit val timeout: Timeout = 10.seconds
+
+    currencyActor
+      .ask(CurrencySynchronizerActor.GetCurrency)
+      .mapTo[(BigDecimal, BigDecimal)]
+      .map(c => Good(Prices(c._1, c._2)))
   }
 
   private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
