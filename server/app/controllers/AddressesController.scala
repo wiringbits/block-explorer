@@ -1,5 +1,6 @@
 package controllers
 
+import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.ordering.OrderingQuery
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.models.LightWalletTransaction
@@ -22,11 +23,25 @@ class AddressesController @Inject()(
 
   def getBy(address: String) = public { _ =>
     addressService.getBy(address)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
     public { _ =>
       transactionService.getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)
+      .toFutureOr
+      .map {
+        value =>
+          val response = Ok(Json.toJson(value))
+          response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
     }
 
   /**
@@ -52,10 +67,24 @@ class AddressesController @Inject()(
 
   def getUnspentOutputs(address: String) = public { _ =>
     addressService.getUnspentOutputs(address)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getTPoSContracts(address: String) = public { _ =>
     tposContractService.getBy(address)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 }
 

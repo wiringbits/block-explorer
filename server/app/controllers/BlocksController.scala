@@ -23,6 +23,13 @@ class BlocksController @Inject()(
 
   def getLatestBlocks() = public { _ =>
     blockService.getLatestBlocks()
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
@@ -74,6 +81,13 @@ class BlocksController @Inject()(
       .map(Height.apply)
       .map(blockService.getDetails)
       .getOrElse(blockService.getDetails(query))
+      .toFutureOr
+      .map {
+        value =>
+          val response = Ok(Json.toJson(value))
+          response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
   }
 
   def getRawBlock(query: String) = public { _ =>
@@ -81,18 +95,46 @@ class BlocksController @Inject()(
       .map(Height.apply)
       .map(blockService.getRawBlock)
       .getOrElse(blockService.getRawBlock(query))
+      .toFutureOr
+      .map {
+        value =>
+          val response = Ok(Json.toJson(value))
+          response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
   }
 
   def getTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getLightTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
     transactionService.getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def estimateFee(nBlocks: Int) = public { _ =>
     blockService.estimateFee(nBlocks)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getBlockLite(blockhash: String) = public { _ =>

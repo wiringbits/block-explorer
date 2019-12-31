@@ -14,10 +14,24 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
 
   def getTransaction(txid: String) = public { _ =>
     transactionRPCService.getTransactionDetails(txid)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def getRawTransaction(txid: String) = public { _ =>
     transactionRPCService.getRawTransaction(txid)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 
   def sendRawTransaction() = publicInput { ctx: HasModel[SendRawTransactionRequest] =>
@@ -42,5 +56,12 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
 
   def getTransactionUtxoByIndex(txid: String, index: Int, includeMempool: Boolean) = public { _ =>
     transactionRPCService.getTransactionUtxoByIndex(txid, index, includeMempool)
+    .toFutureOr
+    .map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }
+    .toFuture
   }
 }
