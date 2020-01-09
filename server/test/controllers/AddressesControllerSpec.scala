@@ -94,7 +94,7 @@ class AddressesControllerSpec extends MyAPISpec {
     }
 
     "fail on bad address format" in {
-      val address = "XnH3bC9NruJ4wnu4Dgi8F"
+      val address = "9NruJ4wnu"
       val response = GET(url(address))
 
       status(response) mustEqual BAD_REQUEST
