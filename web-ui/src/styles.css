@@ -3,32 +3,35 @@
 @import "~ngx-toastr/toastr.css";
 
 html {
-   margin: 0px;
-   height: 100%;
-   width: 100%;
+  margin: 0px;
+  height: 100%;
+  width: 100%;
 }
 
 body {
-   margin: 0px;
-   min-height: 100%;
-   width: 100%;
-   background: linear-gradient( #141829 60%, #f8f8f8 40%);
-   background-attachment:fixed;
+  margin: 0px;
+  min-height: 100%;
+  width: 100%;
+  background: #141829;
+  background-attachment: fixed;
 }
 
-.table-borderless > tbody > tr > td,
-.table-borderless > tbody > tr > th,
-.table-borderless > tfoot > tr > td,
-.table-borderless > tfoot > tr > th,
-.table-borderless > thead > tr > td,
-.table-borderless > thead > tr > th {
-    border: none;
+.table-borderless>tbody>tr>td,
+.table-borderless>tbody>tr>th,
+.table-borderless>tfoot>tr>td,
+.table-borderless>tfoot>tr>th,
+.table-borderless>thead>tr>td,
+.table-borderless>thead>tr>th {
+  border: none;
 }
 
 .table-container {
-    background-color: white;
-    border-radius: 4px;
-    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+  background-color: white;
+  border-radius: 4px;
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  background-clip: content-box;
+  padding-left: 0px;
+  padding-right: 0px;
 }

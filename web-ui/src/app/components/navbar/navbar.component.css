@@ -5,7 +5,6 @@
 }
 
 .navbar-brand {
-  font-family: InterUI-Bold;
   font-size: 24px;
   color: #141829;
   font-weight: bold;
@@ -13,7 +12,6 @@
 
 .navbar-tab {
   margin-top: 1.8px;
-  font-family: InterUI-Bold;
   font-size: 16px;
   color: #141829;
   font-weight: bold;

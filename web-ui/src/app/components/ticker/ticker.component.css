@@ -40,3 +40,22 @@ small.currency {
   vertical-align: text-top;
   padding-top: 10px;
 }
+
+@media (max-width:767px) {
+
+  .no-left,
+  .no-right {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (min-width:768px) {
+  .no-left {
+    padding-left: 0;
+  }
+
+  .no-right {
+    padding-right: 0;
+  }
+}

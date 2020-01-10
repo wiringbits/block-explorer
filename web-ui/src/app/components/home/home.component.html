@@ -3,7 +3,7 @@
   <app-ticker></app-ticker>
 
   <div class="row">
-    <div class="col-xs-12 col-md-offset-2 col-md-8 table-container">
+    <div class="table-container col-xs-12 col-md-offset-2 col-md-8">
       <tabset justified="true">
         <tab heading="{{'label.latestBlocks' | translate}}" (select)="selectView('latestBlocks')">
           <app-latest-blocks *ngIf="isSelected('latestBlocks')"></app-latest-blocks>

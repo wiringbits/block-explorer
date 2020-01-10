@@ -5,26 +5,16 @@
 }
 
 ::-webkit-input-placeholder {
-  /* Edge */
-  opacity: 0.8;
-  font-family: helvetica neue, Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  color: #141829;
+  font-size: 14px;
 }
 
 :-ms-input-placeholder {
   /* Internet Explorer */
-  opacity: 0.8;
-  font-family: helvetica neue, Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  color: #141829;
+  font-size: 14px;
 }
 
 ::placeholder {
-  opacity: 0.8;
-  font-family: helvetica neue, Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  color: #141829;
+  font-size: 14px;
 }
 
 .input-group-addon {
@@ -35,4 +25,9 @@
 
 .input-lg {
   border-left: #ffffff;
+}
+
+.padding-finder {
+  padding-left: 2px;
+  padding-right: 2px;
 }
