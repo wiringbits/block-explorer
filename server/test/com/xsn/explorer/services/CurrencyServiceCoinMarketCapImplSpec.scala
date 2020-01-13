@@ -30,13 +30,7 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
   val actorSystem = ActorSystem()
   val scheduler = actorSystem.scheduler
 
-  val coinMarketCapConfig = new CoinMarketCapConfig {
-    override def host: CoinMarketCapConfig.Host = Host("host")
-
-    override def key: CoinMarketCapConfig.Key = Key("key")
-
-    override def coinID: CoinMarketCapConfig.CoinID = CoinID("123")
-  }
+  val coinMarketCapConfig = CoinMarketCapConfig(Host("host"), Key("key"), CoinID("id"))
 
   val retryConfig = RetryConfig(1.millisecond, 2.milliseconds)
 
@@ -47,7 +41,7 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
 
   val service = new CurrencyServiceCoinMarketCapImpl(ws, coinMarketCapConfig, retryConfig)(ec, scheduler)
 
-  def createSuccessfulUSDResponse(value: BigDecimal): String = {
+  def createSuccessfullResponse(currency: Currency, value: BigDecimal): String = {
     s"""
        |{
        |  "status": {
@@ -64,7 +58,7 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
        |    "amount": 1,
        |    "last_updated": "2019-08-30T18:51:11.000Z",
        |    "quote": {
-       |      "USD": {
+       |      "${currency.entryName}": {
        |        "price": $value,
        |        "last_updated": "2019-08-30T18:51:11.000Z"
        |      }
@@ -74,41 +68,14 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
      """.stripMargin
   }
 
-  def createSuccessfulEURResponse(value: BigDecimal): String = {
-    s"""
-       |{
-       |  "status": {
-       |    "timestamp": "2019-12-16T01:58:23.659Z",
-       |    "error_code": 0,
-       |    "error_message": null,
-       |    "elapsed": 6,
-       |    "credit_count": 1
-       |  },
-       |  "data": {
-       |    "id": 2633,
-       |    "symbol": "XSN",
-       |    "name": "Stakenet",
-       |    "amount": 1,
-       |    "last_updated": "2019-08-30T18:51:11.000Z",
-       |    "quote": {
-       |      "EUR": {
-       |        "price": $value,
-       |        "last_updated": "2019-08-30T18:51:11.000Z"
-       |      }
-       |    }
-       |  }
-       |}
-     """.stripMargin
-  }
-
-  "getUSDprice" should {
-    "get coin price in usd" in {
-      val responseBody = createSuccessfulUSDResponse(0.0734864351)
+  "getPrice" should {
+    "get coin price" in {
+      val responseBody = createSuccessfullResponse(Currency.USD, 0.0734864351)
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
 
-      whenReady(service.getUSDPrice) { result =>
+      whenReady(service.getPrice(Currency.USD)) { result =>
         result.isGood mustEqual true
 
         val usd = result.get
@@ -117,59 +84,23 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
     }
 
     "fail when status is not 200" in {
-      val responseBody = createSuccessfulUSDResponse(0.0734864351)
+      val responseBody = createSuccessfullResponse(Currency.USD, 0.0734864351)
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(502, json)
 
-      whenReady(service.getUSDPrice) { result =>
+      whenReady(service.getPrice(Currency.USD)) { result =>
         result mustEqual Bad(One(CoinMarketCapRequestFailedError(502)))
       }
     }
 
     "fail on unexpexted response" in {
-      val json = Json.parse(s"""{\"USD\": ${0.0734864351}}""")
-
-      mockRequest(request, response)(200, json)
-
-      whenReady(service.getUSDPrice) { result =>
-        result mustEqual Bad(One(CoinMarketCapUnexpectedResponseError))
-      }
-    }
-  }
-
-  "getEURprice" should {
-    "get coin price in eur" in {
-      val responseBody = createSuccessfulEURResponse(0.0634864351)
+      val responseBody = createSuccessfullResponse(Currency.USD, 0.0734864351)
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
 
-      whenReady(service.getEURPrice) { result =>
-        result.isGood mustEqual true
-
-        val eur = result.get
-        eur mustEqual 0.0634864351
-      }
-    }
-
-    "fail when status is not 200" in {
-      val responseBody = createSuccessfulEURResponse(0.0634864351)
-      val json = Json.parse(responseBody)
-
-      mockRequest(request, response)(502, json)
-
-      whenReady(service.getEURPrice) { result =>
-        result mustEqual Bad(One(CoinMarketCapRequestFailedError(502)))
-      }
-    }
-
-    "fail on unexpexted response" in {
-      val json = Json.parse(s"""{\"USD\": ${0.0634864351}}""")
-
-      mockRequest(request, response)(200, json)
-
-      whenReady(service.getEURPrice) { result =>
+      whenReady(service.getPrice(Currency.EUR)) { result =>
         result mustEqual Bad(One(CoinMarketCapUnexpectedResponseError))
       }
     }

@@ -1,34 +1,21 @@
 package com.xsn.explorer.config
 
-import javax.inject.Inject
+import com.xsn.explorer.config.CoinMarketCapConfig._
 import play.api.Configuration
 
-trait CoinMarketCapConfig {
-
-  import CoinMarketCapConfig._
-
-  def host: Host
-  def key: Key
-  def coinID: CoinID
-}
+case class CoinMarketCapConfig(host: Host, key: Key, coinID: CoinID)
 
 object CoinMarketCapConfig {
 
   case class Host(string: String) extends AnyVal
   case class Key(string: String) extends AnyVal
   case class CoinID(string: String) extends AnyVal
-}
 
-class PlayCoinMarketCapConfig @Inject()(config: Configuration) extends CoinMarketCapConfig {
+  def apply(config: Configuration): CoinMarketCapConfig = {
+    val host = Host(config.get[String]("coinMarketCap.host"))
+    val key = Key(config.get[String]("coinMarketCap.key"))
+    val coinID = CoinID(config.get[String]("coinMarketCap.coinID"))
 
-  import CoinMarketCapConfig._
-
-  private def get(name: String) = config.get[String](s"coinMarketCap.$name")
-
-  override val host: Host = Host(get("host"))
-
-  override def key: Key = Key(get("key"))
-
-  override def coinID: CoinID = CoinID(get("coinID"))
-
+    CoinMarketCapConfig(host, key, coinID)
+  }
 }

@@ -1,7 +1,8 @@
 package com.xsn.explorer.modules
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides}
 import com.xsn.explorer.config._
+import play.api.Configuration
 
 class ConfigModule extends AbstractModule {
 
@@ -9,7 +10,11 @@ class ConfigModule extends AbstractModule {
     bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig])
     bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig])
     bind(classOf[ExplorerConfig]).to(classOf[ExplorerConfig.Play])
-    bind(classOf[CoinMarketCapConfig]).to(classOf[PlayCoinMarketCapConfig])
-    bind(classOf[CurrencySynchronizerConfig]).to(classOf[PlayCurrencySynchronizerConfig])
   }
+
+  @Provides
+  def coinMarketCapConfig(config: Configuration): CoinMarketCapConfig = CoinMarketCapConfig(config)
+
+  @Provides
+  def currencuSynchronizerConfig(config: Configuration): CurrencySynchronizerConfig = CurrencySynchronizerConfig(config)
 }

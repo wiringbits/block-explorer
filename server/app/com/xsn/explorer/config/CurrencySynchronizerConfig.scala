@@ -1,23 +1,18 @@
 package com.xsn.explorer.config
 
-import javax.inject.Inject
 import play.api.Configuration
 
 import scala.concurrent.duration.FiniteDuration
 
-trait CurrencySynchronizerConfig {
+case class CurrencySynchronizerConfig(enabled: Boolean, initialDelay: FiniteDuration, interval: FiniteDuration)
 
-  def enabled: Boolean
-  def initialDelay: FiniteDuration
-  def interval: FiniteDuration
-}
+object CurrencySynchronizerConfig {
 
-class PlayCurrencySynchronizerConfig @Inject()(config: Configuration) extends CurrencySynchronizerConfig {
+  def apply(config: Configuration): CurrencySynchronizerConfig = {
+    val enabled: Boolean = config.get[Boolean]("currencySynchronizer.enabled")
+    val initialDelay: FiniteDuration = config.get[FiniteDuration]("currencySynchronizer.initialDelay")
+    val interval: FiniteDuration = config.get[FiniteDuration]("currencySynchronizer.interval")
 
-  override val enabled: Boolean = config.get[Boolean]("currencySynchronizer.enabled")
-
-  override def initialDelay: FiniteDuration = config.get[FiniteDuration]("currencySynchronizer.initialDelay")
-
-  override def interval: FiniteDuration = config.get[FiniteDuration]("currencySynchronizer.interval")
-
+    CurrencySynchronizerConfig(enabled, initialDelay, interval)
+  }
 }

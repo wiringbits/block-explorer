@@ -2,7 +2,7 @@ package com.xsn.explorer.tasks
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.xsn.explorer.config.CurrencySynchronizerConfig
-import com.xsn.explorer.services.CurrencyService
+import com.xsn.explorer.services.{Currency, CurrencyService}
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
@@ -13,23 +13,20 @@ import scala.util.{Failure, Success}
 class CurrencySynchronizerActor extends Actor {
   import context._
 
-  def receive = behavior(0, 0)
+  def receive = behavior(Currency.values.map(currency => currency -> BigDecimal(0)).toMap)
 
-  private def behavior(usd: BigDecimal, eur: BigDecimal): Receive = {
-    case CurrencySynchronizerActor.UpdateUSD(updatedUSD) =>
-      become(behavior(updatedUSD, eur))
-    case CurrencySynchronizerActor.UpdateEUR(updatedEUR) =>
-      become(behavior(usd, updatedEUR))
-    case CurrencySynchronizerActor.GetCurrency =>
-      val reply = (usd, eur)
-      sender() ! reply
+  private def behavior(prices: Map[Currency, BigDecimal]): Receive = {
+    case CurrencySynchronizerActor.UpdatePrice(currency, price) =>
+      val updatedPrices = prices + (currency -> price)
+      become(behavior(updatedPrices))
+    case CurrencySynchronizerActor.GetPrices =>
+      sender() ! prices
   }
 }
 
 object CurrencySynchronizerActor {
-  final case class UpdateUSD(usd: BigDecimal)
-  final case class UpdateEUR(eur: BigDecimal)
-  final case class GetCurrency()
+  final case class UpdatePrice(currency: Currency, price: BigDecimal)
+  final case class GetPrices()
 }
 
 class CurrencySynchronizerTask @Inject()(
@@ -45,25 +42,21 @@ class CurrencySynchronizerTask @Inject()(
     logger.info("Starting currency synchronizer task")
 
     val currencySynchronizerActor = actorSystem.actorOf(Props[CurrencySynchronizerActor], "currency_synchronizer")
-    actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
-      currencyService.getUSDPrice.onComplete {
-        case Success(Good(usd)) =>
-          logger.info(s"USD price synced to: $usd")
-          currencySynchronizerActor ! CurrencySynchronizerActor.UpdateUSD(usd)
-        case Success(Bad(error)) =>
-          logger.info(s"USD syncronization failed due to $error")
-        case Failure(exception) =>
-          logger.info(s"USD syncronization failed due to $exception")
-      }
 
-      currencyService.getEURPrice.onComplete {
-        case Success(Good(eur)) =>
-          logger.info(s"EUR price synced to: $eur")
-          currencySynchronizerActor ! CurrencySynchronizerActor.UpdateEUR(eur)
-        case Success(Bad(error)) =>
-          logger.info(s"EUR syncronization failed due to $error")
-        case Failure(exception) =>
-          logger.info(s"EUR syncronization failed due to $exception")
+    actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
+      Currency.values.foreach { currency =>
+        currencyService.getPrice(currency).onComplete {
+          case Success(Good(price)) =>
+            logger.info(s"${currency.entryName} price synced")
+            currencySynchronizerActor ! CurrencySynchronizerActor.UpdatePrice(currency, price)
+          case Success(Bad(error)) =>
+            logger.info(s"${currency.entryName} price syncronization failed due to $error")
+          case Failure(exception) =>
+            logger.info(
+              s"${currency.entryName} price syncronization failed due to ${exception.getLocalizedMessage}",
+              exception
+            )
+        }
       }
     }
   }

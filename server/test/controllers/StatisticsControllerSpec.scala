@@ -5,7 +5,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
 import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import controllers.common.MyAPISpec
 import org.mockito.Mockito.{mock => _, _}
@@ -58,8 +58,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   class CurrencyActorMock extends Actor {
     override def receive: Receive = {
-      case CurrencySynchronizerActor.GetCurrency =>
-        val reply: (BigDecimal, BigDecimal) = (0.071231351, 0.063465494)
+      case CurrencySynchronizerActor.GetPrices =>
+        val reply: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.EUR -> 0.063465494)
         sender() ! reply
     }
   }
@@ -131,7 +131,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     }
   }
 
-  "GET /currency" should {
+  "GET /prices" should {
     "get currency values" in {
       actorSystem.actorOf(Props(classOf[CurrencyActorMock], this), "currency_synchronizer")
 

@@ -11,15 +11,21 @@ import com.xsn.explorer.util.RetryableFuture
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One}
 import play.api.libs.ws.WSClient
+import enumeratum.{Enum, EnumEntry}
 
 import scala.util.{Failure, Success, Try}
 
+sealed abstract class Currency(override val entryName: String) extends EnumEntry
+
+object Currency extends Enum[Currency] {
+  final case object USD extends Currency("USD")
+  final case object EUR extends Currency("BTC")
+
+  val values = findValues
+}
+
 trait CurrencyService {
-
-  def getUSDPrice: FutureApplicationResult[BigDecimal]
-
-  def getEURPrice: FutureApplicationResult[BigDecimal]
-
+  def getPrice(currency: Currency): FutureApplicationResult[BigDecimal]
 }
 
 class CurrencyServiceCoinMarketCapImpl @Inject()(
@@ -60,44 +66,24 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
     }
   }
 
-  override def getUSDPrice: FutureApplicationResult[BigDecimal] = {
+  override def getPrice(currency: Currency): FutureApplicationResult[BigDecimal] = {
     retrying {
-      requestFor(s"v1/tools/price-conversion?id=${coinMarketCapConfig.coinID.string}&amount=1&convert=USD").get().map {
-        response =>
-          (response.status, response) match {
-            case (200, r) =>
-              Try(r.json).toOption
-                .map { json =>
-                  (json \ "data" \ "quote" \ "USD" \ "price")
-                    .asOpt[BigDecimal]
-                    .map(Good(_))
-                    .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
-                }
-                .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
-            case (code, _) =>
-              Bad(One(CoinMarketCapRequestFailedError(code)))
-          }
-      }
-    }
-  }
-
-  override def getEURPrice: FutureApplicationResult[BigDecimal] = {
-    retrying {
-      requestFor(s"v1/tools/price-conversion?id=${coinMarketCapConfig.coinID.string}&amount=1&convert=EUR").get().map {
-        response =>
-          (response.status, response) match {
-            case (200, r) =>
-              Try(r.json).toOption
-                .map { json =>
-                  (json \ "data" \ "quote" \ "EUR" \ "price")
-                    .asOpt[BigDecimal]
-                    .map(Good(_))
-                    .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
-                }
-                .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
-            case (code, _) =>
-              Bad(One(CoinMarketCapRequestFailedError(code)))
-          }
+      val url =
+        s"v1/tools/price-conversion?id=${coinMarketCapConfig.coinID.string}&amount=1&convert=${currency.entryName}"
+      requestFor(url).get().map { response =>
+        (response.status, response) match {
+          case (200, r) =>
+            Try(r.json).toOption
+              .map { json =>
+                (json \ "data" \ "quote" \ currency.entryName \ "price")
+                  .asOpt[BigDecimal]
+                  .map(Good(_))
+                  .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+              }
+              .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+          case (code, _) =>
+            Bad(One(CoinMarketCapRequestFailedError(code)))
+        }
       }
     }
   }
