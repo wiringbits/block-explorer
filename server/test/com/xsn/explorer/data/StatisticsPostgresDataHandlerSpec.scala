@@ -104,6 +104,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
           areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(s.medianInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (9999 + 1234) / 2.0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
@@ -145,6 +146,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, (300 + 400) / 2.0) mustBe true
           areAlmostEqual(s.averageInput, (1234 + 4321) / 2.0) mustBe true
+          areAlmostEqual(s.medianInput, (1234 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 4321) mustBe true
           areAlmostEqual(s.averageTPoSInput, 1234) mustBe true
           areAlmostEqual(s.medianWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
@@ -186,6 +188,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
           areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(s.medianInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 9999) mustBe true
           areAlmostEqual(s.averageTPoSInput, (1500 + 1234 + 4321) / 3.0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
@@ -213,6 +216,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, (100 + 200) / 2.0) mustBe true
           areAlmostEqual(s.averageInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.medianInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
@@ -240,6 +244,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, (100 + 200) / 2.0) mustBe true
           areAlmostEqual(s.averageInput, (1500 + 9999) / 2.0) mustBe true
+          areAlmostEqual(s.medianInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, 0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
@@ -252,6 +257,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         case Good(s) =>
           areAlmostEqual(s.averageReward, 0) mustBe true
           areAlmostEqual(s.averageInput, 0) mustBe true
+          areAlmostEqual(s.medianInput, 0) mustBe true
           areAlmostEqual(s.averagePoSInput, 0) mustBe true
           areAlmostEqual(s.averageTPoSInput, 0) mustBe true
           areAlmostEqual(s.medianWaitTime, 0) mustBe true

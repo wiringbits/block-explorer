@@ -33,10 +33,11 @@ object BlockRewardParsers {
   val parseSummary =
     (get[BigDecimal]("average_reward") ~
       get[BigDecimal]("average_input") ~
+      get[BigDecimal]("median_input") ~
       get[BigDecimal]("pos_average_input") ~
       get[BigDecimal]("tpos_average_input") ~
       get[BigDecimal]("median_wait_time")).map {
-      case averageReward ~ averageInput ~ averagePoSInput ~ averageTPoSInput ~ medianWaitTime =>
-        BlockRewardsSummary(averageReward, averageInput, averagePoSInput, averageTPoSInput, medianWaitTime)
+      case averageReward ~ averageInput ~ medianInput ~ averagePoSInput ~ averageTPoSInput ~ medianWaitTime =>
+        BlockRewardsSummary(averageReward, averageInput, medianInput, averagePoSInput, averageTPoSInput, medianWaitTime)
     }
 }

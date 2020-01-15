@@ -39,6 +39,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         BlockRewardsSummary(
           BigDecimal("1000.12345678123"),
           BigDecimal("4800.12345678123"),
+          BigDecimal("4900.12345678123"),
           BigDecimal("5000.12345678123"),
           BigDecimal("4500.12345678123"),
           BigDecimal("60000.12345678123")
@@ -123,6 +124,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       val json = contentAsJson(response)
       (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal("1000.12345678")
       (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal("4800.12345678")
+      (json \ "medianInput").as[BigDecimal] mustEqual BigDecimal("4900.12345678")
       (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
       (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
       (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
