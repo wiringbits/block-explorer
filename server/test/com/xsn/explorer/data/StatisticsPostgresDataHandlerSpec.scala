@@ -108,6 +108,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.averagePoSInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (9999 + 1234) / 2.0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.averageWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
         case _ => fail
       }
     }
@@ -150,6 +151,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.averagePoSInput, 4321) mustBe true
           areAlmostEqual(s.averageTPoSInput, 1234) mustBe true
           areAlmostEqual(s.medianWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.averageWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
         case _ => fail
       }
     }
@@ -191,7 +193,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.medianInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 9999) mustBe true
           areAlmostEqual(s.averageTPoSInput, (1500 + 1234 + 4321) / 3.0) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.averageWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
         case _ => fail
       }
     }
@@ -220,6 +223,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.averagePoSInput, 0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.averageWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
         case _ => fail
       }
     }
@@ -248,6 +252,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.averagePoSInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, 0) mustBe true
           areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(s.averageWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
         case _ => fail
       }
     }
@@ -261,6 +266,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.averagePoSInput, 0) mustBe true
           areAlmostEqual(s.averageTPoSInput, 0) mustBe true
           areAlmostEqual(s.medianWaitTime, 0) mustBe true
+          areAlmostEqual(s.averageWaitTime, 0) mustBe true
         case _ => fail
       }
     }

@@ -9,7 +9,8 @@ case class BlockRewardsSummary(
     medianInput: BigDecimal,
     averagePoSInput: BigDecimal,
     averageTPoSInput: BigDecimal,
-    medianWaitTime: BigDecimal
+    medianWaitTime: BigDecimal,
+    averageWaitTime: BigDecimal
 )
 
 object BlockRewardsSummary {
@@ -20,6 +21,7 @@ object BlockRewardsSummary {
       "medianInput" -> summary.medianInput.setScale(8, RoundingMode.HALF_UP),
       "averagePoSInput" -> summary.averagePoSInput.setScale(8, RoundingMode.HALF_UP),
       "averageTPoSInput" -> summary.averageTPoSInput.setScale(8, RoundingMode.HALF_UP),
-      "medianWaitTime" -> summary.medianWaitTime.setScale(8, RoundingMode.HALF_UP)
+      "medianWaitTime" -> summary.medianWaitTime.setScale(8, RoundingMode.HALF_UP),
+      "averageWaitTime" -> summary.averageWaitTime.setScale(8, RoundingMode.HALF_UP)
     )
 }

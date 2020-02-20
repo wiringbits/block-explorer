@@ -36,8 +36,9 @@ object BlockRewardParsers {
       get[BigDecimal]("median_input") ~
       get[BigDecimal]("pos_average_input") ~
       get[BigDecimal]("tpos_average_input") ~
-      get[BigDecimal]("median_wait_time")).map {
-      case averageReward ~ averageInput ~ medianInput ~ averagePoSInput ~ averageTPoSInput ~ medianWaitTime =>
-        BlockRewardsSummary(averageReward, averageInput, medianInput, averagePoSInput, averageTPoSInput, medianWaitTime)
+      get[BigDecimal]("median_wait_time") ~
+      get[BigDecimal]("average_wait_time")).map {
+      case averageReward ~ averageInput ~ medianInput ~ averagePoSInput ~ averageTPoSInput ~ medianWaitTime ~ averageWaitTime =>
+        BlockRewardsSummary(averageReward, averageInput, medianInput, averagePoSInput, averageTPoSInput, medianWaitTime, averageWaitTime)
     }
 }

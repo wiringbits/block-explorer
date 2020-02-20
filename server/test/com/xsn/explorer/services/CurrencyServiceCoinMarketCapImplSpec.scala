@@ -100,7 +100,7 @@ class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndA
 
       mockRequest(request, response)(200, json)
 
-      whenReady(service.getPrice(Currency.EUR)) { result =>
+      whenReady(service.getPrice(Currency.BTC)) { result =>
         result mustEqual Bad(One(CoinMarketCapUnexpectedResponseError))
       }
     }

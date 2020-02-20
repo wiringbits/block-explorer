@@ -39,7 +39,8 @@ class StatisticsPostgresDAO {
         |  COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY pos_staked_amount + tpos_staked_amount), 0) AS median_input,
         |  CASE WHEN SUM(pos_reward) > 0 THEN SUM(pos_staked_amount) / SUM(pos_reward) ELSE 0 END AS pos_average_input,
         |  CASE WHEN SUM(tpos_reward) > 0 THEN SUM(tpos_staked_amount) / SUM(tpos_reward) ELSE 0 END AS tpos_average_input,
-        |  COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY staked_time), 0) AS median_wait_time
+        |  COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY staked_time), 0) AS median_wait_time,
+        |  COALESCE(AVG(staked_time), 0) AS average_wait_time
         |FROM (
         |  SELECT
         |    SUM(r.value) AS reward,

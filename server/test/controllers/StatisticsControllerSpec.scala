@@ -42,7 +42,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
           BigDecimal("4900.12345678123"),
           BigDecimal("5000.12345678123"),
           BigDecimal("4500.12345678123"),
-          BigDecimal("60000.12345678123")
+          BigDecimal("60000.12345678123"),
+          BigDecimal("70000.12345678123")
         )
       )
   }
@@ -59,7 +60,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   class CurrencyActorMock extends Actor {
     override def receive: Receive = {
       case CurrencySynchronizerActor.GetPrices =>
-        val reply: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.EUR -> 0.063465494)
+        val reply: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
         sender() ! reply
     }
   }
@@ -128,6 +129,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
       (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
       (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
+      (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal("70000.12345678")
     }
   }
 
@@ -140,7 +142,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
       val json = contentAsJson(response)
       (json \ "usd").as[BigDecimal] mustEqual 0.071231351
-      (json \ "eur").as[BigDecimal] mustEqual 0.063465494
+      (json \ "btc").as[BigDecimal] mustEqual 0.063465494
     }
   }
 

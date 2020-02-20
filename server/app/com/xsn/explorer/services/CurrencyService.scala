@@ -19,7 +19,7 @@ sealed abstract class Currency(override val entryName: String) extends EnumEntry
 
 object Currency extends Enum[Currency] {
   final case object USD extends Currency("USD")
-  final case object EUR extends Currency("BTC")
+  final case object BTC extends Currency("BTC")
 
   val values = findValues
 }
