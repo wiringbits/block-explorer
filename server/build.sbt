@@ -10,7 +10,8 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
   "-target:jvm-1.8",
-  "-encoding", "UTF-8",
+  "-encoding",
+  "UTF-8",
   "-Xfuture",
   "-Xlint:missing-interpolator",
   "-Yno-adapted-args",
@@ -21,11 +22,10 @@ scalacOptions ++= Seq(
   "-Ywarn-unused-import"
 )
 
-
 val playsonifyVersion = "2.0.1"
 
 lazy val root = (project in file("."))
-    .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala)
 
 // don't include play generated classes into code coverage
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
@@ -47,7 +47,7 @@ libraryDependencies += "org.postgresql" % "postgresql" % "42.2.5"
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
-libraryDependencies += "io.sentry" % "sentry-logback" % "1.7.13"
+libraryDependencies += "io.sentry" % "sentry-logback" % "1.7.30"
 libraryDependencies += "com.github.ben-manes.caffeine" % "caffeine" % "2.7.0"
 
 libraryDependencies ++= Seq(
@@ -64,4 +64,5 @@ libraryDependencies += "org.mockito" %% "mockito-scala" % "1.3.1" % Test
 libraryDependencies ++= Seq(
   "com.spotify" % "docker-client" % "8.9.1",
   "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % "test",
-  "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5" % "test")
+  "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5" % "test"
+)

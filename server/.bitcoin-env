@@ -1,0 +1,5 @@
+export XSN_PSQL_PASSWORD=postgres
+export XSN_PSQL_DATABASE=bitcoin_explorer
+export XSN_RPC_HOST=http://localhost:18443
+export XSN_RPC_USER=bitcoin
+export XSN_RPC_PASSWORD=bitcoin
