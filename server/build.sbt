@@ -58,6 +58,8 @@ libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
 
 libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
+libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
+
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 libraryDependencies += "org.mockito" %% "mockito-scala" % "1.3.1" % Test
 

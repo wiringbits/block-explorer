@@ -3,7 +3,7 @@ package com.xsn.explorer.services.synchronizer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.cache.BlockHeaderCache
-import com.xsn.explorer.config.LedgerSynchronizerConfig
+import com.xsn.explorer.config.{LedgerSynchronizerConfig, NotificationsConfig}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -17,7 +17,7 @@ import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.services.validators.BlockhashValidator
-import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
+import com.xsn.explorer.services.{BlockService, EmailService, TransactionCollectorService, XSNService}
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -311,7 +311,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       syncStatusService,
       syncOps,
       blockChunkFutureRepository,
-      blockParallelChunkSynchronizer
+      blockParallelChunkSynchronizer,
+      NotificationsConfig(List.empty, List.empty),
+      EmailService.Disabled
     )
   }
 

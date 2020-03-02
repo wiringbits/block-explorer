@@ -2,13 +2,13 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.core.{FutureApplicationResult, FutureOr}
-import com.xsn.explorer.config.LedgerSynchronizerConfig
+import com.xsn.explorer.config.{LedgerSynchronizerConfig, NotificationsConfig}
 import com.xsn.explorer.data.async.LedgerFutureDataHandler
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.XSNService
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
+import com.xsn.explorer.services.{EmailService, XSNService}
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
@@ -22,7 +22,9 @@ class LedgerSynchronizerService @Inject()(
     syncStatusService: LedgerSynchronizationStatusService,
     syncOps: LedgerSynchronizationOps,
     blockChunkRepository: BlockChunkRepository.FutureImpl,
-    blockParallelChunkSynchronizer: BlockParallelChunkSynchronizer
+    blockParallelChunkSynchronizer: BlockParallelChunkSynchronizer,
+    notificationsConfig: NotificationsConfig,
+    emailService: EmailService
 )(implicit ec: ExecutionContext)
     extends LedgerSynchronizer {
 
@@ -141,6 +143,7 @@ class LedgerSynchronizerService @Inject()(
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts, filterFactory, rewards) = data
+      _ = notify(blockWithTransactions)
       _ <- if (synchronizerConfig.parallelSynchronizer) {
         blockParallelChunkSynchronizer
           .sync(blockWithTransactions.asTip, tposContracts, filterFactory, rewards)
@@ -155,5 +158,32 @@ class LedgerSynchronizerService @Inject()(
     }
 
     result.toFuture
+  }
+
+  // TODO: Move this to a notifications service
+  private def notify(block: persisted.Block.HasTransactions): Unit = {
+    block.transactions.foreach(notify)
+  }
+
+  private def notify(tx: persisted.Transaction.HasIO): Unit = {
+    val received = tx.inputs.flatMap(_.addresses).filter(notificationsConfig.monitoredAddresses.contains)
+    val sent = tx.outputs.flatMap(_.addresses).filter(notificationsConfig.monitoredAddresses.contains)
+    val involved = (received ++ sent).toSet
+    if (involved.nonEmpty) {
+      val subject = "ALERT - There are new operations on the monitored XSN addresses"
+      val lines = involved
+        .map { x =>
+          s"- $x"
+        }
+        .mkString("\n")
+      val text = s"Addresses:\n$lines"
+
+      // send the notifications in the background, errors are logged in the email layer
+      val _ = Future {
+        emailService.sendEmail(subject = subject, text = text, recipients = notificationsConfig.recipients)
+      }
+    } else {
+      ()
+    }
   }
 }
