@@ -153,6 +153,18 @@ class BlocksController @Inject()(
       }
       .toFuture
   }
+
+  def getHexEncodedBlock(blockhash: String) = public { _ =>
+    blockService
+      .getHexEncodedBlock(blockhash)
+      .toFutureOr
+      .map {
+          value =>
+            val response = Ok(Json.obj("hex" -> value))
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+      }
+      .toFuture
+  }
 }
 
 object BlocksController {

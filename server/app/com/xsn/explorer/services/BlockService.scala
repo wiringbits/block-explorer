@@ -122,6 +122,20 @@ class BlockService @Inject()(
     result.toFuture
   }
 
+  def getHexEncodedBlock(blockhashString: String): FutureApplicationResult[String] = {
+    val result = for {
+      blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
+
+      blockhashHex <- xsnService
+        .getHexEncodedBlock(blockhash)
+        .toFutureOr
+
+    } yield blockhashHex
+
+    result.toFuture
+  }
+
+
   private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
     val result = for {
       block <- xsnService
