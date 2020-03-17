@@ -22,6 +22,8 @@ trait TransactionDataHandler[F[_]] {
 
   def getOutput(txid: TransactionId, index: Int): F[Transaction.Output]
 
+  def getTxidFromHeightAndIndex(height: Int, index: Int): F[TransactionId]
+
   def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,

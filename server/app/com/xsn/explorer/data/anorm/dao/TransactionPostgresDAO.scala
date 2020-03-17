@@ -8,6 +8,7 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
+import com.xsn.explorer.data.anorm.parsers.CommonParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
@@ -397,6 +398,19 @@ class TransactionPostgresDAO @Inject()(
         'index -> index
       )
       .as(parseTransaction.singleOpt)
+  }
+
+  def getTxidFromHeightAndIndex(height: Int, index: Int)(implicit conn: Connection) = {
+    SQL(
+      """
+        |SELECT txid FROM transactions t INNER JOIN blocks b USING(blockhash) WHERE b.height = {height} and t.index = {index}
+        |
+      """.stripMargin
+    ).on(
+      'height -> height,
+      'index -> index
+    )
+    .as(parseTransactionId().single)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {

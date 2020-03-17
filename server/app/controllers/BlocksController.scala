@@ -9,12 +9,14 @@ import com.xsn.explorer.services.{BlockService, TransactionService}
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
+import com.xsn.explorer.services.TransactionRPCService
 
 import scala.util.Try
 
 class BlocksController @Inject()(
     blockService: BlockService,
     transactionService: TransactionService,
+    transactionRPCService: TransactionRPCService,
     cc: MyJsonControllerComponents
 ) extends MyJsonController(cc) {
 
@@ -164,6 +166,19 @@ class BlocksController @Inject()(
             response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
+  }
+
+  def getRawTransaction(height: Int, index: Int) = public { _ =>
+    val result = for {
+      txid <- transactionService.getTxidFromHeightAndIndex(height, index).toFutureOr
+      transaction <- transactionRPCService.getRawTransaction(txid.toString).toFutureOr
+    } yield transaction
+
+    result.map {
+      value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    }.toFuture
   }
 }
 
