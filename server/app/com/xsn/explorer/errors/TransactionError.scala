@@ -2,7 +2,7 @@ package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
 import com.alexitc.playsonify.models._
-import com.xsn.explorer.models.values.{Blockhash, TransactionId}
+import com.xsn.explorer.models.values.{Blockhash, Height, TransactionId}
 
 sealed trait TransactionError
 
@@ -23,6 +23,17 @@ object TransactionError {
       val message = i18nService.render("error.transaction.notFound")
       val error = FieldValidationError("transactionId", message)
       List(error)
+    }
+  }
+
+  final case class IndexNotFound(height: Height, index: Int) extends TransactionError with InputValidationError {
+
+    override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+      val message = i18nService.render("error.transaction.notFound")
+      val errorHeight = FieldValidationError("height", message)
+      val errorIndex = FieldValidationError("index", message)
+
+      List(errorHeight, errorIndex)
     }
   }
 

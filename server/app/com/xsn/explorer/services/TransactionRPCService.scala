@@ -9,11 +9,11 @@ import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.validators.TransactionIdValidator
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import javax.inject.Inject
-import org.scalactic.{One, Or}
+import org.scalactic.{Bad, Good, One, Or}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionRPCService @Inject()(
     transactionIdValidator: TransactionIdValidator,
@@ -69,6 +69,29 @@ class TransactionRPCService @Inject()(
       height = block.height
     } yield (
       Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height),
+      canCacheResult(latestBlock, height)
+    )
+
+    result.toFuture
+  }
+
+  def getTransactionLite(height: Height, txindex: Int): FutureApplicationResult[(JsValue, Boolean)] = {
+    val result = for {
+      latestBlock <- xsnService.getLatestBlock().toFutureOr
+      blockhash <- xsnService.getBlockhash(height).toFutureOr
+      block <- xsnService.getBlock(blockhash).toFutureOr
+      txid <- Future
+        .successful(
+          block.transactions
+            .lift(txindex)
+            .map(Good(_))
+            .getOrElse(Bad(One(TransactionError.IndexNotFound(height, txindex))))
+        )
+        .toFutureOr
+      jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
+      hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
+    } yield (
+      Json.obj("hex" -> hex, "blockhash" -> blockhash),
       canCacheResult(latestBlock, height)
     )
 

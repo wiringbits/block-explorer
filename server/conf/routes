@@ -28,7 +28,8 @@ GET   /blocks/:query/raw                 controllers.BlocksController.getRawBloc
 GET   /v2/blocks/:blockhash/transactions controllers.BlocksController.getTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 GET   /v2/blocks/:blockhash/light-wallet-transactions controllers.BlocksController.getLightTransactionsV2(blockhash: String, limit: Int ?= 10, lastSeenTxid: Option[String])
 GET   /v2/blocks/:blockhash/hex controllers.BlocksController.getHexEncodedBlock(blockhash: String)
-GET   /v2/blocks/:height/transactions/:index/raw controllers.BlocksController.getRawTransaction(height: Int, index: Int)
+# GET   /v2/blocks/:height/transactions/:index/raw controllers.BlocksController.getRawTransaction(height: Int, index: Int)
+GET   /v2/blocks/:height/transactions/:txindex/lite controllers.BlocksController.getLiteTransaction(height: Int, txindex: Int)
 
 GET   /stats                 controllers.StatisticsController.getStatus()
 GET   /rewards-summary       controllers.StatisticsController.getBlockRewardsSummary()

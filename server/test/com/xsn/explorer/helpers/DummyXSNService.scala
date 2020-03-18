@@ -30,4 +30,6 @@ class DummyXSNService extends XSNService {
   override def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue] =
     ???
   override def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = ???
+
+  override def getHexEncodedBlock(blockhash: Blockhash): FutureApplicationResult[String] = ???
 }

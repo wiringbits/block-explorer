@@ -24,14 +24,14 @@ class BlocksController @Inject()(
   import Codecs._
 
   def getLatestBlocks() = public { _ =>
-    blockService.getLatestBlocks()
-    .toFutureOr
-    .map {
-      value =>
+    blockService
+      .getLatestBlocks()
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getBlockHeaders(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
@@ -84,10 +84,9 @@ class BlocksController @Inject()(
       .map(blockService.getDetails)
       .getOrElse(blockService.getDetails(query))
       .toFutureOr
-      .map {
-        value =>
-          val response = Ok(Json.toJson(value))
-          response.withHeaders("Cache-Control" -> "public, max-age=60")
+      .map { value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
       }
       .toFuture
   }
@@ -98,45 +97,44 @@ class BlocksController @Inject()(
       .map(blockService.getRawBlock)
       .getOrElse(blockService.getRawBlock(query))
       .toFutureOr
-      .map {
-        value =>
-          val response = Ok(Json.toJson(value))
-          response.withHeaders("Cache-Control" -> "public, max-age=60")
+      .map { value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
       }
       .toFuture
   }
 
   def getTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
-    transactionService.getByBlockhash(blockhash, Limit(limit), lastSeenTxid)
-    .toFutureOr
-    .map {
-      value =>
+    transactionService
+      .getByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getLightTransactionsV2(blockhash: String, limit: Int, lastSeenTxid: Option[String]) = public { _ =>
-    transactionService.getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
-    .toFutureOr
-    .map {
-      value =>
+    transactionService
+      .getLightWalletTransactionsByBlockhash(blockhash, Limit(limit), lastSeenTxid)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def estimateFee(nBlocks: Int) = public { _ =>
-    blockService.estimateFee(nBlocks)
-    .toFutureOr
-    .map {
-      value =>
+    blockService
+      .estimateFee(nBlocks)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getBlockLite(blockhash: String) = public { _ =>
@@ -160,10 +158,9 @@ class BlocksController @Inject()(
     blockService
       .getHexEncodedBlock(blockhash)
       .toFutureOr
-      .map {
-          value =>
-            val response = Ok(Json.obj("hex" -> value))
-            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+      .map { value =>
+        val response = Ok(Json.obj("hex" -> value))
+        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
   }
@@ -174,11 +171,26 @@ class BlocksController @Inject()(
       transaction <- transactionRPCService.getRawTransaction(txid.toString).toFutureOr
     } yield transaction
 
-    result.map {
-      value =>
-        val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+    result.map { value =>
+      val response = Ok(Json.toJson(value))
+      response.withHeaders("Cache-Control" -> "public, max-age=60")
     }.toFuture
+  }
+
+  def getLiteTransaction(height: Int, txindex: Int) = public { _ =>
+    transactionRPCService
+      .getTransactionLite(Height(height), txindex)
+      .toFutureOr
+      .map {
+        case (value, cacheable) =>
+          val response = Ok(value)
+          if (cacheable) {
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+          } else {
+            response.withHeaders("Cache-Control" -> "no-store")
+          }
+      }
+      .toFuture
   }
 }
 

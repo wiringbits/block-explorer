@@ -17,6 +17,7 @@ import org.scalactic.Good
 import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.test.Helpers._
+import play.api.libs.json.Json
 
 class BlocksControllerSpec extends MyAPISpec {
 
@@ -432,6 +433,54 @@ class BlocksControllerSpec extends MyAPISpec {
       cacheHeader.value mustEqual "no-store"
     }
 
+  }
+
+  "GET /blocks/:height/transactions/:txindex/lite" should {
+    def url(height: Int, txindex: Int) = s"/v2/blocks/${height}/transactions/$txindex/lite"
+
+    "retrieve lite transaction" in {
+      val block = posBlock
+      val response = GET(url(block.height.int, 0))
+
+      status(response) mustEqual OK
+
+      val expectedResult = Json.obj(
+        "hex" -> "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0502d8590101ffffffff0100000000000000000000000000",
+        "blockhash" -> block.hash.string
+      )
+      val json = contentAsJson(response)
+      json mustEqual expectedResult
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader.value mustEqual "public, max-age=31536000"
+    }
+
+    "fail when transaction on txindex does no exists" in {
+      val block = posBlock
+      val response = GET(url(block.height.int, 99))
+
+      val json = contentAsJson(response)
+      val errors = (json \ "errors").as[List[JsValue]]
+      (errors.head \ "field").as[String] mustEqual "height"
+      (errors.head \ "message").as[String] mustEqual "Transaction not found"
+      (errors(1) \ "field").as[String] mustEqual "index"
+      (errors(1) \ "message").as[String] mustEqual "Transaction not found"
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader mustBe None
+    }
+
+    "fail when block does no exists" in {
+      val response = GET(url(123456789, 0))
+
+      val json = contentAsJson(response)
+      val errors = (json \ "errors").as[List[JsValue]]
+      (errors.head \ "field").as[String] mustEqual "blockhash"
+      (errors.head \ "message").as[String] mustEqual "Block not found"
+
+      val cacheHeader = header("Cache-Control", response)
+      cacheHeader mustBe None
+    }
   }
 
   private def matchBlock(expected: Block.Canonical, actual: JsValue) = {
