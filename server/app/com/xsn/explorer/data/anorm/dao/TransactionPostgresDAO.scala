@@ -400,19 +400,6 @@ class TransactionPostgresDAO @Inject()(
       .as(parseTransaction.singleOpt)
   }
 
-  def getTxidFromHeightAndIndex(height: Int, index: Int)(implicit conn: Connection) = {
-    SQL(
-      """
-        |SELECT txid FROM transactions t INNER JOIN blocks b USING(blockhash) WHERE b.height = {height} and t.index = {index}
-        |
-      """.stripMargin
-    ).on(
-      'height -> height,
-      'index -> index
-    )
-    .as(parseTransactionId().single)
-  }
-
   private def toSQL(condition: OrderingCondition): String = condition match {
     case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"

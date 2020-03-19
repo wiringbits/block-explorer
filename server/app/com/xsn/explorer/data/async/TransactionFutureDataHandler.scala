@@ -66,10 +66,4 @@ class TransactionFutureDataHandler @Inject()(
       blockingDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid)
     }
   }
-
-  override def getTxidFromHeightAndIndex(height: Int, index: Int) = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.getTxidFromHeightAndIndex(height, index)
-    }
-  }
 }

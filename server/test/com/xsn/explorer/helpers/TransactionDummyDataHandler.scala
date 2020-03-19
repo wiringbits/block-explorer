@@ -34,6 +34,4 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
       limit: pagination.Limit,
       lastSeenTxid: Option[TransactionId]
   ): ApplicationResult[List[Transaction.HasIO]] = ???
-
-  override def getTxidFromHeightAndIndex(height: Int, index: Int): ApplicationResult[TransactionId] = ???
 }

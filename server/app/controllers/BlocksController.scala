@@ -165,18 +165,6 @@ class BlocksController @Inject()(
       .toFuture
   }
 
-  def getRawTransaction(height: Int, index: Int) = public { _ =>
-    val result = for {
-      txid <- transactionService.getTxidFromHeightAndIndex(height, index).toFutureOr
-      transaction <- transactionRPCService.getRawTransaction(txid.toString).toFutureOr
-    } yield transaction
-
-    result.map { value =>
-      val response = Ok(Json.toJson(value))
-      response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }.toFuture
-  }
-
   def getLiteTransaction(height: Int, txindex: Int) = public { _ =>
     transactionRPCService
       .getTransactionLite(Height(height), txindex)
@@ -187,7 +175,7 @@ class BlocksController @Inject()(
           if (cacheable) {
             response.withHeaders("Cache-Control" -> "public, max-age=31536000")
           } else {
-            response.withHeaders("Cache-Control" -> "no-store")
+            response.withHeaders("Cache-Control" -> "public, max-age=60")
           }
       }
       .toFuture

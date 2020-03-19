@@ -68,8 +68,4 @@ class TransactionPostgresDataHandler @Inject()(
 
     Good(transactions)
   }
-
-  override def getTxidFromHeightAndIndex(height: Int, index: Int) = withConnection { implicit conn =>
-    Good(transactionPostgresDAO.getTxidFromHeightAndIndex(height, index))
-  }
 }

@@ -91,8 +91,7 @@ class TransactionRPCService @Inject()(
       jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
       hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
     } yield (
-      Json.obj("hex" -> hex, "blockhash" -> blockhash),
-      canCacheResult(latestBlock, height)
+      Json.obj("hex" -> hex, "blockhash" -> blockhash) -> canCacheResult(latestBlock, height)
     )
 
     result.toFuture

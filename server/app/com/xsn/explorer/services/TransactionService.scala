@@ -88,8 +88,4 @@ class TransactionService @Inject()(
 
     result.toFuture
   }
-
-  def getTxidFromHeightAndIndex(height: Int, index: Int) = {
-    transactionFutureDataHandler.getTxidFromHeightAndIndex(height, index)
-  }
 }
