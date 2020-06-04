@@ -226,8 +226,8 @@ class XSNServiceRPCImpl @Inject()(
   }
 
   override def getHexEncodedBlock(
-                             blockhash: Blockhash
-                           ): FutureApplicationResult[String] = {
+      blockhash: Blockhash
+  ): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 0] }"""
 

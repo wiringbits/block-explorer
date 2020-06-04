@@ -13,25 +13,25 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
   import Context._
 
   def getTransaction(txid: String) = public { _ =>
-    transactionRPCService.getTransactionDetails(txid)
-    .toFutureOr
-    .map {
-      value =>
+    transactionRPCService
+      .getTransactionDetails(txid)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getRawTransaction(txid: String) = public { _ =>
-    transactionRPCService.getRawTransaction(txid)
-    .toFutureOr
-    .map {
-      value =>
+    transactionRPCService
+      .getRawTransaction(txid)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def sendRawTransaction() = publicInput { ctx: HasModel[SendRawTransactionRequest] =>
@@ -55,13 +55,13 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
   }
 
   def getTransactionUtxoByIndex(txid: String, index: Int, includeMempool: Boolean) = public { _ =>
-    transactionRPCService.getTransactionUtxoByIndex(txid, index, includeMempool)
-    .toFutureOr
-    .map {
-      value =>
+    transactionRPCService
+      .getTransactionUtxoByIndex(txid, index, includeMempool)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 }

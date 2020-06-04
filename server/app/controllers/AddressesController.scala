@@ -22,26 +22,26 @@ class AddressesController @Inject()(
   import Codecs._
 
   def getBy(address: String) = public { _ =>
-    addressService.getBy(address)
-    .toFutureOr
-    .map {
-      value =>
+    addressService
+      .getBy(address)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
     public { _ =>
-      transactionService.getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)
-      .toFutureOr
-      .map {
-        value =>
+      transactionService
+        .getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)
+        .toFutureOr
+        .map { value =>
           val response = Ok(Json.toJson(value))
           response.withHeaders("Cache-Control" -> "public, max-age=60")
-      }
-      .toFuture
+        }
+        .toFuture
     }
 
   /**
@@ -66,25 +66,25 @@ class AddressesController @Inject()(
   }
 
   def getUnspentOutputs(address: String) = public { _ =>
-    addressService.getUnspentOutputs(address)
-    .toFutureOr
-    .map {
-      value =>
+    addressService
+      .getUnspentOutputs(address)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getTPoSContracts(address: String) = public { _ =>
-    tposContractService.getBy(address)
-    .toFutureOr
-    .map {
-      value =>
+    tposContractService
+      .getBy(address)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 }
 

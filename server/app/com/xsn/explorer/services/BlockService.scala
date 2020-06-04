@@ -135,7 +135,6 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-
   private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
     val result = for {
       block <- xsnService

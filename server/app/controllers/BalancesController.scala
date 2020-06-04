@@ -14,13 +14,13 @@ class BalancesController @Inject()(balanceService: BalanceService, cc: MyJsonCon
   import Codecs._
 
   def getHighest(limit: Int, lastSeenAddress: Option[String]) = public { _ =>
-    balanceService.getHighest(Limit(limit), lastSeenAddress)
-    .toFutureOr
-    .map {
-      value =>
+    balanceService
+      .getHighest(Limit(limit), lastSeenAddress)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 }

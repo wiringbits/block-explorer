@@ -17,24 +17,24 @@ class MasternodesController @Inject()(masternodeService: MasternodeService, cc: 
     val paginatedQuery = PaginatedQuery(Offset(offset), Limit(limit))
     val orderingQuery = OrderingQuery(ordering)
 
-    masternodeService.getMasternodes(paginatedQuery, orderingQuery)
-    .toFutureOr
-    .map {
-      value =>
+    masternodeService
+      .getMasternodes(paginatedQuery, orderingQuery)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 
   def getBy(ipAddress: String) = public { _ =>
-    masternodeService.getMasternode(ipAddress)
-    .toFutureOr
-    .map {
-      value =>
+    masternodeService
+      .getMasternode(ipAddress)
+      .toFutureOr
+      .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
-    }
-    .toFuture
+      }
+      .toFuture
   }
 }
