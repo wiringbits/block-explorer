@@ -102,14 +102,18 @@ class TransactionRPCService @Inject()(
       index: Int,
       includeMempool: Boolean
   ): FutureApplicationResult[JsValue] = {
+    def f(json: JsValue) = {
+      val x = for {
+        value <- (json \ "value").asOpt[BigDecimal]
+        jsonScriptHex <- (json \ "scriptPubKey" \ "hex").asOpt[String]
+      } yield Json.obj("value" -> value.toSatoshis.toString, "script" -> jsonScriptHex)
+      x.getOrElse(Json.obj())
+    }
+
     val result = for {
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       jsvalue <- xsnService.getTxOut(txid, index, includeMempool).toFutureOr
-      value <- Or.from((jsvalue \ "value").asOpt[BigDecimal], One(TransactionError.NotFound(txid))).toFutureOr
-      jsonScriptHex <- Or
-        .from((jsvalue \ "scriptPubKey" \ "hex").asOpt[String], One(TransactionError.NotFound(txid)))
-        .toFutureOr
-    } yield Json.obj("value" -> value.toSatoshis.toString, "script" -> jsonScriptHex)
+    } yield f(jsvalue)
 
     result.toFuture
   }
