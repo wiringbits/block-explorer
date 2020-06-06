@@ -7,9 +7,11 @@ import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
+import com.xsn.explorer.models.MarketInformation
 import com.xsn.explorer.util.RetryableFuture
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One}
+import org.scalactic.Accumulation._
 import play.api.libs.ws.WSClient
 import enumeratum.{Enum, EnumEntry}
 
@@ -26,6 +28,7 @@ object Currency extends Enum[Currency] {
 
 trait CurrencyService {
   def getPrice(currency: Currency): FutureApplicationResult[BigDecimal]
+  def getMarketInformation(): FutureApplicationResult[MarketInformation]
 }
 
 class CurrencyServiceCoinMarketCapImpl @Inject()(
@@ -79,6 +82,35 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
                   .asOpt[BigDecimal]
                   .map(Good(_))
                   .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+              }
+              .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+          case (code, _) =>
+            Bad(One(CoinMarketCapRequestFailedError(code)))
+        }
+      }
+    }
+  }
+
+  override def getMarketInformation() = {
+    retrying {
+      val coinId = coinMarketCapConfig.coinID.string
+      val url = s"v1/cryptocurrency/quotes/latest?id=$coinId"
+      requestFor(url).get().map { response =>
+        (response.status, response) match {
+          case (200, r) =>
+            Try(r.json).toOption
+              .map { json =>
+                val volume = (json \ "data" \ coinId \ "quote" \ "USD" \ "volume_24h")
+                  .asOpt[BigDecimal]
+                  .map(Good(_))
+                  .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+
+                val marketcap = (json \ "data" \ coinId \ "quote" \ "USD" \ "market_cap")
+                  .asOpt[BigDecimal]
+                  .map(Good(_))
+                  .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+
+                withGood(volume, marketcap)((volume, marketcap) => MarketInformation(volume, marketcap))
               }
               .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
           case (code, _) =>

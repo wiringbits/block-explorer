@@ -1,10 +1,11 @@
-package com.xsn.explorer.services
+package com.xsn.explorer.services.currencyService
 
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.CoinMarketCapConfig.{CoinID, Host, Key}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
 import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUnexpectedResponseError}
 import com.xsn.explorer.helpers.Executors
+import com.xsn.explorer.services.{Currency, CurrencyServiceCoinMarketCapImpl}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{mock => _, _}
 import org.scalactic.{Bad, One}
@@ -18,7 +19,7 @@ import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class CurrencyServiceCoinMarketCapImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
+class GetPriceSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()

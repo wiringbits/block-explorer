@@ -2,7 +2,9 @@ package com.xsn.explorer.tasks
 
 import akka.actor.{Actor, ActorSystem, Props}
 import com.xsn.explorer.config.CurrencySynchronizerConfig
+import com.xsn.explorer.models.{MarketInformation, MarketStatistics}
 import com.xsn.explorer.services.{Currency, CurrencyService}
+import com.xsn.explorer.tasks.CurrencySynchronizerActor.UpdateMarketInformation
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
@@ -13,20 +15,29 @@ import scala.util.{Failure, Success}
 class CurrencySynchronizerActor extends Actor {
   import context._
 
-  def receive = behavior(Currency.values.map(currency => currency -> BigDecimal(0)).toMap)
+  def receive: Receive = {
+    val initialPrices = Currency.values.map(currency => currency -> BigDecimal(0)).toMap
+    val initialMarketInformation = MarketInformation(0, 0)
 
-  private def behavior(prices: Map[Currency, BigDecimal]): Receive = {
+    behavior(MarketStatistics(initialPrices, initialMarketInformation))
+  }
+
+  private def behavior(marketStatistics: MarketStatistics): Receive = {
     case CurrencySynchronizerActor.UpdatePrice(currency, price) =>
-      val updatedPrices = prices + (currency -> price)
-      become(behavior(updatedPrices))
-    case CurrencySynchronizerActor.GetPrices =>
-      sender() ! prices
+      val updatedStatistics = marketStatistics.copy(prices = marketStatistics.prices + (currency -> price))
+      become(behavior(updatedStatistics))
+    case UpdateMarketInformation(marketInformation) =>
+      val updatedStatistics = marketStatistics.copy(marketInformation = marketInformation)
+      become(behavior(updatedStatistics))
+    case CurrencySynchronizerActor.GetMarketStatistics =>
+      sender() ! marketStatistics
   }
 }
 
 object CurrencySynchronizerActor {
   final case class UpdatePrice(currency: Currency, price: BigDecimal)
-  final case class GetPrices()
+  final case class UpdateMarketInformation(marketInformation: MarketInformation)
+  final case class GetMarketStatistics()
 }
 
 class CurrencySynchronizerTask @Inject()(
@@ -57,6 +68,16 @@ class CurrencySynchronizerTask @Inject()(
               exception
             )
         }
+      }
+
+      currencyService.getMarketInformation().onComplete {
+        case Success(Good(marketInformation)) =>
+          logger.info("Market information synced")
+          currencySynchronizerActor ! CurrencySynchronizerActor.UpdateMarketInformation(marketInformation)
+        case Success(Bad(error)) =>
+          logger.info(s"market information syncronization failed due to $error")
+        case Failure(exception) =>
+          logger.info(s"market information syncronization failed due to ${exception.getLocalizedMessage}", exception)
       }
     }
   }

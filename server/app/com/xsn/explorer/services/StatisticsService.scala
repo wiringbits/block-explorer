@@ -5,7 +5,7 @@ import akka.actor.ActorSystem
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.async.StatisticsFutureDataHandler
-import com.xsn.explorer.models.{StatisticsDetails, SynchronizationProgress}
+import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, SynchronizationProgress}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
@@ -52,19 +52,14 @@ class StatisticsService @Inject()(
     statisticsFutureDataHandler.getRewardsSummary(numberOfBlocks)
   }
 
-  def getPrices(): FutureApplicationResult[Map[String, BigDecimal]] = {
+  def getPrices(): FutureApplicationResult[MarketStatistics] = {
     val currencyActor = actorSystem.actorSelection("user/currency_synchronizer")
     implicit val timeout: Timeout = 10.seconds
 
     currencyActor
-      .ask(CurrencySynchronizerActor.GetPrices)
-      .mapTo[Map[Currency, BigDecimal]]
-      .map(
-        prices =>
-          Good(prices.map {
-            case (currency, price) => currency.entryName.toLowerCase -> price
-          })
-      )
+      .ask(CurrencySynchronizerActor.GetMarketStatistics)
+      .mapTo[MarketStatistics]
+      .map(Good(_))
   }
 
   private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
