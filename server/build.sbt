@@ -25,7 +25,15 @@ scalacOptions ++= Seq(
 val playsonifyVersion = "2.2.0"
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, JavaAgent)
+
+// Some options are very noisy when using the console and prevent us using it smoothly, let's disable them
+val consoleDisabledOptions = Seq("-Xfatal-warnings", "-Ywarn-unused", "-Ywarn-unused-import")
+scalacOptions in (Compile, console) ~= (_ filterNot consoleDisabledOptions.contains)
+
+// remove play noisy warnings
+import play.sbt.routes.RoutesKeys
+RoutesKeys.routesImport := Seq.empty
 
 // don't include play generated classes into code coverage
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
@@ -41,8 +49,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
-libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.1"
-libraryDependencies += "org.postgresql" % "postgresql" % "42.2.5"
+libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.4"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.2.6"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3"
@@ -59,6 +67,9 @@ libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
 libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
 libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
+
+libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.0"
+libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.0"
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 libraryDependencies += "org.mockito" %% "mockito-scala" % "1.3.1" % Test
