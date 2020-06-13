@@ -23,4 +23,10 @@ object TransactionId {
         }
     }
   }
+
+  implicit val writes: Writes[TransactionId] = {
+    Writes[TransactionId] { wrapped =>
+      JsString(wrapped.string)
+    }
+  }
 }

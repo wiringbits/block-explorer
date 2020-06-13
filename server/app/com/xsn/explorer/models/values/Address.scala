@@ -39,4 +39,10 @@ object Address {
         }
     }
   }
+
+  implicit val writes: Writes[Address] = {
+    Writes[Address] { wrapped =>
+      JsString(wrapped.string)
+    }
+  }
 }

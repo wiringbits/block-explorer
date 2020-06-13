@@ -1,6 +1,6 @@
 name := "xsn-block-explorer"
 organization := "com.xsn"
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.10"
 
 fork in Test := true
 
@@ -22,7 +22,7 @@ scalacOptions ++= Seq(
   "-Ywarn-unused-import"
 )
 
-val playsonifyVersion = "2.0.1"
+val playsonifyVersion = "2.2.0"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)

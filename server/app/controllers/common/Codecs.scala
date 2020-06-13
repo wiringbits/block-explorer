@@ -1,5 +1,6 @@
 package controllers.common
 
+import com.alexitc.playsonify.models.WrappedInt
 import com.alexitc.playsonify.models.pagination.PaginatedResult
 import com.xsn.explorer.models._
 import org.scalactic.Every
@@ -23,9 +24,9 @@ object Codecs {
   implicit def paginatedResultWrites[T](implicit writesT: Writes[T]): Writes[PaginatedResult[T]] =
     OWrites[PaginatedResult[T]] { result =>
       Json.obj(
-        "offset" -> result.offset,
-        "limit" -> result.limit,
-        "total" -> result.total,
+        "offset" -> (result.offset: WrappedInt),
+        "limit" -> (result.limit: WrappedInt),
+        "total" -> (result.total: WrappedInt),
         "data" -> result.data
       )
     }

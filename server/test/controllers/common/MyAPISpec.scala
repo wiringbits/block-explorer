@@ -41,7 +41,7 @@ trait MyAPISpec extends PlayAPISpec {
   private def loadConfigWithoutEvolutions(env: Environment): Configuration = {
     val map = Map("play.evolutions.db.default.enabled" -> false)
 
-    Configuration.load(env) ++ Configuration.from(map)
+    Configuration.from(map).withFallback(Configuration.load(env))
   }
 
   override val guiceApplicationBuilder: GuiceApplicationBuilder =

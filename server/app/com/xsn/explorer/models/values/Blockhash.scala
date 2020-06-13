@@ -23,4 +23,10 @@ object Blockhash {
         }
     }
   }
+
+  implicit val writes: Writes[Blockhash] = {
+    Writes[Blockhash] { wrapped =>
+      JsString(wrapped.string)
+    }
+  }
 }
