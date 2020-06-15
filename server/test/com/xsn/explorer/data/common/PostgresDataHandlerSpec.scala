@@ -4,8 +4,10 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.whisk.docker.DockerFactory
 import com.whisk.docker.impl.spotify.SpotifyDockerFactory
 import com.whisk.docker.scalatest.DockerTestKit
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.time.{Second, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.db.evolutions.Evolutions
 import play.api.db.{Database, Databases}
 
@@ -24,8 +26,8 @@ import play.api.db.{Database, Databases}
  * }}}
  */
 trait PostgresDataHandlerSpec
-    extends WordSpec
-    with MustMatchers
+    extends AnyWordSpec
+    with Matchers
     with DockerTestKit
     with DockerPostgresService
     with BeforeAndAfterAll {

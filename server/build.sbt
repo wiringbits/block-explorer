@@ -48,7 +48,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.2"
 libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.4"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.6"
 
@@ -71,11 +71,12 @@ libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
 libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.0"
 libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.0"
 
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala" % "1.3.1" % Test
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala" % "1.14.4" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.14.4" % Test
 
 libraryDependencies ++= Seq(
-  "com.spotify" % "docker-client" % "8.9.1",
-  "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % "test",
-  "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5" % "test"
+  "com.spotify" % "docker-client" % "8.16.0" % "test",
+  "com.whisk" %% "docker-testkit-scalatest" % "0.9.9" % "test",
+  "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "test"
 )

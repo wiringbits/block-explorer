@@ -12,6 +12,10 @@ trait DockerPostgresService extends DockerKit {
 
   import scala.concurrent.duration._
 
+  override val PullImagesTimeout = 120.minutes
+  override val StartContainersTimeout = 120.seconds
+  override val StopContainersTimeout = 120.seconds
+
   val postgresContainer = DockerContainer(PostgresImage)
     .withCommand("-N 1000")
     .withPorts((PostgresAdvertisedPort, Some(PostgresExposedPort)))
@@ -26,7 +30,7 @@ trait DockerPostgresService extends DockerKit {
 
 object DockerPostgresService {
 
-  val PostgresImage = "postgres:9.6"
+  val PostgresImage = "postgres:12"
   val PostgresUsername = "postgres"
   val PostgresPassword = ""
   val DatabaseName = "xsn_blockchain"

@@ -4,18 +4,17 @@ import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.validators.TransactionIdValidator
-import org.mockito.Mockito.{mock => _, _}
+import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, Good, One}
-import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
 import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.mockito.MockitoSugar._
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class TransactionRPCServiceSpec extends WordSpec {
+class TransactionRPCServiceSpec extends AnyWordSpec {
   val transactionIdValidator = mock[TransactionIdValidator]
   val transactionCollectorService = mock[TransactionCollectorService]
   val xsnService = mock[XSNService]

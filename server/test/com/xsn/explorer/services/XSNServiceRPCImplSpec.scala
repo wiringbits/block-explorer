@@ -7,12 +7,11 @@ import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, Transaction
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.models.values._
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{mock => _, _}
+import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, Good}
-import org.scalatest.MustMatchers._
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll}
 import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.mockito.MockitoSugar._
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll}
 import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 

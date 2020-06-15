@@ -7,12 +7,12 @@ import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUn
 import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.services.CurrencyServiceCoinMarketCapImpl
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{mock => _, _}
+import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, One}
-import org.scalatest.MustMatchers._
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures._
-import org.scalatest.mockito.MockitoSugar._
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll}
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AsyncWordSpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 

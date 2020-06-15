@@ -4,15 +4,13 @@ import akka.actor.{Actor, ActorSystem, Props}
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{BlockRewardsSummary, MarketInformation, MarketStatistics, Statistics}
 import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import controllers.common.MyAPISpec
-import org.mockito.Mockito.{mock => _, _}
-import org.mockito.MockitoSugar.when
+import org.mockito.MockitoSugar.{when, _}
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.mockito.MockitoSugar._
 import play.api.inject.bind
 import play.api.test.Helpers._
 
@@ -60,7 +58,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   class CurrencyActorMock extends Actor {
     override def receive: Receive = {
       case CurrencySynchronizerActor.GetMarketStatistics =>
-        val reply: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+        val map: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+        val reply = MarketStatistics(map, MarketInformation(0, 0))
         sender() ! reply
     }
   }
