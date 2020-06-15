@@ -6,7 +6,7 @@ matrix:
       services:
         - docker
       before_install:
-         - docker pull postgres:9.6
+         - docker pull postgres:12
       before_script:
         - cd server
       script:
