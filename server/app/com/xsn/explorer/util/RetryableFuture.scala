@@ -17,6 +17,7 @@ object RetryableFuture {
    * @param shouldRetry indicates whether or not retry the future depending on the current result
    * @param f the future to be retried
    */
+  @com.github.ghik.silencer.silent
   def apply[A](
       delays: List[FiniteDuration]
   )(
@@ -86,6 +87,6 @@ object RetryableFuture {
       factor: Int = 2,
       jitter: Int = Random.nextInt(100)
   ): FiniteDuration = {
-    ((Math.pow(factor, retry) * baseDelay).longValue + jitter).millis
+    ((Math.pow(factor.toDouble, retry.toDouble) * baseDelay).longValue + jitter).millis
   }
 }

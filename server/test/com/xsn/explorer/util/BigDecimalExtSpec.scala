@@ -2,6 +2,7 @@ package com.xsn.explorer.util
 
 import org.scalatest.{MustMatchers, WordSpec}
 
+@com.github.ghik.silencer.silent
 class BigDecimalExtSpec extends WordSpec with MustMatchers {
 
   import Extensions.BigDecimalExt

@@ -11,7 +11,9 @@ import com.xsn.explorer.executors.{
 class ExecutorsModule extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[ExternalServiceExecutionContext]).to(classOf[ExternalServiceAkkaExecutionContext])
-    bind(classOf[DatabaseExecutionContext]).to(classOf[DatabaseAkkaExecutionContext])
+    val _ = (
+      bind(classOf[ExternalServiceExecutionContext]).to(classOf[ExternalServiceAkkaExecutionContext]),
+      bind(classOf[DatabaseExecutionContext]).to(classOf[DatabaseAkkaExecutionContext])
+    )
   }
 }

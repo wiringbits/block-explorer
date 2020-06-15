@@ -30,10 +30,12 @@ object LedgerHelper {
       .map(_._1)
   }
 
+  @com.github.ghik.silencer.silent
   def getPoWReward(block: rpc.Block.Canonical): PoWBlockRewards = {
     PoWBlockRewards(BlockReward(Address.from(list.head).get, 1000))
   }
 
+  @com.github.ghik.silencer.silent
   def getPoSReward(block: rpc.Block.Canonical): PoSBlockRewards = {
     val reward = BlockReward(Address.from(list.head).get, 1000)
     val masternodeReward = BlockReward(Address.from(list.head).get, 250)
@@ -41,6 +43,7 @@ object LedgerHelper {
     PoSBlockRewards(reward, Some(masternodeReward), 10000, 120000)
   }
 
+  @com.github.ghik.silencer.silent
   def getTPoSReward(block: rpc.Block.Canonical): TPoSBlockRewards = {
     val ownerReward = BlockReward(Address.from(list.head).get, 1000)
     val merchantReward = BlockReward(Address.from(list(1)).get, 100)

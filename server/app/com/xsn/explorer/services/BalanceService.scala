@@ -7,7 +7,6 @@ import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.BalanceFutureDataHandler
 import com.xsn.explorer.models.WrappedResult
 import com.xsn.explorer.models.persisted.Balance
-import com.xsn.explorer.parsers.BalanceOrderingParser
 import com.xsn.explorer.services.validators._
 import javax.inject.Inject
 
@@ -15,7 +14,6 @@ import scala.concurrent.ExecutionContext
 
 class BalanceService @Inject()(
     paginatedQueryValidator: PaginatedQueryValidator,
-    balanceOrderingParser: BalanceOrderingParser,
     addressValidator: AddressValidator,
     balanceFutureDataHandler: BalanceFutureDataHandler
 )(implicit ec: ExecutionContext) {

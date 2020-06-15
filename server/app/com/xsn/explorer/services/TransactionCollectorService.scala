@@ -131,6 +131,8 @@ class TransactionCollectorService @Inject()(
       .toFuture
   }
 
+  // TODO: Fix me, compiler problem due to type erasure
+  @com.github.ghik.silencer.silent
   private[services] def getRPCTransactions(block: rpc.Block[_]): FutureApplicationResult[List[RPCTransaction]] = {
     block match {
       case b: rpc.Block.Canonical =>

@@ -1,13 +1,12 @@
 package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.alexitc.playsonify.models.ordering.OrderingQuery
-import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
+import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
-import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
+import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json._
 
@@ -19,7 +18,6 @@ class AddressesController @Inject()(
 ) extends MyJsonController(cc) {
 
   import AddressesController._
-  import Codecs._
 
   def getBy(address: String) = public { _ =>
     addressService

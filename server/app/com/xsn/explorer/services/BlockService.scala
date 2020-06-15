@@ -5,7 +5,6 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
-import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
@@ -28,8 +27,7 @@ class BlockService @Inject()(
     blockhashValidator: BlockhashValidator,
     blockLogic: BlockLogic,
     transactionLogic: TransactionLogic,
-    orderingConditionParser: OrderingConditionParser,
-    blockHeaderCache: BlockHeaderCache
+    orderingConditionParser: OrderingConditionParser
 )(implicit ec: ExecutionContext) {
 
   private val maxHeadersPerQuery = 1000
@@ -360,6 +358,8 @@ class BlockService @Inject()(
     }
   }
 
+  // TODO: Fix me, compiler problem due to type erasure
+  @com.github.ghik.silencer.silent
   private def getCoinstakeTransaction(block: Block[_]): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     block match {
       case b: Block.Canonical =>

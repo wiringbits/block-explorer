@@ -10,7 +10,7 @@ import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.Rew
 class BlockRewardPostgresDAO {
 
   def upsert(blockhash: Blockhash, reward: Reward)(implicit conn: Connection): Unit = {
-    SQL(
+    val _ = SQL(
       """
         |INSERT INTO block_rewards(blockhash, value, address, type, staked_amount, staked_time)
         |VALUES({blockhash}, {value}, {address}, {type}::REWARD_TYPE, {staked_amount}, {staked_time})

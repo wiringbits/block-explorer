@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
+@com.github.ghik.silencer.silent
 class DatabaseMigrationsTask @Inject()(
     actorSystem: ActorSystem,
     migration: MigrationRunner

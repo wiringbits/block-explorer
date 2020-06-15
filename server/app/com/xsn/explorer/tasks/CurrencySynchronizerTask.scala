@@ -49,6 +49,7 @@ class CurrencySynchronizerTask @Inject()(
 
   start()
 
+  @com.github.ghik.silencer.silent
   def start() = {
     logger.info("Starting currency synchronizer task")
 

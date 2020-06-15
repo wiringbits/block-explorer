@@ -5,6 +5,7 @@ import com.xsn.explorer.helpers.BlockLoader
 import org.scalatest.MustMatchers._
 import org.scalatest.WordSpec
 
+@com.github.ghik.silencer.silent
 class GolombEncodingSpec extends WordSpec {
 
   val words = Set(

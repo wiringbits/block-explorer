@@ -87,7 +87,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     val r = (x & ((1 << p) - 1)).toInt
 
     val qBits = List.fill[Bit](q)(Bit.One) :+ Bit.Zero
-    val rBits = toBits(r, p)
+    val rBits = toBits(r.toLong, p)
 
     qBits ++ rBits
   }
@@ -103,6 +103,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     (pending, x)
   }
 
+  @com.github.ghik.silencer.silent
   private def differences(sortedHashes: SortedSet[BigInt]): List[BigInt] = {
     (BigInt(0) :: sortedHashes.toList)
       .sliding(2)

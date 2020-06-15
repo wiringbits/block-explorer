@@ -25,8 +25,7 @@ trait DataHandlerObjects {
     transactionInputDAO,
     transactionOutputDAO,
     tposContractDAO,
-    addressTransactionDetailsDAO,
-    fieldOrderingSQLInterpreter
+    addressTransactionDetailsDAO
   )
   lazy val blockFilterPostgresDAO = new BlockFilterPostgresDAO
   lazy val blockPostgresDAO = new BlockPostgresDAO(blockFilterPostgresDAO, fieldOrderingSQLInterpreter)

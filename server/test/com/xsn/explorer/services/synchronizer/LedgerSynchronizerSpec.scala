@@ -2,7 +2,6 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
-import com.xsn.explorer.cache.BlockHeaderCache
 import com.xsn.explorer.config.{LedgerSynchronizerConfig, NotificationsConfig}
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
@@ -284,8 +283,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       new BlockhashValidator,
       new BlockLogic,
       new TransactionLogic,
-      new OrderingConditionParser,
-      BlockHeaderCache.default
+      new OrderingConditionParser
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
@@ -328,8 +326,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       new BlockhashValidator,
       new BlockLogic,
       new TransactionLogic,
-      new OrderingConditionParser,
-      BlockHeaderCache.default
+      new OrderingConditionParser
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
@@ -343,10 +340,7 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       transactionCollectorService
     )
     new LegacyLedgerSynchronizerService(
-      Config.explorerConfig,
       xsnService,
-      blockService,
-      transactionCollectorService,
       new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(Executors.databaseEC),
       blockFutureDataHandler,
       syncOps

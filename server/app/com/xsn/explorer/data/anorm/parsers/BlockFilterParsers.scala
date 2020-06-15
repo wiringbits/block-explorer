@@ -16,7 +16,7 @@ object BlockFilterParsers {
 
   val parseFilter = (parseN ~ parseM ~ parseP ~ parseHex).map {
     case n ~ m ~ p ~ hex =>
-      val compactN = CompactSizeInt(n)
+      val compactN = CompactSizeInt(n.toLong)
       new GolombCodedSet(
         n = n,
         m = m,

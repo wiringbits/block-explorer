@@ -8,6 +8,7 @@ import akka.actor.{ActorSystem, Scheduler}
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
+@com.github.ghik.silencer.silent
 class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
   override def afterAll: Unit = {

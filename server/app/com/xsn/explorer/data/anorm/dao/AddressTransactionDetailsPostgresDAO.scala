@@ -9,11 +9,8 @@ import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction
 import com.xsn.explorer.models.values.TransactionId
 import com.xsn.explorer.util.TransactionAddressesHelper
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def batchInsertDetails(transaction: Transaction.HasIO)(implicit conn: Connection): Option[Unit] = {
     val details = TransactionAddressesHelper.computeDetails(transaction)

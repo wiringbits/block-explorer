@@ -31,7 +31,7 @@ class BlockFilterPostgresDAO {
   }
 
   def upsert(blockhash: Blockhash, filter: GolombCodedSet)(implicit conn: Connection): Unit = {
-    SQL(
+    val _ = SQL(
       """
         |INSERT INTO block_address_gcs
         |  (blockhash, m, n, p, hex)

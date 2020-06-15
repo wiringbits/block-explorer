@@ -14,6 +14,7 @@ import com.xsn.explorer.models.values.{Address, Height}
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
+@com.github.ghik.silencer.silent
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   val secondsInOneDay = 24 * 60 * 60

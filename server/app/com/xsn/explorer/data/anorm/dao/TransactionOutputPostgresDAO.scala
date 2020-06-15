@@ -8,11 +8,8 @@ import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
     SQL(

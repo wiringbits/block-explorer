@@ -25,6 +25,7 @@ import io.scalaland.chimney.dsl._
 import org.scalactic.Good
 import org.scalatest.{BeforeAndAfter, WordSpec}
 
+@com.github.ghik.silencer.silent
 class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandlerSpec with BeforeAndAfter {
 
   private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))

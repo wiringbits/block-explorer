@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import play.api.libs.ws.{WSAuthScheme, WSClient, WSResponse}
 
-import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 trait XSNService {

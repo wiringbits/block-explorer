@@ -9,13 +9,15 @@ import com.xsn.explorer.services.synchronizer.repository.{BlockChunkPostgresRepo
 class DataHandlerModule extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[BlockBlockingDataHandler]).to(classOf[BlockPostgresDataHandler])
-    bind(classOf[BalanceBlockingDataHandler]).to(classOf[BalancePostgresDataHandler])
-    bind(classOf[StatisticsBlockingDataHandler]).to(classOf[StatisticsPostgresDataHandler])
-    bind(classOf[TransactionBlockingDataHandler]).to(classOf[TransactionPostgresDataHandler])
-    bind(classOf[LedgerBlockingDataHandler]).to(classOf[LedgerPostgresDataHandler])
-    bind(classOf[TPoSContractBlockingDataHandler]).to(classOf[TPoSContractPostgresDataHandler])
-    bind(classOf[BlockChunkRepository.Blocking]).to(classOf[BlockChunkPostgresRepository])
-    bind(classOf[RetryableDataHandler]).to(classOf[RetryableFutureDataHandler])
+    val _ = (
+      bind(classOf[BlockBlockingDataHandler]).to(classOf[BlockPostgresDataHandler]),
+      bind(classOf[BalanceBlockingDataHandler]).to(classOf[BalancePostgresDataHandler]),
+      bind(classOf[StatisticsBlockingDataHandler]).to(classOf[StatisticsPostgresDataHandler]),
+      bind(classOf[TransactionBlockingDataHandler]).to(classOf[TransactionPostgresDataHandler]),
+      bind(classOf[LedgerBlockingDataHandler]).to(classOf[LedgerPostgresDataHandler]),
+      bind(classOf[TPoSContractBlockingDataHandler]).to(classOf[TPoSContractPostgresDataHandler]),
+      bind(classOf[BlockChunkRepository.Blocking]).to(classOf[BlockChunkPostgresRepository]),
+      bind(classOf[RetryableDataHandler]).to(classOf[RetryableFutureDataHandler])
+    )
   }
 }

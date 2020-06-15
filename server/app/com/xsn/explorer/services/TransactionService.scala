@@ -7,24 +7,20 @@ import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers._
-import com.xsn.explorer.parsers.{OrderingConditionParser, TransactionOrderingParser}
+import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.validators._
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 
 class TransactionService @Inject()(
     paginatedQueryValidator: PaginatedQueryValidator,
     orderingConditionParser: OrderingConditionParser,
-    transactionOrderingParser: TransactionOrderingParser,
     addressValidator: AddressValidator,
     transactionIdValidator: TransactionIdValidator,
     blockhashValidator: BlockhashValidator,
     transactionFutureDataHandler: TransactionFutureDataHandler
 )(implicit ec: ExecutionContext) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val maxTransactionsPerQuery = 100
 

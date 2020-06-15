@@ -7,9 +7,11 @@ import play.api.Configuration
 class ConfigModule extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig])
-    bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig])
-    bind(classOf[ExplorerConfig]).to(classOf[ExplorerConfig.Play])
+    val _ = (
+      bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig]),
+      bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig]),
+      bind(classOf[ExplorerConfig]).to(classOf[ExplorerConfig.Play])
+    )
   }
 
   @Provides

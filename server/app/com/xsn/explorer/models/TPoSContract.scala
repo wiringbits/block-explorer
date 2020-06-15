@@ -43,7 +43,8 @@ object TPoSContract {
       val parts = asm.split(" ").toList
 
       parts match {
-        case op :: owner :: merchant :: commission :: signature :: Nil if op == "OP_RETURN" =>
+        // signature after commission
+        case op :: owner :: merchant :: commission :: _ :: Nil if op == "OP_RETURN" =>
           for {
             ownerAddress <- Address.fromHex(owner)
             merchantAddress <- Address.fromHex(merchant)

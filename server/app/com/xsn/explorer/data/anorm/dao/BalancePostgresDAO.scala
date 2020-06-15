@@ -11,11 +11,8 @@ import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * create or update the balance for an address

@@ -16,6 +16,7 @@ import org.scalatest.concurrent.ScalaFutures._
 
 import scala.concurrent.Future
 
+@com.github.ghik.silencer.silent
 class TransactionCollectorServiceSpec extends WordSpec {
 
   import Executors.globalEC

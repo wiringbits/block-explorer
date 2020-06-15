@@ -3,6 +3,7 @@ package com.xsn.explorer.models
 import com.xsn.explorer.models.values._
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
+@com.github.ghik.silencer.silent
 class AddressSpec extends WordSpec with MustMatchers with OptionValues {
 
   val addresses = Map(

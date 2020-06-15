@@ -10,6 +10,7 @@ import scala.concurrent.Future
 
 class MyAuthenticatorService extends AbstractAuthenticatorService[Nothing] {
 
+  @com.github.ghik.silencer.silent
   override def authenticate(request: Request[JsValue]): FutureApplicationResult[Nothing] = {
     Future.successful(Good(throw new RuntimeException("Not implemented")))
   }

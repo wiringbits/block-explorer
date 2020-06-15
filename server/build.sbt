@@ -5,7 +5,7 @@ scalaVersion := "2.12.10"
 fork in Test := true
 
 scalacOptions ++= Seq(
-//  "-Xfatal-warnings",
+  "-Xfatal-warnings",
   "-unchecked",
   "-deprecation",
   "-feature",
@@ -19,7 +19,8 @@ scalacOptions ++= Seq(
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard",
   "-Ywarn-unused",
-  "-Ywarn-unused-import"
+  "-Ywarn-unused-import",
+  "-P:silencer:checkUnused"
 )
 
 val playsonifyVersion = "2.2.0"
@@ -37,6 +38,12 @@ RoutesKeys.routesImport := Seq.empty
 
 // don't include play generated classes into code coverage
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
+
+// silence noisy warnings
+libraryDependencies ++= Seq(
+  compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.3.4"),
+  "com.github.ghik" %% "silencer-lib" % "1.3.4" % Provided
+)
 
 libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
 

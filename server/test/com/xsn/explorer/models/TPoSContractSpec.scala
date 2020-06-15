@@ -6,6 +6,7 @@ import org.scalatest.MustMatchers._
 import org.scalatest.OptionValues._
 import org.scalatest.WordSpec
 
+@com.github.ghik.silencer.silent
 class TPoSContractSpec extends WordSpec {
 
   val address1 = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw").get

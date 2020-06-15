@@ -2,6 +2,7 @@ package com.xsn.explorer.models.values
 
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
+@com.github.ghik.silencer.silent
 class CompactSizeIntSpec extends WordSpec with MustMatchers with OptionValues {
   "CompactSizeUInt" should {
     "serialize a VarInt with size 1 correctly" in {

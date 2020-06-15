@@ -6,6 +6,7 @@ import com.xsn.explorer.helpers.DataGenerator
 import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, RewardType, TPoSBlockRewards}
 import org.scalatest.{MustMatchers, WordSpec}
 
+@com.github.ghik.silencer.silent
 class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
   "serialize" should {
     "serialize PoW block" in {

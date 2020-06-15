@@ -19,6 +19,7 @@ import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+@com.github.ghik.silencer.silent
 class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   override def afterAll: Unit = {

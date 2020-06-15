@@ -2,13 +2,12 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
-import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
+import com.xsn.explorer.services.XSNService
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import org.scalactic.Good
@@ -17,10 +16,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.{ExecutionContext, Future}
 
 class LegacyLedgerSynchronizerService @Inject()(
-    explorerConfig: ExplorerConfig,
     xsnService: XSNService,
-    blockService: BlockService,
-    transactionCollectorService: TransactionCollectorService,
     ledgerDataHandler: LedgerFutureDataHandler,
     blockDataHandler: BlockFutureDataHandler,
     syncOps: LedgerSynchronizationOps

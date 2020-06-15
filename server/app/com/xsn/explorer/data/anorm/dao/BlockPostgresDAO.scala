@@ -54,7 +54,7 @@ class BlockPostgresDAO @Inject()(
   }
 
   def upsert(block: Block)(implicit conn: Connection): Unit = {
-    SQL(
+    val _ = SQL(
       """
         |INSERT INTO blocks
         |  (

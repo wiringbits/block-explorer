@@ -28,6 +28,7 @@ trait DockerPostgresService extends DockerKit {
     postgresContainer :: super.dockerContainers
 }
 
+@com.github.ghik.silencer.silent
 object DockerPostgresService {
 
   val PostgresImage = "postgres:12"

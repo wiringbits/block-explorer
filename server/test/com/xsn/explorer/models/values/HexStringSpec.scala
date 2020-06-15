@@ -2,6 +2,7 @@ package com.xsn.explorer.models.values
 
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 
+@com.github.ghik.silencer.silent
 class HexStringSpec extends WordSpec with MustMatchers with OptionValues {
 
   "from" should {

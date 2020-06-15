@@ -5,11 +5,10 @@ import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.values.Height
-import com.xsn.explorer.services.{BlockService, TransactionService}
-import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
+import com.xsn.explorer.services.{BlockService, TransactionRPCService, TransactionService}
+import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
-import com.xsn.explorer.services.TransactionRPCService
 
 import scala.util.Try
 
@@ -21,7 +20,6 @@ class BlocksController @Inject()(
 ) extends MyJsonController(cc) {
 
   import BlocksController._
-  import Codecs._
 
   def getLatestBlocks() = public { _ =>
     blockService

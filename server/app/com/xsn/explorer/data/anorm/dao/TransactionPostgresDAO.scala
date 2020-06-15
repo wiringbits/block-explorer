@@ -5,26 +5,20 @@ import java.sql.Connection
 import anorm._
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Count, Limit}
-import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.data.anorm.parsers.CommonParsers._
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
 
 class TransactionPostgresDAO @Inject()(
     explorerConfig: ExplorerConfig,
     transactionInputDAO: TransactionInputPostgresDAO,
     transactionOutputDAO: TransactionOutputPostgresDAO,
     tposContractDAO: TPoSContractDAO,
-    addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO,
-    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter
+    addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO
 ) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * NOTE: Ensure the connection has an open transaction.

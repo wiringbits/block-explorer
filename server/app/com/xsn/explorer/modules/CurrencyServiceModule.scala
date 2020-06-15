@@ -6,6 +6,6 @@ import com.xsn.explorer.services.{CurrencyService, CurrencyServiceCoinMarketCapI
 class CurrencyServiceModule extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[CurrencyService]).to(classOf[CurrencyServiceCoinMarketCapImpl])
+    val _ = bind(classOf[CurrencyService]).to(classOf[CurrencyServiceCoinMarketCapImpl])
   }
 }

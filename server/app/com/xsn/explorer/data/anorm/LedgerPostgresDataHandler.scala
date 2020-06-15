@@ -9,13 +9,12 @@ import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.GolombCodedSet
-import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.{Balance, Block}
+import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.util.Extensions.ListOptionExt
 import com.xsn.explorer.util.TransactionBalancesHelper
 import javax.inject.Inject
 import org.scalactic.Good
-import org.slf4j.LoggerFactory
 import play.api.db.Database
 
 class LedgerPostgresDataHandler @Inject()(
@@ -28,8 +27,6 @@ class LedgerPostgresDataHandler @Inject()(
     blockRewardDAO: BlockRewardPostgresDAO
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * Push a block into the database chain, note that even if the block is supposed

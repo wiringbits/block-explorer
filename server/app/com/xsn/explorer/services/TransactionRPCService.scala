@@ -10,7 +10,6 @@ import com.xsn.explorer.services.validators.TransactionIdValidator
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,8 +19,6 @@ class TransactionRPCService @Inject()(
     transactionCollectorService: TransactionCollectorService,
     xsnService: XSNService
 )(implicit ec: ExecutionContext) {
-
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
     val result = for {
