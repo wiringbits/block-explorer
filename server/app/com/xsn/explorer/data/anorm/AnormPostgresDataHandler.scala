@@ -9,7 +9,7 @@ import org.scalactic.Bad
 import play.api.db.Database
 
 /**
- * Allow us to map a [[PSQLException]] to a sub type of [[PostgresError]].
+ * Allow us to map a PSQLException to a sub type of PostgresError.
  *
  * This is helpful to differentiate between errors caused by input data
  * and failures that can not be prevented, these failures are thrown.
