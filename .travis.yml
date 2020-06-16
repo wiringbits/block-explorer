@@ -9,7 +9,7 @@ matrix:
         - docker pull postgres:12
         - sudo curl -L -o /usr/local/bin/mill https://github.com/lihaoyi/mill/releases/download/0.7.3/0.7.3 && sudo chmod +x /usr/local/bin/mill
         - git clone https://github.com/AlexITC/playsonify.git
-        - cd playsonify && mill __.publishLocal
+        - cd playsonify && mill __.publishLocal && cd ..
       before_script:
         - cd server
       script:
