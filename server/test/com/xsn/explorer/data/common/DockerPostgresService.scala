@@ -12,9 +12,9 @@ trait DockerPostgresService extends DockerKit {
 
   import scala.concurrent.duration._
 
-  override val PullImagesTimeout = 120.minutes
-  override val StartContainersTimeout = 120.seconds
-  override val StopContainersTimeout = 120.seconds
+  override val PullImagesTimeout = 300.minutes
+  override val StartContainersTimeout = 300.seconds
+  override val StopContainersTimeout = 300.seconds
 
   val postgresContainer = DockerContainer(PostgresImage)
     .withCommand("-N 1000")
