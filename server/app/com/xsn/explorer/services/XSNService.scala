@@ -13,6 +13,7 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.util.RetryableFuture
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
@@ -89,7 +90,7 @@ class XSNServiceRPCImpl @Inject()(
     .withAuth(rpcConfig.username.string, rpcConfig.password.string, WSAuthScheme.BASIC)
     .withHttpHeaders("Content-Type" -> "text/plain")
 
-  private def retrying[A](f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
+  private def retrying[A](name: String)(f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
     val retry = RetryableFuture.withExponentialBackoff[ApplicationResult[A]](
       retryConfig.initialDelay,
       retryConfig.maxDelay
@@ -102,14 +103,15 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     retry(shouldRetry) {
-      f
+      val span = Kamon.spanBuilder(name)
+      Kamon.runWithSpan(span.start())(f)
     }
   }
 
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
-    val result = retrying {
+    val result = retrying("getrawtransaction") {
       server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
@@ -135,7 +137,7 @@ class XSNServiceRPCImpl @Inject()(
   override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
-    val result = retrying {
+    val result = retrying("getrawtransaction") {
       server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
@@ -162,7 +164,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
-    val result = retrying {
+    val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
@@ -196,7 +198,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
 
-    val result = retrying {
+    val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
@@ -230,7 +232,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 0] }"""
 
-    val result = retrying {
+    val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
@@ -257,7 +259,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
-    val result = retrying {
+    val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
@@ -284,7 +286,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
 
-    val result = retrying {
+    val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
@@ -311,7 +313,7 @@ class XSNServiceRPCImpl @Inject()(
     val errorCodeMapper = Map(-8 -> BlockNotFoundError)
     val body = s"""{ "jsonrpc": "1.0", "method": "getblockhash", "params": [${height.int}] }"""
 
-    val result = retrying {
+    val result = retrying("getblockhash") {
       server
         .post(body)
         .map { response =>
@@ -343,7 +345,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("getbestblockhash") {
       server
         .post(body)
         .flatMap { response =>
@@ -385,7 +387,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("gettxoutsetinfo") {
       server
         .post(body)
         .map { response =>
@@ -417,7 +419,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("masternode_count") {
       server
         .post(body)
         .map { response =>
@@ -449,7 +451,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("getdifficulty") {
       server
         .post(body)
         .map { response =>
@@ -481,7 +483,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("masternode_list_full") {
       server
         .post(body)
         .map { response =>
@@ -518,7 +520,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("masternode_list_full_ip") {
       server
         .post(body)
         .map { response =>
@@ -563,7 +565,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("getaddressutxos") {
       server
         .post(body)
         .map { response =>
@@ -601,7 +603,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("sendrawtransaction") {
       server
         .post(body)
         .map { response =>
@@ -638,7 +640,7 @@ class XSNServiceRPCImpl @Inject()(
       )
     )
 
-    val result = retrying {
+    val result = retrying("tposcontract_validate") {
       server
         .post(body)
         .map { response =>
@@ -674,7 +676,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("estimatesmartfee") {
       server
         .post(body)
         .map { response =>
@@ -707,7 +709,7 @@ class XSNServiceRPCImpl @Inject()(
                   |}
                   |""".stripMargin
 
-    val result = retrying {
+    val result = retrying("gettxout") {
       server
         .post(body)
         .map { response =>
