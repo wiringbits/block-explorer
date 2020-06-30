@@ -591,6 +591,7 @@ class XSNServiceRPCImpl @Inject()(
   override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(
       -26 -> TransactionError.InvalidRawTransaction,
+      -25 -> TransactionError.MissingInputs,
       -22 -> TransactionError.InvalidRawTransaction,
       -27 -> TransactionError.RawTransactionAlreadyExists
     )

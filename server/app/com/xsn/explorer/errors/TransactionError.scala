@@ -71,4 +71,16 @@ object TransactionError {
       List(error)
     }
   }
+
+  final case object MissingInputs extends TransactionError with ConflictError {
+
+    // This is done this way because previously missing inputs error was not being handled so it ended up as
+    // an XSNMessageError("missing inputs") and the wallet team requested us not to change the response
+    // of the endpoint in those cases. But at the same time we did not want to keep it as an XSNMessageError
+    // since those are sent to sentry.
+    override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+      val error = GenericPublicError("missing inputs")
+      List(error)
+    }
+  }
 }

@@ -2,13 +2,14 @@ package com.xsn.explorer.services
 
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.{ExplorerConfig, RPCConfig, RetryConfig}
+import com.xsn.explorer.errors.TransactionError.{InvalidRawTransaction, MissingInputs, RawTransactionAlreadyExists}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.models.values._
 import org.mockito.ArgumentMatchers._
 import org.mockito.MockitoSugar._
-import org.scalactic.{Bad, Good}
+import org.scalactic.{Bad, Good, One}
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll}
@@ -623,6 +624,70 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       val txid = createTransactionId("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54c")
       whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) { result =>
         result mustEqual Good(JsNull)
+      }
+    }
+  }
+
+  "sendRawTransaction" should {
+    "return the transaction hash" in {
+      val content = JsString("ae74538baa914f3799081ba78429d5d84f36a0127438e9f721dff584ac17b346")
+      val responseBody = createRPCSuccessfulResponse(content)
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      whenReady(service.sendRawTransaction(transaction)) { result =>
+        result.isGood mustEqual true
+        result.get mustEqual "ae74538baa914f3799081ba78429d5d84f36a0127438e9f721dff584ac17b346"
+      }
+    }
+
+    "return InvalidRawTransaction on error code -26" in {
+      val responseBody = createRPCErrorResponse(-26, "error")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      whenReady(service.sendRawTransaction(transaction)) { result =>
+        result mustEqual Bad(One(InvalidRawTransaction))
+      }
+    }
+
+    "return MissingInputs on error code -25" in {
+      val responseBody = createRPCErrorResponse(-25, "error")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      whenReady(service.sendRawTransaction(transaction)) { result =>
+        result mustEqual Bad(One(MissingInputs))
+      }
+    }
+
+    "return InvalidRawTransaction on error code -22" in {
+      val responseBody = createRPCErrorResponse(-22, "error")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      whenReady(service.sendRawTransaction(transaction)) { result =>
+        result mustEqual Bad(One(InvalidRawTransaction))
+      }
+    }
+
+    "return RawTransactionAlreadyExists on error code -27" in {
+      val responseBody = createRPCErrorResponse(-27, "error")
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      whenReady(service.sendRawTransaction(transaction)) { result =>
+        result mustEqual Bad(One(RawTransactionAlreadyExists))
       }
     }
   }
