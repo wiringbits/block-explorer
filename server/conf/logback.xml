@@ -42,6 +42,7 @@
 
     <logger name="play" level="INFO" />
     <logger name="application" level="DEBUG" />
+    <logger name="com.xsn.explorer" level="DEBUG" />
 
     <!-- produces invalid CORS warnings, client is not authorized to call this from its own domain -->
     <logger name="play.filters.cors.CORSFilter" level="ERROR" />
