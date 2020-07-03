@@ -83,4 +83,12 @@ object TransactionError {
       List(error)
     }
   }
+
+  final case object UnconfirmedTransaction extends TransactionError with NotFoundError {
+    override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+      val message = i18nService.render("error.transaction.unconfirmed")
+      val error = GenericPublicError(message)
+      List(error)
+    }
+  }
 }

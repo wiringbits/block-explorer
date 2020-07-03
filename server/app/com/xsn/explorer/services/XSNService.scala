@@ -7,6 +7,7 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.config.{ExplorerConfig, RPCConfig, RetryConfig}
+import com.xsn.explorer.errors.TransactionError.UnconfirmedTransaction
 import com.xsn.explorer.errors._
 import com.xsn.explorer.executors.ExternalServiceExecutionContext
 import com.xsn.explorer.models._
@@ -111,23 +112,27 @@ class XSNServiceRPCImpl @Inject()(
   override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
-    val result = retrying("getrawtransaction") {
+    val result = retrying("gettransaction") {
       server
         .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
         .map { response =>
           val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](response, errorCodeMapper)
           maybe.getOrElse {
-            logger.debug(
-              s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}"
-            )
+            getResult[rpc.UnconfirmedTransaction[rpc.TransactionVIN]](response, errorCodeMapper)
+              .map(_ => Bad(UnconfirmedTransaction).accumulating)
+              .getOrElse {
+                logger.debug(
+                  s"Unexpected response from XSN Server, txid = ${txid.string}, status = ${response.status}, response = ${response.body}"
+                )
 
-            Bad(XSNUnexpectedResponseError).accumulating
+                Bad(XSNUnexpectedResponseError).accumulating
+              }
           }
         }
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get transaction $txid, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get transaction $txid, errors = $errors")
       case _ => ()
     }
 
@@ -153,7 +158,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get raw transaction $txid, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get raw transaction $txid, errors = $errors")
       case _ => ()
     }
 
@@ -185,7 +190,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get block $blockhash, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -219,7 +224,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get full block $blockhash, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get full block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -248,7 +253,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get hex encoded block $blockhash, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get hex encoded block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -275,7 +280,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get raw block $blockhash, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get raw block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -302,7 +307,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get full raw block $blockhash, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get full raw block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -329,7 +334,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get blockhash $height, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get blockhash $height, errors = $errors")
       case _ => ()
     }
 
@@ -371,7 +376,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get latest block, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get latest block, errors = $errors")
       case _ => ()
     }
 
@@ -403,7 +408,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get server statistics, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get server statistics, errors = $errors")
       case _ => ()
     }
 
@@ -435,7 +440,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get master node count, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get master node count, errors = $errors")
       case _ => ()
     }
 
@@ -467,7 +472,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get difficulty, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get difficulty, errors = $errors")
       case _ => ()
     }
 
@@ -504,7 +509,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get master nodes, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get master nodes, errors = $errors")
       case _ => ()
     }
 
@@ -547,7 +552,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get master node $ipAddress, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get master node $ipAddress, errors = $errors")
       case _ => ()
     }
 
@@ -581,7 +586,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get unspent outputs $address, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get unspent outputs $address, errors = $errors")
       case _ => ()
     }
 
@@ -623,7 +628,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to send raw transaction $hex, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to send raw transaction $hex, errors = $errors")
       case _ => ()
     }
 
@@ -661,7 +666,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get is TPoS contract $txid, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get is TPoS contract $txid, errors = $errors")
       case _ => ()
     }
 
@@ -694,7 +699,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to estimate smart fee $confirmationsTarget, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to estimate smart fee $confirmationsTarget, errors = $errors")
       case _ => ()
     }
 
@@ -726,7 +731,7 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.warn(s"Failed to get TxOut, errors = $errors")
+      case Bad(errors) => logger.info(s"Failed to get TxOut, errors = $errors")
       case _ => ()
     }
 

@@ -40,11 +40,16 @@ object TransactionLoader {
   }
 
   def all(coin: String = "xsn"): List[Transaction[TransactionVIN]] = {
+    val transactionsWithErrors = List(
+      "6b984d317623fdb3f40e5d64a4236de33b9cb1de5f12a6abe2e8f242f6572655"
+    )
+
     val uri = getClass.getResource(s"/$BasePath/$coin")
     new File(uri.getPath)
       .listFiles()
       .toList
       .map(_.getName)
+      .filterNot(transactionsWithErrors.contains)
       .map(get(_, coin))
   }
 }

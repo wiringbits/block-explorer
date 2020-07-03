@@ -2,7 +2,12 @@ package com.xsn.explorer.services
 
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.{ExplorerConfig, RPCConfig, RetryConfig}
-import com.xsn.explorer.errors.TransactionError.{InvalidRawTransaction, MissingInputs, RawTransactionAlreadyExists}
+import com.xsn.explorer.errors.TransactionError.{
+  InvalidRawTransaction,
+  MissingInputs,
+  RawTransactionAlreadyExists,
+  UnconfirmedTransaction
+}
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models.rpc.Masternode
@@ -216,6 +221,18 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       service.getTransaction(txid).map { result =>
         result mustEqual Bad(XSNWarmingUp).accumulating
+      }
+    }
+
+    "handle unconfirmed transaction" in {
+      val txid = createTransactionId("6b984d317623fdb3f40e5d64a4236de33b9cb1de5f12a6abe2e8f242f6572655")
+      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.toString))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      service.getTransaction(txid).map { result =>
+        result mustEqual Bad(One(UnconfirmedTransaction))
       }
     }
   }
