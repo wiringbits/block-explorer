@@ -10,10 +10,12 @@ import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class LegacyLedgerSynchronizerService @Inject()(
     xsnService: XSNService,
@@ -33,16 +35,31 @@ class LegacyLedgerSynchronizerService @Inject()(
    * because the behavior is undefined.
    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
+    val span = Kamon
+      .spanBuilder(operationName = "synchronizeBlockhash")
+      .tag("hash", blockhash.string)
+      .start()
+
     val result = for {
       data <- syncOps.getRPCBlock(blockhash).toFutureOr
       _ <- synchronize(data).toFutureOr
     } yield ()
+
+    result.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
 
     result.toFuture
   }
 
   private def synchronize(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     logger.info(s"Synchronize block ${block.height}, hash = ${block.hash}")
+    val span = Kamon
+      .spanBuilder(operationName = "synchronizeBlock")
+      .tag("hash", block.hash.string)
+      .tag("height", block.height.int.toLong)
+      .start()
 
     val result = for {
       latestBlockMaybe <- blockDataHandler
@@ -58,6 +75,11 @@ class LegacyLedgerSynchronizerService @Inject()(
         .getOrElse { onEmptyLedger(block) }
         .toFutureOr
     } yield ()
+
+    result.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
 
     result.toFuture
   }
@@ -98,6 +120,12 @@ class LegacyLedgerSynchronizerService @Inject()(
       appendBlock(newBlock)
     } else if (ledgerBlock.height.int + 1 == newBlock.height.int) {
       logger.info(s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}")
+      val span = Kamon
+        .spanBuilder(operationName = "handleReorganization")
+        .tag("hash", newBlock.hash.string)
+        .tag("height", newBlock.height.int.toLong)
+        .start()
+
       val result = for {
         blockhash <- newBlock.previousBlockhash.toFutureOr(BlockNotFoundError)
         previousBlock <- syncOps.getRPCBlock(blockhash).toFutureOr
@@ -105,13 +133,29 @@ class LegacyLedgerSynchronizerService @Inject()(
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
 
+      result.toFuture.onComplete {
+        case Success(_) => span.finish()
+        case Failure(exception) => span.fail(exception)
+      }
+
       result.toFuture
     } else if (newBlock.height.int > ledgerBlock.height.int) {
       logger.info(s"Filling holes to push block ${newBlock.height}, hash = ${newBlock.hash}")
+      val span = Kamon
+        .spanBuilder(operationName = "synchronizeBlockRange")
+        .tag("hash", newBlock.hash.string)
+        .tag("height", newBlock.height.int.toLong)
+        .start()
+
       val result = for {
         _ <- sync(ledgerBlock.height.int + 1 until newBlock.height.int).toFutureOr
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
+
+      result.toFuture.onComplete {
+        case Success(_) => span.finish()
+        case Failure(exception) => span.fail(exception)
+      }
 
       result.toFuture
     } else {
@@ -144,6 +188,12 @@ class LegacyLedgerSynchronizerService @Inject()(
   }
 
   private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
+    val span = Kamon
+      .spanBuilder(operationName = "appendBlock")
+      .tag("hash", newBlock.hash.string)
+      .tag("height", newBlock.height.int.toLong)
+      .start()
+
     val result = for {
       // if newBlock is the genesis block we need to retrieve the full block in order to get the block transactions
       block <- Option(newBlock)
@@ -155,6 +205,11 @@ class LegacyLedgerSynchronizerService @Inject()(
       (blockWithTransactions, tposContracts, filterFactory, rewards) = data
       _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
+
+    result.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
 
     result.toFuture
   }
@@ -184,9 +239,20 @@ class LegacyLedgerSynchronizerService @Inject()(
    * the last stored block will be 3.
    */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
-    val result = ledgerDataHandler
+    val span = Kamon
+      .spanBuilder(operationName = "trimBlock")
+      .start()
+
+    val partial = ledgerDataHandler
       .pop()
       .toFutureOr
+
+    partial.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
+
+    val result = partial
       .flatMap { block =>
         logger.info(s"Trimmed block ${block.height} from the ledger")
         val result = if (block.height == height) {
