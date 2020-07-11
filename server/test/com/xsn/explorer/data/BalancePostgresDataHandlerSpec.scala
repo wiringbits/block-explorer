@@ -143,7 +143,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     "return the highest balances" in {
       prepare()
 
-      val expected = balances.head
+      val expected = balances(6)
       val result = dataHandler.getHighestBalances(Limit(1), None).get
       result mustEqual List(expected)
     }
@@ -176,7 +176,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
       prepare()
 
       val lastSeenAddress = balances(3).address
-      val expected = balances(5)
+      val expected = balances(4)
       val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
       result mustEqual List(expected)
     }
