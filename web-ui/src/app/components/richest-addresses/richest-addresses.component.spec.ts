@@ -8,6 +8,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { BalancesService } from '../../services/balances.service';
 import { TickerService } from '../../services/ticker.service';
+import { NotificationService } from '../../services/notification.service';
 import { Observable } from 'rxjs';
 
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
@@ -18,6 +19,7 @@ describe('RichestAddressesComponent', () => {
 
   const balancesServiceSpy: jasmine.SpyObj<BalancesService> = jasmine.createSpyObj('BalancesService', ['getHighest']);
   const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get']);
+  const notificationServiceSpy: jasmine.SpyObj<NotificationService> = jasmine.createSpyObj('NotificationService', ['warning']);
 
   beforeEach(async(() => {
     balancesServiceSpy.getHighest.and.returnValue(Observable.create());
@@ -34,11 +36,12 @@ describe('RichestAddressesComponent', () => {
       ],
       providers: [
         { provide: BalancesService, useValue: balancesServiceSpy },
-        { provide: TickerService, useValue: tickerServiceSpy }
+        { provide: TickerService, useValue: tickerServiceSpy },
+        { provide: NotificationService, useValue: notificationServiceSpy }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
