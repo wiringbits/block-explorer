@@ -44,10 +44,6 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
       s"""
         |SELECT address, received, spent
         |FROM balances
-        |WHERE address NOT IN (
-        |  SELECT address
-        |  FROM hidden_addresses
-        |)
         |$orderBy
         |OFFSET {offset}
         |LIMIT {limit}
@@ -64,10 +60,6 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
       """
         |SELECT COUNT(*)
         |FROM balances
-        |WHERE address NOT IN (
-        |  SELECT address
-        |  FROM hidden_addresses
-        |)
       """.stripMargin
     ).as(SqlParser.scalar[Int].single)
 
@@ -95,7 +87,6 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
       """
         |SELECT address, received, spent
         |FROM balances
-        |WHERE address NOT IN (SELECT address FROM hidden_addresses)
         |ORDER BY (received - spent) DESC
         |LIMIT {limit}
       """.stripMargin
@@ -121,8 +112,7 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         |SELECT address, received, spent
         |FROM CTE CROSS JOIN balances
         |WHERE ((received - spent) < lastSeenAvailable OR
-        |      ((received - spent) = lastSeenAvailable AND address > {lastSeenAddress})) AND
-        |      address NOT IN (SELECT address FROM hidden_addresses)
+        |      ((received - spent) = lastSeenAvailable AND address > {lastSeenAddress}))
         |ORDER BY (received - spent) DESC
         |LIMIT {limit}
       """.stripMargin

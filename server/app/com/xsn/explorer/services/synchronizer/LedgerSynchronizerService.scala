@@ -10,10 +10,12 @@ import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.services.{EmailService, XSNService}
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class LedgerSynchronizerService @Inject()(
     synchronizerConfig: LedgerSynchronizerConfig,
@@ -48,7 +50,11 @@ class LedgerSynchronizerService @Inject()(
   }
 
   private def applyPendingUpdate(): FutureApplicationResult[Unit] = {
-    val result = for {
+    val span = Kamon
+      .spanBuilder(operationName = "applyPendingUpdate")
+      .start()
+
+    val partial = for {
       blockhashMaybe <- blockChunkRepository.findSyncingBlock().toFutureOr
     } yield blockhashMaybe match {
       case None => Future.successful(Good(())).toFutureOr
@@ -71,7 +77,13 @@ class LedgerSynchronizerService @Inject()(
         }.toFutureOr
     }
 
-    result.flatMap(identity).toFuture
+    val result = partial.flatMap(identity).toFuture
+    result.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
+
+    result
   }
 
   private def sync(status: SynchronizationStatus): FutureApplicationResult[Unit] = {
@@ -111,6 +123,11 @@ class LedgerSynchronizerService @Inject()(
   private def sync(goal: Range): FutureApplicationResult[Unit] = {
     goal.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) {
       case (previous, height) =>
+        val span = Kamon
+          .spanBuilder(operationName = "syncRange")
+          .tag("height", height.toLong)
+          .start()
+
         val result = for {
           _ <- previous.toFutureOr
           blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
@@ -118,14 +135,28 @@ class LedgerSynchronizerService @Inject()(
           _ <- append(block).toFutureOr
         } yield ()
 
+        result.toFuture.onComplete {
+          case Success(_) => span.finish()
+          case Failure(exception) => span.fail(exception)
+        }
+
         result.toFuture
     }
   }
 
   private def rollback(goal: BlockPointer): FutureOr[persisted.Block] = {
-    ledgerDataHandler
-      .pop()
-      .toFutureOr
+    val span = Kamon
+      .spanBuilder(operationName = "rollback")
+      .start()
+
+    val partial = ledgerDataHandler.pop()
+
+    partial.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
+
+    partial.toFutureOr
       .flatMap { removedBlock =>
         if (removedBlock.previousBlockhash.contains(goal.blockhash)) {
           Future.successful(Good(removedBlock)).toFutureOr
@@ -140,6 +171,12 @@ class LedgerSynchronizerService @Inject()(
   }
 
   private def append(newBlock: rpc.Block.HasTransactions[_]): FutureApplicationResult[Unit] = {
+    val span = Kamon
+      .spanBuilder(operationName = "appendBlock")
+      .tag("hash", newBlock.hash.string)
+      .tag("height", newBlock.height.int.toLong)
+      .start()
+
     val result = for {
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts, filterFactory, rewards) = data
@@ -155,6 +192,11 @@ class LedgerSynchronizerService @Inject()(
       if (blockWithTransactions.height.int % 5000 == 0) {
         logger.info(s"Caught up to block ${blockWithTransactions.height}")
       }
+    }
+
+    result.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
     }
 
     result.toFuture

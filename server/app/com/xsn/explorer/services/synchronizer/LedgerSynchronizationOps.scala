@@ -11,10 +11,12 @@ import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
+import kamon.Kamon
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 private[synchronizer] class LedgerSynchronizationOps @Inject()(
     explorerConfig: ExplorerConfig,
@@ -53,10 +55,14 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
   }
 
   def getFullRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
+    val span = Kamon
+      .spanBuilder(operationName = "getFullRPCBlock")
+      .tag("blockhash", blockhash.string)
+      .start()
 
     import io.scalaland.chimney.dsl._
 
-    val result = for {
+    val partial = for {
       // we need to get the canonical block in order to evalu
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
@@ -74,10 +80,23 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       }
     }
 
-    result.flatMap(_.toFutureOr).toFuture
+    val result = partial.flatMap(_.toFutureOr).toFuture
+
+    result.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
+    }
+
+    result
   }
 
   def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
+    val span = Kamon
+      .spanBuilder(operationName = "getBlockData")
+      .tag("hash", rpcBlock.hash.string)
+      .tag("height", rpcBlock.height.int.toLong)
+      .start()
+
     val result = for {
       extractionMethod <- blockService.extractionMethod(rpcBlock).toFutureOr
       rewards <- getBlockRewards(rpcBlock, extractionMethod).toFutureOr
@@ -94,6 +113,11 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       }
       val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
       (block, validContracts, filterFactory, rewards)
+    }
+
+    result.toFuture.onComplete {
+      case Success(_) => span.finish()
+      case Failure(exception) => span.fail(exception)
     }
 
     result.toFuture
