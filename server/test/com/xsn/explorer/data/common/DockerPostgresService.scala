@@ -33,7 +33,7 @@ object DockerPostgresService {
 
   val PostgresImage = "postgres:12"
   val PostgresUsername = "postgres"
-  val PostgresPassword = ""
+  val PostgresPassword = "postgres"
   val DatabaseName = "xsn_blockchain"
 
   def PostgresAdvertisedPort = 5432
