@@ -41,7 +41,6 @@
     </appender>
 
     <logger name="play" level="INFO" />
-    <logger name="application" level="DEBUG" />
     <logger name="com.xsn.explorer" level="DEBUG" />
 
     <!-- produces invalid CORS warnings, client is not authorized to call this from its own domain -->
@@ -50,6 +49,8 @@
     <logger name="play.filters.hosts.AllowedHostsFilter" level="ERROR" />
     <!-- produces illegal request warnings, client sends corrupted request -->
     <logger name="akka.actor.ActorSystemImpl" level="ERROR" />
+    <!-- kamon has been quite noisy, ignoring the time settings -->
+    <logger name="kamon.instrumentation.jdbc" level="ERROR" />
 
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
     <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
