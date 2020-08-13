@@ -1,0 +1,15 @@
+.new-address {
+  animation: blinker 1s linear;
+}
+
+@keyframes blinker {
+  50% {
+    background-color: #FFFFFF08;
+  }
+}
+
+.address-table-wrapper {
+  width: 100%;
+  padding: 0;
+  margin-top: 15px;
+}

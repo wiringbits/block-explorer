@@ -1,0 +1,142 @@
+@media (min-width:992px) {
+    .calculator-panel {
+        padding-left: 0;
+        padding-right: 10px;
+    }
+    
+    .calculator-stats {
+        padding-left: 10px;
+        padding-right: 0;
+    }
+}
+
+.calculator-panel .page-title {
+    margin: 25px 0;
+}
+
+.calculator-label {
+  font-size: 12px;
+  color: #989DCC;
+  font-weight: 300;
+  letter-spacing: 0.9px;
+  margin-bottom: 5px;
+}
+
+.calculator-hold-amount {
+    padding: 20px 20px 16px;
+    margin-top: 5px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: 300;
+    background: #1C202E 0% 0% no-repeat padding-box;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.calculator-hold-amount-text {
+    margin-left: 10px;
+}
+
+.calculator-optimal-setup {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 18px;
+}
+
+.calculator-more-profitable {
+    font-size: 16px;
+    font-weight: 300;
+    text-align: center;
+    margin-top: 46px;
+}
+
+.calculator-comparison-bar {
+    height: 40px;
+    border-radius: 20px;
+
+    background: repeating-linear-gradient(
+        -45deg,
+        #FFFFFF,
+        #FFFFFF 15px,
+        #000000 15px,
+        #000000 30px
+    );
+    font-size: 16px;
+
+    margin-top: 35px;
+    margin-bottom: 25px;
+}
+
+.calculator-staking-bar {
+    height: 100%;
+    background-color: #6D56EEF0;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.calculator-masternode-staking-bar {
+    height: 100%;
+    background-color: #3CE0E0F0;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+
+    color: #2D5759;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.calculator-comparison-table {
+    margin-top: 25px;
+}
+
+.calculator-comparison-table>tbody>tr>td {
+  padding: 5px 15px 0;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.calculator-stats-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+
+    padding: 20px;
+}
+
+.calculator-stat-item {
+    margin-bottom: 30px;
+}
+
+.calculator-stat-item:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.calculator-stat-data {
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.calculator-balance-input {
+    background-color: transparent !important;
+    color: #01D9DE;
+    outline: none;
+    box-shadow: none;
+    font-size: 24px;
+    font-weight: 300;
+    border: none;
+}

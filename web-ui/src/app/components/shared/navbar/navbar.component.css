@@ -1,0 +1,53 @@
+.navbar-default {
+  background-color: #090D1C;
+  border-color: #090D1C;
+  padding: 48px 0 0;
+}
+
+.navbar-logo {
+  width: 35px;
+  height: 35px;
+  margin-top: -7.5px;
+}
+
+.navbar-brand {
+  font-size: 30px;
+  text-align: left;
+  letter-spacing: -1.5px;
+  color: #FFFFFF;
+  font-weight: 300;
+}
+
+.navbar-brand:hover {
+  color: #FFFFFF;
+}
+
+.navbar-brand-bold {
+  font-weight: 500;
+}
+
+.navbar-tabbar {
+  margin-top: 30px;
+  padding: 0 15px;
+}
+
+.navbar-nav>li.active {
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+.navbar-nav>li {
+  background: transparent;
+}
+
+.navbar-nav>li>.navbar-tab {
+  background: transparent;
+  color: #5C5F7D;
+}
+
+.navbar-nav>li>.navbar-tab.main-tab {
+  color: #989DCC;
+}
+
+.navbar-nav>li.active>.navbar-tab {
+  color: #FFFFFF;
+}

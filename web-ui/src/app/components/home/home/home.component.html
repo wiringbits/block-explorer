@@ -1,0 +1,31 @@
+<div class="row">
+  <app-ticker class="col-xs-12"></app-ticker>
+
+  <div class="home-table-container col-xs-12 col-md-6 no-left">
+    <div class="tab-content">
+      <div class="page-title col-sm-3 col-xs-12">
+        {{'label.blocks' | translate}}
+      </div>
+      <div class="col-sm-9 col-xs-12">
+        <a class="show-more text-primary" routerLink="/blocks">
+            {{'label.showMore' | translate | uppercase}}
+        </a>
+      </div>
+      <app-block-table [hideBlockHash]="true"></app-block-table>
+    </div>
+  </div>
+
+  <div class="home-table-container col-xs-12 col-md-6 no-right">
+    <div class="tab-content">
+      <div class="page-title col-sm-3 col-xs-12">
+        {{'label.transactions' | translate}}
+      </div>
+      <div class="col-sm-9 col-xs-12">
+        <a class="show-more text-primary" routerLink="/transactions">
+          {{'label.showMore' | translate | uppercase}}
+        </a>
+      </div>
+      <app-transaction-table class="col-xs-12" [hideBlockHash]="true"></app-transaction-table>
+    </div>
+  </div>
+</div>

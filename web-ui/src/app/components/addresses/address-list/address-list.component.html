@@ -1,0 +1,43 @@
+<div class="tab-content row">
+  <div class="page-title col-xs-12">
+      {{'label.addresses' | translate}}
+  </div>
+  <div class="col-md-12 address-table-wrapper">
+    
+    <div class="row visible-xs">
+      <h2 class="col-xs-12">{{'label.richestAddresses' | translate}}</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-borderless table-striped table-hover">
+        <thead>
+          <tr class="row">
+            <th class="col-xs-1">#</th>
+            <th class="col-xs-4">{{'label.address' | translate | uppercase}}</th>
+            <th class="col-xs-3 right-align">{{'label.amount' | translate | uppercase}}</th>
+            <th class="col-xs-2 right-align">{{'label.percentOfCoins' | translate | uppercase}}</th>
+            <th class="col-xs-2 right-align">{{'label.addressLabel' | translate | uppercase}}</th>
+          </tr>
+        </thead>
+
+        <tbody class='search-results' infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300"
+          (scrolled)="load()" [scrollWindow]="true">
+            <tr *ngFor="let index = index; let item of items" class="new-address">
+              <td class="text-primary">{{index + 1}}</td>
+              <td>
+                <a class="text-highlight" routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+              </td>
+              <td class="text-primary right-align">{{item.available | explorerCurrency}}</td>
+              <td *ngIf="ticker == null || ticker.circulatingSupply == null" class="text-primary right-align">{{'message.unavailable' | translate}}</td>
+              <td class="text-primary right-align" *ngIf="ticker != null && ticker.circulatingSupply != null">
+                {{getPercent(item) | number:'1.2-2'}} %
+              </td>
+              <td class="right-align">
+                <a class="text-highlight" routerLink="/addresses/{{item.address}}">{{addressLabel[item.address]}}</a>
+              </td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
