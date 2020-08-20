@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 
 import scala.language.higherKinds
@@ -32,6 +32,16 @@ trait BlockDataHandler[F[_]] {
   def getHeader(blockhash: Blockhash, includeFilter: Boolean): F[BlockHeader]
 
   def getHeader(height: Height, includeFilter: Boolean): F[BlockHeader]
+
+  def getBlocks(
+      limit: Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash]
+  ): F[List[BlockInfo]]
+
+  def getBlock(blockhash: Blockhash): F[BlockInfo]
+
+  def getBlock(height: Height): F[BlockInfo]
 }
 
 trait BlockBlockingDataHandler extends BlockDataHandler[ApplicationResult]

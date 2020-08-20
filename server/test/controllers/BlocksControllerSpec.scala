@@ -2,10 +2,11 @@ package controllers
 
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
+import com.alexitc.playsonify.models.ordering.{OrderingCondition}
 import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers._
-import com.xsn.explorer.models.persisted.{BlockHeader, Transaction}
+import com.xsn.explorer.models.persisted.{BlockHeader, BlockInfo, Transaction}
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size}
 import com.xsn.explorer.services.XSNService
@@ -253,6 +254,76 @@ class BlocksControllerSpec extends MyAPISpec {
 
       val json = contentAsJson(response)
       json mustEqual BlockLoader.json(block.hash.string)
+    }
+  }
+
+  "GET /v2/blocks" should {
+    "return the blockinfo list with no lastSeenHash" in {
+      val block = BlockLoader.get("00000267225f7dba55d9a3493740e7f0dde0f28a371d2c3b42e7676b5728d020")
+      val blockInfo =
+        block
+          .into[BlockInfo]
+          .withFieldConst(_.transactions, 1)
+          .transform
+
+      val latestBlock = BlockLoader.get("0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85")
+
+      when(
+        blockBlockingDataHandlerMock
+          .getLatestBlock()
+      ).thenReturn(Good(latestBlock))
+
+      val expectedList = List(blockInfo);
+      val result = Good(expectedList)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getBlocks(eqTo(Limit(1)), eqTo(OrderingCondition.DescendingOrder), eqTo(None))
+      ).thenReturn(result)
+      
+      val response = GET(s"/v2/blocks?limit=1")
+      status(response) mustEqual OK
+
+      val blockList = contentAsJson(response).as[List[JsValue]]
+      blockList.size must be(1)
+
+      val firsrBlock = blockList.head
+      matchBlockInfo(blockInfo, firsrBlock)
+    }
+
+    "return the blockinfo list with lastSeenHash" in {
+      val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
+
+      val block = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+      val blockInfo =
+        block
+          .into[BlockInfo]
+          .withFieldConst(_.transactions, 1)
+          .transform
+
+      val latestBlock = BlockLoader.get("0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85")
+
+      when(
+        blockBlockingDataHandlerMock
+          .getLatestBlock()
+      ).thenReturn(Good(latestBlock))
+
+      val expectedList = List(blockInfo);
+      val result = Good(expectedList)
+
+      when(
+        blockBlockingDataHandlerMock
+          .getBlocks(eqTo(Limit(1)), eqTo(OrderingCondition.DescendingOrder), eqTo(Some(blockhash)))
+      ).thenReturn(result)
+      
+      val response = GET(s"/v2/blocks?lastSeenHash=${blockhash}&limit=1")
+      status(response) mustEqual OK
+
+      val blockList = contentAsJson(response).as[List[JsValue]]
+      blockList.size must be(1)
+
+      val firsrBlock = blockList.head
+      matchBlockInfo(blockInfo, firsrBlock)
     }
   }
 
@@ -532,6 +603,19 @@ class BlocksControllerSpec extends MyAPISpec {
       }
       case BlockHeader.Simple(_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => ()
     }
+  }
+
+  private def matchBlockInfo(expected: BlockInfo, actual: JsValue) = {
+    val jsonBlockInfo = actual
+    val block = expected
+
+    (jsonBlockInfo \ "hash").as[Blockhash] mustEqual block.hash
+    (jsonBlockInfo \ "difficulty").as[BigDecimal] mustEqual block.difficulty
+    (jsonBlockInfo \ "height").as[Height] mustEqual block.height
+    (jsonBlockInfo \ "time").as[Long] mustEqual block.time
+    (jsonBlockInfo \ "merkleRoot").as[Blockhash] mustEqual block.merkleRoot
+    (jsonBlockInfo \ "previousBlockhash").asOpt[Blockhash] mustEqual block.previousBlockhash
+    (jsonBlockInfo \ "nextBlockhash").asOpt[Blockhash] mustEqual block.nextBlockhash
   }
 
 }

@@ -8,7 +8,7 @@ import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.errors._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
@@ -77,6 +77,32 @@ class BlockPostgresDataHandler @Inject()(override val database: Database, blockP
   override def getHeader(height: Height, includeFilter: Boolean): ApplicationResult[BlockHeader] =
     withConnection { implicit conn =>
       val maybe = blockPostgresDAO.getHeader(height, includeFilter)
+      Or.from(maybe, One(BlockNotFoundError))
+    }
+
+  override def getBlocks(
+      limit: pagination.Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash]
+  ): ApplicationResult[List[BlockInfo]] = withConnection { implicit conn =>
+    val result = lastSeenHash
+      .map { hash =>
+        blockPostgresDAO.getBlocks(hash, limit, orderingCondition)
+      }
+      .getOrElse { blockPostgresDAO.getBlocks(limit, orderingCondition) }
+
+    Good(result)
+  }
+
+  override def getBlock(blockhash: Blockhash): ApplicationResult[BlockInfo] =
+    withConnection { implicit conn =>
+      val maybe = blockPostgresDAO.getBlock(blockhash)
+      Or.from(maybe, One(BlockNotFoundError))
+    }
+
+  override def getBlock(height: Height): ApplicationResult[BlockInfo] =
+    withConnection { implicit conn =>
+      val maybe = blockPostgresDAO.getBlock(height)
       Or.from(maybe, One(BlockNotFoundError))
     }
 

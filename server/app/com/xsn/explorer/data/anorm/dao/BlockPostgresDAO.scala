@@ -8,7 +8,7 @@ import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, Paginated
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
@@ -305,6 +305,112 @@ class BlockPostgresDAO @Inject()(
     } else {
       blockMaybe
     }
+  }
+
+  def getBlocks(limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[BlockInfo] = {
+    val order = toSQL(orderingCondition)
+
+    SQL(
+      s"""
+        |SELECT blk.*, COALESCE(tx.count, 0) transactions 
+        |FROM (
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
+        |   FROM blocks
+        |) blk
+        |LEFT JOIN (
+        |   SELECT blockhash, count(*) count 
+        |   FROM transactions 
+        |   GROUP BY blockhash
+        |) tx 
+        |ON blk.blockhash = tx.blockhash
+        |ORDER BY height $order
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+        'limit -> limit.int
+      )
+      .as(parseBlockInfo.*)
+  }
+
+  def getBlocks(lastSeenHash: Blockhash, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[BlockInfo] = {
+    val order = toSQL(orderingCondition)
+    val comparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => "<"
+      case OrderingCondition.AscendingOrder => ">"
+    }
+
+    SQL(
+      s"""
+        |SELECT blk.*, COALESCE(tx.count, 0) transactions 
+        |FROM (
+        |WITH CTE AS (
+        |  SELECT height as lastSeenHeight
+        |  FROM blocks
+        |  WHERE blockhash = {lastSeenHash}
+        |)
+        |SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
+        |FROM CTE CROSS JOIN blocks b
+        |WHERE b.height $comparator lastSeenHeight) blk
+        |LEFT JOIN (
+        |   SELECT blockhash, count(*) count 
+        |   FROM transactions 
+        |   GROUP BY blockhash
+        |) tx 
+        |ON blk.blockhash = tx.blockhash
+        |ORDER BY height $order
+        |LIMIT {limit}
+      """.stripMargin
+    ).on(
+        'lastSeenHash -> lastSeenHash.toBytesBE.toArray,
+        'limit -> limit.int
+      )
+      .as(parseBlockInfo.*)
+  }
+
+  def getBlock(blockhash: Blockhash)(implicit conn: Connection): Option[BlockInfo] = {
+    SQL(
+      """
+        |SELECT blk.*, COALESCE(tx.count, 0) transactions 
+        |FROM (
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty 
+        |   FROM blocks 
+        |   WHERE blockhash = {blockhash}
+        |) blk 
+        |LEFT JOIN (
+        |   SELECT blockhash, count(*) count 
+        |   FROM transactions 
+        |   GROUP BY blockhash
+        |) tx
+        |ON blk.blockhash = tx.blockhash
+      """.stripMargin
+    ).on(
+        "blockhash" -> blockhash.toBytesBE.toArray
+      )
+      .as(parseBlockInfo.singleOpt)
+  }
+
+  def getBlock(height: Height)(implicit conn: Connection): Option[BlockInfo] = {
+    SQL(
+      """
+        |SELECT blk.*, COALESCE(tx.count, 0) transactions 
+        |FROM (
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty 
+        |   FROM blocks 
+        |   WHERE height = {height}
+        |) blk 
+        |LEFT JOIN (
+        |   SELECT blockhash, count(*) count 
+        |   FROM transactions 
+        |   GROUP BY blockhash
+        |) tx 
+        |ON blk.blockhash = tx.blockhash
+      """.stripMargin
+    ).on(
+        "height" -> height.int
+      )
+      .as(parseBlockInfo.singleOpt)
   }
 
   private def attachFilter(blockheader: BlockHeader)(implicit conn: Connection): BlockHeader = {

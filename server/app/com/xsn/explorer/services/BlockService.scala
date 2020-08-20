@@ -9,6 +9,7 @@ import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
+import com.xsn.explorer.models.persisted.BlockInfo
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{Blockhash, Height, Size}
 import com.xsn.explorer.parsers.OrderingConditionParser
@@ -73,6 +74,19 @@ class BlockService @Inject()(
       expectedSize: Int,
       latestKnownBlock: persisted.Block,
       result: List[BlockHeader]
+  ): Boolean = {
+
+    ordering == OrderingCondition.AscendingOrder && // from oldest to newest
+    result.size == expectedSize && // a complete query
+    expectedSize > 0 && // non empty result
+    result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
+  }
+
+  private def canCacheResultBlockInfo(
+      ordering: OrderingCondition,
+      expectedSize: Int,
+      latestKnownBlock: persisted.Block,
+      result: List[BlockInfo]
   ): Boolean = {
 
     ordering == OrderingCondition.AscendingOrder && // from oldest to newest
@@ -167,6 +181,29 @@ class BlockService @Inject()(
       i <- xsnService.getBlock(h.previousBlockhash.get).toFutureOr
       j <- xsnService.getBlock(i.previousBlockhash.get).toFutureOr
     } yield List(a, b, c, d, e, f, g, h, i, j)
+
+    result.toFuture
+  }
+
+  def getBlocks(
+      limit: Limit,
+      lastSeenHashString: Option[String],
+      orderingConditionString: String
+  ): FutureApplicationResult[(WrappedResult[List[BlockInfo]], Boolean)] = {
+
+    val result = for {
+      lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
+      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+
+      blocks <- blockDataHandler.getBlocks(limit, orderingCondition, lastSeenHash).toFutureOr
+      _ <- (blocks, lastSeenHash) match {
+        // if there are no blocks but a hash was seen, check whether the given hash actually exists
+        case (Nil, Some(hash)) => blockDataHandler.getBlock(hash).toFutureOr
+        case _ => Future.successful(Good(())).toFutureOr
+      }
+      latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
+    } yield (WrappedResult(blocks), canCacheResultBlockInfo(orderingCondition, limit.int, latestBlock, blocks))
 
     result.toFuture
   }

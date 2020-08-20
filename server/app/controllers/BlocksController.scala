@@ -4,6 +4,8 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.BlockHeader
+import com.xsn.explorer.models.persisted.BlockInfo
+import com.xsn.explorer.models.persisted.BlockInfoCodec
 import com.xsn.explorer.models.values.Height
 import com.xsn.explorer.services.{BlockService, TransactionRPCService, TransactionService}
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
@@ -28,6 +30,23 @@ class BlocksController @Inject()(
       .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
+  }
+
+  def getBlocks(lastSeenHash: Option[String], limit: Int, orderingCondition: String) = public { _ =>
+    implicit val codec: Writes[BlockInfo] = BlockInfoCodec.completeWrites
+    blockService
+      .getBlocks(Limit(limit), lastSeenHash, orderingCondition)
+      .toFutureOr
+      .map {
+        case (value, cacheable) =>
+          val response = Ok(Json.toJson(value.data))
+          if (cacheable) {
+            response.withHeaders("Cache-Control" -> "public, max-age=31536000")
+          } else {
+            response.withHeaders("Cache-Control" -> "no-store")
+          }
       }
       .toFuture
   }

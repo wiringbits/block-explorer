@@ -7,7 +7,7 @@ import com.alexitc.playsonify.models.pagination.PaginatedQuery
 import com.xsn.explorer.data.{BlockBlockingDataHandler, BlockDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 import javax.inject.Inject
 
@@ -80,6 +80,30 @@ class BlockFutureDataHandler @Inject()(
     retryableFutureDataHandler.retrying {
       Future {
         blockBlockingDataHandler.getHeader(height, includeFilter)
+      }
+    }
+
+  override def getBlocks(
+      limit: pagination.Limit,
+      orderingCondition: OrderingCondition,
+      lastSeenHash: Option[Blockhash]
+  ): FutureApplicationResult[List[BlockInfo]] = retryableFutureDataHandler.retrying {
+    Future {
+      blockBlockingDataHandler.getBlocks(limit, orderingCondition, lastSeenHash)
+    }
+  }
+
+  override def getBlock(blockhash: Blockhash): FutureApplicationResult[BlockInfo] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockBlockingDataHandler.getBlock(blockhash)
+      }
+    }
+
+  override def getBlock(height: Height): FutureApplicationResult[BlockInfo] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockBlockingDataHandler.getBlock(height)
       }
     }
 }

@@ -8,7 +8,7 @@ import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.{BlockLoader, DataHandlerObjects}
 import com.xsn.explorer.models.fields.BlockField
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.Blockhash
 import org.scalactic.{Bad, One, Or}
 import org.scalatest.BeforeAndAfter
@@ -297,6 +297,95 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       result mustEqual Bad(BlockNotFoundError).accumulating
     }
   }
+  
+  "getBlocks" should {
+
+    "return the latest block list when lastSeenHash is missing" in {
+      clearDatabase()
+
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
+
+      List(block0, block1, block2).map(insert).foreach(_.isGood mustEqual true)
+      val latestBlockInfo = block2.into[BlockInfo].withFieldConst(_.transactions, 1).transform
+
+      val result = dataHandler.getBlocks(Limit(1), OrderingCondition.DescendingOrder, None);
+      result.isGood mustEqual true
+
+      val blockList = result.get
+      blockList.size must be(1)
+
+      matches(latestBlockInfo, blockList.head)
+    }
+
+    "return the block list from the lastSeenHash" in {
+      val lastSeenHash = Blockhash.from("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8").get
+
+      clearDatabase()
+
+      val block0 = BlockLoader
+        .get("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      val block1 = BlockLoader
+        .get("000003fb382f6892ae96594b81aa916a8923c70701de4e7054aac556c7271ef7")
+        .copy(nextBlockhash = None)
+      val block2 = BlockLoader
+        .get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
+        .copy(nextBlockhash = None)
+
+      List(block0, block1, block2).map(insert).foreach(_.isGood mustEqual true)
+
+      val nextBlockInfo = block1.into[BlockInfo].withFieldConst(_.transactions, 1).transform
+
+      val result = dataHandler.getBlocks(Limit(2), OrderingCondition.DescendingOrder, Some(lastSeenHash));
+      result.isGood mustEqual true
+
+      val blockList = result.get
+      blockList.size must be(2)
+
+      matches(nextBlockInfo, blockList.head)
+    }
+
+    "return the blockInfo by blockhash" in {
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      insert(block).isGood mustEqual true
+
+      val blockInfo = block.into[BlockInfo].withFieldConst(_.transactions, 0).transform
+      val result = dataHandler.getBlock(block.hash)
+
+      result.isGood mustEqual true
+      matches(blockInfo, result.get)
+    }
+
+    "return the blockInfo by height" in {
+      val block = BlockLoader
+        .get("1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0")
+        .copy(previousBlockhash = None, nextBlockhash = None)
+      insert(block).isGood mustEqual true
+
+      val blockInfo = block.into[BlockInfo].withFieldConst(_.transactions, 0).transform
+      val result = dataHandler.getBlock(block.height)
+
+      result.isGood mustEqual true
+      matches(blockInfo, result.get)
+    }
+
+    "fail on block not found" in {
+      val blockhash = Blockhash.from("b858d38a3552c83aea58f66fe00ae220352a235e33fcf1f3af04507a61a9dc32").get
+
+      val result = dataHandler.getBlock(blockhash)
+      result mustEqual Bad(BlockNotFoundError).accumulating
+    }
+  }
 
   private def matches(expected: Block, result: Block) = {
     // NOTE: transactions and confirmations are not matched intentionally
@@ -337,6 +426,16 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       case (_: BlockHeader.Simple, _: BlockHeader.Simple) => ()
       case _ => fail("The filter doesn't match")
     }
+  }
+
+  private def matches(expected: BlockInfo, result: BlockInfo) = {
+    result.hash mustEqual expected.hash
+    result.nextBlockhash mustEqual expected.nextBlockhash
+    result.previousBlockhash mustEqual expected.previousBlockhash
+    result.merkleRoot mustEqual expected.merkleRoot
+    result.height mustEqual expected.height
+    result.time mustEqual expected.time
+    result.difficulty mustEqual expected.difficulty
   }
 
   private def matchFilter(expected: GolombCodedSet, result: GolombCodedSet) = {

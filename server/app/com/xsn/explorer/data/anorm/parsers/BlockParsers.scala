@@ -3,7 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm._
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.persisted.{Block, BlockHeader}
+import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values._
 
 object BlockParsers {
@@ -26,6 +26,7 @@ object BlockParsers {
   val parseBits = str("bits")
   val parseChainwork = str("chainwork")
   val parseDifficulty = get[BigDecimal]("difficulty")
+  val parseTransactions = int("transactions")
 
   val parseBlock = (parseBlockhashBytes() ~
     parseNextBlockhash.? ~
@@ -124,6 +125,35 @@ object BlockParsers {
         difficulty = difficulty,
         version = version,
         extractionMethod = extractionMethod
+      )
+  }
+
+  val parseBlockInfo = (parseBlockhashBytes() ~
+    parseNextBlockhash.? ~
+    parsePreviousBlockhash.? ~
+    parseMerkleRoot ~
+    parseHeight ~
+    parseTime ~
+    parseDifficulty ~
+    parseTransactions).map {
+
+    case hash ~
+          nextBlockhash ~
+          previousBlockhash ~
+          merkleRoot ~
+          height ~
+          time ~
+          difficulty ~
+          transactions =>
+      BlockInfo(
+        hash = hash,
+        previousBlockhash = previousBlockhash,
+        nextBlockhash = nextBlockhash,
+        merkleRoot = merkleRoot,
+        height = height,
+        time = time,
+        difficulty = difficulty,
+        transactions = transactions
       )
   }
 }
