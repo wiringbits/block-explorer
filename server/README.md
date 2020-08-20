@@ -22,9 +22,18 @@
     ```
     Now, xsnd can be started without arguments, for example, `./bin/xsnd`.
 
-2. If the xsnd node is not getting any blocks/peers, try disabling IPv6, and remove the peers file (`~/.xsncore/peers.dat`), restarting xsnd should get peers now.
+2. If you get the following error: `Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler`, try switching the Java version to `14.0.2-open` using sdkman and create `.sbtopts` file at the root of the `server` with this content:
+    ```
+    -J-Xmx4G
+    -J-XX:MaxMetaspaceSize=4G
+    -J-XX:MaxPermSize=4G
+    -J-XX:+CMSClassUnloadingEnabled
+    ```
+    Then restarting the server should work fine.
 
-3. If connection problems persist, try increasing the open files limit in your operating system.
+3. If the xsnd node is not getting any blocks/peers, try disabling IPv6, and remove the peers file (`~/.xsncore/peers.dat`), restarting xsnd should get peers now.
+
+4. If connection problems persist, try increasing the open files limit in your operating system.
 
 ## Bitcoin
 If you want to run the explorer for Bitcoin, checkout the `bitcoin` branch and then, apply manually the following SQL commands:
