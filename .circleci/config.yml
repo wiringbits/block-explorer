@@ -1,0 +1,56 @@
+# Scala CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/sample-config/ for more details
+#
+version: 2
+jobs:
+  build-server:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "server/build.sbt" }}-{{ checksum "server/project/plugins.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: Install playsonify
+          command: |
+              sudo curl -L -o /usr/local/bin/mill https://github.com/lihaoyi/mill/releases/download/0.7.3/0.7.3 && sudo chmod +x /usr/local/bin/mill
+              git clone https://github.com/AlexITC/playsonify.git
+              cd playsonify && git checkout 1ab09bd0c76b571894e6cea0960a708fe0f2113d && mill __.publishLocal 
+      - run:
+          name: compile
+          command: cd server && sbt test:compile
+
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/.cache/coursier
+            - ~/.ivy2
+          key: v1-dependencies-{{ checksum "server/build.sbt" }}-{{ checksum "server/project/plugins.sbt" }}
+
+      # run tests!
+      - run:
+          name: Pre-download postgres image
+          command: docker pull postgres:11.5
+      - run:
+          name: Run tests
+          command: cd server && sbt test
+      - run:
+          name: sbt dist
+          command: cd server && sbt dist
+
+      # store results
+      - store_test_results:
+          path: server/target/test-reports
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-server
