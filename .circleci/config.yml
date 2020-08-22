@@ -4,6 +4,22 @@
 #
 version: 2
 jobs:
+  build-web:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:8-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          key: explorer-web-{{ .Branch }}-{{ checksum "web-ui/package-lock.json" }}
+      - run: cd web-ui && npm install
+      - save_cache:
+          key: explorer-web-{{ .Branch }}-{{ checksum "web-ui/package-lock.json" }}
+          paths:
+            - "web-ui/node_modules"
+      - run: cd web-ui && npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+      - run: cd web-ui && npm run e2e -- --protractor-config=e2e/protractor-ci.conf.js
+
   build-server:
     machine:
       image: ubuntu-1604:201903-01
@@ -22,7 +38,7 @@ jobs:
           command: |
               sudo curl -L -o /usr/local/bin/mill https://github.com/lihaoyi/mill/releases/download/0.7.3/0.7.3 && sudo chmod +x /usr/local/bin/mill
               git clone https://github.com/AlexITC/playsonify.git
-              cd playsonify && git checkout 1ab09bd0c76b571894e6cea0960a708fe0f2113d && mill __.publishLocal 
+              cd playsonify && git checkout 1ab09bd0c76b571894e6cea0960a708fe0f2113d && mill __.publishLocal
       - run:
           name: compile
           command: cd server && sbt test:compile
@@ -53,4 +69,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - build-server
+      - build-web
