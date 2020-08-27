@@ -2,6 +2,8 @@ package controllers
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
+import com.alexitc.playsonify.models.pagination.Limit
+import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
@@ -13,6 +15,7 @@ import org.scalactic.Bad
 import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.test.Helpers._
+import org.scalactic.Good
 
 class TransactionsControllerSpec extends MyAPISpec {
 
@@ -23,11 +26,44 @@ class TransactionsControllerSpec extends MyAPISpec {
   private val severalInputsTx =
     TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
 
+  private val transactionList = List(
+    TransactionInfo(
+      createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
+      createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+      12312312L,
+      Size(1000),
+      sent = 50,
+      received = 200,
+      height = Height(2)
+    ),
+    TransactionInfo(
+      createTransactionId("0c0f595a004eab5cf62ea70570f175701d120a0da31c8222d2d99fc60bf96577"),
+      createBlockhash("e2df117061eb6ed4d2832616dd7a5f07b01ad3d148c9d7f9a1628d339d6caedb"),
+      1521700630L,
+      Size(1000),
+      sent = 100,
+      received = 50,
+      height = Height(1)
+    ),
+  )
+
   private val customXSNService = new FileBasedXSNService
 
   private val transactionDataHandler = new TransactionDummyDataHandler {
     override def getOutput(txid: TransactionId, index: Int): ApplicationResult[persisted.Transaction.Output] = {
       Bad(TransactionError.OutputNotFound(txid, index)).accumulating
+    }
+
+    override def get(
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+    ): ApplicationResult[List[TransactionInfo]] = {
+      if(lastSeenTxid == None) {
+        Good(transactionList)
+      } else {
+        Good(List(transactionList.last))
+      }
     }
   }
 
@@ -197,6 +233,46 @@ class TransactionsControllerSpec extends MyAPISpec {
       val json = contentAsJson(response)
 
       json mustEqual expected
+    }
+  }
+
+  "GET /transactions" should {
+    "return the last transactions without lastSeenTxid" in {
+      val response = GET("/transactions?limit=2")
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      val data = (json \ "data").as[List[JsValue]]
+      data.size mustEqual 2
+
+      val item = data.head
+      val expected = transactionList.head
+      (item \ "id").as[String] mustEqual expected.id.string
+      (item \ "blockhash").as[String] mustEqual expected.blockhash.string
+      (item \ "time").as[Long] mustEqual expected.time
+      (item \ "size").as[Int] mustEqual expected.size.int
+      (item \ "sent").as[BigDecimal] mustEqual expected.sent
+      (item \ "received").as[BigDecimal] mustEqual expected.received
+      (item \ "height").as[Int] mustEqual expected.height.int
+    }
+
+    "return the transactions with lastSeenTxid" in {
+      val response = GET("/transactions?limit=1&lastSeenTxid=92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8")
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      val data = (json \ "data").as[List[JsValue]]
+      data.size mustEqual 1
+
+      val item = data.head
+      val expected = transactionList.last
+      (item \ "id").as[String] mustEqual expected.id.string
+      (item \ "blockhash").as[String] mustEqual expected.blockhash.string
+      (item \ "time").as[Long] mustEqual expected.time
+      (item \ "size").as[Int] mustEqual expected.size.int
+      (item \ "sent").as[BigDecimal] mustEqual expected.sent
+      (item \ "received").as[BigDecimal] mustEqual expected.received
+      (item \ "height").as[Int] mustEqual expected.height.int
     }
   }
 

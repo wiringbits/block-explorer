@@ -45,6 +45,18 @@ class TransactionPostgresDataHandler @Inject()(
       Or.from(maybe, One(TransactionError.OutputNotFound(txid, index)))
   }
 
+  override def get(
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): ApplicationResult[List[TransactionInfo]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map { transactionPostgresDAO.get(_, limit, orderingCondition) }
+      .getOrElse { transactionPostgresDAO.get(limit, orderingCondition) }
+
+    Good(transactions)
+  }
+
   override def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,

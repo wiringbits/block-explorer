@@ -3,14 +3,27 @@ package controllers
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.models.request.SendRawTransactionRequest
 import com.xsn.explorer.services.TransactionRPCService
+import com.xsn.explorer.services.TransactionService
+import com.alexitc.playsonify.models.pagination.Limit
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.Json
 
-class TransactionsController @Inject()(transactionRPCService: TransactionRPCService, cc: MyJsonControllerComponents)
+class TransactionsController @Inject()(transactionRPCService: TransactionRPCService, transactionService: TransactionService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
 
   import Context._
+
+  def getTransactions(limit: Int, lastSeenTxid: Option[String], orderingCondition: String) = public { _ =>
+    transactionService
+      .get(Limit(limit), lastSeenTxid, orderingCondition)
+      .toFutureOr
+      .map { value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
+  }
 
   def getTransaction(txid: String) = public { _ =>
     transactionRPCService

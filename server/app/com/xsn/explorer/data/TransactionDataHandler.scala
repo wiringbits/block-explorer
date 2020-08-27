@@ -22,6 +22,12 @@ trait TransactionDataHandler[F[_]] {
 
   def getOutput(txid: TransactionId, index: Int): F[Transaction.Output]
 
+  def get(
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): F[List[TransactionInfo]]
+
   def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,

@@ -48,6 +48,23 @@ class TransactionService @Inject()(
     result.toFuture
   }
 
+  def get(
+      limit: Limit,
+      lastSeenTxidString: Option[String],
+      orderingConditionString: String
+  ): FutureApplicationResult[WrappedResult[List[TransactionInfo]]] = {
+    val result = for {
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+
+      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
+      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+
+      r <- transactionFutureDataHandler.get(limit, lastSeenTxid, orderingCondition).toFutureOr
+    } yield WrappedResult(r)
+
+    result.toFuture
+  }
+
   def getByBlockhash(
       blockhashString: String,
       limit: Limit,

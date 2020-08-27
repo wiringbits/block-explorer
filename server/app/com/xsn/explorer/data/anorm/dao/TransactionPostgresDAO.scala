@@ -311,6 +311,70 @@ class TransactionPostgresDAO @Inject()(
       .as(parseTransactionWithValues.*)
   }
 
+  def get(limit: Limit, orderingCondition: OrderingCondition)(implicit conn: Connection): List[TransactionInfo] = {
+
+    val order = toSQL(orderingCondition)
+
+    SQL(
+      s"""
+        |WITH TXS AS (
+        |   SELECT txid, blockhash, time, size
+        |   FROM transactions
+        |   ORDER BY time $order, txid
+        |   LIMIT {limit}
+        |)
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM TXS t JOIN blocks blk USING (blockhash)
+      """.stripMargin
+    ).on(
+        'limit -> limit.int
+      )
+      .as(parseTransactionInfo.*)
+  }
+
+  def get(lastSeenTxid: TransactionId, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[TransactionInfo] = {
+
+    val order = toSQL(orderingCondition)
+    val timeComparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => "<"
+      case OrderingCondition.AscendingOrder => ">"
+    }
+    val indexComparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => ">"
+      case OrderingCondition.AscendingOrder => "<"
+    }
+
+    SQL(
+      s"""
+        |WITH CTE AS (
+        |  SELECT index AS lastSeenIndex, time AS lastSeenTime
+        |  FROM transactions
+        |  WHERE txid = {lastSeenTxid}
+        |),
+        |TXS AS (
+        |  SELECT txid, blockhash, time, size, index
+        |  FROM CTE CROSS JOIN transactions
+        |  WHERE time $timeComparator lastSeenTime
+        |  OR (time = lastSeenTime AND index $indexComparator lastSeenIndex)
+        |  ORDER BY time $order, txid
+        |  LIMIT {limit}
+        |)
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM TXS t JOIN blocks blk USING (blockhash)
+      """.stripMargin
+    ).on(
+        'limit -> limit.int,
+        'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
+      )
+      .as(parseTransactionInfo.*)
+  }
+
   def getTransactionsWithIOBy(blockhash: Blockhash, limit: Limit)(
       implicit conn: Connection
   ): List[Transaction.HasIO] = {

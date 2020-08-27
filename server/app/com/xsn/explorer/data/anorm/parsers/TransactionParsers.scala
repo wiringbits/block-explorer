@@ -4,6 +4,7 @@ import anorm.SqlParser._
 import anorm.~
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
+import com.xsn.explorer.models.values._
 
 object TransactionParsers {
 
@@ -16,6 +17,7 @@ object TransactionParsers {
   val parseSent = get[BigDecimal]("sent")
   val parseValue = get[BigDecimal]("value")
   val parseHexScript = parseHexString("hex_script")
+  val parseHeight = int("height").map(Height.apply)
 
   val parseTransaction = (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map {
     case txid ~ blockhash ~ time ~ size => Transaction(txid, blockhash, time, size)
@@ -30,6 +32,18 @@ object TransactionParsers {
 
     case txid ~ blockhash ~ time ~ size ~ sent ~ received =>
       TransactionWithValues(txid, blockhash, time, size, sent, received)
+  }
+
+  val parseTransactionInfo = (parseTransactionId() ~
+    parseBlockhashBytes() ~
+    parseTime ~
+    parseSize ~
+    parseSent ~
+    parseReceived ~
+    parseHeight).map {
+
+    case txid ~ blockhash ~ time ~ size ~ sent ~ received ~ height =>
+      TransactionInfo(txid, blockhash, time, size, sent, received, height)
   }
 
   val parseTransactionInput =

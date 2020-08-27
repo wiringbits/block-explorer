@@ -9,7 +9,7 @@ import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.DataHelper._
 import com.xsn.explorer.helpers.{DataGenerator, LedgerHelper, TransactionLoader}
-import com.xsn.explorer.models.{BlockReward, PoWBlockRewards}
+import com.xsn.explorer.models.{BlockReward, PoWBlockRewards, TransactionInfo}
 import com.xsn.explorer.models.fields.TransactionField
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.rpc.Block
@@ -201,6 +201,73 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
     testOrdering("desc", OrderingCondition.DescendingOrder)
     testOrdering("asc", OrderingCondition.AscendingOrder)
+  }
+
+  "get with scroll" should {
+    val address = randomAddress
+    val blockhash = randomBlockhash
+    val inputs = List(
+      Transaction.Input(dummyTransaction.id, 0, 1, 100, address),
+      Transaction.Input(dummyTransaction.id, 1, 2, 200, address)
+    )
+
+    val outputs = List(
+      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
+      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
+    )
+
+    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+      case (txid, time) =>
+        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
+    }
+
+    val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
+
+    def prepare() = {
+      createBlock(block, transactions)
+    }
+
+    val sorted = transactions
+      .sortWith {
+        case (a, b) =>
+          if (a.time > b.time) true
+          else if (a.time < b.time) false
+          else a.id.string.compareTo(b.id.string) < 0
+      }
+
+    "return the last element without last seen tx" in {
+      prepare()
+      val expected = TransactionInfo(
+        dummyTransaction.id, dummyTransaction.blockhash, dummyTransaction.time, dummyTransaction.size, BigDecimal(300), BigDecimal(300), Height(0)
+      )
+      val result = dataHandler.get(Limit(1), None, OrderingCondition.DescendingOrder).get
+
+      result.head.id mustEqual expected.id
+      result.head.blockhash mustEqual expected.blockhash
+    }
+
+    "return the next elements given the last seen tx" in {
+      prepare()
+
+      val lastSeenTxid = dummyTransaction.id
+      
+      val txWithIO = sorted.head
+      val expected = TransactionInfo(
+        txWithIO.id, txWithIO.blockhash, txWithIO.time, txWithIO.size, BigDecimal(0), BigDecimal(0), Height(0)
+      )
+
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder).get
+
+      result.head.id mustEqual expected.id
+      result.head.blockhash mustEqual expected.blockhash
+    }
+
+    "return no elements on unknown lastSeenTransaction" in {
+      val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder).get
+
+      result must be(empty)
+    }
   }
 
   "spending an output" should {

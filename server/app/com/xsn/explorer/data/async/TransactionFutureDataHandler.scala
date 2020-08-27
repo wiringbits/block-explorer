@@ -45,6 +45,16 @@ class TransactionFutureDataHandler @Inject()(
       }
     }
 
+  override def get(
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): FutureApplicationResult[List[TransactionInfo]] = retryableFutureDataHandler.retrying {
+    Future {
+      blockingDataHandler.get(limit, lastSeenTxid, orderingCondition)
+    }
+  }
+
   override def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,
