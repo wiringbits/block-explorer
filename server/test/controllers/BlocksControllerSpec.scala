@@ -280,7 +280,7 @@ class BlocksControllerSpec extends MyAPISpec {
         blockBlockingDataHandlerMock
           .getBlocks(eqTo(Limit(1)), eqTo(OrderingCondition.DescendingOrder), eqTo(None))
       ).thenReturn(result)
-      
+
       val response = GET(s"/v2/blocks?limit=1")
       status(response) mustEqual OK
 
@@ -315,7 +315,7 @@ class BlocksControllerSpec extends MyAPISpec {
         blockBlockingDataHandlerMock
           .getBlocks(eqTo(Limit(1)), eqTo(OrderingCondition.DescendingOrder), eqTo(Some(blockhash)))
       ).thenReturn(result)
-      
+
       val response = GET(s"/v2/blocks?lastSeenHash=${blockhash}&limit=1")
       status(response) mustEqual OK
 

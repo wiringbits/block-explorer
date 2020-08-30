@@ -1,17 +1,17 @@
 package controllers
 
-import com.alexitc.playsonify.core.FutureApplicationResult
-import com.alexitc.playsonify.play.PublicErrorRenderer
-import com.xsn.explorer.errors.MasternodeNotFoundError
-import com.xsn.explorer.helpers.DummyXSNService
 import com.xsn.explorer.models.rpc.Masternode
+import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.xsn.explorer.models.values.{TransactionId, _}
-import com.xsn.explorer.services.XSNService
+import com.xsn.explorer.services.synchronizer.repository.MasternodeRepository
 import controllers.common.MyAPISpec
-import org.scalactic.{Bad, Good}
 import play.api.inject.bind
+import org.mockito.MockitoSugar._
+import org.mockito.ArgumentMatchersSugar._
 import play.api.libs.json.JsValue
+import org.scalactic.Equality
 import play.api.test.Helpers._
+import com.xsn.explorer.models.values.IPAddress
 
 import scala.concurrent.Future
 
@@ -40,27 +40,16 @@ class MasternodesControllerSpec extends MyAPISpec {
 
   val masternode = masternodes.last
 
-  val xsnService = new DummyXSNService {
-    override def getMasternodes(): FutureApplicationResult[List[Masternode]] = {
-      Future.successful(Good(masternodes))
-    }
-
-    override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[Masternode] = {
-      if (masternode.ip.startsWith(ipAddress.string)) {
-        Future.successful(Good(masternode))
-      } else {
-        Future.successful(Bad(MasternodeNotFoundError).accumulating)
-      }
-    }
-  }
+  val masternodeRepositoryMock = mock[MasternodeRepository]
 
   override val application = guiceApplicationBuilder
-    .overrides(bind[XSNService].to(xsnService))
-    .build
+    .overrides(bind[MasternodeRepository].to(masternodeRepositoryMock))
+    .build()
 
   "GET /masternodes" should {
     "return the masternodes" in {
       val expected = masternodes.head
+      when(masternodeRepositoryMock.getAll()).thenReturn(Future.successful(masternodes))
       val response = GET("/masternodes?offset=1&limit=10&orderBy=activeSeconds:desc")
       status(response) mustEqual OK
 
@@ -82,8 +71,22 @@ class MasternodesControllerSpec extends MyAPISpec {
   }
 
   "GET /masternodes/:ip" should {
+
+    implicit val ipEquality: Equality[IPAddress] = new Equality[IPAddress] {
+      override def areEqual(a: IPAddress, b: Any): Boolean = {
+        b match {
+          case ip: IPAddress => a.string == ip.string
+          case _ => false
+        }
+      }
+    }
     "return the masternode" in {
       val expected = masternode
+      val ip = new IPAddress("45.32.148.13")
+
+      when(masternodeRepositoryMock.find(eqTo(ip)))
+        .thenReturn(Future.successful(Some(masternode)))
+
       val response = GET("/masternodes/45.32.148.13")
       status(response) mustEqual OK
 
@@ -98,6 +101,9 @@ class MasternodesControllerSpec extends MyAPISpec {
     }
 
     "fail on masternode not found" in {
+      val ip = new IPAddress("45.32.149.13")
+      when(masternodeRepositoryMock.find(eqTo(ip)))
+        .thenReturn(Future.successful(None))
       val response = GET("/masternodes/45.32.149.13")
       status(response) mustEqual NOT_FOUND
 
@@ -112,6 +118,8 @@ class MasternodesControllerSpec extends MyAPISpec {
     }
 
     "fail on bad ip format" in {
+      val ip = new IPAddress("45.32.149.1333")
+      when(masternodeRepositoryMock.find(eqTo(ip))).thenReturn(Future.failed(new Exception))
       val response = GET("/masternodes/45.32.149.1333")
       status(response) mustEqual BAD_REQUEST
 

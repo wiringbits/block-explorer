@@ -19,4 +19,7 @@ class ConfigModule extends AbstractModule {
 
   @Provides
   def currencuSynchronizerConfig(config: Configuration): CurrencySynchronizerConfig = CurrencySynchronizerConfig(config)
+
+  @Provides
+  def masternodeSynchronizerConfig(config: Configuration): MasternodeSynchronizerConfig = MasternodeSynchronizerConfig(config)
 }
