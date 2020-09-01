@@ -316,6 +316,8 @@ class BlockPostgresDAO @Inject()(
         |FROM (
         |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
         |   FROM blocks
+        |   ORDER BY height $order
+        |   LIMIT {limit}
         |) blk
         |LEFT JOIN (
         |   SELECT blockhash, count(*) count 
@@ -323,8 +325,6 @@ class BlockPostgresDAO @Inject()(
         |   GROUP BY blockhash
         |) tx 
         |ON blk.blockhash = tx.blockhash
-        |ORDER BY height $order
-        |LIMIT {limit}
       """.stripMargin
     ).on(
         'limit -> limit.int
@@ -345,22 +345,24 @@ class BlockPostgresDAO @Inject()(
       s"""
         |SELECT blk.*, COALESCE(tx.count, 0) transactions 
         |FROM (
-        |WITH CTE AS (
-        |  SELECT height as lastSeenHeight
-        |  FROM blocks
-        |  WHERE blockhash = {lastSeenHash}
-        |)
-        |SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
-        |FROM CTE CROSS JOIN blocks b
-        |WHERE b.height $comparator lastSeenHeight) blk
+        |   WITH CTE AS (
+        |     SELECT height as lastSeenHeight
+        |     FROM blocks
+        |     WHERE blockhash = {lastSeenHash}
+        |   )
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
+        |   FROM CTE CROSS JOIN blocks b
+        |   WHERE b.height $comparator lastSeenHeight
+        |   ORDER BY height $order
+        |   LIMIT {limit}
+        |) blk
         |LEFT JOIN (
         |   SELECT blockhash, count(*) count 
         |   FROM transactions 
         |   GROUP BY blockhash
         |) tx 
         |ON blk.blockhash = tx.blockhash
-        |ORDER BY height $order
-        |LIMIT {limit}
+        |ORDER BY blk.height $order
       """.stripMargin
     ).on(
         'lastSeenHash -> lastSeenHash.toBytesBE.toArray,
