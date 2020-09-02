@@ -23,6 +23,7 @@ class DummyXSNService extends XSNService {
   override def getDifficulty(): FutureApplicationResult[BigDecimal] = ???
   override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] = ???
   override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[Masternode] = ???
+  override def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]] = ???
   override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = ???
   override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = ???
   override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = ???

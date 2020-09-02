@@ -7,6 +7,7 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.async.StatisticsFutureDataHandler
 import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, SynchronizationProgress}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
+import com.xsn.explorer.services.synchronizer.repository.MerchantnodeRepository
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import akka.util.Timeout
@@ -17,21 +18,24 @@ import scala.concurrent.ExecutionContext
 class StatisticsService @Inject()(
     xsnService: XSNService,
     actorSystem: ActorSystem,
-    statisticsFutureDataHandler: StatisticsFutureDataHandler
+    statisticsFutureDataHandler: StatisticsFutureDataHandler,
+    merchantnodeRepository: MerchantnodeRepository
 )(
     implicit ec: ExecutionContext
 ) {
 
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
-    val rpcStats = xsnService.getMasternodeCount()
+    val mnStats = xsnService.getMasternodeCount()
+    val tposStats = merchantnodeRepository.getCount()
     val difficultyF = xsnService.getDifficulty()
 
     val result = for {
       stats <- dbStats.toFutureOr
-      count <- discardErrors(rpcStats).toFutureOr
+      mnCount <- discardErrors(mnStats).toFutureOr
       difficulty <- discardErrors(difficultyF).toFutureOr
-    } yield StatisticsDetails(stats, count, difficulty)
+      tposCount <- tposStats.map(x => Good(Some(x))).toFutureOr
+    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty)
 
     result.toFuture
   }

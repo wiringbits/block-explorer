@@ -5,7 +5,8 @@ import com.xsn.explorer.modules.{
   CurrencySynchronizerModule,
   DatabaseMigrationsModule,
   PollerSynchronizerModule,
-  MasternodeSynchronizerModule
+  MasternodeSynchronizerModule,
+  MerchantnodeSynchronizerModule
 }
 import org.slf4j.LoggerFactory
 import play.api.db.{DBApi, Database, Databases}
@@ -56,6 +57,7 @@ trait MyAPISpec extends PlayAPISpec {
       .disable(classOf[DatabaseMigrationsModule])
       .disable(classOf[CurrencySynchronizerModule])
       .disable(classOf[MasternodeSynchronizerModule])
+      .disable(classOf[MerchantnodeSynchronizerModule])
       .overrides(bind[Database].to(dummyDB))
       .overrides(bind[DBApi].to(dummyDBApi))
 }

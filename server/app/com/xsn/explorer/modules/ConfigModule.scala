@@ -22,4 +22,7 @@ class ConfigModule extends AbstractModule {
 
   @Provides
   def masternodeSynchronizerConfig(config: Configuration): MasternodeSynchronizerConfig = MasternodeSynchronizerConfig(config)
+
+  @Provides
+  def merchantnodeSynchronizerConfig(config: Configuration): MerchantnodeSynchronizerConfig = MerchantnodeSynchronizerConfig(config)
 }

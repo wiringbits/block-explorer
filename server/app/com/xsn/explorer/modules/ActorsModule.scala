@@ -5,6 +5,8 @@ import javax.inject.Singleton
 import akka.actor.ActorSystem
 import com.xsn.explorer.services.synchronizer.MasternodeSynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.MasternodeRepository
+import com.xsn.explorer.services.synchronizer.MerchantnodeSynchronizerActor
+import com.xsn.explorer.services.synchronizer.repository.MerchantnodeRepository
 
 class ActorsModule extends AbstractModule {
 
@@ -14,7 +16,16 @@ class ActorsModule extends AbstractModule {
     MasternodeSynchronizerActor.Ref.apply()
   }
 
+  @Provides
+  @Singleton
+  def merchantnodeSynchronizerActor()(implicit actorSystem: ActorSystem): MerchantnodeSynchronizerActor.Ref = {
+    MerchantnodeSynchronizerActor.Ref.apply()
+  }
+
   override def configure(): Unit = {
-    val _ = bind(classOf[MasternodeRepository]).to(classOf[MasternodeRepository.ActorImpl])
+    val _ = (
+      bind(classOf[MasternodeRepository]).to(classOf[MasternodeRepository.ActorImpl]),
+      bind(classOf[MerchantnodeRepository]).to(classOf[MerchantnodeRepository.ActorImpl])
+    )
   }
 }

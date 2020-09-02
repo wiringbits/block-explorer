@@ -24,7 +24,7 @@ class MasternodeSynchronizerActor extends Actor {
 }
 
 object MasternodeSynchronizerActor {
-  final class Ref private (val ref: ActorRef) extends AnyVal
+  final class Ref private (val ref: ActorRef)
 
   object Ref {
 

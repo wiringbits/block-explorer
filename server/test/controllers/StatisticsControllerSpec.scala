@@ -7,6 +7,7 @@ import com.xsn.explorer.errors.XSNUnexpectedResponseError
 import com.xsn.explorer.models.{BlockRewardsSummary, MarketInformation, MarketStatistics, Statistics}
 import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
+import com.xsn.explorer.services.synchronizer.repository.MerchantnodeRepository
 import controllers.common.MyAPISpec
 import org.mockito.MockitoSugar.{when, _}
 import org.scalactic.{Bad, Good}
@@ -47,11 +48,13 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   }
 
   val xsnService = mock[XSNService]
+  val merchantnodeRepository = mock[MerchantnodeRepository]
   val actorSystem = ActorSystem()
 
   override val application = guiceApplicationBuilder
     .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
     .overrides(bind[XSNService].to(xsnService))
+    .overrides(bind[MerchantnodeRepository].to(merchantnodeRepository))
     .overrides(bind[ActorSystem].to(actorSystem))
     .build()
 
@@ -67,8 +70,10 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   "GET /stats" should {
     "return the server statistics" in {
       val masternodes = 1000
+      val tposnodes = 100
       val difficulty = BigDecimal("129.1827211827212")
       when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
 
       val response = GET("/stats")
@@ -80,12 +85,15 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
       (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
       (json \ "masternodes").as[Int] mustEqual masternodes
+      (json \ "tposnodes").as[Int] mustEqual tposnodes
       (json \ "difficulty").as[BigDecimal] mustEqual difficulty
     }
 
     "return the stats even if getting masternodes throws an exception" in {
       val difficulty = BigDecimal("129.1827211827212")
+      val tposnodes = 100
       when(xsnService.getMasternodeCount()).thenReturn(Future.failed(new Exception))
+      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
 
       missingMasternodesTest(difficulty)
@@ -93,7 +101,9 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
     "return the stats even if the masternodes aren't available" in {
       val difficulty = BigDecimal("129.1827211827212")
+      val tposnodes = 100
       when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
+      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
 
       missingMasternodesTest(difficulty)
@@ -101,7 +111,9 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
     "return the stats even if getting the difficulty throws an exception" in {
       val masternodes = 1000
+      val tposnodes = 100
       when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.failed(new Exception))
 
       missingDifficultyTest(masternodes)
@@ -109,7 +121,9 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
     "return the stats even if the difficulty isn't available" in {
       val masternodes = 1000
+      val tposnodes = 100
       when(xsnService.getMasternodeCount()).thenReturn(Future.successful(Good(masternodes)))
+      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
 
       missingDifficultyTest(masternodes)

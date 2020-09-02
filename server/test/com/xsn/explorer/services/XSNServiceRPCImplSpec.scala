@@ -11,6 +11,7 @@ import com.xsn.explorer.errors.TransactionError.{
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models.rpc.Masternode
+import com.xsn.explorer.models.rpc.Merchantnode
 import com.xsn.explorer.models.values._
 import org.mockito.ArgumentMatchers._
 import org.mockito.MockitoSugar._
@@ -467,6 +468,52 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
         val masternodes = result.get
         masternodes mustEqual expected
+      }
+    }
+  }
+
+  "getMerchantnodes" should {
+    "return the merchant nodes" in {
+      val content =
+        """
+          |{
+          |  "36383165613065623435373332353634303664656666653535303735616465343966306433363232": "           WATCHDOG_EXPIRED 70209 XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2 c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01 1532897292 0 45.77.136.212:62583",
+          |  "36383165613065623435373332353634303664656666653535303735616465343966306433363233": "           ENABLED 70209 XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3 b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01 1532905050 6010 45.32.148.13:62583"
+          |}
+        """.stripMargin
+
+      val expected = List(
+        Merchantnode(
+          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
+          txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+          ip = "45.77.136.212:62583",
+          protocol = "70209",
+          status = "WATCHDOG_EXPIRED",
+          activeSeconds = 0,
+          lastSeen = 1532897292,
+          Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
+        ),
+        Merchantnode(
+          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
+          txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+          ip = "45.32.148.13:62583",
+          protocol = "70209",
+          status = "ENABLED",
+          activeSeconds = 6010,
+          lastSeen = 1532905050,
+          Address.from("XdNDRAiMUC9KiVRzhCTg9w44jQRdCpCRe3").get
+        )
+      )
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      whenReady(service.getMerchantnodes()) { result =>
+        result.isGood mustEqual true
+
+        val merchantnodes = result.get
+        merchantnodes mustEqual expected
       }
     }
   }

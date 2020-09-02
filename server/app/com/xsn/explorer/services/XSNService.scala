@@ -52,6 +52,8 @@ trait XSNService {
 
   def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode]
 
+  def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]]
+
   def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue]
 
   def sendRawTransaction(hex: HexString): FutureApplicationResult[String]
@@ -559,6 +561,43 @@ class XSNServiceRPCImpl @Inject()(
 
     result.foreach {
       case Bad(errors) => logger.info(s"Failed to get master node $ipAddress, errors = $errors")
+      case _ => ()
+    }
+
+    result
+  }
+
+  override def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "merchantnode",
+                  |  "params": ["list", "full"]
+                  |}
+                  |""".stripMargin
+
+    val result = retrying("merchantnode_list_full") {
+      server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[Map[String, String]](response)
+            .map {
+              case Good(map) => Good(rpc.Merchantnode.fromMap(map))
+              case Bad(errors) => Bad(errors)
+            }
+
+          maybe.getOrElse {
+            logger.debug(
+              s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+    }
+
+    result.foreach {
+      case Bad(errors) => logger.info(s"Failed to get merchant nodes, errors = $errors")
       case _ => ()
     }
 
