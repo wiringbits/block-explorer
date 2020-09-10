@@ -51,7 +51,8 @@
     <logger name="akka.actor.ActorSystemImpl" level="ERROR" />
     <!-- kamon has been quite noisy, ignoring the time settings -->
     <logger name="kamon.instrumentation.jdbc" level="ERROR" />
-    <logger name="kamon.apm.KamonApmApiClient" level="ERROR" />
+    <logger name="kamon.apm.KamonApmApiClient" level="OFF" />
+    <logger name="kamon.apm.KamonApm" level="ERROR" />
 
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
     <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF" />
