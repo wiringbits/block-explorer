@@ -5,6 +5,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.{StatisticsBlockingDataHandler, StatisticsDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.values.Address
 
 import scala.concurrent.Future
 
@@ -27,4 +28,12 @@ class StatisticsFutureDataHandler @Inject()(
         blockingDataHandler.getRewardsSummary(numberOfBlocks)
       }
     }
+
+  override def getTPoSMerchantStakingAddresses(merchantAddress: Address): FutureApplicationResult[List[Address]] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getTPoSMerchantStakingAddresses(merchantAddress)
+      }
+    }
+
 }

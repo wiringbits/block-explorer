@@ -6,10 +6,12 @@ import anorm._
 import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseSummary
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
 import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import org.slf4j.LoggerFactory
 
 class StatisticsPostgresDAO {
 
   import StatisticsPostgresDAO._
+  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def getStatistics(implicit conn: Connection): Statistics = {
     val result = SQL(

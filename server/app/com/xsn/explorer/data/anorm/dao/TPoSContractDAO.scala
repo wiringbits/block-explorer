@@ -6,6 +6,7 @@ import anorm._
 import com.xsn.explorer.data.anorm.parsers.TPoSContractParsers
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.values.{Address, TransactionId}
+import com.xsn.explorer.data.anorm.parsers.CommonParsers._
 
 class TPoSContractDAO {
 
@@ -120,5 +121,18 @@ class TPoSContractDAO {
         'address -> address.string
       )
       .as(parseTPoSContract.*)
+  }
+
+  def getTPoSMerchantStakingAddresses(merchantAddress: Address)(implicit conn: Connection): List[Address] = {
+    SQL(
+      """
+        |SELECT owner
+        |FROM tpos_contracts
+        |WHERE merchant={merchantAddress}
+        |AND state='ACTIVE'
+      """.stripMargin
+    ).on(
+      'merchantAddress -> merchantAddress.string
+    ).as(parseAddress("owner").*)
   }
 }

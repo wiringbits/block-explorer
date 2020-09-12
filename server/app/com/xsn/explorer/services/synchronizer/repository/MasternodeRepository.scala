@@ -12,6 +12,9 @@ import scala.concurrent.Future
 trait MasternodeRepository {
   def getAll(): Future[List[Masternode]]
   def find(ipAddress: IPAddress): Future[Option[Masternode]]
+  def getCount(): Future[Int]
+  def getEnabledCount(): Future[Int]
+  def getProtocols(): Future[Map[String, Int]]
 }
 
 object MasternodeRepository {
@@ -26,6 +29,18 @@ object MasternodeRepository {
       actor.ref
         .ask(MasternodeSynchronizerActor.GetMasternode(ipAddress))
         .mapTo[Option[Masternode]]
+    }
+
+    override def getCount(): Future[Int] = {
+      actor.ref.ask(MasternodeSynchronizerActor.GetMasternodeCount).mapTo[Int]
+    }
+
+    override def getEnabledCount(): Future[Int] = {
+      actor.ref.ask(MasternodeSynchronizerActor.GetEnabledMasternodeCount).mapTo[Int]
+    }
+
+    override def getProtocols(): Future[Map[String, Int]] = {
+      actor.ref.ask(MasternodeSynchronizerActor.GetMasternodeProtocols).mapTo[Map[String, Int]]
     }
   }
 }

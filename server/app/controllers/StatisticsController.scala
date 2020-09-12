@@ -20,6 +20,17 @@ class StatisticsController @Inject()(statisticsService: StatisticsService, cc: M
       .toFuture
   }
 
+  def getNodeStatus() = public { _ =>
+    statisticsService
+      .getNodeStatistics()
+      .toFutureOr
+      .map { value =>
+        val response = Ok(Json.toJson(value))
+        response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
+  }
+
   def getBlockRewardsSummary() = public { _ =>
     statisticsService
       .getRewardsSummary(1000)

@@ -20,6 +20,12 @@ class MasternodeSynchronizerActor extends Actor {
       sender() ! masternodes.find(x => x.ip.split(":").headOption.contains(ipAddress.string))
     case MasternodeSynchronizerActor.GetMasternodes =>
       sender() ! masternodes
+    case MasternodeSynchronizerActor.GetMasternodeCount =>
+      sender() ! masternodes.length
+    case MasternodeSynchronizerActor.GetEnabledMasternodeCount =>
+      sender() ! masternodes.count(x => x.status == "ENABLED")
+    case MasternodeSynchronizerActor.GetMasternodeProtocols =>
+      sender() ! masternodes.groupBy(_.protocol).mapValues(_.length).toMap
   }
 }
 
@@ -37,4 +43,7 @@ object MasternodeSynchronizerActor {
   final case class UpdateMasternodes(masternodes: List[rpc.Masternode])
   final case class GetMasternode(ipAddress: IPAddress)
   final case class GetMasternodes()
+  final case class GetMasternodeCount()
+  final case class GetEnabledMasternodeCount()
+  final case class GetMasternodeProtocols()
 }

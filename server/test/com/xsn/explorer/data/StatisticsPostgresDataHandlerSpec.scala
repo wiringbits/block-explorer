@@ -1,7 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO}
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
@@ -18,7 +18,7 @@ import org.scalatest.BeforeAndAfter
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   val secondsInOneDay = 24 * 60 * 60
-  lazy val dataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO)
+  lazy val dataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO, new TPoSContractDAO())
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val balanceDataHandler =
     new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))

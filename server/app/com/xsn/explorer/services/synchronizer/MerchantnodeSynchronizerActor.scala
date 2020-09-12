@@ -22,6 +22,10 @@ class MerchantnodeSynchronizerActor extends Actor {
       sender() ! merchantnodes
     case MerchantnodeSynchronizerActor.GetMerchantnodeCount =>
       sender() ! merchantnodes.length
+    case MerchantnodeSynchronizerActor.GetEnabledMerchantnodeCount =>
+      sender() ! merchantnodes.count(x => x.status == "ENABLED")
+    case MerchantnodeSynchronizerActor.GetMerchantnodeProtocols =>
+      sender() ! merchantnodes.groupBy(_.protocol).mapValues(_.length).toMap
   }
 }
 
@@ -40,4 +44,6 @@ object MerchantnodeSynchronizerActor {
   final case class GetMerchantnode(ipAddress: IPAddress)
   final case class GetMerchantnodes()
   final case class GetMerchantnodeCount()
+  final case class GetEnabledMerchantnodeCount()
+  final case class GetMerchantnodeProtocols()
 }

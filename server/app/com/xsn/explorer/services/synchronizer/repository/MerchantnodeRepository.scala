@@ -13,6 +13,8 @@ trait MerchantnodeRepository {
   def getAll(): Future[List[Merchantnode]]
   def find(ipAddress: IPAddress): Future[Option[Merchantnode]]
   def getCount(): Future[Int]
+  def getEnabledCount(): Future[Int]
+  def getProtocols(): Future[Map[String, Int]]
 }
 
 object MerchantnodeRepository {
@@ -31,6 +33,14 @@ object MerchantnodeRepository {
 
     override def getCount(): Future[Int] = {
       actor.ref.ask(MerchantnodeSynchronizerActor.GetMerchantnodeCount).mapTo[Int]
+    }
+
+    override def getEnabledCount(): Future[Int] = {
+      actor.ref.ask(MerchantnodeSynchronizerActor.GetEnabledMerchantnodeCount).mapTo[Int]
+    }
+
+    override def getProtocols(): Future[Map[String, Int]] = {
+      actor.ref.ask(MerchantnodeSynchronizerActor.GetMerchantnodeProtocols).mapTo[Map[String, Int]]
     }
   }
 }
