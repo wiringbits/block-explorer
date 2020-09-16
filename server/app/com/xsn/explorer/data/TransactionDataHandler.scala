@@ -18,6 +18,13 @@ trait TransactionDataHandler[F[_]] {
       orderingCondition: OrderingCondition
   ): F[List[Transaction.HasIO]]
 
+  def getByAddress(
+      address: Address,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): F[List[TransactionInfo]]
+
   def getUnspentOutputs(address: Address): F[List[Transaction.Output]]
 
   def getOutput(txid: TransactionId, index: Int): F[Transaction.Output]

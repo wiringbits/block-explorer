@@ -203,6 +203,87 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     testOrdering("asc", OrderingCondition.AscendingOrder)
   }
 
+  "getByAddress with scroll" should {
+    val address = randomAddress
+    val blockhash = randomBlockhash
+    val inputs = List(
+      Transaction.Input(dummyTransaction.id, 0, 1, 100, address),
+      Transaction.Input(dummyTransaction.id, 1, 2, 200, address)
+    )
+
+    val outputs = List(
+      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
+      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
+    )
+
+    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+      case (txid, time) =>
+        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
+    }
+
+    val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
+
+    def prepare() = {
+      createBlock(block, transactions)
+    }
+
+    def testOrdering[B](tag: String, condition: OrderingCondition) = {
+      val sorted = condition match {
+        case OrderingCondition.AscendingOrder =>
+          transactions
+            .sortWith {
+              case (a, b) =>
+                if (a.time < b.time) true
+                else if (a.time > b.time) false
+                else a.id.string.compareTo(b.id.string) < 0
+            }
+
+        case OrderingCondition.DescendingOrder =>
+          transactions
+            .sortWith {
+              case (a, b) =>
+                if (a.time > b.time) true
+                else if (a.time < b.time) false
+                else a.id.string.compareTo(b.id.string) < 0
+            }
+      }
+
+      s"[$tag] return the first elements" in {
+        prepare()
+        val expected = TransactionInfo(
+          sorted.head.id, sorted.head.blockhash, sorted.head.time, sorted.head.size, BigDecimal(300), BigDecimal(300), Height(0)
+        )
+        val result = dataHandler.getByAddress(address, Limit(1), None, condition).get
+
+        result.head.id mustEqual expected.id
+        result.head.blockhash mustEqual expected.blockhash
+      }
+
+      s"[$tag] return the next elements given the last seen tx" in {
+        prepare()
+
+        val lastSeenTxid = sorted.head.id
+        val expected = TransactionInfo(
+          sorted(1).id, sorted(1).blockhash, sorted(1).time, sorted(1).size, BigDecimal(0), BigDecimal(0), Height(0)
+        )
+
+        val result = dataHandler.getByAddress(address, Limit(1), Option(lastSeenTxid), condition).get
+                
+        result.head.id mustEqual expected.id
+        result.head.blockhash mustEqual expected.blockhash
+      }
+
+      s"[$tag] return no elements on unknown lastSeenTransaction" in {
+        val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
+        val result = dataHandler.getByAddress(address, Limit(1), Option(lastSeenTxid), condition).get
+        result must be(empty)
+      }
+    }
+
+    testOrdering("desc", OrderingCondition.DescendingOrder)
+    testOrdering("asc", OrderingCondition.AscendingOrder)
+  }
+
   "get with scroll" should {
     val address = randomAddress
     val blockhash = randomBlockhash

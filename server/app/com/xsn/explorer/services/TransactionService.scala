@@ -48,6 +48,26 @@ class TransactionService @Inject()(
     result.toFuture
   }
 
+  def getByAddress(
+      addressString: String,
+      limit: Limit,
+      lastSeenTxidString: Option[String],
+      orderingConditionString: String
+  ): FutureApplicationResult[WrappedResult[List[TransactionInfo]]] = {
+
+    val result = for {
+      address <- addressValidator.validate(addressString).toFutureOr
+
+      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+
+      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
+      transactions <- transactionFutureDataHandler.getByAddress(address, limit, lastSeenTxid, orderingCondition).toFutureOr
+    } yield WrappedResult(transactions)
+
+    result.toFuture
+  }
+
   def get(
       limit: Limit,
       lastSeenTxidString: Option[String],

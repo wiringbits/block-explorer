@@ -33,6 +33,19 @@ class TransactionPostgresDataHandler @Inject()(
     Good(transactions)
   }
 
+  def getByAddress(
+      address: Address,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): ApplicationResult[List[TransactionInfo]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map { transactionPostgresDAO.getByAddress(address, _, limit, orderingCondition) }
+      .getOrElse { transactionPostgresDAO.getByAddress(address, limit, orderingCondition) }
+
+    Good(transactions)
+  }
+
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = withConnection {
     implicit conn =>
       val result = transactionOutputDAO.getUnspentOutputs(address)

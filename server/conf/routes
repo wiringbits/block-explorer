@@ -15,6 +15,7 @@ GET   /transactions/:txid/utxos/:index               controllers.TransactionsCon
 
 GET   /addresses/:address                            controllers.AddressesController.getBy(address: String)
 GET   /addresses/:address/tposcontracts              controllers.AddressesController.getTPoSContracts(address: String)
+GET   /addresses/:address/transactions               controllers.AddressesController.getTransactions(address: String, limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc")
 GET   /v2/addresses/:address/transactions            controllers.AddressesController.getLightWalletTransactions(address: String, limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc")
 GET   /addresses/:address/utxos                      controllers.AddressesController.getUnspentOutputs(address: String)
 

@@ -204,6 +204,33 @@ class TransactionPostgresDAO @Inject()(
     }
   }
 
+  def getByAddress(address: Address, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[TransactionInfo] = {
+    val order = toSQL(orderingCondition)
+
+    SQL(
+      s"""
+        |WITH TXS AS(
+        | SELECT t.txid, t.blockhash, t.time, t.size
+        | FROM transactions t JOIN address_transaction_details USING (txid)
+        | WHERE address = {address}
+        | ORDER BY time $order, txid
+        | LIMIT {limit}
+        |)
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
+        | (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        | (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM TXS t JOIN blocks blk USING (blockhash)
+      """.stripMargin
+    ).on(
+        'address -> address.string,
+        'limit -> limit.int
+      )
+      .as(parseTransactionInfo.*)
+
+  }
+
   /**
    * Get the transactions by the given address (sorted by time).
    *
@@ -249,6 +276,45 @@ class TransactionPostgresDAO @Inject()(
       val outputs = transactionOutputDAO.getOutputs(tx.id, address)
       Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
     }
+  }
+
+  def getByAddress(address: Address, lastSeenTxid: TransactionId, limit: Limit, orderingCondition: OrderingCondition)(
+      implicit conn: Connection
+  ): List[TransactionInfo] = {
+
+    val order = toSQL(orderingCondition)
+    val comparator = orderingCondition match {
+      case OrderingCondition.DescendingOrder => "<"
+      case OrderingCondition.AscendingOrder => ">"
+    }
+
+    SQL(
+      s"""
+        |WITH CTE AS (
+        |  SELECT time AS lastSeenTime
+        |  FROM transactions
+        |  WHERE txid = {lastSeenTxid}
+        |),
+        |TXS AS(
+        | SELECT t.txid, t.blockhash, t.time, t.size
+        | FROM CTE CROSS JOIN transactions t
+        |          JOIN address_transaction_details USING (txid)
+        | WHERE address = {address} AND
+        |       (t.time $comparator lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
+        | ORDER BY time $order, txid
+        | LIMIT {limit}
+        |)
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
+        | (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
+        | (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |FROM TXS t JOIN blocks blk USING (blockhash)
+      """.stripMargin
+    ).on(
+        'address -> address.string,
+        'limit -> limit.int,
+        'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
+      )
+      .as(parseTransactionInfo.*)
   }
 
   def countByBlockhash(blockhash: Blockhash)(implicit conn: Connection): Count = {

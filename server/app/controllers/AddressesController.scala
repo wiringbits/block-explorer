@@ -42,6 +42,18 @@ class AddressesController @Inject()(
         .toFuture
     }
 
+    def getTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
+      public { _ =>
+        transactionService
+          .getByAddress(address, Limit(limit), lastSeenTxid, orderingCondition)
+          .toFutureOr
+          .map { value =>
+            val response = Ok(Json.toJson(value))
+            response.withHeaders("Cache-Control" -> "public, max-age=60")
+          }
+          .toFuture
+      }
+
   /**
    * Format to keep compatibility with the previous approach using the RPC api.
    */

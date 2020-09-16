@@ -31,6 +31,18 @@ class TransactionFutureDataHandler @Inject()(
     }
   }
 
+  override def getByAddress(
+      address: Address,
+      limit: Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): FutureApplicationResult[List[TransactionInfo]] = retryableFutureDataHandler.retrying {
+    Future {
+
+      blockingDataHandler.getByAddress(address, limit, lastSeenTxid, orderingCondition)
+    }
+  }
+
   override def getUnspentOutputs(address: Address): FutureApplicationResult[List[Transaction.Output]] =
     retryableFutureDataHandler.retrying {
       Future {

@@ -17,6 +17,13 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
       orderingCondition: OrderingCondition
   ): ApplicationResult[List[Transaction.HasIO]] = ???
 
+  override def getByAddress(
+      address: Address,
+      limit: pagination.Limit,
+      lastSeenTxid: Option[TransactionId],
+      orderingCondition: OrderingCondition
+  ): ApplicationResult[List[TransactionInfo]] = ???
+
   override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = ???
 
   override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = ???

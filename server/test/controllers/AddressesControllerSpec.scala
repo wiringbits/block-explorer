@@ -2,6 +2,8 @@ package controllers
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
+import com.alexitc.playsonify.models.ordering.OrderingCondition
+import com.alexitc.playsonify.models.pagination
 import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDataHandler}
 import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, TransactionDummyDataHandler}
 import com.xsn.explorer.models._
@@ -42,13 +44,14 @@ class AddressesControllerSpec extends MyAPISpec {
 
   val addressForTransactions = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
 
-  val addressTransaction = TransactionWithValues(
+  val addressTransaction = TransactionInfo(
     createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
     createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
     12312312L,
     Size(1000),
     sent = 50,
-    received = 200
+    received = 200,
+    Height(1000)
   )
 
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
@@ -59,6 +62,15 @@ class AddressesControllerSpec extends MyAPISpec {
       } else {
         super.getUnspentOutputs(address)
       }
+    }
+
+    override def getByAddress(
+        address: Address,
+        limit: pagination.Limit,
+        lastSeenTxid: Option[TransactionId],
+        orderingCondition: OrderingCondition
+    ): ApplicationResult[List[TransactionInfo]] = {
+      Good(List(addressTransaction))
     }
   }
 
@@ -127,20 +139,14 @@ class AddressesControllerSpec extends MyAPISpec {
   }
 
   "GET /addresses/:address/transactions" should {
-    def url(address: String, offset: Int, limit: Int) = s"/addresses/$address/transactions?offset=$offset&limit=$limit"
+    def url(address: String, limit: Int) = s"/addresses/$address/transactions?limit=$limit"
 
     "return the transactions where the address was involved" in {
-      pending
-      val offset = 0
       val limit = 5
-      val response = GET(url(addressForTransactions.string, offset, limit))
+      val response = GET(url(addressForTransactions.string, limit))
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
-      (json \ "offset").as[Int] mustEqual offset
-      (json \ "limit").as[Int] mustEqual limit
-      (json \ "total").as[Int] mustEqual 1
-
       val data = (json \ "data").as[List[JsValue]]
       data.size mustEqual 1
 
@@ -149,6 +155,7 @@ class AddressesControllerSpec extends MyAPISpec {
       (item \ "blockhash").as[String] mustEqual addressTransaction.blockhash.string
       (item \ "time").as[Long] mustEqual addressTransaction.time
       (item \ "size").as[Int] mustEqual addressTransaction.size.int
+      (item \ "height").as[Int] mustEqual addressTransaction.height.int
       (item \ "sent").as[BigDecimal] mustEqual addressTransaction.sent
       (item \ "received").as[BigDecimal] mustEqual addressTransaction.received
     }
