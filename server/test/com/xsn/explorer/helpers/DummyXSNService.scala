@@ -33,4 +33,13 @@ class DummyXSNService extends XSNService {
   override def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = ???
 
   override def getHexEncodedBlock(blockhash: Blockhash): FutureApplicationResult[String] = ???
+
+  override def encodeTPOSContract(
+      tposAddress: Address,
+      merchantAddress: Address,
+      commission: Int,
+      signature: String
+  ): FutureApplicationResult[String] = ???
+
+  override def getTPoSContractDetails(transactionId: TransactionId): FutureApplicationResult[TPoSContract.Details] = ???
 }

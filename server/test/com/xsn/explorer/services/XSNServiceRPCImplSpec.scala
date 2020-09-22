@@ -10,6 +10,8 @@ import com.xsn.explorer.errors.TransactionError.{
 }
 import com.xsn.explorer.errors._
 import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
+import com.xsn.explorer.models.TPoSContract
+import com.xsn.explorer.models.TPoSContract.Commission
 import com.xsn.explorer.models.rpc.Masternode
 import com.xsn.explorer.models.rpc.Merchantnode
 import com.xsn.explorer.models.values._
@@ -752,6 +754,56 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result mustEqual Bad(One(RawTransactionAlreadyExists))
+      }
+    }
+  }
+
+  "encodeTPOSContract" should {
+    "return the tpos contract encoded" in {
+      val content = JsString(
+        "020000000a001976a91495cf859d7a40c5d7fded2a03cb8d7dcf307eab1188ac1976a914a7e2ba4e0d91273d686f446fa04ca5fe800d452d88ac41201f2d052fb372248f89f9f2c9106be9a670d5538c01e4f39215c92717b847d3ea2466e7d1d88010ff98996913ed024dde8ebc860984f7806e5619c88cabf2ef06"
+      )
+      val responseBody = createRPCSuccessfulResponse(content)
+      val json = Json.parse(responseBody)
+
+      mockRequest(request, response)(200, json)
+
+      val tposAddress = Address.from("XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV").get
+      val merchantAddress = Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
+      val merchantCommission = 10
+      val signature =
+        "201F2D052FB372248F89F9F2C9106BE9A670D5538C01E4F39215C92717B847D3EA2466E7D1D88010FF98996913ED024DDE8EBC860984F7806E5619C88CABF2EF06"
+
+      whenReady(service.encodeTPOSContract(tposAddress, merchantAddress, merchantCommission, signature)) { result =>
+        result.isGood mustEqual true
+        result.get mustEqual "020000000a001976a91495cf859d7a40c5d7fded2a03cb8d7dcf307eab1188ac1976a914a7e2ba4e0d91273d686f446fa04ca5fe800d452d88ac41201f2d052fb372248f89f9f2c9106be9a670d5538c01e4f39215c92717b847d3ea2466e7d1d88010ff98996913ed024dde8ebc860984f7806e5619c88cabf2ef06"
+      }
+    }
+  }
+
+  "getTPoSContractDetails" should {
+    "return the tpos contract details" in {
+      val content =
+        """
+          |{
+          |    "tposAddress": "XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV",
+          |    "merchantAddress": "XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv",
+          |    "commission": 10
+          |}
+          |""".stripMargin
+
+      val responseBody = createRPCSuccessfulResponse(Json.parse(content))
+      val json = Json.parse(responseBody)
+      mockRequest(request, response)(200, json)
+      val tposAddress = Address.from("XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV").get
+      val merchantAddress = Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
+      val merchantCommission = Commission.from(10).get
+      val txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get
+      val expected = TPoSContract.Details(tposAddress, merchantAddress, merchantCommission)
+
+      whenReady(service.getTPoSContractDetails(txid)) { result =>
+        result.isGood mustEqual true
+        result.get mustEqual expected
       }
     }
   }

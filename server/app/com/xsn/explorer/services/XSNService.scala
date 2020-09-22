@@ -73,6 +73,14 @@ trait XSNService {
 
   def genesisBlockhash: Blockhash
 
+  def encodeTPOSContract(
+      tposAddress: Address,
+      merchantAddress: Address,
+      commission: Int,
+      signature: String
+  ): FutureApplicationResult[String]
+
+  def getTPoSContractDetails(transactionId: TransactionId): FutureApplicationResult[TPoSContract.Details]
 }
 
 class XSNServiceRPCImpl @Inject()(
@@ -777,6 +785,78 @@ class XSNServiceRPCImpl @Inject()(
 
     result.foreach {
       case Bad(errors) => logger.info(s"Failed to get TxOut, errors = $errors")
+      case _ => ()
+    }
+
+    result
+  }
+
+  override def encodeTPOSContract(
+      tposAddress: Address,
+      merchantAddress: Address,
+      comission: Int,
+      signature: String
+  ): FutureApplicationResult[String] = {
+    val body = s"""
+                  |{
+                  |  "jsonrpc": "1.0",
+                  |  "method": "tposcontract",
+                  |  "params": ["encode", "${tposAddress.string}", "${merchantAddress.string}", "$comission", "$signature"]
+                  |}
+                  |""".stripMargin
+
+    val result = retrying("encodetposcontract") {
+      server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[String](response)
+          maybe.getOrElse {
+            logger.debug(
+              s"Unexpected response from XSN Server: tposAddress:${tposAddress.string}, merchantAddress = ${merchantAddress},commission = $comission, signature = $signature status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+    }
+
+    result.foreach {
+      case Bad(errors) => logger.info(s"Failed to encode the TPoS contract, errors = $errors")
+      case _ => ()
+    }
+
+    result
+
+  }
+
+  override def getTPoSContractDetails(txid: TransactionId): FutureApplicationResult[TPoSContract.Details] = {
+    val innerBody = Json.obj("txid" -> txid)
+    val body = Json.obj(
+      "jsonrpc" -> "1.0",
+      "method" -> "tposcontract",
+      "params" -> List(
+        JsString("describe"),
+        JsString(innerBody.toString())
+      )
+    )
+
+    val result = retrying("describe-tpos") {
+      server
+        .post(body)
+        .map { response =>
+          val maybe = getResult[TPoSContract.Details](response)
+          maybe.getOrElse {
+            logger.debug(
+              s"Unexpected response from XSN Server, status = ${response.status}, response = ${response.body}"
+            )
+
+            Bad(XSNUnexpectedResponseError).accumulating
+          }
+        }
+    }
+
+    result.foreach {
+      case Bad(errors) => logger.info(s"Failed to get the TPoS contract details: $txid, errors = $errors")
       case _ => ()
     }
 

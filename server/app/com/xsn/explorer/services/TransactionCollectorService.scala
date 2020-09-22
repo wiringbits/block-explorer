@@ -1,15 +1,15 @@
 package com.xsn.explorer.services
 
-import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
+import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureListOps, FutureOps}
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
+import io.scalaland.chimney.dsl._
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
-import io.scalaland.chimney.dsl._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,13 +41,19 @@ class TransactionCollectorService @Inject()(
     val futureOr = for {
       rpcTransactions <- getRPCTransactions(block).toFutureOr
       completeTransactions <- completeValues(rpcTransactions).toFutureOr
+      result = completeTransactions.map(persisted.Transaction.fromRPC)
+      potentialTposTransactions = result.collect {
+        case (transaction, true) => transaction
+      }
+      validTposTransactions <- getValidContracts(potentialTposTransactions).toFutureOr
+      contracts <- getTposContracts(validTposTransactions).toFutureOr
+
     } yield {
       val completeBlock = block
         .into[rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]]
         .withFieldConst(_.transactions, completeTransactions)
         .transform
-      val result = completeTransactions.map(persisted.Transaction.fromRPC)
-      val contracts = result.flatMap(_._2)
+
       val txs = result.map(_._1)
       (txs, contracts, () => GolombEncoding.encode(completeBlock))
     }
@@ -215,6 +221,65 @@ class TransactionCollectorService @Inject()(
         Good(newVIN)
 
       case Bad(e) => Bad(e)
+    }
+  }
+
+  private[services] def getTposContracts(
+      transactions: List[persisted.Transaction.HasIO]
+  ): FutureListOps[TPoSContract] = {
+
+    val futures = transactions.map { transaction =>
+      val result = for {
+        contractDetails <- xsnService.getTPoSContractDetails(transaction.id).toFutureOr
+
+      } yield {
+        val collateralMaybe = transaction.outputs.find(_.value == 1)
+        val id = collateralMaybe
+          .map(x => TPoSContract.Id(transaction.id, x.index))
+          .getOrElse(
+            throw new RuntimeException(
+              s"The transaction ${transaction.id} is not a valid contract, missing collateral ${transaction.outputs}"
+            )
+          )
+        TPoSContract(id, contractDetails, transaction.time, TPoSContract.State.Active)
+      }
+
+      result.toFuture
+    }
+
+    FutureListOps(futures)
+  }
+
+  private[services] def getValidContracts(
+      transactions: List[persisted.Transaction.HasIO]
+  ): FutureApplicationResult[List[persisted.Transaction.HasIO]] = {
+    val listF = transactions
+      .map { transaction =>
+        xsnService
+          .isTPoSContract(transaction.id)
+          .toFutureOr
+          .map { valid =>
+            if (valid) Some(transaction)
+            else None
+          }
+          .toFuture
+      }
+
+    val futureList = Future.sequence(listF)
+    futureList.map { list =>
+      val x = list.flatMap {
+        case Good(a) => a.map(Good(_))
+        case Bad(e) => Some(Bad(e))
+      }
+
+      val initial: ApplicationResult[List[persisted.Transaction.HasIO]] = Good(List.empty)
+      x.foldLeft(initial) {
+        case (acc, cur) =>
+          cur match {
+            case Good(txid) => acc.map(txid :: _)
+            case Bad(e) => acc.badMap(prev => prev ++ e)
+          }
+      }
     }
   }
 }

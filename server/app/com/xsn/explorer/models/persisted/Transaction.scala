@@ -65,9 +65,9 @@ object Transaction {
   /**
    * Transform a rpc transaction to a persisted transaction.
    *
-   * As the TPoS contracts aren't stored in the persisted transaction, they are returned on the result.
+   * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
    */
-  def fromRPC(tx: rpc.Transaction[TransactionVIN.HasValues]): (HasIO, Option[TPoSContract]) = {
+  def fromRPC(tx: rpc.Transaction[TransactionVIN.HasValues]): (HasIO, Boolean) = {
     val inputs = tx.vin.zipWithIndex
       .map {
         case (vin, index) =>
@@ -88,24 +88,17 @@ object Transaction {
       size = tx.size
     )
 
-    (HasIO(transaction, inputs, outputs), getContract(tx))
+    (HasIO(transaction, inputs, outputs), seemsTPoSContract(tx))
   }
 
   /**
    * A transaction can have at most one contract
    */
-  private def getContract(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): Option[TPoSContract] = {
+  private def seemsTPoSContract(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): Boolean = {
     val collateralMaybe = tx.vout.find(_.value == 1)
-    val detailsMaybe = tx.vout.flatMap(_.scriptPubKey).flatMap(_.getTPoSContractDetails).headOption
+    val zeroAmount = tx.vout.find(_.value == 0)
+    val hasOpReturn = zeroAmount.exists(t => t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN")))
 
-    for {
-      collateral <- collateralMaybe
-      details <- detailsMaybe
-    } yield TPoSContract(
-      TPoSContract.Id(tx.id, collateral.n),
-      time = tx.time,
-      details = details,
-      state = TPoSContract.State.Active
-    )
+    collateralMaybe.isDefined && zeroAmount.isDefined && hasOpReturn
   }
 }

@@ -1,7 +1,7 @@
 package com.xsn.explorer.services.synchronizer
 
+import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.async.BlockFutureDataHandler
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -102,7 +102,6 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       rewards <- getBlockRewards(rpcBlock, extractionMethod).toFutureOr
       data <- transactionCollectorService.collect(rpcBlock).toFutureOr
       (transactions, contracts, filterFactory) = data
-      validContracts <- getValidContracts(contracts).toFutureOr
       filteredTransactions = transactions.filter(_.blockhash == rpcBlock.hash)
     } yield {
       if (transactions.size != filteredTransactions.size) {
@@ -112,7 +111,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
         )
       }
       val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
-      (block, validContracts, filterFactory, rewards)
+      (block, contracts, filterFactory, rewards)
     }
 
     result.toFuture.onComplete {
@@ -130,37 +129,6 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
     blockService.getBlockRewards(rpcBlock, extractionMethod).map {
       case Good(reward) => Good(Some(reward))
       case Bad(_) => Good(None)
-    }
-  }
-
-  private def getValidContracts(contracts: List[TPoSContract]): FutureApplicationResult[List[TPoSContract]] = {
-    val listF = contracts
-      .map { contract =>
-        xsnService
-          .isTPoSContract(contract.txid)
-          .toFutureOr
-          .map { valid =>
-            if (valid) Some(contract)
-            else None
-          }
-          .toFuture
-      }
-
-    val futureList = Future.sequence(listF)
-    futureList.map { list =>
-      val x = list.flatMap {
-        case Good(a) => a.map(Good(_))
-        case Bad(e) => Some(Bad(e))
-      }
-
-      val initial: ApplicationResult[List[TPoSContract]] = Good(List.empty)
-      x.foldLeft(initial) {
-        case (acc, cur) =>
-          cur match {
-            case Good(contract) => acc.map(contract :: _)
-            case Bad(e) => acc.badMap(prev => prev ++ e)
-          }
-      }
     }
   }
 }
