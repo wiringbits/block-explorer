@@ -27,12 +27,12 @@ export class TransactionsService {
     return this.http.get<any>(url);
   }
 
-  push(hex: string): Observable<any> {
+  push(hex: string): Promise<any> {
     const url = this.baseUrl;
     const body = {
       hex: hex
     };
 
-    return this.http.post<any>(url, body, httpOptions);
+    return this.http.post<any>(url, body, httpOptions).toPromise();
   }
 }

@@ -10,6 +10,7 @@ import { LightWalletTransaction } from '../models/light-wallet-transaction';
 import { Transaction } from '../models/transaction';
 import { UTXO } from '../models/utxo';
 import { WrappedResult } from '../models/wrapped-result';
+import { TposContract } from '../models/tpos-contract';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -50,5 +51,10 @@ export class AddressesService {
   getUtxos(address): Observable<UTXO[]> {
     const url = `${this.baseUrl}/${address}/utxos`;
     return this.http.get<UTXO[]>(url);
+  }
+
+  getTposContracts(address): Promise<any> {
+    const url = `${this.baseUrl}/${address}/tposcontracts`;
+    return this.http.get<any>(url).toPromise();
   }
 }

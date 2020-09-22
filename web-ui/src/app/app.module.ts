@@ -29,6 +29,7 @@ import { NotificationService } from './services/notification.service';
 import { TickerService } from './services/ticker.service';
 import { TransactionsService } from './services/transactions.service';
 import { TrezorRepositoryService } from './services/trezor-repository.service';
+import { TposContractsService } from './services/tposcontracts.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -108,7 +109,8 @@ import { TrezorConnectComponent } from './components/trezor-connect/trezor-conne
     NotificationService,
     TickerService,
     TransactionsService,
-    TrezorRepositoryService
+    TrezorRepositoryService,
+    TposContractsService
   ],
   bootstrap: [AppComponent]
 })

@@ -32,7 +32,7 @@ export const getScriptTypeByAddress = (address: string, scriptType: ScriptType) 
       return ScriptType.OUTPUT + getAddressTypeByAddress(address);
     default: throw new Error('Unknown script type');
   }
-}
+};
 
 export const getAddressTypeByPrefix = (prefix: number) => {
   switch (prefix) {
@@ -43,13 +43,13 @@ export const getAddressTypeByPrefix = (prefix: number) => {
   }
 };
 
-export const convertToSatoshis = (xsnAmount: number) => {
+export const convertToSatoshis = (xsnAmount: number): number => {
   if (xsnAmount < 0) {
     throw new Error('Invalid negative amount');
   }
   const splitXSN = Number(xsnAmount).toFixed(8).split('.');
-  const num = splitXSN[ 0 ];
-  const dec = splitXSN.length === 1 ? '' : splitXSN[ 1 ];
+  const num = splitXSN[0];
+  const dec = splitXSN.length === 1 ? '' : splitXSN[1];
   return Number(num + dec.padEnd(8, '0'));
 };
 
@@ -100,7 +100,7 @@ export const selectUtxos = (available: UTXO[], satoshis: number) => {
 
 export const toTrezorInput = (trezorAddresses: TrezorAddress[], utxo: UTXO) => {
   const trezorAddress = trezorAddresses.find(ta => ta.address === utxo.address);
-  if (typeof(trezorAddress) === 'undefined') {
+  if (typeof (trezorAddress) === 'undefined') {
     throw new Error('Address not found');
   }
   return {

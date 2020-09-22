@@ -120,6 +120,18 @@ export class AppComponent implements OnInit {
       'label.normalFee': 'Normal',
       'label.lowFee': 'Low',
       'label.satoshis': 'Satoshis',
+      'label.merchantAddress': 'Merchant Address',
+      'label.ownerAddress': 'Owner Address',
+      'label.merchantCommission': 'Merchant Commission',
+      'label.state': 'State',
+      'label.commision': 'Commision',
+      'label.add': 'Add',
+      'label.enterMerchantAddress': 'Enter merchant address',
+      'label.tposAddress': 'TPoS Address',
+      'label.path': 'Path',
+      'label.generatedTransaction': 'Generated transaction id',
+      'label.createContract': 'Create TPoS contract',
+
 
       'label.address': 'Address',
       'label.balance': 'Balance',
