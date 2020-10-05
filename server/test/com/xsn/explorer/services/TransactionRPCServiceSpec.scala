@@ -3,7 +3,7 @@ package com.xsn.explorer.services
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.validators.TransactionIdValidator
+import com.xsn.explorer.services.validators.{AddressValidator, TransactionIdValidator}
 import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, Good, One}
 import org.scalatest.concurrent.ScalaFutures._
@@ -18,8 +18,10 @@ class TransactionRPCServiceSpec extends AnyWordSpec {
   val transactionIdValidator = mock[TransactionIdValidator]
   val transactionCollectorService = mock[TransactionCollectorService]
   val xsnService = mock[XSNService]
+  val addresValidator = new AddressValidator()
 
-  val service = new TransactionRPCService(transactionIdValidator, transactionCollectorService, xsnService)
+  val service =
+    new TransactionRPCService(transactionIdValidator, transactionCollectorService, xsnService)
 
   "getTransactionLite(height, txindex)" should {
     "get non-cacheable lite transaction" in {

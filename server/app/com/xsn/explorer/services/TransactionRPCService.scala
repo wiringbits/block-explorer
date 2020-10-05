@@ -10,6 +10,7 @@ import com.xsn.explorer.services.validators.TransactionIdValidator
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
+import org.slf4j.LoggerFactory
 import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,6 +20,7 @@ class TransactionRPCService @Inject()(
     transactionCollectorService: TransactionCollectorService,
     xsnService: XSNService
 )(implicit ec: ExecutionContext) {
+  protected val logger = LoggerFactory.getLogger(this.getClass)
 
   def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
     val result = for {
@@ -111,6 +113,28 @@ class TransactionRPCService @Inject()(
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       jsvalue <- xsnService.getTxOut(txid, index, includeMempool).toFutureOr
     } yield f(jsvalue)
+
+    result.toFuture
+  }
+
+  def encodeTPOSContract(
+      tposAddress: Address,
+      merchantAddress: Address,
+      commission: Int,
+      signature: String
+  ): FutureApplicationResult[JsValue] = {
+    val result = for {
+      encodedTposContract <- xsnService
+        .encodeTPOSContract(
+          tposAddress = tposAddress,
+          merchantAddress = merchantAddress,
+          commission = commission,
+          signature = signature
+        )
+        .toFutureOr
+    } yield {
+      Json.obj("tposContractEncoded" -> JsString(encodedTposContract))
+    }
 
     result.toFuture
   }

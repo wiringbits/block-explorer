@@ -2,8 +2,10 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
+import com.xsn.explorer.helpers.DataGenerator.randomTPoSContract
+import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
-import com.xsn.explorer.models.values.{Blockhash, Height, TransactionId}
+import com.xsn.explorer.models.values.{Address, Blockhash, Height, TransactionId}
 import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
 
@@ -69,4 +71,20 @@ class FileBasedXSNService extends DummyXSNService {
   }
 
   override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = Future.successful(Good(true))
+
+  override def encodeTPOSContract(
+      tposAddress: Address,
+      merchantAddress: Address,
+      commission: Int,
+      signature: String
+  ): FutureApplicationResult[String] = {
+    val tposEncoded =
+      "020000000a001976a91495cf859d7a40c5d7fded2a03cb8d7dcf307eab1188ac1976a914a7e2ba4e0d91273d686f446fa04ca5fe800d452d88ac41201f2d052fb372248f89f9f2c9106be9a670d5538c01e4f39215c92717b847d3ea2466e7d1d88010ff98996913ed024dde8ebc860984f7806e5619c88cabf2ef06"
+    Future.successful(Good(tposEncoded))
+  }
+
+  override def getTPoSContractDetails(transactionId: TransactionId): FutureApplicationResult[TPoSContract.Details] = {
+    val contractDetails = randomTPoSContract(txid = transactionId).details
+    Future.successful(Good(contractDetails))
+  }
 }

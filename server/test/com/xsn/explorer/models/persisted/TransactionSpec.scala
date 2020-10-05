@@ -6,7 +6,6 @@ import com.xsn.explorer.models.rpc.ScriptPubKey
 import com.xsn.explorer.models.values._
 import javax.xml.bind.DatatypeConverter
 import org.scalatest.MustMatchers._
-import org.scalatest.OptionValues._
 import org.scalatest.WordSpec
 
 @com.github.ghik.silencer.silent
@@ -112,7 +111,7 @@ class TransactionSpec extends WordSpec {
       )
 
       val (_, contract) = persisted.Transaction.fromRPC(tx)
-      contract.value must be(expected)
+      contract must be(true)
     }
 
     "accept outputs with empty script" in {

@@ -2,7 +2,8 @@ package com.xsn.explorer.models
 
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import enumeratum._
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 import scala.util.Try
 
@@ -23,6 +24,16 @@ object TPoSContract {
     def from(int: Int): Option[Commission] = {
       if (range contains int) Some(new Commission(int))
       else None
+    }
+
+    implicit val reads: Reads[Commission] = Reads { json =>
+      json.validate[Int].flatMap { value =>
+        from(value)
+          .map(JsSuccess.apply(_))
+          .getOrElse {
+            JsError.apply("Invalid commission")
+          }
+      }
     }
   }
 
@@ -55,6 +66,13 @@ object TPoSContract {
         case _ => None
       }
     }
+
+    implicit val detailsReads: Reads[Details] = (
+      (JsPath \ "tposAddress").read[Address] and
+        (JsPath \ "merchantAddress").read[Address] and
+        (JsPath \ "commission").read[Commission]
+    )(Details.apply _)
+
   }
 
   sealed abstract class State(override val entryName: String) extends EnumEntry

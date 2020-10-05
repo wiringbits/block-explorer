@@ -44,7 +44,7 @@ class TransactionsControllerSpec extends MyAPISpec {
       sent = 100,
       received = 50,
       height = Height(1)
-    ),
+    )
   )
 
   private val customXSNService = new FileBasedXSNService
@@ -55,11 +55,11 @@ class TransactionsControllerSpec extends MyAPISpec {
     }
 
     override def get(
-      limit: Limit,
-      lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition
+        limit: Limit,
+        lastSeenTxid: Option[TransactionId],
+        orderingCondition: OrderingCondition
     ): ApplicationResult[List[TransactionInfo]] = {
-      if(lastSeenTxid == None) {
+      if (lastSeenTxid == None) {
         Good(transactionList)
       } else {
         Good(List(transactionList.last))
@@ -257,7 +257,8 @@ class TransactionsControllerSpec extends MyAPISpec {
     }
 
     "return the transactions with lastSeenTxid" in {
-      val response = GET("/transactions?limit=1&lastSeenTxid=92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8")
+      val response =
+        GET("/transactions?limit=1&lastSeenTxid=92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8")
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
@@ -325,6 +326,31 @@ class TransactionsControllerSpec extends MyAPISpec {
 
       val cacheHeader = header("Cache-Control", response)
       cacheHeader mustBe None
+    }
+  }
+
+  "POST   /tposcontracts/encode" should {
+    val url = s"/tposcontracts/encode"
+
+    "return the tpos contract encoded" in {
+      val params: String =
+        s"""
+           |{
+           |    "tposAddress" : "XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV",
+           |    "merchantAddress" : "XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv",
+           |    "commission" : 10,
+           |    "signature" : "201F2D052FB372248F89F9F2C9106BE9A670D5538C01E4F39215C92717B847D3EA2466E7D1D88010FF98996913ED024DDE8EBC860984F7806E5619C88CABF2EF06"
+           |}
+           |""".stripMargin
+
+      val response = POST(url, Some(params))
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+
+      val contract =
+        "020000000a001976a91495cf859d7a40c5d7fded2a03cb8d7dcf307eab1188ac1976a914a7e2ba4e0d91273d686f446fa04ca5fe800d452d88ac41201f2d052fb372248f89f9f2c9106be9a670d5538c01e4f39215c92717b847d3ea2466e7d1d88010ff98996913ed024dde8ebc860984f7806e5619c88cabf2ef06"
+      (json \ "tposContractEncoded").as[String] mustEqual contract
+
     }
   }
 }

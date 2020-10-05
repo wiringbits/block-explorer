@@ -1,7 +1,7 @@
 package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.xsn.explorer.models.request.SendRawTransactionRequest
+import com.xsn.explorer.models.request.{SendRawTransactionRequest, TposContractsEncodeRequest}
 import com.xsn.explorer.services.TransactionRPCService
 import com.xsn.explorer.services.TransactionService
 import com.alexitc.playsonify.models.pagination.Limit
@@ -9,8 +9,11 @@ import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.Json
 
-class TransactionsController @Inject()(transactionRPCService: TransactionRPCService, transactionService: TransactionService, cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+class TransactionsController @Inject()(
+    transactionRPCService: TransactionRPCService,
+    transactionService: TransactionService,
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   import Context._
 
@@ -74,6 +77,22 @@ class TransactionsController @Inject()(transactionRPCService: TransactionRPCServ
       .map { value =>
         val response = Ok(Json.toJson(value))
         response.withHeaders("Cache-Control" -> "public, max-age=60")
+      }
+      .toFuture
+  }
+
+  def encodeTPOSContract() = publicInput { ctx: HasModel[TposContractsEncodeRequest] =>
+    transactionRPCService
+      .encodeTPOSContract(
+        tposAddress = ctx.model.tposAddress,
+        merchantAddress = ctx.model.merchantAddress,
+        commission = ctx.model.commission,
+        signature = ctx.model.signature
+      )
+      .toFutureOr
+      .map { value =>
+        val response = Ok(value)
+        response.withHeaders("Cache-Control" -> "no-store")
       }
       .toFuture
   }
