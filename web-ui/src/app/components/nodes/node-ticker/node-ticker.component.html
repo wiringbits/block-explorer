@@ -1,0 +1,212 @@
+<div class="row nodeStats-container">
+
+  <div class="col-xs-12 col-sm-6 panel">
+    <div class="panel-body row">
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.masternodes' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.masternodes != null">
+            {{nodeStats.masternodes}}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.enabled' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.enabledMasternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.enabledMasternodes != null">
+            {{nodeStats.enabledMasternodes}} <small>({{nodeStats.enabledMasternodes / nodeStats.masternodes | percent}})</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.coinsInMasternodes' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            {{nodeStats.masternodes * 15000}} XSN <br/>
+            <small>({{nodeStats.masternodes * 15000 / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+          </span>
+        </div>
+      </div>
+      
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.masternodeROI' | translate}}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            16.62%   Year
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.distributedAcross' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            25 <small>countries</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.protocols' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodesProtocols == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.masternodesProtocols != null">
+            <div *ngFor="let item of nodeStats.masternodesProtocols | keyvalue">
+              {{item.key}}: {{item.value}} <small>({{item.value / nodeStats.masternodes | percent}})</small>
+            </div>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 panel">
+    <div class="panel-body row">
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.tposNodes' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.masternodes != null">
+            {{nodeStats.tposnodes}}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.enabled' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.enabledTposnodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.enabledTposnodes != null">
+            {{nodeStats.enabledTposnodes}} <small>({{nodeStats.enabledTposnodes / nodeStats.tposnodes | percent}})</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.coinsStaking' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            {{nodeStats.coinsStaking}} XSN <br/>
+            <small>({{nodeStats.coinsStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+          </span>
+        </div>
+      </div>
+      
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.stakingROI' | translate}}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            16.62%   Year
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.distributedAcross' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            25 <small>countries</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.protocols' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.tposnodesProtocols == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null && nodeStats.tposnodesProtocols != null">
+            <div *ngFor="let item of nodeStats.tposnodesProtocols | keyvalue">
+              {{item.key}}: {{item.value}} <small>({{item.value / nodeStats.tposnodes | percent}})</small>
+            </div>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.coinsTrustlesslyStaking' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="nodeStats != null">
+            {{nodeStats.coinsStaking}} XSN <br/>
+            <small>({{nodeStats.coinsStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

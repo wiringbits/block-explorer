@@ -1,0 +1,108 @@
+<div class="tab-content row">
+	<div class="col-xs-12 text-primary page-title">
+		<a class="text-highlight" routerLink="/addresses">
+			<span class="glyphicon glyphicon-arrow-left text-highlight"></span>
+    </a>
+    &nbsp; {{addressLabel[addressString] ? addressLabel[addressString] : 'label.address' | translate}}
+  </div>
+  
+	<div class="col-xs-12 block-tab-content">
+    <div class="text-primary">
+      <div [hidden]="address != null">
+        <alert>{{'message.addressNotFound' | translate}}</alert>
+      </div>
+
+      <div *ngIf="address != null">
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <thead>
+                  <tr>
+                    <th class="col-xs-3">
+                      <h4 class="text-primary">
+                        {{'label.summary' | translate}}
+                      </h4>
+                    </th>
+                    <th class="col-xs-9"></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td class="text-label">{{'label.address' | translate}}</td>
+                    <td>{{addressString}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.balance' | translate}}</td>
+                    <td>{{address.available | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.received' | translate}}</td>
+                    <td>{{address.received | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.spent' | translate}}</td>
+                    <td>{{address.spent | explorerCurrency}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-xs-6">
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <thead>
+                  <tr>
+                    <th class="col-xs-5">
+                      <h4 class="text-primary">
+                        {{'label.tposDetails' | translate}} <small *ngIf="tposContract" class="text-highlight">({{'label.enabled' | translate | uppercase}})</small>
+                      </h4>  
+                    </th>
+                    <th class="col-xs-7"></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td class="text-label">{{'label.isStakingCoinsTrustlessly' | translate}}</td>
+                    <td>{{'label.yes' | translate}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.contractState' | translate}}</td>
+                    <td>{{tposContract ? tposContract.state : ''}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.merchantAddress' | translate}}</td>
+                    <td>
+                      <a *ngIf="tposContract" class="text-highlight" routerLink="/addresses/{{tposContract.merchant}}">{{tposContract.merchant}}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.merchantCommission' | translate}}</td>
+                    <td>{{tposContract ? tposContract.merchantCommission : ''}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.contractTxid' | translate}}</td>
+                    <td>
+                      <a *ngIf="tposContract" class="text-highlight" routerLink="/transactions/{{tposContract.txid}}">{{tposContract.txid}}</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <h3 class="col-xs-12">{{'label.transactinoLabel' | translate}}</h3>
+        
+        <div class="col-xs-12 transaction-table-wrapper">
+          <app-transaction-table address={{addressString}}></app-transaction-table>
+        </div>
+      </div>
+    </div>
+	</div>
+</div>

@@ -1,0 +1,21 @@
+<div class="tab-content row">
+    <div class="page-title col-sm-3 col-xs-12">
+        {{'label.blocks' | translate}}
+    </div>
+    <div class="col-sm-9 col-xs-12 text-label">
+        <div class="blocks-info">
+            <div>
+                {{'label.height' | translate | uppercase}}: <span class="text-highlight">{{stats.blocks}}</span>
+            </div>
+            <div>
+                {{'label.inflation' | translate | uppercase}}: <span class="text-highlight">7.58%</span>
+            </div>
+            <div>
+                {{'label.price' | translate | uppercase}}: <span class="text-highlight">${{prices.usd}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 block-table-wrapper">
+        <app-block-table></app-block-table>
+    </div>
+</div>

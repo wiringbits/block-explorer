@@ -1,0 +1,27 @@
+<div class="finder-wrapper">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate role="form">
+
+    <div [ngClass]="{
+      'has-success': errorService.hasCorrectValue(form, 'searchField'),
+      'has-error': errorService.hasWrongValue(form, 'searchField')
+    }">
+      <div class="input-group">
+        <input type="text" class="form-control" maxlength="64" formControlName="searchField" type="text"
+          id="searchField" placeholder="{{ 'label.searchField' | translate }}">
+
+        <span class="input-group-btn">
+          <button class="btn btn-search" type="button" (click)="onSubmit()">
+            <span class="glyphicon glyphicon-search text-highlight"></span>
+          </button>
+        </span>
+
+      </div>
+    </div>
+
+    <div [hidden]="!errorService.hasWrongValue(form, 'searchField')">
+      <span class="text-danger">{{ errorService.getFieldError(form, 'searchField') | translate }}</span>
+    </div>
+
+  </form>
+</div>
+<br *ngIf="!errorService.hasWrongValue(form, 'searchField')">

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 import { Transaction } from '../models/transaction';
+import { PaginatedResult } from '../models/paginated-result';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -16,6 +17,15 @@ export class TransactionsService {
   private baseUrl = environment.api.url + '/transactions';
 
   constructor(private http: HttpClient) { }
+
+  getList(lastSeenTxId: string, limit: number = 10, orderBy: string = 'asc'): Observable<PaginatedResult<Transaction>> {
+    let url = `${this.baseUrl}?limit=${limit}&orderBy=${orderBy}`;
+    if (lastSeenTxId) {
+      url += `&lastSeenTxid=${lastSeenTxId}`;
+    }
+
+    return this.http.get<PaginatedResult<Transaction>>(url);
+  }
 
   get(txid: string): Observable<Transaction> {
     const url = `${this.baseUrl}/${txid}`;

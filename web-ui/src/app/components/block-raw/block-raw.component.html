@@ -1,8 +1,0 @@
-<div>
-  <div [hidden]="block != null">
-    <alert>{{'message.blockNotFound' | translate}}</alert>
-  </div>
-  <div *ngIf="block != null">
-    <pre>{{block | json}}</pre>
-  </div>
-</div>

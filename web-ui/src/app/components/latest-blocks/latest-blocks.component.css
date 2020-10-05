@@ -1,9 +1,0 @@
-.latest-block {
-  animation: blinker 1s linear;
-}
-
-@keyframes blinker {
-  50% {
-    background-color: #D4FFD4;
-  }
-}

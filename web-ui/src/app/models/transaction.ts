@@ -10,6 +10,7 @@ export class Transaction {
   output: TransactionValue[];
   sent: number;
   received: number;
+  height: string;
 }
 
 export class TransactionValue {

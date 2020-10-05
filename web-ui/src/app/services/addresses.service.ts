@@ -10,6 +10,7 @@ import { LightWalletTransaction } from '../models/light-wallet-transaction';
 import { Transaction } from '../models/transaction';
 import { UTXO } from '../models/utxo';
 import { WrappedResult } from '../models/wrapped-result';
+import { TposContract } from '../models/tposcontract';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -28,8 +29,15 @@ export class AddressesService {
     return this.http.get<Balance>(url);
   }
 
-  getTransactions(address: string, offset: number = 0, limit: number = 10, orderBy: string = ''): Observable<PaginatedResult<Transaction>> {
-    const url = `${this.baseUrl}/${address}/transactions?offset=${offset}&limit=${limit}&orderBy=${orderBy}`;
+  getTransactions(
+    address: string,
+    limit: number = 10,
+    lastSeenTxid: string = '',
+    order: string = 'desc'): Observable<PaginatedResult<Transaction>> {
+    let url = `${this.baseUrl}/${address}/transactions?limit=${limit}&orderBy=${order}`;
+    if (lastSeenTxid !== '') {
+      url += `&lastSeenTxid=${lastSeenTxid}`;
+    }
     return this.http.get<PaginatedResult<Transaction>>(url);
   }
 
@@ -50,5 +58,10 @@ export class AddressesService {
   getUtxos(address): Observable<UTXO[]> {
     const url = `${this.baseUrl}/${address}/utxos`;
     return this.http.get<UTXO[]>(url);
+  }
+
+  getTposContracts(address): Observable<WrappedResult<TposContract>> {
+    const url = `${this.baseUrl}/${address}/tposcontracts`;
+    return this.http.get<WrappedResult<TposContract>>(url);
   }
 }

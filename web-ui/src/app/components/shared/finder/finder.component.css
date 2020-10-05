@@ -1,0 +1,20 @@
+.btn-search {
+  background: #FFFFFF08 0% 0% no-repeat padding-box;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  margin-left: 0 !important;
+}
+
+.btn-search:disabled {
+  background: #FFFFFF08 0% 0% no-repeat padding-box;
+}
+
+.input-group-btn {
+  background: transparent;
+}
+
+.finder-wrapper {
+  padding: 0;
+  margin-top: 5px;
+}
