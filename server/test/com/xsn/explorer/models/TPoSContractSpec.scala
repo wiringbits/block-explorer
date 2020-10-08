@@ -24,8 +24,8 @@ class TPoSContractSpec extends WordSpec {
     "fail if OP_RETURN is not present" -> s"OP_RTURN $address1Hex $address2Hex $commission $signature",
     "fail if the commission is missing" -> s"OP_RETURN $address1Hex $address2Hex  $signature",
     "fail if the commission is corrupted" -> s"OP_RETURN $address1Hex $address2Hex $commission$commission $signature",
-    "fail if the commission is 0" -> s"OP_RETURN $address1Hex $address2Hex 0 $signature",
-    "fail if the commission is 100" -> s"OP_RETURN $address1Hex $address2Hex 100 $signature",
+    "fail if the commission is -1" -> s"OP_RETURN $address1Hex $address2Hex -1 $signature",
+    "fail if the commission is 101" -> s"OP_RETURN $address1Hex $address2Hex 101 $signature",
     "fail if the owner address is malformed" -> s"OP_RETURN x$address1Hex $address2Hex $commission $signature",
     "fail if the merchant address is malformed" -> s"OP_RETURN x$address1Hex $address2Hex $commission $signature"
   )

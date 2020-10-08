@@ -19,7 +19,7 @@ object TPoSContract {
 
   object Commission {
 
-    val range = 1 until 100
+    val range = 0 to 100
 
     def from(int: Int): Option[Commission] = {
       if (range contains int) Some(new Commission(int))
