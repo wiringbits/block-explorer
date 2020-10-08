@@ -407,8 +407,8 @@ export class TrezorConnectComponent implements OnInit {
       return false;
     }
 
-    if (commission < 1 || commission > 99) {
-      this.notificationService.error('Commission must be a value between 1 and 99');
+    if (commission < 0 || commission > 100) {
+      this.notificationService.error('Commission must be a value between 0 and 100');
       return false;
     }
 
