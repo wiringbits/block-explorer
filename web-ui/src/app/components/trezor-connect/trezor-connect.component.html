@@ -52,10 +52,10 @@
         <div class="tab-wrapper">
           <label class="first-position"> {{ 'label.sendXSN' | translate }}</label>
           <div class="first-position">{{ 'label.address' | translate }}</div>
-          <input class="second-position complete black-text form-control" #destinationAddress type="text">
+          <input class="second-position complete black-text form-control" #destinationAddress type="text" (change)="destinationAddress.value = destinationAddress.value.trim()">
           <div class="first-position">{{ 'label.amount' | translate }}</div>
-          <input class="second-position complete black-text form-control" #amountValue (change)="precise(amountValue)"
-            #amountXSN type="number" min="0" step="0.00000001">
+          <input class="second-position complete black-text form-control" #amountValue
+            type="number" min="0" step="0.00000001" (change)="precise(amountValue)">
           <div class="first-position">{{ 'label.fee' | translate }}</div>
           <select class="second-position form-control" #selectedFee (change)="refresh()">
             <option *ngFor="let fee of transactionFees" value="{{fee.amount}}">
@@ -63,7 +63,7 @@
             </option>
           </select>
           <input class="first-position btn btn-primary btn-serach" type="button" value="{{ 'label.send' | translate }}"
-            (click)="signTransaction(destinationAddress.value, amountXSN.value, selectedFee.value)">
+            (click)="signTransaction(destinationAddress.value, amountValue.value, selectedFee.value)">
         </div>
         <br>
         <label>{{'label.generatedTransaction' | translate}}: </label>
