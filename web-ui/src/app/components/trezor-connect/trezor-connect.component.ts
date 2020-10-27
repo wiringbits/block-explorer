@@ -178,11 +178,11 @@ export class TrezorConnectComponent implements OnInit {
         outputs: outputs,
         refTxs: txs,
         coin: 'Stakenet'
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.payload.error) {
           this.notificationService.error(result);
         } else {
-          this.pushTransaction(result.payload.serializedTx);
+          this.txid = await this.pushTransaction(result.payload.serializedTx);
         }
       });
     });
