@@ -14,6 +14,7 @@ import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfterAll
 import com.xsn.explorer.models.values.Address
 import play.api.inject.bind
+import play.api.libs.json.Json
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
@@ -66,6 +67,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   val merchantnodeRepository = mock[MerchantnodeRepository]
   val nodeStatsRepository = mock[NodeStatsRepository]
   val actorSystem = ActorSystem()
+  actorSystem.actorOf(Props(classOf[CurrencyActorMock], this), "currency_synchronizer")
 
   override val application = guiceApplicationBuilder
     .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
@@ -179,14 +181,37 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   "GET /prices" should {
     "get currency values" in {
-      actorSystem.actorOf(Props(classOf[CurrencyActorMock], this), "currency_synchronizer")
-
       val response = GET("/prices")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
       (json \ "usd").as[BigDecimal] mustEqual 0.071231351
       (json \ "btc").as[BigDecimal] mustEqual 0.063465494
+    }
+
+    "get a specific currency" in {
+      val response = GET("/prices?currency=usd")
+      status(response) mustEqual OK
+
+      val expected = Json.obj("usd" -> 0.071231351)
+      val json = contentAsJson(response)
+
+      json mustEqual expected
+    }
+
+    "getting a specific currency is case insensitive" in {
+      val response = GET("/prices?currency=USD")
+      status(response) mustEqual OK
+
+      val expected = Json.obj("usd" -> 0.071231351)
+      val json = contentAsJson(response)
+
+      json mustEqual expected
+    }
+
+    "return not found when currency does not exist" in {
+      val response = GET("/prices?currency=asd")
+      status(response) mustEqual NOT_FOUND
     }
   }
 

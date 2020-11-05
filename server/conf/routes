@@ -37,7 +37,7 @@ GET   /v2/blocks/:height/transactions/:txindex/lite controllers.BlocksController
 GET   /stats                 controllers.StatisticsController.getStatus()
 GET   /node-stats            controllers.StatisticsController.getNodeStatus()
 GET   /rewards-summary       controllers.StatisticsController.getBlockRewardsSummary()
-GET   /prices              controllers.StatisticsController.getCurrency()
+GET   /prices              controllers.StatisticsController.getCurrency(currency: Option[String])
 
 GET   /v2/balances           controllers.BalancesController.getHighest(limit: Int ?= 10, lastSeenAddress: Option[String])
 

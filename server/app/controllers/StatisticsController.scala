@@ -4,7 +4,7 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.services.StatisticsService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
-import play.api.libs.json.{Json}
+import play.api.libs.json.Json
 
 class StatisticsController @Inject()(statisticsService: StatisticsService, cc: MyJsonControllerComponents)
     extends MyJsonController(cc) {
@@ -42,7 +42,20 @@ class StatisticsController @Inject()(statisticsService: StatisticsService, cc: M
       .toFuture
   }
 
-  def getCurrency() = public { _ =>
-    statisticsService.getPrices
+  def getCurrency(currency: Option[String]) = public { _ =>
+    val prices = statisticsService.getPrices.toFutureOr.map(r => Json.toJson(r))
+
+    val result = currency.map(_.toLowerCase) match {
+      case Some(currency) =>
+        prices.map { prices =>
+          (prices \ currency)
+            .asOpt[BigDecimal]
+            .map(price => Ok(Json.obj(currency -> price)))
+            .getOrElse(NotFound)
+        }
+      case None => prices.map(Ok(_))
+    }
+
+    result.future
   }
 }

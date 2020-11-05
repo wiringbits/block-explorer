@@ -1,6 +1,6 @@
 package com.xsn.explorer.tasks
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.xsn.explorer.config.CurrencySynchronizerConfig
 import com.xsn.explorer.models.{MarketInformation, MarketStatistics}
 import com.xsn.explorer.services.{Currency, CurrencyService}
@@ -49,27 +49,15 @@ class CurrencySynchronizerTask @Inject()(
 
   start()
 
-  @com.github.ghik.silencer.silent
-  def start() = {
+  def start(): Unit = {
     logger.info("Starting currency synchronizer task")
 
     val currencySynchronizerActor = actorSystem.actorOf(Props[CurrencySynchronizerActor], "currency_synchronizer")
+    val highPriorityCurrencies = List(Currency.BTC, Currency.USD)
+    val lowPriorityCurrencies = Currency.values.filterNot(highPriorityCurrencies.contains)
 
-    actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
-      Currency.values.foreach { currency =>
-        currencyService.getPrice(currency).onComplete {
-          case Success(Good(price)) =>
-            logger.info(s"${currency.entryName} price synced")
-            currencySynchronizerActor ! CurrencySynchronizerActor.UpdatePrice(currency, price)
-          case Success(Bad(error)) =>
-            logger.info(s"${currency.entryName} price syncronization failed due to $error")
-          case Failure(exception) =>
-            logger.info(
-              s"${currency.entryName} price syncronization failed due to ${exception.getLocalizedMessage}",
-              exception
-            )
-        }
-      }
+    actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.highPriorityInterval) { () =>
+      highPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
 
       currencyService.getMarketInformation().onComplete {
         case Success(Good(marketInformation)) =>
@@ -80,6 +68,27 @@ class CurrencySynchronizerTask @Inject()(
         case Failure(exception) =>
           logger.info(s"market information syncronization failed due to ${exception.getLocalizedMessage}", exception)
       }
+    }
+
+    actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.lowPriorityInterval) { () =>
+      lowPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
+    }
+
+    ()
+  }
+
+  private def syncCurrencyPrice(currency: Currency, currencySynchronizerActor: ActorRef): Unit = {
+    currencyService.getPrice(currency).onComplete {
+      case Success(Good(price)) =>
+        logger.info(s"${currency.entryName} price synced")
+        currencySynchronizerActor ! CurrencySynchronizerActor.UpdatePrice(currency, price)
+      case Success(Bad(error)) =>
+        logger.info(s"${currency.entryName} price syncronization failed due to $error")
+      case Failure(exception) =>
+        logger.info(
+          s"${currency.entryName} price syncronization failed due to ${exception.getLocalizedMessage}",
+          exception
+        )
     }
   }
 }

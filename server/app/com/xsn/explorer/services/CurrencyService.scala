@@ -22,6 +22,13 @@ sealed abstract class Currency(override val entryName: String) extends EnumEntry
 object Currency extends Enum[Currency] {
   final case object USD extends Currency("USD")
   final case object BTC extends Currency("BTC")
+  final case object EUR extends Currency("EUR")
+  final case object GBP extends Currency("GBP")
+  final case object JPY extends Currency("JPY")
+  final case object MXN extends Currency("MXN")
+  final case object NZD extends Currency("NZD")
+  final case object TRY extends Currency("TRY")
+  final case object UAH extends Currency("UAH")
 
   val values = findValues
 }
