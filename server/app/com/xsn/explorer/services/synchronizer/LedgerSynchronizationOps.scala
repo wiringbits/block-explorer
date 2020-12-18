@@ -16,7 +16,6 @@ import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 private[synchronizer] class LedgerSynchronizationOps @Inject()(
     explorerConfig: ExplorerConfig,
@@ -55,9 +54,9 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
   }
 
   def getFullRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
-    val span = Kamon
-      .spanBuilder(operationName = "getFullRPCBlock")
-      .tag("blockhash", blockhash.string)
+    val timer = Kamon
+      .timer("getFullRPCBlock")
+      .withTag("blockhash", blockhash.string)
       .start()
 
     import io.scalaland.chimney.dsl._
@@ -82,19 +81,16 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
 
     val result = partial.flatMap(_.toFutureOr).toFuture
 
-    result.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.onComplete(_ => timer.stop())
 
     result
   }
 
   def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
-    val span = Kamon
-      .spanBuilder(operationName = "getBlockData")
-      .tag("hash", rpcBlock.hash.string)
-      .tag("height", rpcBlock.height.int.toLong)
+    val timer = Kamon
+      .timer("getBlockData")
+      .withTag("hash", rpcBlock.hash.string)
+      .withTag("height", rpcBlock.height.int.toLong)
       .start()
 
     val result = for {
@@ -114,10 +110,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       (block, contracts, filterFactory, rewards)
     }
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }

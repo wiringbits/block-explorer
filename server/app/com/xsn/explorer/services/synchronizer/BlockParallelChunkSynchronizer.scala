@@ -14,7 +14,6 @@ import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class BlockParallelChunkSynchronizer @Inject()(
     blockChunkRepository: BlockChunkRepository.FutureImpl,
@@ -35,10 +34,10 @@ class BlockParallelChunkSynchronizer @Inject()(
       rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val start = System.currentTimeMillis()
-    val span = Kamon
-      .spanBuilder(operationName = "syncSingleBlock")
-      .tag("height", block.height.int.toLong)
-      .tag("hash", block.hash.string)
+    val timer = Kamon
+      .timer("syncSingleBlock")
+      .withTag("height", block.height.int.toLong)
+      .withTag("hash", block.hash.string)
       .start()
 
     val result = for {
@@ -48,10 +47,7 @@ class BlockParallelChunkSynchronizer @Inject()(
       _ = logger.debug(s"Synced ${block.height}, took ${System.currentTimeMillis() - start} ms")
     } yield ()
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }

@@ -15,7 +15,6 @@ import org.scalactic.{Bad, Good, One}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class LedgerSynchronizerService @Inject()(
     synchronizerConfig: LedgerSynchronizerConfig,
@@ -50,8 +49,9 @@ class LedgerSynchronizerService @Inject()(
   }
 
   private def applyPendingUpdate(): FutureApplicationResult[Unit] = {
-    val span = Kamon
-      .spanBuilder(operationName = "applyPendingUpdate")
+    val timer = Kamon
+      .timer("applyPendingUpdate")
+      .withoutTags()
       .start()
 
     val partial = for {
@@ -78,10 +78,7 @@ class LedgerSynchronizerService @Inject()(
     }
 
     val result = partial.flatMap(identity).toFuture
-    result.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.onComplete(_ => timer.stop())
 
     result
   }
@@ -123,9 +120,9 @@ class LedgerSynchronizerService @Inject()(
   private def sync(goal: Range): FutureApplicationResult[Unit] = {
     goal.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) {
       case (previous, height) =>
-        val span = Kamon
-          .spanBuilder(operationName = "syncRange")
-          .tag("height", height.toLong)
+        val timer = Kamon
+          .timer("syncRange")
+          .withTag("height", height.toLong)
           .start()
 
         val result = for {
@@ -135,26 +132,21 @@ class LedgerSynchronizerService @Inject()(
           _ <- append(block).toFutureOr
         } yield ()
 
-        result.toFuture.onComplete {
-          case Success(_) => span.finish()
-          case Failure(exception) => span.fail(exception)
-        }
+        result.toFuture.onComplete(_ => timer.stop())
 
         result.toFuture
     }
   }
 
   private def rollback(goal: BlockPointer): FutureOr[persisted.Block] = {
-    val span = Kamon
-      .spanBuilder(operationName = "rollback")
+    val timer = Kamon
+      .timer("rollback")
+      .withoutTags()
       .start()
 
     val partial = ledgerDataHandler.pop()
 
-    partial.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    partial.onComplete(_ => timer.stop())
 
     partial.toFutureOr
       .flatMap { removedBlock =>
@@ -171,10 +163,10 @@ class LedgerSynchronizerService @Inject()(
   }
 
   private def append(newBlock: rpc.Block.HasTransactions[_]): FutureApplicationResult[Unit] = {
-    val span = Kamon
-      .spanBuilder(operationName = "appendBlock")
-      .tag("hash", newBlock.hash.string)
-      .tag("height", newBlock.height.int.toLong)
+    val timer = Kamon
+      .timer("appendBlock")
+      .withTag("hash", newBlock.hash.string)
+      .withTag("height", newBlock.height.int.toLong)
       .start()
 
     val result = for {
@@ -194,10 +186,7 @@ class LedgerSynchronizerService @Inject()(
       }
     }
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }

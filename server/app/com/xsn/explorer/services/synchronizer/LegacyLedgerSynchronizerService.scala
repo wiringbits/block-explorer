@@ -15,7 +15,6 @@ import org.scalactic.Good
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class LegacyLedgerSynchronizerService @Inject()(
     xsnService: XSNService,
@@ -35,9 +34,9 @@ class LegacyLedgerSynchronizerService @Inject()(
    * because the behavior is undefined.
    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
-    val span = Kamon
-      .spanBuilder(operationName = "synchronizeBlockhash")
-      .tag("hash", blockhash.string)
+    val timer = Kamon
+      .timer("synchronizeBlockhash")
+      .withTag("hash", blockhash.string)
       .start()
 
     val result = for {
@@ -45,20 +44,17 @@ class LegacyLedgerSynchronizerService @Inject()(
       _ <- synchronize(data).toFutureOr
     } yield ()
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }
 
   private def synchronize(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
     logger.info(s"Synchronize block ${block.height}, hash = ${block.hash}")
-    val span = Kamon
-      .spanBuilder(operationName = "synchronizeBlock")
-      .tag("hash", block.hash.string)
-      .tag("height", block.height.int.toLong)
+    val timer = Kamon
+      .timer("synchronizeBlock")
+      .withTag("hash", block.hash.string)
+      .withTag("height", block.height.int.toLong)
       .start()
 
     val result = for {
@@ -76,10 +72,7 @@ class LegacyLedgerSynchronizerService @Inject()(
         .toFutureOr
     } yield ()
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }
@@ -120,10 +113,10 @@ class LegacyLedgerSynchronizerService @Inject()(
       appendBlock(newBlock)
     } else if (ledgerBlock.height.int + 1 == newBlock.height.int) {
       logger.info(s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}")
-      val span = Kamon
-        .spanBuilder(operationName = "handleReorganization")
-        .tag("hash", newBlock.hash.string)
-        .tag("height", newBlock.height.int.toLong)
+      val timer = Kamon
+        .timer("handleReorganization")
+        .withTag("hash", newBlock.hash.string)
+        .withTag("height", newBlock.height.int.toLong)
         .start()
 
       val result = for {
@@ -133,18 +126,15 @@ class LegacyLedgerSynchronizerService @Inject()(
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
 
-      result.toFuture.onComplete {
-        case Success(_) => span.finish()
-        case Failure(exception) => span.fail(exception)
-      }
+      result.toFuture.onComplete(_ => timer.stop())
 
       result.toFuture
     } else if (newBlock.height.int > ledgerBlock.height.int) {
       logger.info(s"Filling holes to push block ${newBlock.height}, hash = ${newBlock.hash}")
-      val span = Kamon
-        .spanBuilder(operationName = "synchronizeBlockRange")
-        .tag("hash", newBlock.hash.string)
-        .tag("height", newBlock.height.int.toLong)
+      val timer = Kamon
+        .timer("synchronizeBlockRange")
+        .withTag("hash", newBlock.hash.string)
+        .withTag("height", newBlock.height.int.toLong)
         .start()
 
       val result = for {
@@ -152,10 +142,7 @@ class LegacyLedgerSynchronizerService @Inject()(
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
 
-      result.toFuture.onComplete {
-        case Success(_) => span.finish()
-        case Failure(exception) => span.fail(exception)
-      }
+      result.toFuture.onComplete(_ => timer.stop())
 
       result.toFuture
     } else {
@@ -188,10 +175,10 @@ class LegacyLedgerSynchronizerService @Inject()(
   }
 
   private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
-    val span = Kamon
-      .spanBuilder(operationName = "appendBlock")
-      .tag("hash", newBlock.hash.string)
-      .tag("height", newBlock.height.int.toLong)
+    val timer = Kamon
+      .timer("appendBlock")
+      .withTag("hash", newBlock.hash.string)
+      .withTag("height", newBlock.height.int.toLong)
       .start()
 
     val result = for {
@@ -206,10 +193,7 @@ class LegacyLedgerSynchronizerService @Inject()(
       _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory, rewards).toFutureOr
     } yield ()
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }
@@ -239,18 +223,16 @@ class LegacyLedgerSynchronizerService @Inject()(
    * the last stored block will be 3.
    */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
-    val span = Kamon
-      .spanBuilder(operationName = "trimBlock")
+    val timer = Kamon
+      .timer("trimBlock")
+      .withoutTags()
       .start()
 
     val partial = ledgerDataHandler
       .pop()
       .toFutureOr
 
-    partial.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    partial.toFuture.onComplete(_ => timer.stop())
 
     val result = partial
       .flatMap { block =>

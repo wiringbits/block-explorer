@@ -114,13 +114,14 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     retry(shouldRetry) {
-      val span = Kamon.clientSpanBuilder(component = "xsn-service", operationName = name).start()
+      val timer = Kamon
+        .timer("xsn-service")
+        .withTag("operation", name)
+        .start()
+
       val result = f
 
-      result.onComplete {
-        case Success(_) => span.finish()
-        case Failure(ex) => span.fail(ex)
-      }
+      result.onComplete(_ => timer.stop())
       result
     }
   }
