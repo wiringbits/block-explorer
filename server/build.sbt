@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.2"
-libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.4"
+libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.8"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.6"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
