@@ -70,7 +70,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
 
-libraryDependencies += "com.google.guava" % "guava" % "22.0"
+libraryDependencies += "com.google.guava" % "guava" % "30.1-jre"
 
 libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
 
