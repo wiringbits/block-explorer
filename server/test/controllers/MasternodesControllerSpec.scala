@@ -19,7 +19,11 @@ class MasternodesControllerSpec extends MyAPISpec {
 
   val masternodes = List(
     Masternode(
-      txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+      txid = TransactionId
+        .from(
+          "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
+        )
+        .get,
       ip = "45.77.136.212:62583",
       protocol = "70208",
       status = "WATCHDOG_EXPIRED",
@@ -28,7 +32,11 @@ class MasternodesControllerSpec extends MyAPISpec {
       payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
     ),
     Masternode(
-      txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+      txid = TransactionId
+        .from(
+          "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+        )
+        .get,
       ip = "45.32.148.13:62583",
       protocol = "70208",
       status = "ENABLED",
@@ -49,8 +57,10 @@ class MasternodesControllerSpec extends MyAPISpec {
   "GET /masternodes" should {
     "return the masternodes" in {
       val expected = masternodes.head
-      when(masternodeRepositoryMock.getAll()).thenReturn(Future.successful(masternodes))
-      val response = GET("/masternodes?offset=1&limit=10&orderBy=activeSeconds:desc")
+      when(masternodeRepositoryMock.getAll())
+        .thenReturn(Future.successful(masternodes))
+      val response =
+        GET("/masternodes?offset=1&limit=10&orderBy=activeSeconds:desc")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
@@ -76,7 +86,7 @@ class MasternodesControllerSpec extends MyAPISpec {
       override def areEqual(a: IPAddress, b: Any): Boolean = {
         b match {
           case ip: IPAddress => a.string == ip.string
-          case _ => false
+          case _             => false
         }
       }
     }
@@ -112,14 +122,16 @@ class MasternodesControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
 
       val error = errorList.head
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "ip"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
 
     "fail on bad ip format" in {
       val ip = new IPAddress("45.32.149.1333")
-      when(masternodeRepositoryMock.find(eqTo(ip))).thenReturn(Future.failed(new Exception))
+      when(masternodeRepositoryMock.find(eqTo(ip)))
+        .thenReturn(Future.failed(new Exception))
       val response = GET("/masternodes/45.32.149.1333")
       status(response) mustEqual BAD_REQUEST
 
@@ -128,7 +140,8 @@ class MasternodesControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
 
       val error = errorList.head
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "ip"
       (error \ "message").as[String].nonEmpty mustEqual true
     }

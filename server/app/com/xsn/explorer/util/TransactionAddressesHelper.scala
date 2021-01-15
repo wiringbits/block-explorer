@@ -1,10 +1,15 @@
 package com.xsn.explorer.util
 
-import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
+import com.xsn.explorer.models.persisted.{
+  AddressTransactionDetails,
+  Transaction
+}
 
 object TransactionAddressesHelper {
 
-  private def computeReceiveDetails(transaction: Transaction.HasIO): Iterable[AddressTransactionDetails] = {
+  private def computeReceiveDetails(
+      transaction: Transaction.HasIO
+  ): Iterable[AddressTransactionDetails] = {
     val outputAddressValueList = for {
       output <- transaction.outputs
       address <- output.addresses
@@ -13,15 +18,21 @@ object TransactionAddressesHelper {
     val received = outputAddressValueList
       .groupBy(_._1)
       .mapValues { _.map(_._2).sum }
-      .map {
-        case (address, value) =>
-          AddressTransactionDetails(address, transaction.id, time = transaction.time, received = value)
+      .map { case (address, value) =>
+        AddressTransactionDetails(
+          address,
+          transaction.id,
+          time = transaction.time,
+          received = value
+        )
       }
 
     received
   }
 
-  private def computeSendDetails(transaction: Transaction.HasIO): Iterable[AddressTransactionDetails] = {
+  private def computeSendDetails(
+      transaction: Transaction.HasIO
+  ): Iterable[AddressTransactionDetails] = {
     val inputAddressValueList = for {
       input <- transaction.inputs
       address <- input.addresses
@@ -30,26 +41,36 @@ object TransactionAddressesHelper {
     val sent = inputAddressValueList
       .groupBy(_._1)
       .mapValues { _.map(_._2).sum }
-      .map {
-        case (address, value) =>
-          AddressTransactionDetails(address, transaction.id, time = transaction.time, sent = value)
+      .map { case (address, value) =>
+        AddressTransactionDetails(
+          address,
+          transaction.id,
+          time = transaction.time,
+          sent = value
+        )
       }
 
     sent
   }
 
-  def computeDetails(transaction: Transaction.HasIO): Iterable[AddressTransactionDetails] = {
-    val details = (computeReceiveDetails(transaction) ++ computeSendDetails(transaction))
-      .groupBy(_.address)
-      .mapValues {
-        case head :: list => list.foldLeft(head)(merge)
-      }
-      .values
+  def computeDetails(
+      transaction: Transaction.HasIO
+  ): Iterable[AddressTransactionDetails] = {
+    val details =
+      (computeReceiveDetails(transaction) ++ computeSendDetails(transaction))
+        .groupBy(_.address)
+        .mapValues { case head :: list =>
+          list.foldLeft(head)(merge)
+        }
+        .values
 
     details
   }
 
-  private def merge(x: AddressTransactionDetails, y: AddressTransactionDetails): AddressTransactionDetails = {
+  private def merge(
+      x: AddressTransactionDetails,
+      y: AddressTransactionDetails
+  ): AddressTransactionDetails = {
     x.copy(received = x.received + y.received, sent = x.sent + y.sent)
   }
 }

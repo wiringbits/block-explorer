@@ -2,7 +2,11 @@ package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{
+  Limit,
+  PaginatedQuery,
+  PaginatedResult
+}
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
@@ -13,36 +17,44 @@ import javax.inject.Inject
 import org.scalactic.{Good, One, Or}
 import play.api.db.Database
 
-class BalancePostgresDataHandler @Inject()(override val database: Database, balancePostgresDAO: BalancePostgresDAO)
-    extends BalanceBlockingDataHandler
+class BalancePostgresDataHandler @Inject() (
+    override val database: Database,
+    balancePostgresDAO: BalancePostgresDAO
+) extends BalanceBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def upsert(balance: Balance): ApplicationResult[Balance] = withTransaction { implicit conn =>
-    val maybe = balancePostgresDAO.upsert(balance)
+  override def upsert(balance: Balance): ApplicationResult[Balance] =
+    withTransaction { implicit conn =>
+      val maybe = balancePostgresDAO.upsert(balance)
 
-    Or.from(maybe, One(BalanceUnknownError))
-  }
+      Or.from(maybe, One(BalanceUnknownError))
+    }
 
   override def get(
       query: PaginatedQuery,
       ordering: FieldOrdering[BalanceField]
-  ): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
-    val balances = balancePostgresDAO.get(query, ordering)
-    val total = balancePostgresDAO.count
-    val result = PaginatedResult(query.offset, query.limit, total, balances)
+  ): ApplicationResult[PaginatedResult[Balance]] = withConnection {
+    implicit conn =>
+      val balances = balancePostgresDAO.get(query, ordering)
+      val total = balancePostgresDAO.count
+      val result = PaginatedResult(query.offset, query.limit, total, balances)
 
-    Good(result)
+      Good(result)
   }
 
-  override def getBy(address: Address): ApplicationResult[Balance] = withConnection { implicit conn =>
-    val maybe = balancePostgresDAO.getBy(address)
+  override def getBy(address: Address): ApplicationResult[Balance] =
+    withConnection { implicit conn =>
+      val maybe = balancePostgresDAO.getBy(address)
 
-    // unknown addresses are the same as address with empty balances
-    val balance = maybe.getOrElse { Balance(address, 0, 0) }
-    Good(balance)
-  }
+      // unknown addresses are the same as address with empty balances
+      val balance = maybe.getOrElse { Balance(address, 0, 0) }
+      Good(balance)
+    }
 
-  override def getHighestBalances(limit: Limit, lastSeenAddress: Option[Address]): ApplicationResult[List[Balance]] =
+  override def getHighestBalances(
+      limit: Limit,
+      lastSeenAddress: Option[Address]
+  ): ApplicationResult[List[Balance]] =
     withConnection { implicit conn =>
       val result = lastSeenAddress
         .map { balancePostgresDAO.getHighestBalances(_, limit) }

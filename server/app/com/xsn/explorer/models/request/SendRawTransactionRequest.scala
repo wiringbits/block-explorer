@@ -6,5 +6,6 @@ case class SendRawTransactionRequest(hex: String)
 
 object SendRawTransactionRequest {
 
-  implicit val reads: Reads[SendRawTransactionRequest] = Json.reads[SendRawTransactionRequest]
+  implicit val reads: Reads[SendRawTransactionRequest] =
+    Json.reads[SendRawTransactionRequest]
 }

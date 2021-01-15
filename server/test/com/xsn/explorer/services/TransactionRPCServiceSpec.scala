@@ -3,7 +3,10 @@ package com.xsn.explorer.services
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.validators.{AddressValidator, TransactionIdValidator}
+import com.xsn.explorer.services.validators.{
+  AddressValidator,
+  TransactionIdValidator
+}
 import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, Good, One}
 import org.scalatest.concurrent.ScalaFutures._
@@ -21,13 +24,22 @@ class TransactionRPCServiceSpec extends AnyWordSpec {
   val addresValidator = new AddressValidator()
 
   val service =
-    new TransactionRPCService(transactionIdValidator, transactionCollectorService, xsnService)
+    new TransactionRPCService(
+      transactionIdValidator,
+      transactionCollectorService,
+      xsnService
+    )
 
   "getTransactionLite(height, txindex)" should {
     "get non-cacheable lite transaction" in {
       val height = Height(123)
-      val blockhash = Blockhash.from("00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32").get
-      val hexTransaction = "000006a473044022054b5726d41608f8a5d587b4908d3d1f2835625a5d48c819a20ec8f7b83e"
+      val blockhash = Blockhash
+        .from(
+          "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32"
+        )
+        .get
+      val hexTransaction =
+        "000006a473044022054b5726d41608f8a5d587b4908d3d1f2835625a5d48c819a20ec8f7b83e"
       val txindex = 0
 
       val block = BlockLoader.getRPC(blockhash.string)
@@ -59,8 +71,13 @@ class TransactionRPCServiceSpec extends AnyWordSpec {
 
     "get cacheable lite transaction" in {
       val height = Height(123)
-      val blockhash = Blockhash.from("00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32").get
-      val hexTransaction = "000006a473044022054b5726d41608f8a5d587b4908d3d1f2835625a5d48c819a20ec8f7b83e"
+      val blockhash = Blockhash
+        .from(
+          "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32"
+        )
+        .get
+      val hexTransaction =
+        "000006a473044022054b5726d41608f8a5d587b4908d3d1f2835625a5d48c819a20ec8f7b83e"
       val txindex = 0
 
       val block = BlockLoader.getRPC(blockhash.string)
@@ -92,7 +109,11 @@ class TransactionRPCServiceSpec extends AnyWordSpec {
 
     "fail when transaction with txid does not exists" in {
       val height = Height(123)
-      val blockhash = Blockhash.from("00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32").get
+      val blockhash = Blockhash
+        .from(
+          "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32"
+        )
+        .get
       val txindex = 999
 
       val block = BlockLoader.getRPC(blockhash.string)

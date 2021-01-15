@@ -14,26 +14,45 @@ object EmailService {
 
   object Disabled extends EmailService {
     private val logger = LoggerFactory.getLogger(this.getClass)
-    override def sendEmail(subject: String, text: String, recipients: List[String]): Unit = {
-      logger.info(s"Not sending email, subject = $subject, recipients = ${recipients.mkString(", ")}, text = $text")
+    override def sendEmail(
+        subject: String,
+        text: String,
+        recipients: List[String]
+    ): Unit = {
+      logger.info(
+        s"Not sending email, subject = $subject, recipients = ${recipients
+          .mkString(", ")}, text = $text"
+      )
     }
   }
 
-  class SendgridService @Inject()(config: SendgridService.Config) extends EmailService {
+  class SendgridService @Inject() (config: SendgridService.Config)
+      extends EmailService {
 
     private val logger = LoggerFactory.getLogger(this.getClass)
     private val sendgrid = new SendGrid(config.apiKey)
 
-    override def sendEmail(subject: String, text: String, recipients: List[String]): Unit = {
-      Try(unsafeSendEmail(subject = subject, text = text, recipients = recipients)) match {
-        case Failure(exception) => logger.warn(s"Failed to send email: $text", exception)
+    override def sendEmail(
+        subject: String,
+        text: String,
+        recipients: List[String]
+    ): Unit = {
+      Try(
+        unsafeSendEmail(subject = subject, text = text, recipients = recipients)
+      ) match {
+        case Failure(exception) =>
+          logger.warn(s"Failed to send email: $text", exception)
         case Success(_) =>
           // log this so that we get notified about it on sentry, shouldn't happen frequently anyway
           logger.warn(s"Email sent on monitored addresses: $text")
       }
     }
 
-    private def unsafeSendEmail(subject: String, text: String, recipients: List[String]): Unit = {
+    private def unsafeSendEmail(
+        subject: String,
+        text: String,
+        recipients: List[String]
+    ): Unit = {
       if (recipients.isEmpty) {
         throw new RuntimeException("There are no recipients for the email")
       }

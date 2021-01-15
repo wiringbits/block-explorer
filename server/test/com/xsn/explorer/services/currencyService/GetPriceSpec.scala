@@ -3,7 +3,10 @@ package com.xsn.explorer.services.currencyService
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.CoinMarketCapConfig.{CoinID, Host, Key}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
-import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUnexpectedResponseError}
+import com.xsn.explorer.errors.{
+  CoinMarketCapRequestFailedError,
+  CoinMarketCapUnexpectedResponseError
+}
 import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.services.{Currency, CurrencyServiceCoinMarketCapImpl}
 import org.mockito.ArgumentMatchers._
@@ -32,7 +35,8 @@ class GetPriceSpec extends AsyncWordSpec with BeforeAndAfterAll {
   val actorSystem = ActorSystem()
   val scheduler = actorSystem.scheduler
 
-  val coinMarketCapConfig = CoinMarketCapConfig(Host("host"), Key("key"), CoinID("id"))
+  val coinMarketCapConfig =
+    CoinMarketCapConfig(Host("host"), Key("key"), CoinID("id"))
 
   val retryConfig = RetryConfig(1.millisecond, 2.milliseconds)
 
@@ -41,9 +45,16 @@ class GetPriceSpec extends AsyncWordSpec with BeforeAndAfterAll {
   when(ws.url(anyString)).thenReturn(request)
   when(request.withHttpHeaders(any())).thenReturn(request)
 
-  val service = new CurrencyServiceCoinMarketCapImpl(ws, coinMarketCapConfig, retryConfig)(ec, scheduler)
+  val service =
+    new CurrencyServiceCoinMarketCapImpl(ws, coinMarketCapConfig, retryConfig)(
+      ec,
+      scheduler
+    )
 
-  def createSuccessfullResponse(currency: Currency, value: BigDecimal): String = {
+  def createSuccessfullResponse(
+      currency: Currency,
+      value: BigDecimal
+  ): String = {
     s"""
        |{
        |  "status": {
@@ -108,7 +119,10 @@ class GetPriceSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
   }
 
-  private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
+  private def mockRequest(
+      request: WSRequest,
+      response: WSResponse
+  )(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
     when(response.body).thenReturn(body.toString())

@@ -9,12 +9,15 @@ import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database
 
-class TPoSContractPostgresDataHandler @Inject()(override val database: Database, tposContractDAO: TPoSContractDAO)
-    extends TPoSContractBlockingDataHandler
+class TPoSContractPostgresDataHandler @Inject() (
+    override val database: Database,
+    tposContractDAO: TPoSContractDAO
+) extends TPoSContractBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  def getBy(address: Address): ApplicationResult[List[TPoSContract]] = withConnection { implicit conn =>
-    val result = tposContractDAO.getBy(address)
-    Good(result)
-  }
+  def getBy(address: Address): ApplicationResult[List[TPoSContract]] =
+    withConnection { implicit conn =>
+      val result = tposContractDAO.getBy(address)
+      Good(result)
+    }
 }

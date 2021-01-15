@@ -37,19 +37,19 @@ class TPoSContractSpec extends WordSpec {
       val expected = TPoSContract.Details(
         owner = address1,
         merchant = address2,
-        merchantCommission = TPoSContract.Commission.from(100 - commission.toInt).get
+        merchantCommission =
+          TPoSContract.Commission.from(100 - commission.toInt).get
       )
 
       val result = TPoSContract.Details.fromOutputScriptASM(asm)
       result.value must be(expected)
     }
 
-    failureCases.foreach {
-      case (test, input) =>
-        test in {
-          val result = TPoSContract.Details.fromOutputScriptASM(input)
-          result must be(empty)
-        }
+    failureCases.foreach { case (test, input) =>
+      test in {
+        val result = TPoSContract.Details.fromOutputScriptASM(input)
+        result must be(empty)
+      }
     }
   }
 }

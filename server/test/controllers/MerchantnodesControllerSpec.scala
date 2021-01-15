@@ -19,8 +19,13 @@ class MerchantnodesControllerSpec extends MyAPISpec {
 
   val merchantnodes = List(
     Merchantnode(
-      pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
-      txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+      pubkey =
+        "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
+      txid = TransactionId
+        .from(
+          "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
+        )
+        .get,
       ip = "45.77.136.212:62583",
       protocol = "70208",
       status = "WATCHDOG_EXPIRED",
@@ -29,8 +34,13 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
     ),
     Merchantnode(
-      pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
-      txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+      pubkey =
+        "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
+      txid = TransactionId
+        .from(
+          "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+        )
+        .get,
       ip = "45.32.148.13:62583",
       protocol = "70208",
       status = "ENABLED",
@@ -51,9 +61,11 @@ class MerchantnodesControllerSpec extends MyAPISpec {
   "GET /merchantnodes" should {
     "return the merchantnodes" in {
       val expected = merchantnodes.head
-      when(merchantnodeRepositoryMock.getAll()).thenReturn(Future.successful(merchantnodes))
+      when(merchantnodeRepositoryMock.getAll())
+        .thenReturn(Future.successful(merchantnodes))
 
-      val response = GET("/merchantnodes?offset=1&limit=10&orderBy=activeSeconds:desc")
+      val response =
+        GET("/merchantnodes?offset=1&limit=10&orderBy=activeSeconds:desc")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
@@ -80,7 +92,7 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       override def areEqual(a: IPAddress, b: Any): Boolean = {
         b match {
           case ip: IPAddress => a.string == ip.string
-          case _ => false
+          case _             => false
         }
       }
     }
@@ -119,14 +131,16 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
 
       val error = errorList.head
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "ip"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
 
     "fail on bad ip format" in {
       val ip = new IPAddress("45.32.149.1333")
-      when(merchantnodeRepositoryMock.find(eqTo(ip))).thenReturn(Future.failed(new Exception))
+      when(merchantnodeRepositoryMock.find(eqTo(ip)))
+        .thenReturn(Future.failed(new Exception))
 
       val response = GET("/merchantnodes/45.32.149.1333")
       status(response) mustEqual BAD_REQUEST
@@ -136,7 +150,8 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
 
       val error = errorList.head
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "ip"
       (error \ "message").as[String].nonEmpty mustEqual true
     }

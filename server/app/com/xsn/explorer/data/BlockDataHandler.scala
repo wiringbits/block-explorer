@@ -2,7 +2,11 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.models.pagination.{
+  Limit,
+  PaginatedQuery,
+  PaginatedResult
+}
 import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
@@ -15,7 +19,10 @@ trait BlockDataHandler[F[_]] {
 
   def getBy(height: Height): F[Block]
 
-  def getBy(paginatedQuery: PaginatedQuery, ordering: FieldOrdering[BlockField]): F[PaginatedResult[Block]]
+  def getBy(
+      paginatedQuery: PaginatedQuery,
+      ordering: FieldOrdering[BlockField]
+  ): F[PaginatedResult[Block]]
 
   def delete(blockhash: Blockhash): F[Block]
 

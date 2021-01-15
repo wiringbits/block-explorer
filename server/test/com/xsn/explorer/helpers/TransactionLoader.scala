@@ -13,7 +13,10 @@ object TransactionLoader {
     json(txid, coin).as[Transaction[TransactionVIN]]
   }
 
-  def getWithValues(txid: String, coin: String = "xsn"): Transaction[TransactionVIN.HasValues] = {
+  def getWithValues(
+      txid: String,
+      coin: String = "xsn"
+  ): Transaction[TransactionVIN.HasValues] = {
     val plain = json(txid, coin).as[Transaction[TransactionVIN]]
     val newVIN = plain.vin.flatMap { vin =>
       get(vin.txid.string, coin).vout
@@ -32,10 +35,12 @@ object TransactionLoader {
   def json(txid: String, coin: String = "xsn"): JsValue = {
     try {
       val resource = s"$BasePath/$coin/$txid"
-      val json = scala.io.Source.fromResource(resource).getLines().mkString("\n")
+      val json =
+        scala.io.Source.fromResource(resource).getLines().mkString("\n")
       Json.parse(json)
     } catch {
-      case _: Throwable => throw new RuntimeException(s"Transaction $txid not found")
+      case _: Throwable =>
+        throw new RuntimeException(s"Transaction $txid not found")
     }
   }
 

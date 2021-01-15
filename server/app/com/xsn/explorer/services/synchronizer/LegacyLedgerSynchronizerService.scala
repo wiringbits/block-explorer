@@ -2,7 +2,10 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
-import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
+import com.xsn.explorer.data.async.{
+  BlockFutureDataHandler,
+  LedgerFutureDataHandler
+}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Block
@@ -16,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LegacyLedgerSynchronizerService @Inject()(
+class LegacyLedgerSynchronizerService @Inject() (
     xsnService: XSNService,
     ledgerDataHandler: LedgerFutureDataHandler,
     blockDataHandler: BlockFutureDataHandler,
@@ -26,13 +29,12 @@ class LegacyLedgerSynchronizerService @Inject()(
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  /**
-   * Synchronize the given block with our ledger database.
-   *
-   * The synchronization involves a very complex logic in order to handle
-   * several corner cases, be sure to not call this method concurrently
-   * because the behavior is undefined.
-   */
+  /** Synchronize the given block with our ledger database.
+    *
+    * The synchronization involves a very complex logic in order to handle
+    * several corner cases, be sure to not call this method concurrently
+    * because the behavior is undefined.
+    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val timer = Kamon
       .timer("synchronizeBlockhash")
@@ -49,7 +51,9 @@ class LegacyLedgerSynchronizerService @Inject()(
     result.toFuture
   }
 
-  private def synchronize(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
+  private def synchronize(
+      block: rpc.Block.Canonical
+  ): FutureApplicationResult[Unit] = {
     logger.info(s"Synchronize block ${block.height}, hash = ${block.hash}")
     val timer = Kamon
       .timer("synchronizeBlock")
@@ -77,17 +81,22 @@ class LegacyLedgerSynchronizerService @Inject()(
     result.toFuture
   }
 
-  /**
-   * 1. current ledger is empty:
-   * 1.1. the given block is the genensis block, it is added.
-   * 1.2. the given block is not the genesis block, sync everything until the given block.
-   */
-  private def onEmptyLedger(block: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
+  /** 1. current ledger is empty:
+    * 1.1. the given block is the genensis block, it is added.
+    * 1.2. the given block is not the genesis block, sync everything until the given block.
+    */
+  private def onEmptyLedger(
+      block: rpc.Block.Canonical
+  ): FutureApplicationResult[Unit] = {
     if (block.height.int == 0) {
-      logger.info(s"Synchronize genesis block on empty ledger, hash = ${block.hash}")
+      logger.info(
+        s"Synchronize genesis block on empty ledger, hash = ${block.hash}"
+      )
       appendBlock(block)
     } else {
-      logger.info(s"Synchronize block ${block.height} on empty ledger, hash = ${block.hash}")
+      logger.info(
+        s"Synchronize block ${block.height} on empty ledger, hash = ${block.hash}"
+      )
       val result = for {
         _ <- sync(0 until block.height.int).toFutureOr
         _ <- synchronize(block).toFutureOr
@@ -97,22 +106,30 @@ class LegacyLedgerSynchronizerService @Inject()(
     }
   }
 
-  /**
-   * 2. current ledger has blocks until N, given block height H:
-   * 2.1. if N+1 == H and its previous blockhash is N, it is added.
-   * 2.2. if N+1 == H and its previous blockhash isn't N, pick the expected block N from H and apply the whole process with it, then, apply H.
-   * 2.3. if H > N+1, sync everything until H.
-   * 2.4. if H <= N, if the hash already exists, it is ignored.
-   * 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included), then, add the new H.
-   */
-  private def onLatestBlock(ledgerBlock: Block, newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
-    if (ledgerBlock.height.int + 1 == newBlock.height.int &&
-      newBlock.previousBlockhash.contains(ledgerBlock.hash)) {
+  /** 2. current ledger has blocks until N, given block height H:
+    * 2.1. if N+1 == H and its previous blockhash is N, it is added.
+    * 2.2. if N+1 == H and its previous blockhash isn't N, pick the expected block N from H and apply the whole process with it, then, apply H.
+    * 2.3. if H > N+1, sync everything until H.
+    * 2.4. if H <= N, if the hash already exists, it is ignored.
+    * 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included), then, add the new H.
+    */
+  private def onLatestBlock(
+      ledgerBlock: Block,
+      newBlock: rpc.Block.Canonical
+  ): FutureApplicationResult[Unit] = {
+    if (
+      ledgerBlock.height.int + 1 == newBlock.height.int &&
+      newBlock.previousBlockhash.contains(ledgerBlock.hash)
+    ) {
 
-      logger.info(s"Appending block ${newBlock.height}, hash = ${newBlock.hash}")
+      logger.info(
+        s"Appending block ${newBlock.height}, hash = ${newBlock.hash}"
+      )
       appendBlock(newBlock)
     } else if (ledgerBlock.height.int + 1 == newBlock.height.int) {
-      logger.info(s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}")
+      logger.info(
+        s"Reorganization to push block ${newBlock.height}, hash = ${newBlock.hash}"
+      )
       val timer = Kamon
         .timer("handleReorganization")
         .withTag("hash", newBlock.hash.string)
@@ -130,7 +147,9 @@ class LegacyLedgerSynchronizerService @Inject()(
 
       result.toFuture
     } else if (newBlock.height.int > ledgerBlock.height.int) {
-      logger.info(s"Filling holes to push block ${newBlock.height}, hash = ${newBlock.hash}")
+      logger.info(
+        s"Filling holes to push block ${newBlock.height}, hash = ${newBlock.hash}"
+      )
       val timer = Kamon
         .timer("synchronizeBlockRange")
         .withTag("hash", newBlock.hash.string)
@@ -138,7 +157,9 @@ class LegacyLedgerSynchronizerService @Inject()(
         .start()
 
       val result = for {
-        _ <- sync(ledgerBlock.height.int + 1 until newBlock.height.int).toFutureOr
+        _ <- sync(
+          ledgerBlock.height.int + 1 until newBlock.height.int
+        ).toFutureOr
         _ <- synchronize(newBlock).toFutureOr
       } yield ()
 
@@ -174,7 +195,9 @@ class LegacyLedgerSynchronizerService @Inject()(
     }
   }
 
-  private def appendBlock(newBlock: rpc.Block.Canonical): FutureApplicationResult[Unit] = {
+  private def appendBlock(
+      newBlock: rpc.Block.Canonical
+  ): FutureApplicationResult[Unit] = {
     val timer = Kamon
       .timer("appendBlock")
       .withTag("hash", newBlock.hash.string)
@@ -190,7 +213,9 @@ class LegacyLedgerSynchronizerService @Inject()(
         .toFutureOr
       data <- syncOps.getBlockData(block).toFutureOr
       (blockWithTransactions, tposContracts, filterFactory, rewards) = data
-      _ <- ledgerDataHandler.push(blockWithTransactions, tposContracts, filterFactory, rewards).toFutureOr
+      _ <- ledgerDataHandler
+        .push(blockWithTransactions, tposContracts, filterFactory, rewards)
+        .toFutureOr
     } yield ()
 
     result.toFuture.onComplete(_ => timer.stop())
@@ -198,9 +223,8 @@ class LegacyLedgerSynchronizerService @Inject()(
     result.toFuture
   }
 
-  /**
-   * Sync the given range to our ledger.
-   */
+  /** Sync the given range to our ledger.
+    */
   private def sync(range: Range): FutureApplicationResult[Unit] = {
     logger.info(s"Syncing block range = $range")
 
@@ -218,10 +242,9 @@ class LegacyLedgerSynchronizerService @Inject()(
     }
   }
 
-  /**
-   * Trim the ledger until the given block height, if the height is 4,
-   * the last stored block will be 3.
-   */
+  /** Trim the ledger until the given block height, if the height is 4,
+    * the last stored block will be 3.
+    */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
     val timer = Kamon
       .timer("trimBlock")

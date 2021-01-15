@@ -11,4 +11,5 @@ trait TPoSContractDataHandler[F[_]] {
   def getBy(address: Address): F[List[TPoSContract]]
 }
 
-trait TPoSContractBlockingDataHandler extends TPoSContractDataHandler[ApplicationResult]
+trait TPoSContractBlockingDataHandler
+    extends TPoSContractDataHandler[ApplicationResult]

@@ -3,7 +3,10 @@ package com.xsn.explorer.data.async
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.Limit
-import com.xsn.explorer.data.{TransactionBlockingDataHandler, TransactionDataHandler}
+import com.xsn.explorer.data.{
+  TransactionBlockingDataHandler,
+  TransactionDataHandler
+}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
@@ -12,11 +15,11 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class TransactionFutureDataHandler @Inject()(
+class TransactionFutureDataHandler @Inject() (
     blockingDataHandler: TransactionBlockingDataHandler,
     retryableFutureDataHandler: RetryableDataHandler
-)(
-    implicit ec: DatabaseExecutionContext
+)(implicit
+    ec: DatabaseExecutionContext
 ) extends TransactionDataHandler[FutureApplicationResult] {
 
   override def getBy(
@@ -24,33 +27,50 @@ class TransactionFutureDataHandler @Inject()(
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): FutureApplicationResult[List[Transaction.HasIO]] = retryableFutureDataHandler.retrying {
-    Future {
+  ): FutureApplicationResult[List[Transaction.HasIO]] =
+    retryableFutureDataHandler.retrying {
+      Future {
 
-      blockingDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition)
+        blockingDataHandler.getBy(
+          address,
+          limit,
+          lastSeenTxid,
+          orderingCondition
+        )
+      }
     }
-  }
 
   override def getByAddress(
       address: Address,
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): FutureApplicationResult[List[TransactionInfo]] = retryableFutureDataHandler.retrying {
-    Future {
+  ): FutureApplicationResult[List[TransactionInfo]] =
+    retryableFutureDataHandler.retrying {
+      Future {
 
-      blockingDataHandler.getByAddress(address, limit, lastSeenTxid, orderingCondition)
+        blockingDataHandler.getByAddress(
+          address,
+          limit,
+          lastSeenTxid,
+          orderingCondition
+        )
+      }
     }
-  }
 
-  override def getUnspentOutputs(address: Address): FutureApplicationResult[List[Transaction.Output]] =
+  override def getUnspentOutputs(
+      address: Address
+  ): FutureApplicationResult[List[Transaction.Output]] =
     retryableFutureDataHandler.retrying {
       Future {
         blockingDataHandler.getUnspentOutputs(address)
       }
     }
 
-  override def getOutput(txid: TransactionId, index: Int): FutureApplicationResult[Transaction.Output] =
+  override def getOutput(
+      txid: TransactionId,
+      index: Int
+  ): FutureApplicationResult[Transaction.Output] =
     retryableFutureDataHandler.retrying {
       Future {
         blockingDataHandler.getOutput(txid, index)
@@ -61,31 +81,38 @@ class TransactionFutureDataHandler @Inject()(
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): FutureApplicationResult[List[TransactionInfo]] = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.get(limit, lastSeenTxid, orderingCondition)
+  ): FutureApplicationResult[List[TransactionInfo]] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.get(limit, lastSeenTxid, orderingCondition)
+      }
     }
-  }
 
   override def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,
       lastSeenTxid: Option[TransactionId]
-  ): FutureApplicationResult[List[TransactionWithValues]] = retryableFutureDataHandler.retrying {
-    Future {
+  ): FutureApplicationResult[List[TransactionWithValues]] =
+    retryableFutureDataHandler.retrying {
+      Future {
 
-      blockingDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid)
+        blockingDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid)
+      }
     }
-  }
 
   override def getTransactionsWithIOBy(
       blockhash: Blockhash,
       limit: Limit,
       lastSeenTxid: Option[TransactionId]
-  ): FutureApplicationResult[List[Transaction.HasIO]] = retryableFutureDataHandler.retrying {
-    Future {
+  ): FutureApplicationResult[List[Transaction.HasIO]] =
+    retryableFutureDataHandler.retrying {
+      Future {
 
-      blockingDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid)
+        blockingDataHandler.getTransactionsWithIOBy(
+          blockhash,
+          limit,
+          lastSeenTxid
+        )
+      }
     }
-  }
 }

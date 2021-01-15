@@ -7,8 +7,10 @@ import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.Json
 
-class BalancesController @Inject()(balanceService: BalanceService, cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+class BalancesController @Inject() (
+    balanceService: BalanceService,
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   def getHighest(limit: Int, lastSeenAddress: Option[String]) = public { _ =>
     balanceService

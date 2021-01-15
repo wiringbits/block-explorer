@@ -15,18 +15,17 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BlockParallelChunkSynchronizer @Inject()(
+class BlockParallelChunkSynchronizer @Inject() (
     blockChunkRepository: BlockChunkRepository.FutureImpl,
     addOps: BlockParallelChunkAddOps
-)(
-    implicit ec: ExecutionContext
+)(implicit
+    ec: ExecutionContext
 ) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  /**
-   * Synchronize the given block (continuing from the last step if it is partially synchronized).
-   */
+  /** Synchronize the given block (continuing from the last step if it is partially synchronized).
+    */
   def sync(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -42,9 +41,21 @@ class BlockParallelChunkSynchronizer @Inject()(
 
     val result = for {
       stateMaybe <- blockChunkRepository.findSyncState(block.hash).toFutureOr
-      currentState = stateMaybe.getOrElse(BlockSynchronizationState.StoringBlock)
-      _ <- addOps.continueFromState(currentState, block, tposContracts, filterFactory, rewards).toFutureOr
-      _ = logger.debug(s"Synced ${block.height}, took ${System.currentTimeMillis() - start} ms")
+      currentState = stateMaybe.getOrElse(
+        BlockSynchronizationState.StoringBlock
+      )
+      _ <- addOps
+        .continueFromState(
+          currentState,
+          block,
+          tposContracts,
+          filterFactory,
+          rewards
+        )
+        .toFutureOr
+      _ = logger.debug(
+        s"Synced ${block.height}, took ${System.currentTimeMillis() - start} ms"
+      )
     } yield ()
 
     result.toFuture.onComplete(_ => timer.stop())
@@ -57,10 +68,14 @@ class BlockParallelChunkSynchronizer @Inject()(
       stateMaybe <- blockChunkRepository.findSyncState(blockhash).toFutureOr
     } yield stateMaybe match {
       case None =>
-        logger.warn(s"The block $blockhash is supposed to be rolled back but it is not syncing")
+        logger.warn(
+          s"The block $blockhash is supposed to be rolled back but it is not syncing"
+        )
         Future.successful(Good(())).toFutureOr
       case Some(state) =>
-        logger.warn(s"The block $blockhash is going to be rolled back from the $state state")
+        logger.warn(
+          s"The block $blockhash is going to be rolled back from the $state state"
+        )
         blockChunkRepository.atomicRollback(blockhash).toFutureOr
     }
 

@@ -1,27 +1,49 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
-import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
+import com.xsn.explorer.data.anorm.dao.{
+  BalancePostgresDAO,
+  StatisticsPostgresDAO,
+  TPoSContractDAO
+}
+import com.xsn.explorer.data.anorm.{
+  BalancePostgresDataHandler,
+  StatisticsPostgresDataHandler
+}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
 import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
 import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
-import com.xsn.explorer.models.{BlockExtractionMethod, BlockReward, BlockRewards, PoSBlockRewards, TPoSBlockRewards}
+import com.xsn.explorer.models.{
+  BlockExtractionMethod,
+  BlockReward,
+  BlockRewards,
+  PoSBlockRewards,
+  TPoSBlockRewards
+}
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.{Address, Height}
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
 @com.github.ghik.silencer.silent
-class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
+class StatisticsPostgresDataHandlerSpec
+    extends PostgresDataHandlerSpec
+    with BeforeAndAfter {
 
   val secondsInOneDay = 24 * 60 * 60
-  lazy val dataHandler = new StatisticsPostgresDataHandler(database, new StatisticsPostgresDAO, new TPoSContractDAO())
+  lazy val dataHandler = new StatisticsPostgresDataHandler(
+    database,
+    new StatisticsPostgresDAO,
+    new TPoSContractDAO()
+  )
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val balanceDataHandler =
-    new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+    new BalancePostgresDataHandler(
+      database,
+      new BalancePostgresDAO(new FieldOrderingSQLInterpreter)
+    )
 
   before {
     clearDatabase()
@@ -34,8 +56,10 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     }
 
     "exclude hidden_addresses from the circulating supply" in {
-      val hiddenAddress = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
-      val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
+      val hiddenAddress =
+        DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
+      val circulatingSupply =
+        dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
 
       database.withConnection { implicit conn =>
         _root_.anorm
@@ -48,7 +72,11 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           .execute()
       }
 
-      val balance = Balance(hiddenAddress, received = BigDecimal(1000), spent = BigDecimal(500))
+      val balance = Balance(
+        hiddenAddress,
+        received = BigDecimal(1000),
+        spent = BigDecimal(500)
+      )
       setAvailableCoins(balance.available)
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
@@ -61,7 +89,11 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
       val totalSupply = dataHandler.getStatistics().get.totalSupply.getOrElse(0)
 
-      val balance = Balance(burnAddress, received = BigDecimal(1000), spent = BigDecimal(500))
+      val balance = Balance(
+        burnAddress,
+        received = BigDecimal(1000),
+        spent = BigDecimal(500)
+      )
       setAvailableCoins(balance.available)
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
@@ -103,13 +135,25 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
       dataHandler.getRewardsSummary(4) match {
         case Good(s) =>
-          areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
-          areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(
+            s.averageReward,
+            (100 + 200 + 300 + 400) / 4.0
+          ) mustBe true
+          areAlmostEqual(
+            s.averageInput,
+            (1500 + 9999 + 1234 + 4321) / 4.0
+          ) mustBe true
           areAlmostEqual(s.medianInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (9999 + 1234) / 2.0) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
-          areAlmostEqual(s.averageWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(
+            s.medianWaitTime,
+            ((2 + 3) / 2.0) * secondsInOneDay
+          ) mustBe true
+          areAlmostEqual(
+            s.averageWaitTime,
+            ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay
+          ) mustBe true
         case _ => fail
       }
     }
@@ -151,8 +195,14 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.medianInput, (1234 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 4321) mustBe true
           areAlmostEqual(s.averageTPoSInput, 1234) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
-          areAlmostEqual(s.averageWaitTime, ((3 + 4) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(
+            s.medianWaitTime,
+            ((3 + 4) / 2.0) * secondsInOneDay
+          ) mustBe true
+          areAlmostEqual(
+            s.averageWaitTime,
+            ((3 + 4) / 2.0) * secondsInOneDay
+          ) mustBe true
         case _ => fail
       }
     }
@@ -189,13 +239,28 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
       dataHandler.getRewardsSummary(999) match {
         case Good(s) =>
-          areAlmostEqual(s.averageReward, (100 + 200 + 300 + 400) / 4.0) mustBe true
-          areAlmostEqual(s.averageInput, (1500 + 9999 + 1234 + 4321) / 4.0) mustBe true
+          areAlmostEqual(
+            s.averageReward,
+            (100 + 200 + 300 + 400) / 4.0
+          ) mustBe true
+          areAlmostEqual(
+            s.averageInput,
+            (1500 + 9999 + 1234 + 4321) / 4.0
+          ) mustBe true
           areAlmostEqual(s.medianInput, (1500 + 4321) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 9999) mustBe true
-          areAlmostEqual(s.averageTPoSInput, (1500 + 1234 + 4321) / 3.0) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((2 + 3) / 2.0) * secondsInOneDay) mustBe true
-          areAlmostEqual(s.averageWaitTime, ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(
+            s.averageTPoSInput,
+            (1500 + 1234 + 4321) / 3.0
+          ) mustBe true
+          areAlmostEqual(
+            s.medianWaitTime,
+            ((2 + 3) / 2.0) * secondsInOneDay
+          ) mustBe true
+          areAlmostEqual(
+            s.averageWaitTime,
+            ((1 + 2 + 3 + 4) / 4.0) * secondsInOneDay
+          ) mustBe true
         case _ => fail
       }
     }
@@ -223,8 +288,14 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.medianInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, 0) mustBe true
           areAlmostEqual(s.averageTPoSInput, (1500 + 9999) / 2.0) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
-          areAlmostEqual(s.averageWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(
+            s.medianWaitTime,
+            ((1 + 2) / 2.0) * secondsInOneDay
+          ) mustBe true
+          areAlmostEqual(
+            s.averageWaitTime,
+            ((1 + 2) / 2.0) * secondsInOneDay
+          ) mustBe true
         case _ => fail
       }
     }
@@ -252,8 +323,14 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           areAlmostEqual(s.medianInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averagePoSInput, (1500 + 9999) / 2.0) mustBe true
           areAlmostEqual(s.averageTPoSInput, 0) mustBe true
-          areAlmostEqual(s.medianWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
-          areAlmostEqual(s.averageWaitTime, ((1 + 2) / 2.0) * secondsInOneDay) mustBe true
+          areAlmostEqual(
+            s.medianWaitTime,
+            ((1 + 2) / 2.0) * secondsInOneDay
+          ) mustBe true
+          areAlmostEqual(
+            s.averageWaitTime,
+            ((1 + 2) / 2.0) * secondsInOneDay
+          ) mustBe true
         case _ => fail
       }
     }
@@ -294,7 +371,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       extractionMethod: BlockExtractionMethod,
       reward: BlockRewards
   ) = {
-    val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+    val emptyFilterFactory = () =>
+      GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
     val block = BlockLoader
       .get(blockhash)
@@ -307,7 +385,9 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
     val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
     val blockWithTransactions = block.withTransactions(List(tx))
-    ledgerDataHandler.push(blockWithTransactions, List.empty, emptyFilterFactory, Some(reward)).isGood mustEqual true
+    ledgerDataHandler
+      .push(blockWithTransactions, List.empty, emptyFilterFactory, Some(reward))
+      .isGood mustEqual true
   }
 
   private def pushPoSBlock(
@@ -324,7 +404,12 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       rewardStakeWaitTime
     )
 
-    pushBlock(blockhash, blockHeight, BlockExtractionMethod.ProofOfStake, reward)
+    pushBlock(
+      blockhash,
+      blockHeight,
+      BlockExtractionMethod.ProofOfStake,
+      reward
+    )
   }
 
   private def pushTPoSBlock(
@@ -342,10 +427,19 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       rewardStakeWaitTime
     )
 
-    pushBlock(blockhash, blockHeight, BlockExtractionMethod.TrustlessProofOfStake, reward)
+    pushBlock(
+      blockhash,
+      blockHeight,
+      BlockExtractionMethod.TrustlessProofOfStake,
+      reward
+    )
   }
 
-  private def areAlmostEqual(n1: BigDecimal, n2: BigDecimal, epsilon: Double = 1e-6) = {
+  private def areAlmostEqual(
+      n1: BigDecimal,
+      n2: BigDecimal,
+      epsilon: Double = 1e-6
+  ) = {
     n1 === (n2 +- epsilon)
   }
 }

@@ -5,19 +5,28 @@ import java.sql.Connection
 import anorm._
 import com.xsn.explorer.config.ExplorerConfig
 import com.xsn.explorer.data.anorm.parsers.TransactionParsers._
-import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
+import com.xsn.explorer.models.persisted.{
+  AddressTransactionDetails,
+  Transaction
+}
 import com.xsn.explorer.models.values.TransactionId
 import com.xsn.explorer.util.TransactionAddressesHelper
 import javax.inject.Inject
 
-class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
+class AddressTransactionDetailsPostgresDAO @Inject() (
+    explorerConfig: ExplorerConfig
+) {
 
-  def batchInsertDetails(transaction: Transaction.HasIO)(implicit conn: Connection): Option[Unit] = {
+  def batchInsertDetails(
+      transaction: Transaction.HasIO
+  )(implicit conn: Connection): Option[Unit] = {
     val details = TransactionAddressesHelper.computeDetails(transaction)
     batchInsertDetails(details.toList)
   }
 
-  def batchInsertDetails(details: List[AddressTransactionDetails])(implicit conn: Connection): Option[Unit] = {
+  def batchInsertDetails(
+      details: List[AddressTransactionDetails]
+  )(implicit conn: Connection): Option[Unit] = {
     details match {
       case Nil => Some(())
       case _ =>
@@ -45,8 +54,10 @@ class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerCon
         val result = batch.execute()
         val success = result.forall(_ == 1)
 
-        if (success ||
-          explorerConfig.liteVersionConfig.enabled) {
+        if (
+          success ||
+          explorerConfig.liteVersionConfig.enabled
+        ) {
 
           Some(())
         } else {
@@ -55,7 +66,9 @@ class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerCon
     }
   }
 
-  def upsert(details: AddressTransactionDetails)(implicit conn: Connection): Unit = {
+  def upsert(
+      details: AddressTransactionDetails
+  )(implicit conn: Connection): Unit = {
     val _ = SQL(
       """
         |INSERT INTO address_transaction_details
@@ -70,16 +83,17 @@ class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerCon
         |    time = EXCLUDED.time
       """.stripMargin
     ).on(
-        'address -> details.address.string,
-        'txid -> details.txid.toBytesBE.toArray,
-        'received -> details.received,
-        'sent -> details.sent,
-        'time -> details.time
-      )
-      .executeUpdate()
+      'address -> details.address.string,
+      'txid -> details.txid.toBytesBE.toArray,
+      'received -> details.received,
+      'sent -> details.sent,
+      'time -> details.time
+    ).executeUpdate()
   }
 
-  def deleteDetails(txid: TransactionId)(implicit conn: Connection): List[AddressTransactionDetails] = {
+  def deleteDetails(
+      txid: TransactionId
+  )(implicit conn: Connection): List[AddressTransactionDetails] = {
     val result = SQL(
       """
         |DELETE FROM address_transaction_details
@@ -87,9 +101,8 @@ class AddressTransactionDetailsPostgresDAO @Inject()(explorerConfig: ExplorerCon
         |RETURNING address, txid, received, sent, time
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray
-      )
-      .as(parseAddressTransactionDetails.*)
+      'txid -> txid.toBytesBE.toArray
+    ).as(parseAddressTransactionDetails.*)
 
     result
   }

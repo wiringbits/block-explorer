@@ -4,7 +4,12 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{DataGenerator, DummyRetryableDataHandler, DummyXSNService, Executors}
+import com.xsn.explorer.helpers.{
+  DataGenerator,
+  DummyRetryableDataHandler,
+  DummyXSNService,
+  Executors
+}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
@@ -28,7 +33,10 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
     val dummyRetryableDataHandler = new DummyRetryableDataHandler
     val futureDataHandler =
-      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
+      new TransactionFutureDataHandler(
+        transactionDataHandler,
+        dummyRetryableDataHandler
+      )(Executors.databaseEC)
     new TransactionCollectorService(xsnService, futureDataHandler)
   }
 
@@ -42,7 +50,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
       val pubKeyScript = createScript(address)
       val expected = vin.withValues(100, address, pubKeyScript.hex)
       val xsnService = new DummyXSNService {
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
           val output = rpc.TransactionVOUT(100, outputIndex, Some(pubKeyScript))
           val tx = createTransaction(txid, List(output))
           Future.successful(Good(tx))
@@ -57,8 +67,14 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
     "fail when the transaction doesn't have the referenced output" in {
       val xsnService = new DummyXSNService {
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
-          val output = rpc.TransactionVOUT(100, 1 + outputIndex, Some(createScript(address)))
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
+          val output = rpc.TransactionVOUT(
+            100,
+            1 + outputIndex,
+            Some(createScript(address))
+          )
           val tx = createTransaction(txid, List(output))
           Future.successful(Good(tx))
         }
@@ -66,13 +82,17 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactionVINWithValues(vin)) { result =>
-        result.toEither.left.value must be(One(TransactionError.OutputNotFound(txid, outputIndex)))
+        result.toEither.left.value must be(
+          One(TransactionError.OutputNotFound(txid, outputIndex))
+        )
       }
     }
 
     "fail when the transaction doesn't exists" in {
       val xsnService = new DummyXSNService {
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
           Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
         }
       }
@@ -87,8 +107,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
   "completeRPCTransactionsSequentially" should {
     "do nothing on empty list" in {
       val service = create(null, null)
-      whenReady(service.completeRPCTransactionsSequentially(List.empty)) { result =>
-        result.toEither.right.value must be(empty)
+      whenReady(service.completeRPCTransactionsSequentially(List.empty)) {
+        result =>
+          result.toEither.right.value must be(empty)
       }
     }
 
@@ -100,8 +121,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
       }
 
       val service = create(null, null)
-      whenReady(service.completeRPCTransactionsSequentially(input.toList)) { result =>
-        result.toEither.right.value must be(input.flatMap(_._2.toOption))
+      whenReady(service.completeRPCTransactionsSequentially(input.toList)) {
+        result =>
+          result.toEither.right.value must be(input.flatMap(_._2.toOption))
       }
     }
 
@@ -116,10 +138,14 @@ class TransactionCollectorServiceSpec extends WordSpec {
         val x = DataGenerator.randomTransactionId
         x -> Bad(TransactionError.NotFound(x)).accumulating
       }
-      val input = (completed.take(5).toList ::: pending :: completed.drop(5).toList).reverse
+      val input = (completed
+        .take(5)
+        .toList ::: pending :: completed.drop(5).toList).reverse
 
       val xsnService = new DummyXSNService {
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
           Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
         }
       }
@@ -153,7 +179,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val input = firstHalf ::: List(pending1) ::: secondHalf ::: List(pending2)
       val xsnService = new DummyXSNService {
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
           if (txid == pending1._1) {
             Future.successful(Good(pending1Tx))
           } else if (txid == pending2._1) {
@@ -166,7 +194,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.completeRPCTransactionsSequentially(input)) { result =>
-        val expected = firstHalf.flatMap(_._2.toOption) ::: List(pending1Tx) ::: secondHalf.flatMap(_._2.toOption) ::: List(
+        val expected = firstHalf.flatMap(_._2.toOption) ::: List(
+          pending1Tx
+        ) ::: secondHalf.flatMap(_._2.toOption) ::: List(
           pending2Tx
         )
         result.toEither.right.value must be(expected)
@@ -177,13 +207,16 @@ class TransactionCollectorServiceSpec extends WordSpec {
   "getRPCTransactions" should {
     "fallback to retrieving transactions sequentally" in {
       val tx = createTransaction(DataGenerator.randomTransactionId, List.empty)
-      val pending = createTransaction(DataGenerator.randomTransactionId, List.empty)
+      val pending =
+        createTransaction(DataGenerator.randomTransactionId, List.empty)
 
       val xsnService: XSNService = new DummyXSNService {
 
         var ready = Set.empty[TransactionId]
 
-        override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+        override def getTransaction(
+            txid: TransactionId
+        ): FutureApplicationResult[Transaction[TransactionVIN]] = {
           if (txid == tx.id) {
             Future.successful(Good(tx))
           } else if (txid == pending.id) {
@@ -191,7 +224,9 @@ class TransactionCollectorServiceSpec extends WordSpec {
               Future.successful(Good(pending))
             } else {
               ready = ready + txid
-              Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
+              Future.successful(
+                Bad(TransactionError.NotFound(txid)).accumulating
+              )
             }
           } else {
             Future.successful(Bad(TransactionError.NotFound(txid)).accumulating)
@@ -230,7 +265,10 @@ class TransactionCollectorServiceSpec extends WordSpec {
     ScriptPubKey("nulldata", "", HexString.from("00").get, List(address))
   }
 
-  def createTransaction(txid: TransactionId, outputs: List[rpc.TransactionVOUT]) = {
+  def createTransaction(
+      txid: TransactionId,
+      outputs: List[rpc.TransactionVOUT]
+  ) = {
     rpc.Transaction(
       id = txid,
       size = Size(100),

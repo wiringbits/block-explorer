@@ -2,18 +2,29 @@ package com.xsn.explorer.data
 
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
+import com.xsn.explorer.errors.{
+  PreviousBlockMissingError,
+  RepeatedBlockHeightError
+}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.LedgerHelper._
-import com.xsn.explorer.models.{BlockExtractionMethod, PoSBlockRewards, PoWBlockRewards, TPoSBlockRewards}
+import com.xsn.explorer.models.{
+  BlockExtractionMethod,
+  PoSBlockRewards,
+  PoWBlockRewards,
+  TPoSBlockRewards
+}
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
 
-class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
+class LedgerPostgresDataHandlerSpec
+    extends PostgresDataHandlerSpec
+    with BeforeAndAfter {
 
-  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () =>
+    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
   private val reward = Some(getPoWReward(blockList.head))
   lazy val dataHandler = createLedgerDataHandler(database)
 
@@ -26,7 +37,12 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward) mustEqual Good(
+        dataHandler.push(
+          block.withTransactions(transactions),
+          List.empty,
+          emptyFilterFactory,
+          reward
+        ) mustEqual Good(
           ()
         )
       }
@@ -37,7 +53,12 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         val transactions = getTransactions(block)
 
         dataHandler
-          .push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward) mustEqual Bad(
+          .push(
+            block.withTransactions(transactions),
+            List.empty,
+            emptyFilterFactory,
+            reward
+          ) mustEqual Bad(
           PreviousBlockMissingError
         ).accumulating
       }
@@ -45,22 +66,43 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
 
     "succeed storing a repeated block by hash" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, reward) mustEqual Good(
+      dataHandler.push(
+        genesis.withTransactions(getTransactions(genesis)),
+        List.empty,
+        emptyFilterFactory,
+        reward
+      ) mustEqual Good(
         ()
       )
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, reward) mustEqual Good(
+      dataHandler.push(
+        genesis.withTransactions(getTransactions(genesis)),
+        List.empty,
+        emptyFilterFactory,
+        reward
+      ) mustEqual Good(
         ()
       )
     }
 
     "fail to store a repeated block by height" in {
       val genesis = blockList(0)
-      dataHandler.push(genesis.withTransactions(getTransactions(genesis)), List.empty, emptyFilterFactory, reward) mustEqual Good(
+      dataHandler.push(
+        genesis.withTransactions(getTransactions(genesis)),
+        List.empty,
+        emptyFilterFactory,
+        reward
+      ) mustEqual Good(
         ()
       )
 
-      val block = blockList(1).copy(previousBlockhash = None, height = genesis.height)
-      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty, emptyFilterFactory, reward) mustEqual Bad(
+      val block =
+        blockList(1).copy(previousBlockhash = None, height = genesis.height)
+      dataHandler.push(
+        block.withTransactions(getTransactions(block)),
+        List.empty,
+        emptyFilterFactory,
+        reward
+      ) mustEqual Bad(
         RepeatedBlockHeightError
       ).accumulating
     }
@@ -68,12 +110,19 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     "store block without reward" in {
       val block = blockList.head
 
-      dataHandler.push(block.withTransactions(getTransactions(block)), List.empty, emptyFilterFactory, None) mustEqual Good(
+      dataHandler.push(
+        block.withTransactions(getTransactions(block)),
+        List.empty,
+        emptyFilterFactory,
+        None
+      ) mustEqual Good(
         ()
       )
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward mustEqual None
       }
     }
@@ -85,10 +134,17 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.ProofOfWork)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(powBlock, List.empty, emptyFilterFactory, Some(powReward)) mustEqual Good(())
+      dataHandler.push(
+        powBlock,
+        List.empty,
+        emptyFilterFactory,
+        Some(powReward)
+      ) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward match {
           case Some(r: PoWBlockRewards) => {
             r.reward.address mustEqual powReward.reward.address
@@ -106,10 +162,17 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
+      dataHandler.push(
+        posBlock,
+        List.empty,
+        emptyFilterFactory,
+        Some(posReward)
+      ) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward match {
           case Some(r: PoSBlockRewards) => {
             r.coinstake.address mustEqual posReward.coinstake.address
@@ -133,10 +196,17 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(posBlock, List.empty, emptyFilterFactory, Some(posReward)) mustEqual Good(())
+      dataHandler.push(
+        posBlock,
+        List.empty,
+        emptyFilterFactory,
+        Some(posReward)
+      ) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward match {
           case Some(r: PoSBlockRewards) => {
             r.coinstake.address mustEqual posReward.coinstake.address
@@ -159,10 +229,17 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
+      dataHandler.push(
+        tposBlock,
+        List.empty,
+        emptyFilterFactory,
+        Some(tposReward)
+      ) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward match {
           case Some(r: TPoSBlockRewards) => {
             r.owner.address mustEqual tposReward.owner.address
@@ -189,10 +266,17 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
         .copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
         .withTransactions(getTransactions(block))
 
-      dataHandler.push(tposBlock, List.empty, emptyFilterFactory, Some(tposReward)) mustEqual Good(())
+      dataHandler.push(
+        tposBlock,
+        List.empty,
+        emptyFilterFactory,
+        Some(tposReward)
+      ) mustEqual Good(())
 
       database.withConnection { implicit conn =>
-        val reward = BlockRewardPostgresSerializer.deserialize(blockRewardPostgresDAO.getBy(block.hash))
+        val reward = BlockRewardPostgresSerializer.deserialize(
+          blockRewardPostgresDAO.getBy(block.hash)
+        )
         reward match {
           case Some(r: TPoSBlockRewards) => {
             r.owner.address mustEqual tposReward.owner.address
@@ -226,7 +310,12 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
       blockList.foreach { block =>
         val transactions = getTransactions(block)
 
-        dataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, reward) mustEqual Good(
+        dataHandler.push(
+          block.withTransactions(transactions),
+          List.empty,
+          emptyFilterFactory,
+          reward
+        ) mustEqual Good(
           ()
         )
       }

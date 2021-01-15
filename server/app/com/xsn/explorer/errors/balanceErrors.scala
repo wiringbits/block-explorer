@@ -11,5 +11,7 @@ case object BalanceUnknownError extends BalanceError with ServerError {
 
   override def cause: Option[Throwable] = None
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = List.empty
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit
+      lang: L
+  ): List[PublicError] = List.empty
 }

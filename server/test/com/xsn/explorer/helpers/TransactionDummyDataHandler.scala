@@ -24,9 +24,14 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
       orderingCondition: OrderingCondition
   ): ApplicationResult[List[TransactionInfo]] = ???
 
-  override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = ???
+  override def getUnspentOutputs(
+      address: Address
+  ): ApplicationResult[List[Transaction.Output]] = ???
 
-  override def getOutput(txid: TransactionId, index: Int): ApplicationResult[Transaction.Output] = ???
+  override def getOutput(
+      txid: TransactionId,
+      index: Int
+  ): ApplicationResult[Transaction.Output] = ???
 
   override def get(
       limit: pagination.Limit,

@@ -9,26 +9,28 @@ import org.scalactic.Good
 import play.api.db.Database
 import com.xsn.explorer.models.values.Address
 
-class StatisticsPostgresDataHandler @Inject()(
+class StatisticsPostgresDataHandler @Inject() (
     override val database: Database,
     statisticsDAO: StatisticsPostgresDAO,
     tposContractDAO: TPoSContractDAO
-  )
-    extends StatisticsBlockingDataHandler
+) extends StatisticsBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def getStatistics(): ApplicationResult[Statistics] = withConnection { implicit conn =>
-    val result = statisticsDAO.getStatistics
-    Good(result)
+  override def getStatistics(): ApplicationResult[Statistics] = withConnection {
+    implicit conn =>
+      val result = statisticsDAO.getStatistics
+      Good(result)
   }
 
-  override def getRewardsSummary(numberOfBlocks: Int): ApplicationResult[BlockRewardsSummary] = withConnection {
-    implicit conn =>
-      Good(statisticsDAO.getSummary(numberOfBlocks))
+  override def getRewardsSummary(
+      numberOfBlocks: Int
+  ): ApplicationResult[BlockRewardsSummary] = withConnection { implicit conn =>
+    Good(statisticsDAO.getSummary(numberOfBlocks))
   }
 
-  override def getTPoSMerchantStakingAddresses(merchantAddress: Address): ApplicationResult[List[Address]] = withConnection {
-    implicit conn =>
-      Good(tposContractDAO.getTPoSMerchantStakingAddresses(merchantAddress))
+  override def getTPoSMerchantStakingAddresses(
+      merchantAddress: Address
+  ): ApplicationResult[List[Address]] = withConnection { implicit conn =>
+    Good(tposContractDAO.getTPoSMerchantStakingAddresses(merchantAddress))
   }
 }

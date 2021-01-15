@@ -14,14 +14,21 @@ case class BlockRewardsSummary(
 )
 
 object BlockRewardsSummary {
-  implicit val writes: Writes[BlockRewardsSummary] = (summary: BlockRewardsSummary) =>
-    Json.obj(
-      "averageReward" -> summary.averageReward.setScale(8, RoundingMode.HALF_UP),
-      "averageInput" -> summary.averageInput.setScale(8, RoundingMode.HALF_UP),
-      "medianInput" -> summary.medianInput.setScale(8, RoundingMode.HALF_UP),
-      "averagePoSInput" -> summary.averagePoSInput.setScale(8, RoundingMode.HALF_UP),
-      "averageTPoSInput" -> summary.averageTPoSInput.setScale(8, RoundingMode.HALF_UP),
-      "medianWaitTime" -> summary.medianWaitTime.setScale(8, RoundingMode.HALF_UP),
-      "averageWaitTime" -> summary.averageWaitTime.setScale(8, RoundingMode.HALF_UP)
-    )
+  implicit val writes: Writes[BlockRewardsSummary] =
+    (summary: BlockRewardsSummary) =>
+      Json.obj(
+        "averageReward" -> summary.averageReward
+          .setScale(8, RoundingMode.HALF_UP),
+        "averageInput" -> summary.averageInput
+          .setScale(8, RoundingMode.HALF_UP),
+        "medianInput" -> summary.medianInput.setScale(8, RoundingMode.HALF_UP),
+        "averagePoSInput" -> summary.averagePoSInput
+          .setScale(8, RoundingMode.HALF_UP),
+        "averageTPoSInput" -> summary.averageTPoSInput
+          .setScale(8, RoundingMode.HALF_UP),
+        "medianWaitTime" -> summary.medianWaitTime
+          .setScale(8, RoundingMode.HALF_UP),
+        "averageWaitTime" -> summary.averageWaitTime
+          .setScale(8, RoundingMode.HALF_UP)
+      )
 }

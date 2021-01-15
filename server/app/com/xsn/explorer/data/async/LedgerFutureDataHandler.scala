@@ -10,11 +10,11 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class LedgerFutureDataHandler @Inject()(
+class LedgerFutureDataHandler @Inject() (
     blockingDataHandler: LedgerBlockingDataHandler,
     retryableFutureDataHandler: RetryableDataHandler
-)(
-    implicit ec: DatabaseExecutionContext
+)(implicit
+    ec: DatabaseExecutionContext
 ) extends LedgerDataHandler[FutureApplicationResult] {
 
   override def push(
@@ -30,9 +30,10 @@ class LedgerFutureDataHandler @Inject()(
     }
   }
 
-  override def pop(): FutureApplicationResult[Block] = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.pop()
+  override def pop(): FutureApplicationResult[Block] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.pop()
+      }
     }
-  }
 }

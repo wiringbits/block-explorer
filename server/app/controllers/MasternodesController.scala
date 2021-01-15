@@ -8,8 +8,10 @@ import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.{Json}
 
-class MasternodesController @Inject()(masternodeService: MasternodeService, cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+class MasternodesController @Inject() (
+    masternodeService: MasternodeService,
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   import Codecs._
 

@@ -5,7 +5,9 @@ import com.xsn.explorer.data.async.RetryableDataHandler
 
 class DummyRetryableDataHandler extends RetryableDataHandler {
 
-  def retrying[A](f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
+  def retrying[A](
+      f: => FutureApplicationResult[A]
+  ): FutureApplicationResult[A] = {
     f
   }
 }

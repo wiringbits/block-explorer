@@ -1,6 +1,11 @@
 package com.xsn.explorer.models.rpc
 
-import com.xsn.explorer.models.values.{Blockhash, Confirmations, Size, TransactionId}
+import com.xsn.explorer.models.values.{
+  Blockhash,
+  Confirmations,
+  Size,
+  TransactionId
+}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -31,8 +36,18 @@ object Transaction {
           list.flatMap(_.asOpt[TransactionVIN])
         }
 
-    builder.apply { (id, size, blockHash, blockTime, confirmations, vout, vin) =>
-      Transaction(id, size, blockHash, blockTime, blockTime, confirmations, vin, vout)
+    builder.apply {
+      (id, size, blockHash, blockTime, confirmations, vout, vin) =>
+        Transaction(
+          id,
+          size,
+          blockHash,
+          blockTime,
+          blockTime,
+          confirmations,
+          vin,
+          vout
+        )
     }
   }
 
@@ -52,7 +67,16 @@ object Transaction {
         }
 
     builder.apply { (id, size, vout, vin) =>
-      Transaction(id, size, blockhash, blocktime, blocktime, confirmations, vin, vout)
+      Transaction(
+        id,
+        size,
+        blockhash,
+        blocktime,
+        blocktime,
+        confirmations,
+        vin,
+        vout
+      )
     }
   }
 }

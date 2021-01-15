@@ -1,7 +1,12 @@
 package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
-import com.alexitc.playsonify.models.{ErrorId, GenericPublicError, PublicError, ServerError}
+import com.alexitc.playsonify.models.{
+  ErrorId,
+  GenericPublicError,
+  PublicError,
+  ServerError
+}
 
 sealed trait XSNServerError extends ServerError {
 
@@ -12,7 +17,9 @@ sealed trait XSNServerError extends ServerError {
 
 case class XSNMessageError(message: String) extends XSNServerError {
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val error = GenericPublicError(message)
     List(error)
   }
@@ -20,7 +27,9 @@ case class XSNMessageError(message: String) extends XSNServerError {
 
 case object XSNUnexpectedResponseError extends XSNServerError {
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("xsn.server.unexpectedError")
     val error = GenericPublicError(message)
     List(error)
@@ -28,7 +37,9 @@ case object XSNUnexpectedResponseError extends XSNServerError {
 }
 
 case object XSNWorkQueueDepthExceeded extends XSNServerError {
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("xsn.server.unexpectedError")
     val error = GenericPublicError(message)
     List(error)
@@ -36,7 +47,9 @@ case object XSNWorkQueueDepthExceeded extends XSNServerError {
 }
 
 case object XSNWarmingUp extends XSNServerError {
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("xsn.server.unexpectedError")
     val error = GenericPublicError(message)
     List(error)

@@ -29,7 +29,8 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala, JavaAgent)
 
 // Some options are very noisy when using the console and prevent us using it smoothly, let's disable them
-val consoleDisabledOptions = Seq("-Xfatal-warnings", "-Ywarn-unused", "-Ywarn-unused-import")
+val consoleDisabledOptions =
+  Seq("-Xfatal-warnings", "-Ywarn-unused", "-Ywarn-unused-import")
 scalacOptions in (Compile, console) ~= (_ filterNot consoleDisabledOptions.contains)
 
 // remove play noisy warnings

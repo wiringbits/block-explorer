@@ -4,8 +4,16 @@ import akka.pattern.ask
 import akka.actor.ActorSystem
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{StatisticsFutureDataHandler, BalanceFutureDataHandler}
-import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, NodeStatistics, SynchronizationProgress}
+import com.xsn.explorer.data.async.{
+  StatisticsFutureDataHandler,
+  BalanceFutureDataHandler
+}
+import com.xsn.explorer.models.{
+  MarketStatistics,
+  StatisticsDetails,
+  NodeStatistics,
+  SynchronizationProgress
+}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
   MasternodeRepository,
@@ -19,7 +27,7 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 
-class StatisticsService @Inject()(
+class StatisticsService @Inject() (
     xsnService: XSNService,
     actorSystem: ActorSystem,
     statisticsFutureDataHandler: StatisticsFutureDataHandler,
@@ -27,8 +35,8 @@ class StatisticsService @Inject()(
     merchantnodeRepository: MerchantnodeRepository,
     masternodeRepository: MasternodeRepository,
     nodeStatsRepository: NodeStatsRepository
-)(
-    implicit ec: ExecutionContext
+)(implicit
+    ec: ExecutionContext
 ) {
 
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
@@ -80,21 +88,27 @@ class StatisticsService @Inject()(
         .map(t => t.payee)
         .map(statisticsFutureDataHandler.getTPoSMerchantStakingAddresses)
         .toFutureOr
-      coinsStaking <- tposAddressList.flatten.map(balanceFutureDataHandler.getBy).toFutureOr
+      coinsStaking <- tposAddressList.flatten
+        .map(balanceFutureDataHandler.getBy)
+        .toFutureOr
       coinsStakingSum = coinsStaking.map(t => t.available).sum
     } yield coinsStakingSum
 
     result.toFuture
   }
 
-  def getSynchronizationProgress: FutureApplicationResult[SynchronizationProgress] = {
+  def getSynchronizationProgress
+      : FutureApplicationResult[SynchronizationProgress] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val rpcBlock = xsnService.getLatestBlock()
 
     val result = for {
       stats <- dbStats.toFutureOr
       latestBlock <- rpcBlock.toFutureOr
-    } yield SynchronizationProgress(total = latestBlock.height.int, synced = stats.blocks)
+    } yield SynchronizationProgress(
+      total = latestBlock.height.int,
+      synced = stats.blocks
+    )
 
     result.toFuture
   }
@@ -113,11 +127,13 @@ class StatisticsService @Inject()(
       .map(Good(_))
   }
 
-  private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
+  private def discardErrors[T](
+      value: FutureApplicationResult[T]
+  ): FutureApplicationResult[Option[T]] = {
     value
       .map {
         case Good(result) => Good(Some(result))
-        case Bad(_) => Good(None)
+        case Bad(_)       => Good(None)
       }
       .recover { case _: Throwable => Good(None) }
   }

@@ -11,5 +11,6 @@ case class TposContractsEncodeRequest(
 )
 
 object TposContractsEncodeRequest {
-  implicit val reads: Reads[TposContractsEncodeRequest] = Json.reads[TposContractsEncodeRequest]
+  implicit val reads: Reads[TposContractsEncodeRequest] =
+    Json.reads[TposContractsEncodeRequest]
 }

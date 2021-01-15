@@ -10,6 +10,6 @@ import scala.concurrent.ExecutionContext
 trait ExternalServiceExecutionContext extends ExecutionContext
 
 @Singleton
-class ExternalServiceAkkaExecutionContext @Inject()(system: ActorSystem)
+class ExternalServiceAkkaExecutionContext @Inject() (system: ActorSystem)
     extends CustomExecutionContext(system, "externalService.dispatcher")
     with ExternalServiceExecutionContext

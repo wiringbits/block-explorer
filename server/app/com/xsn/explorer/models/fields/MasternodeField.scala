@@ -10,10 +10,10 @@ object MasternodeField {
   case object LastSeen extends MasternodeField("lastSeen")
 
   def from(string: String): Option[MasternodeField] = string match {
-    case Status.string => Some(Status)
-    case IP.string => Some(IP)
+    case Status.string        => Some(Status)
+    case IP.string            => Some(IP)
     case ActiveSeconds.string => Some(ActiveSeconds)
-    case LastSeen.string => Some(LastSeen)
-    case _ => None
+    case LastSeen.string      => Some(LastSeen)
+    case _                    => None
   }
 }

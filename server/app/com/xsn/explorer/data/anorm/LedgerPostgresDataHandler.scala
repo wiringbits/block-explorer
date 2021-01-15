@@ -7,7 +7,11 @@ import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
-import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
+import com.xsn.explorer.errors.{
+  PostgresForeignKeyViolationError,
+  PreviousBlockMissingError,
+  RepeatedBlockHeightError
+}
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.persisted.{Balance, Block}
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
@@ -17,7 +21,7 @@ import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database
 
-class LedgerPostgresDataHandler @Inject()(
+class LedgerPostgresDataHandler @Inject() (
     override val database: Database,
     blockPostgresDAO: BlockPostgresDAO,
     blockFilterPostgresDAO: BlockFilterPostgresDAO,
@@ -28,10 +32,9 @@ class LedgerPostgresDataHandler @Inject()(
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  /**
-   * Push a block into the database chain, note that even if the block is supposed
-   * to have a next block, we remove the link because that block is not stored yet.
-   */
+  /** Push a block into the database chain, note that even if the block is supposed
+    * to have a next block, we remove the link because that block is not stored yet.
+    */
   override def push(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -52,26 +55,28 @@ class LedgerPostgresDataHandler @Inject()(
     }
 
     def fromError(e: ApplicationError) = e match {
-      case PostgresForeignKeyViolationError("previous_blockhash", _) => PreviousBlockMissingError
-      case PostgresForeignKeyViolationError("height", _) => RepeatedBlockHeightError
+      case PostgresForeignKeyViolationError("previous_blockhash", _) =>
+        PreviousBlockMissingError
+      case PostgresForeignKeyViolationError("height", _) =>
+        RepeatedBlockHeightError
       case _ => e
     }
 
     result.badMap { _.map(fromError) }
   }
 
-  /**
-   * Pop a block from the database chain (if exists)
-   */
-  override def pop(): ApplicationResult[Block] = withTransaction { implicit conn =>
-    val result = for {
-      block <- blockPostgresDAO.getLatestBlock
-      _ <- deleteBlockCascade(block)
-    } yield block
+  /** Pop a block from the database chain (if exists)
+    */
+  override def pop(): ApplicationResult[Block] = withTransaction {
+    implicit conn =>
+      val result = for {
+        block <- blockPostgresDAO.getLatestBlock
+        _ <- deleteBlockCascade(block)
+      } yield block
 
-    result
-      .map(Good(_))
-      .getOrElse(throw new RuntimeException("Unable to pop block"))
+      result
+        .map(Good(_))
+        .getOrElse(throw new RuntimeException("Unable to pop block"))
   }
 
   private def upsertBlockCascade(
@@ -94,7 +99,9 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- transactionPostgresDAO.insert(block.transactions, tposContracts)
 
       // balances
-      balanceList = TransactionBalancesHelper.computeBalances(block.transactions)
+      balanceList = TransactionBalancesHelper.computeBalances(
+        block.transactions
+      )
       _ <- insertBalanceBatch(balanceList).toList.everything
 
       // compute aggregated amount
@@ -111,7 +118,9 @@ class LedgerPostgresDataHandler @Inject()(
     result
   }
 
-  private def deleteBlockCascade(block: Block)(implicit conn: Connection): Option[Unit] = {
+  private def deleteBlockCascade(
+      block: Block
+  )(implicit conn: Connection): Option[Unit] = {
     // transactions
     val deletedTransactions = transactionPostgresDAO.deleteBy(block.hash)
     val _ = blockFilterPostgresDAO.delete(block.hash)
@@ -121,7 +130,9 @@ class LedgerPostgresDataHandler @Inject()(
       _ <- blockPostgresDAO.delete(block.hash)
 
       // balances
-      balanceList = TransactionBalancesHelper.computeBalances(deletedTransactions)
+      balanceList = TransactionBalancesHelper.computeBalances(
+        deletedTransactions
+      )
       _ <- balanceList
         .map { b =>
           b.copy(spent = -b.spent, received = -b.received)
@@ -138,7 +149,9 @@ class LedgerPostgresDataHandler @Inject()(
     } yield ()
   }
 
-  private def insertBalanceBatch(balanceList: Iterable[Balance])(implicit conn: Connection) = {
+  private def insertBalanceBatch(
+      balanceList: Iterable[Balance]
+  )(implicit conn: Connection) = {
     balanceList.map { b =>
       balancePostgresDAO.upsert(b)
     }

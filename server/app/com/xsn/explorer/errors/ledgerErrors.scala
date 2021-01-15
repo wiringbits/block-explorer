@@ -5,7 +5,9 @@ import com.alexitc.playsonify.models.{ApplicationError, PublicError}
 
 trait LedgerError extends ApplicationError {
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = List.empty
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit
+      lang: L
+  ): List[PublicError] = List.empty
 }
 
 case object PreviousBlockMissingError extends LedgerError

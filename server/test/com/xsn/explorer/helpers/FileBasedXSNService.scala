@@ -5,7 +5,12 @@ import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.DataGenerator.randomTPoSContract
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
-import com.xsn.explorer.models.values.{Address, Blockhash, Height, TransactionId}
+import com.xsn.explorer.models.values.{
+  Address,
+  Blockhash,
+  Height,
+  TransactionId
+}
 import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
 
@@ -27,24 +32,32 @@ class FileBasedXSNService extends DummyXSNService {
     }
     .toMap
 
-  override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block.Canonical] = {
+  override def getBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[Block.Canonical] = {
     val maybe = blockMap.get(blockhash)
     val result = Or.from(maybe, One(BlockNotFoundError))
     Future.successful(result)
   }
 
-  override def getFullBlock(blockhash: Blockhash): FutureApplicationResult[Block.HasTransactions[TransactionVIN]] = {
+  override def getFullBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[Block.HasTransactions[TransactionVIN]] = {
     val maybe = BlockLoader.getFullRPCOpt(blockhash.string)
     val result = Or.from(maybe, One(BlockNotFoundError))
     Future.successful(result)
   }
 
-  override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+  override def getRawBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[JsValue] = {
     val result = BlockLoader.json(blockhash.string)
     Future.successful(Good(result))
   }
 
-  override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+  override def getBlockhash(
+      height: Height
+  ): FutureApplicationResult[Blockhash] = {
     val maybe = blockMap.collectFirst {
       case (_, block) if block.height == height => block.hash
     }
@@ -58,19 +71,25 @@ class FileBasedXSNService extends DummyXSNService {
     Future.successful(Good(block))
   }
 
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[Transaction[TransactionVIN]] = {
+  override def getTransaction(
+      txid: TransactionId
+  ): FutureApplicationResult[Transaction[TransactionVIN]] = {
     val maybe = transactionMap.get(txid)
     val result = Or.from(maybe, One(TransactionError.NotFound(txid)))
     Future.successful(result)
   }
 
-  override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+  override def getRawTransaction(
+      txid: TransactionId
+  ): FutureApplicationResult[JsValue] = {
     val maybe = Try(TransactionLoader.json(txid.string)).toOption
     val result = Or.from(maybe, One(TransactionError.NotFound(txid)))
     Future.successful(result)
   }
 
-  override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = Future.successful(Good(true))
+  override def isTPoSContract(
+      txid: TransactionId
+  ): FutureApplicationResult[Boolean] = Future.successful(Good(true))
 
   override def encodeTPOSContract(
       tposAddress: Address,
@@ -83,7 +102,9 @@ class FileBasedXSNService extends DummyXSNService {
     Future.successful(Good(tposEncoded))
   }
 
-  override def getTPoSContractDetails(transactionId: TransactionId): FutureApplicationResult[TPoSContract.Details] = {
+  override def getTPoSContractDetails(
+      transactionId: TransactionId
+  ): FutureApplicationResult[TPoSContract.Details] = {
     val contractDetails = randomTPoSContract(txid = transactionId).details
     Future.successful(Good(contractDetails))
   }

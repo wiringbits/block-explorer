@@ -17,7 +17,9 @@ object BlockParsers {
 
   val parseExtractionMethod = str("extraction_method")
     .map(BlockExtractionMethod.withNameInsensitiveOption)
-    .map { _.getOrElse(throw new RuntimeException("corrupted extraction_method")) }
+    .map {
+      _.getOrElse(throw new RuntimeException("corrupted extraction_method"))
+    }
 
   val parseHeight = int("height").map(Height.apply)
   val parseVersion = int("version")
@@ -45,20 +47,20 @@ object BlockParsers {
     parseExtractionMethod).map {
 
     case hash ~
-          nextBlockhash ~
-          previousBlockhash ~
-          tposContract ~
-          merkleRoot ~
-          size ~
-          height ~
-          version ~
-          time ~
-          medianTime ~
-          nonce ~
-          bits ~
-          chainwork ~
-          difficulty ~
-          extractionMethod =>
+        nextBlockhash ~
+        previousBlockhash ~
+        tposContract ~
+        merkleRoot ~
+        size ~
+        height ~
+        version ~
+        time ~
+        medianTime ~
+        nonce ~
+        bits ~
+        chainwork ~
+        difficulty ~
+        extractionMethod =>
       Block(
         hash = hash,
         previousBlockhash = previousBlockhash,
@@ -95,20 +97,20 @@ object BlockParsers {
     parseExtractionMethod).map {
 
     case hash ~
-          nextBlockhash ~
-          previousBlockhash ~
-          tposContract ~
-          merkleRoot ~
-          size ~
-          height ~
-          version ~
-          time ~
-          medianTime ~
-          nonce ~
-          bits ~
-          chainwork ~
-          difficulty ~
-          extractionMethod =>
+        nextBlockhash ~
+        previousBlockhash ~
+        tposContract ~
+        merkleRoot ~
+        size ~
+        height ~
+        version ~
+        time ~
+        medianTime ~
+        nonce ~
+        bits ~
+        chainwork ~
+        difficulty ~
+        extractionMethod =>
       BlockHeader.Simple(
         hash = hash,
         previousBlockhash = previousBlockhash,
@@ -138,13 +140,13 @@ object BlockParsers {
     parseTransactions).map {
 
     case hash ~
-          nextBlockhash ~
-          previousBlockhash ~
-          merkleRoot ~
-          height ~
-          time ~
-          difficulty ~
-          transactions =>
+        nextBlockhash ~
+        previousBlockhash ~
+        merkleRoot ~
+        height ~
+        time ~
+        difficulty ~
+        transactions =>
       BlockInfo(
         hash = hash,
         previousBlockhash = previousBlockhash,
