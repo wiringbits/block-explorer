@@ -1,4 +1,12 @@
 
+-- query transactions >= 15000 XSN on a given date interval
+SELECT encode(txid, 'hex') as txid, (sent - received) as amount, to_timestamp(time) as time
+FROM address_transaction_details
+WHERE (sent - received) >= 15000 AND
+  to_timestamp(time)::DATE >= DATE '2020-12-01' AND
+  to_timestamp(time)::DATE <= DATE '2020-12-23'
+ORDER BY (sent - received) desc;
+
 -- avg time to get a new block
 SELECT AVG(b.time - a.time) AS new_block_avg_time
 FROM (SELECT height, time FROM blocks) a JOIN
