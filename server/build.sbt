@@ -78,8 +78,8 @@ libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.8"
 libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.8"
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala" % "1.14.4" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.14.4" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala" % "1.14.8" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.14.8" % Test
 
 libraryDependencies ++= Seq(
   "com.spotify" % "docker-client" % "8.16.0" % "test",
