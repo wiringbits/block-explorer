@@ -54,7 +54,7 @@ libraryDependencies ++= Seq(
   "com.alexitc" %% "playsonify-play-test" % playsonifyVersion % Test
 )
 
-libraryDependencies += "com.google.inject" % "guice" % "4.1.0"
+libraryDependencies += "com.google.inject" % "guice" % "4.2.3"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.2"
 libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.4"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.6"
