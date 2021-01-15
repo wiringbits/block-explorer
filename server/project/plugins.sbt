@@ -1,6 +1,6 @@
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.7")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 
 addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.3.17")
 
