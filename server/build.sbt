@@ -65,7 +65,7 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "io.sentry" % "sentry-logback" % "1.7.30"
 
 libraryDependencies ++= Seq(
-  "com.beachape" %% "enumeratum" % "1.5.15"
+  "com.beachape" %% "enumeratum" % "1.6.1"
 )
 
 libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
