@@ -41,8 +41,8 @@ coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 
 // silence noisy warnings
 libraryDependencies ++= Seq(
-  compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.3.4"),
-  "com.github.ghik" %% "silencer-lib" % "1.3.4" % Provided
+  compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
+  "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided
 )
 
 libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
