@@ -68,7 +68,7 @@ libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.5.13"
 )
 
-libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
+libraryDependencies += "io.scalaland" %% "chimney" % "0.3.5"
 
 libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
