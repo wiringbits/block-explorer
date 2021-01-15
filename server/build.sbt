@@ -72,7 +72,7 @@ libraryDependencies += "io.scalaland" %% "chimney" % "0.3.0"
 
 libraryDependencies += "com.google.guava" % "guava" % "22.0"
 
-libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
+libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.7.1"
 
 libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.8"
 libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.8"
