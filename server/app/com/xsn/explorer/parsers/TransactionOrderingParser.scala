@@ -8,9 +8,12 @@ class TransactionOrderingParser extends FieldOrderingParser[TransactionField] {
 
   override protected val defaultField = TransactionField.Time
 
-  override protected val defaultOrderingCondition: OrderingCondition = OrderingCondition.DescendingOrder
+  override protected val defaultOrderingCondition: OrderingCondition =
+    OrderingCondition.DescendingOrder
 
-  override protected def parseField(unsafeField: String): Option[TransactionField] = {
+  override protected def parseField(
+      unsafeField: String
+  ): Option[TransactionField] = {
     TransactionField.withNameOption(unsafeField)
   }
 }

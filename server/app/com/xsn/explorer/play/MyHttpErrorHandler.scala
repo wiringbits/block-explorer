@@ -11,11 +11,16 @@ import play.api.mvc.Results.{InternalServerError, Status}
 
 import scala.concurrent.Future
 
-class MyHttpErrorHandler @Inject()(errorRenderer: PublicErrorRenderer) extends HttpErrorHandler {
+class MyHttpErrorHandler @Inject() (errorRenderer: PublicErrorRenderer)
+    extends HttpErrorHandler {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def onClientError(request: RequestHeader, statusCode: Int, message: String) = {
+  def onClientError(
+      request: RequestHeader,
+      statusCode: Int,
+      message: String
+  ) = {
     val publicError = PublicError.genericError(message)
     val error = errorRenderer.renderPublicError(publicError)
     val json = Json.obj(
@@ -28,7 +33,8 @@ class MyHttpErrorHandler @Inject()(errorRenderer: PublicErrorRenderer) extends H
 
   def onServerError(request: RequestHeader, exception: Throwable) = {
     val errorId = ErrorId.create
-    val error = errorRenderer.renderPublicError(InternalError(errorId, "Internal error"))
+    val error =
+      errorRenderer.renderPublicError(InternalError(errorId, "Internal error"))
     val json = Json.obj(
       "errors" -> Json.arr(error)
     )

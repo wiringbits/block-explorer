@@ -12,5 +12,9 @@ sealed trait PostgresError extends ServerError {
   override def cause: Option[Throwable] = Option(psqlException)
 }
 
-case class UnknownPostgresError(psqlException: PSQLException) extends PostgresError
-case class PostgresForeignKeyViolationError(column: String, psqlException: PSQLException) extends PostgresError
+case class UnknownPostgresError(psqlException: PSQLException)
+    extends PostgresError
+case class PostgresForeignKeyViolationError(
+    column: String,
+    psqlException: PSQLException
+) extends PostgresError

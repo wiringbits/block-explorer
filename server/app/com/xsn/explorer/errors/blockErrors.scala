@@ -7,7 +7,9 @@ sealed trait BlockError
 
 case object BlockhashFormatError extends BlockError with InputValidationError {
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("error.block.format")
     val error = FieldValidationError("blockhash", message)
     List(error)
@@ -16,7 +18,9 @@ case object BlockhashFormatError extends BlockError with InputValidationError {
 
 case object BlockNotFoundError extends BlockError with InputValidationError {
 
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("error.block.notFound")
     val error = FieldValidationError("blockhash", message)
     List(error)
@@ -24,7 +28,9 @@ case object BlockNotFoundError extends BlockError with InputValidationError {
 }
 
 case object BlockRewardsNotFoundError extends BlockError with NotFoundError {
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = {
+  override def toPublicErrorList[L](
+      i18nService: I18nService[L]
+  )(implicit lang: L): List[PublicError] = {
     val message = i18nService.render("error.block.notFound")
     val error = FieldValidationError("blockhash", message)
     List(error)
@@ -34,5 +40,7 @@ case object BlockRewardsNotFoundError extends BlockError with NotFoundError {
 case object BlockUnknownError extends BlockError with ServerError {
   val id = ErrorId.create
   override def cause: Option[Throwable] = None
-  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit lang: L): List[PublicError] = List.empty
+  override def toPublicErrorList[L](i18nService: I18nService[L])(implicit
+      lang: L
+  ): List[PublicError] = List.empty
 }

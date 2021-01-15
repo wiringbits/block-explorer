@@ -2,7 +2,13 @@ package com.xsn.explorer.data.common
 
 import java.sql.DriverManager
 
-import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainerState, DockerKit, DockerReadyChecker}
+import com.whisk.docker.{
+  DockerCommandExecutor,
+  DockerContainer,
+  DockerContainerState,
+  DockerKit,
+  DockerReadyChecker
+}
 
 import scala.concurrent.ExecutionContext
 
@@ -19,7 +25,10 @@ trait DockerPostgresService extends DockerKit {
   val postgresContainer = DockerContainer(PostgresImage)
     .withCommand("-N 1000")
     .withPorts((PostgresAdvertisedPort, Some(PostgresExposedPort)))
-    .withEnv(s"POSTGRES_USER=$PostgresUsername", s"POSTGRES_PASSWORD=$PostgresPassword")
+    .withEnv(
+      s"POSTGRES_USER=$PostgresUsername",
+      s"POSTGRES_PASSWORD=$PostgresPassword"
+    )
     .withReadyChecker(
       new PostgresReadyChecker().looped(15, 1.second)
     )
@@ -51,7 +60,10 @@ object DockerPostgresService {
           try {
             Class.forName("org.postgresql.Driver")
             val url = s"jdbc:postgresql://${docker.host}:$PostgresExposedPort/"
-            Option(DriverManager.getConnection(url, PostgresUsername, PostgresPassword))
+            Option(
+              DriverManager
+                .getConnection(url, PostgresUsername, PostgresPassword)
+            )
               .foreach { conn =>
                 // NOTE: For some reason the result is always false
                 conn.createStatement().execute(s"CREATE DATABASE $DatabaseName")

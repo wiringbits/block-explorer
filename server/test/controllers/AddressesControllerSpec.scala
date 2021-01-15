@@ -4,8 +4,15 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination
-import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDataHandler}
-import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, TransactionDummyDataHandler}
+import com.xsn.explorer.data.{
+  BalanceBlockingDataHandler,
+  TransactionBlockingDataHandler
+}
+import com.xsn.explorer.helpers.{
+  BalanceDummyDataHandler,
+  DataHelper,
+  TransactionDummyDataHandler
+}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.{Balance, Transaction}
 import com.xsn.explorer.models.values.{Address, _}
@@ -23,30 +30,45 @@ class AddressesControllerSpec extends MyAPISpec {
   val addressWithBalance = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
   val addressBalance = Balance(addressWithBalance, spent = 100, received = 200)
 
-  val addressForUtxos = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+  val addressForUtxos =
+    DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
 
   val utxosResponse = List(
     Transaction.Output(
       address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
       index = 0,
       value = BigDecimal("1500000000000").fromSatoshis,
-      script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
-      txid = createTransactionId("ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539")
+      script = HexString
+        .from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac")
+        .get,
+      txid = createTransactionId(
+        "ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"
+      )
     ),
     Transaction.Output(
       address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
       index = 3,
       value = BigDecimal("2250000000").fromSatoshis,
-      script = HexString.from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac").get,
-      txid = createTransactionId("96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d")
+      script = HexString
+        .from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac")
+        .get,
+      txid = createTransactionId(
+        "96a06b802d1c15818a42aa9b46dd2e236cde746000d35f74d3eb940ab9d5694d"
+      )
     )
   )
 
-  val addressForTransactions = createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F")
+  val addressForTransactions = createAddress(
+    "XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW86F"
+  )
 
   val addressTransaction = TransactionInfo(
-    createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
-    createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+    createTransactionId(
+      "92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"
+    ),
+    createBlockhash(
+      "ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"
+    ),
     12312312L,
     Size(1000),
     sent = 50,
@@ -56,7 +78,9 @@ class AddressesControllerSpec extends MyAPISpec {
 
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
-    override def getUnspentOutputs(address: Address): ApplicationResult[List[Transaction.Output]] = {
+    override def getUnspentOutputs(
+        address: Address
+    ): ApplicationResult[List[Transaction.Output]] = {
       if (address == addressForUtxos) {
         Good(utxosResponse)
       } else {
@@ -85,7 +109,9 @@ class AddressesControllerSpec extends MyAPISpec {
   }
 
   override val application = guiceApplicationBuilder
-    .overrides(bind[TransactionBlockingDataHandler].to(customTransactionDataHandler))
+    .overrides(
+      bind[TransactionBlockingDataHandler].to(customTransactionDataHandler)
+    )
     .overrides(bind[BalanceBlockingDataHandler].to(customBalanceDataHandler))
     .build()
 
@@ -113,7 +139,8 @@ class AddressesControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
       val error = errorList.head
 
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "address"
     }
   }
@@ -122,11 +149,14 @@ class AddressesControllerSpec extends MyAPISpec {
     def url(address: String) = s"/addresses/$address/utxos"
 
     def matches(json: JsValue, output: Transaction.Output) = {
-      (json \ "address").as[String] mustEqual output.address.map(_.string).getOrElse("")
+      (json \ "address")
+        .as[String] mustEqual output.address.map(_.string).getOrElse("")
       (json \ "txid").as[String] mustEqual output.txid.string
       (json \ "outputIndex").as[Int] mustEqual output.index
       (json \ "script").as[String] mustEqual output.script.string
-      (json \ "satoshis").as[BigDecimal] mustEqual BigDecimal(output.value.toSatoshis)
+      (json \ "satoshis").as[BigDecimal] mustEqual BigDecimal(
+        output.value.toSatoshis
+      )
     }
 
     "return an array with the result" in {
@@ -134,12 +164,15 @@ class AddressesControllerSpec extends MyAPISpec {
 
       status(response) mustEqual OK
       val result = contentAsJson(response).as[List[JsValue]]
-      result.zip(utxosResponse).foreach { case (json, output) => matches(json, output) }
+      result.zip(utxosResponse).foreach { case (json, output) =>
+        matches(json, output)
+      }
     }
   }
 
   "GET /addresses/:address/transactions" should {
-    def url(address: String, limit: Int) = s"/addresses/$address/transactions?limit=$limit"
+    def url(address: String, limit: Int) =
+      s"/addresses/$address/transactions?limit=$limit"
 
     "return the transactions where the address was involved" in {
       val limit = 5
@@ -152,7 +185,8 @@ class AddressesControllerSpec extends MyAPISpec {
 
       val item = data.head
       (item \ "id").as[String] mustEqual addressTransaction.id.string
-      (item \ "blockhash").as[String] mustEqual addressTransaction.blockhash.string
+      (item \ "blockhash")
+        .as[String] mustEqual addressTransaction.blockhash.string
       (item \ "time").as[Long] mustEqual addressTransaction.time
       (item \ "size").as[Int] mustEqual addressTransaction.size.int
       (item \ "height").as[Int] mustEqual addressTransaction.height.int

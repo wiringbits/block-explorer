@@ -6,8 +6,10 @@ import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.Json
 
-class StatisticsController @Inject()(statisticsService: StatisticsService, cc: MyJsonControllerComponents)
-    extends MyJsonController(cc) {
+class StatisticsController @Inject() (
+    statisticsService: StatisticsService,
+    cc: MyJsonControllerComponents
+) extends MyJsonController(cc) {
 
   def getStatus() = public { _ =>
     statisticsService

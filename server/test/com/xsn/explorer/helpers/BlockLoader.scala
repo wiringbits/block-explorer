@@ -19,11 +19,16 @@ object BlockLoader {
     Converters.toPersistedBlock(rpcBlock)
   }
 
-  def getWithTransactions(blockhash: String): persisted.Block.HasTransactions = {
+  def getWithTransactions(
+      blockhash: String
+  ): persisted.Block.HasTransactions = {
     getWithTransactions(blockhash, "xsn")
   }
 
-  def getWithTransactions(blockhash: String, coin: String): persisted.Block.HasTransactions = {
+  def getWithTransactions(
+      blockhash: String,
+      coin: String
+  ): persisted.Block.HasTransactions = {
     val rpcBlock = getRPC(blockhash, coin)
     val block = Converters.toPersistedBlock(rpcBlock)
     val transactions = rpcBlock.transactions
@@ -35,7 +40,10 @@ object BlockLoader {
     persisted.Block.HasTransactions(block, transactions)
   }
 
-  def getWithTransactions(rpcBlock: rpc.Block.Canonical, coin: String = "xsn"): persisted.Block.HasTransactions = {
+  def getWithTransactions(
+      rpcBlock: rpc.Block.Canonical,
+      coin: String = "xsn"
+  ): persisted.Block.HasTransactions = {
     val block = Converters.toPersistedBlock(rpcBlock)
     val transactions = rpcBlock.transactions
       .map(_.string)
@@ -52,7 +60,10 @@ object BlockLoader {
     cleanGenesisBlock(partial)
   }
 
-  def getFullRPC(blockhash: String, coin: String = "xsn"): rpc.Block.HasTransactions[rpc.TransactionVIN] = {
+  def getFullRPC(
+      blockhash: String,
+      coin: String = "xsn"
+  ): rpc.Block.HasTransactions[rpc.TransactionVIN] = {
     val resource = s"$FullBlocksBasePath/$coin/$blockhash"
     jsonFromResource(resource).as[rpc.Block.HasTransactions[rpc.TransactionVIN]]
   }
@@ -62,7 +73,9 @@ object BlockLoader {
       coin: String = "xsn"
   ): rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues] = {
     val block = json(blockhash, coin).as[rpc.Block.Canonical]
-    val transactionsWithValues = block.transactions.map(_.toString).map(TransactionLoader.getWithValues(_, coin))
+    val transactionsWithValues = block.transactions
+      .map(_.toString)
+      .map(TransactionLoader.getWithValues(_, coin))
 
     block
       .into[rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]]
@@ -70,7 +83,10 @@ object BlockLoader {
       .transform
   }
 
-  def getFullRPCOpt(blockhash: String, coin: String = "xsn"): Option[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
+  def getFullRPCOpt(
+      blockhash: String,
+      coin: String = "xsn"
+  ): Option[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
     Try(getFullRPC(blockhash, coin)).toOption
   }
 
@@ -95,7 +111,11 @@ object BlockLoader {
 
   def cleanGenesisBlock(block: rpc.Block.Canonical): rpc.Block.Canonical = {
     val genesisBlockhash: Blockhash =
-      Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+      Blockhash
+        .from(
+          "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"
+        )
+        .get
 
     Option(block)
       .filter(_.hash == genesisBlockhash)
@@ -105,10 +125,12 @@ object BlockLoader {
 
   private def jsonFromResource(resource: String): JsValue = {
     try {
-      val json = scala.io.Source.fromResource(resource).getLines().mkString("\n")
+      val json =
+        scala.io.Source.fromResource(resource).getLines().mkString("\n")
       Json.parse(json)
     } catch {
-      case _: Throwable => throw new RuntimeException(s"Resource $resource not found")
+      case _: Throwable =>
+        throw new RuntimeException(s"Resource $resource not found")
     }
   }
 }

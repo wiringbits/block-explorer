@@ -18,30 +18,41 @@ class EmailModule extends AbstractModule {
   @Singleton
   def notificationsConfig(globalConfig: Configuration): NotificationsConfig = {
     val config = globalConfig.get[Configuration]("notifications")
-    val monitoredAddresses = getList(config, "monitoredAddresses").flatMap(Address.from)
+    val monitoredAddresses =
+      getList(config, "monitoredAddresses").flatMap(Address.from)
     val recipients = getList(config, "recipients")
 
     logger.info(
-      s"notifications config loaded, monitoredAddresses = ${monitoredAddresses.mkString(", ")}, recipients = ${recipients
+      s"notifications config loaded, monitoredAddresses = ${monitoredAddresses
+        .mkString(", ")}, recipients = ${recipients
         .mkString(", ")}"
     )
-    NotificationsConfig(recipients = recipients, monitoredAddresses = monitoredAddresses)
+    NotificationsConfig(
+      recipients = recipients,
+      monitoredAddresses = monitoredAddresses
+    )
   }
 
   @Provides
   @Singleton
-  def sendgridConfig(globalConfig: Configuration): EmailService.SendgridService.Config = {
+  def sendgridConfig(
+      globalConfig: Configuration
+  ): EmailService.SendgridService.Config = {
     val config = globalConfig.get[Configuration]("sendgrid")
     val apiKey = config.get[String]("apiKey")
     val sender = config.get[String]("sender")
 
-    logger.info(s"sendgrid config loaded, apiKey = ${apiKey.take(4)}..., sender = $sender")
+    logger.info(
+      s"sendgrid config loaded, apiKey = ${apiKey.take(4)}..., sender = $sender"
+    )
     EmailService.SendgridService.Config(apiKey = apiKey, sender = sender)
   }
 
   @Provides
   @Singleton
-  def emailService(config: EmailService.SendgridService.Config): EmailService = {
+  def emailService(
+      config: EmailService.SendgridService.Config
+  ): EmailService = {
     new EmailService.SendgridService(config)
   }
 

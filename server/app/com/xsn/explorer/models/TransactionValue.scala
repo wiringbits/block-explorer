@@ -4,13 +4,21 @@ import com.xsn.explorer.models.rpc.TransactionVOUT
 import com.xsn.explorer.models.values.{Address, HexString}
 import play.api.libs.json.{JsNull, JsString, Json, Writes}
 
-case class TransactionValue(addresses: List[Address], value: BigDecimal, pubKeyScript: HexString) {
+case class TransactionValue(
+    addresses: List[Address],
+    value: BigDecimal,
+    pubKeyScript: HexString
+) {
   def address: Option[Address] = addresses.headOption
 }
 
 object TransactionValue {
 
-  def apply(address: Address, value: BigDecimal, pubKeyScript: HexString): TransactionValue = {
+  def apply(
+      address: Address,
+      value: BigDecimal,
+      pubKeyScript: HexString
+  ): TransactionValue = {
     TransactionValue(List(address), value, pubKeyScript)
   }
 
@@ -22,7 +30,8 @@ object TransactionValue {
   }
 
   implicit val writes: Writes[TransactionValue] = (obj: TransactionValue) => {
-    val address = obj.address.map(_.string).map(JsString.apply).getOrElse(JsNull)
+    val address =
+      obj.address.map(_.string).map(JsString.apply).getOrElse(JsNull)
     Json.obj(
       "address" -> address, // Keeps compatibility
       "addresses" -> obj.addresses,

@@ -8,9 +8,12 @@ class MasternodeOrderingParser extends FieldOrderingParser[MasternodeField] {
 
   override protected val defaultField = MasternodeField.ActiveSeconds
 
-  override protected val defaultOrderingCondition: OrderingCondition = OrderingCondition.DescendingOrder
+  override protected val defaultOrderingCondition: OrderingCondition =
+    OrderingCondition.DescendingOrder
 
-  override protected def parseField(unsafeField: String): Option[MasternodeField] = {
+  override protected def parseField(
+      unsafeField: String
+  ): Option[MasternodeField] = {
     MasternodeField.from(unsafeField)
   }
 }

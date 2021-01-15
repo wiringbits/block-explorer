@@ -32,7 +32,9 @@ class StatisticsPostgresDAO {
     result
   }
 
-  def getSummary(numberOfBlocks: Int)(implicit conn: Connection): BlockRewardsSummary = {
+  def getSummary(
+      numberOfBlocks: Int
+  )(implicit conn: Connection): BlockRewardsSummary = {
     SQL(
       """
         |SELECT
@@ -59,16 +61,14 @@ class StatisticsPostgresDAO {
         |) t
       """.stripMargin
     ).on(
-        'number_of_blocks -> numberOfBlocks
-      )
-      .as(parseSummary.single)
+      'number_of_blocks -> numberOfBlocks
+    ).as(parseSummary.single)
   }
 }
 
 object StatisticsPostgresDAO {
 
-  /**
-   * We need to exclude the burn address from the total supply.
-   */
+  /** We need to exclude the burn address from the total supply.
+    */
   val BurnAddress = "XmPe9BHRsmZeThtYF34YYjdnrjmcAUn8bC"
 }

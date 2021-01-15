@@ -16,7 +16,8 @@ class CurrencySynchronizerActor extends Actor {
   import context._
 
   def receive: Receive = {
-    val initialPrices = Currency.values.map(currency => currency -> BigDecimal(0)).toMap
+    val initialPrices =
+      Currency.values.map(currency => currency -> BigDecimal(0)).toMap
     val initialMarketInformation = MarketInformation(0, 0)
 
     behavior(MarketStatistics(initialPrices, initialMarketInformation))
@@ -24,10 +25,13 @@ class CurrencySynchronizerActor extends Actor {
 
   private def behavior(marketStatistics: MarketStatistics): Receive = {
     case CurrencySynchronizerActor.UpdatePrice(currency, price) =>
-      val updatedStatistics = marketStatistics.copy(prices = marketStatistics.prices + (currency -> price))
+      val updatedStatistics = marketStatistics.copy(prices =
+        marketStatistics.prices + (currency -> price)
+      )
       become(behavior(updatedStatistics))
     case UpdateMarketInformation(marketInformation) =>
-      val updatedStatistics = marketStatistics.copy(marketInformation = marketInformation)
+      val updatedStatistics =
+        marketStatistics.copy(marketInformation = marketInformation)
       become(behavior(updatedStatistics))
     case CurrencySynchronizerActor.GetMarketStatistics =>
       sender() ! marketStatistics
@@ -40,7 +44,7 @@ object CurrencySynchronizerActor {
   final case class GetMarketStatistics()
 }
 
-class CurrencySynchronizerTask @Inject()(
+class CurrencySynchronizerTask @Inject() (
     config: CurrencySynchronizerConfig,
     actorSystem: ActorSystem,
     currencyService: CurrencyService
@@ -52,38 +56,62 @@ class CurrencySynchronizerTask @Inject()(
   def start(): Unit = {
     logger.info("Starting currency synchronizer task")
 
-    val currencySynchronizerActor = actorSystem.actorOf(Props[CurrencySynchronizerActor], "currency_synchronizer")
+    val currencySynchronizerActor = actorSystem.actorOf(
+      Props[CurrencySynchronizerActor],
+      "currency_synchronizer"
+    )
     val highPriorityCurrencies = List(Currency.BTC, Currency.USD)
-    val lowPriorityCurrencies = Currency.values.filterNot(highPriorityCurrencies.contains)
+    val lowPriorityCurrencies =
+      Currency.values.filterNot(highPriorityCurrencies.contains)
 
-    actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.highPriorityInterval) { () =>
-      highPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
+    actorSystem.scheduler.scheduleAtFixedRate(
+      config.initialDelay,
+      config.highPriorityInterval
+    ) { () =>
+      highPriorityCurrencies.foreach(currency =>
+        syncCurrencyPrice(currency, currencySynchronizerActor)
+      )
 
       currencyService.getMarketInformation().onComplete {
         case Success(Good(marketInformation)) =>
           logger.info("Market information synced")
-          currencySynchronizerActor ! CurrencySynchronizerActor.UpdateMarketInformation(marketInformation)
+          currencySynchronizerActor ! CurrencySynchronizerActor
+            .UpdateMarketInformation(marketInformation)
         case Success(Bad(error)) =>
           logger.info(s"market information syncronization failed due to $error")
         case Failure(exception) =>
-          logger.info(s"market information syncronization failed due to ${exception.getLocalizedMessage}", exception)
+          logger.info(
+            s"market information syncronization failed due to ${exception.getLocalizedMessage}",
+            exception
+          )
       }
     }
 
-    actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.lowPriorityInterval) { () =>
-      lowPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
+    actorSystem.scheduler.scheduleAtFixedRate(
+      config.initialDelay,
+      config.lowPriorityInterval
+    ) { () =>
+      lowPriorityCurrencies.foreach(currency =>
+        syncCurrencyPrice(currency, currencySynchronizerActor)
+      )
     }
 
     ()
   }
 
-  private def syncCurrencyPrice(currency: Currency, currencySynchronizerActor: ActorRef): Unit = {
+  private def syncCurrencyPrice(
+      currency: Currency,
+      currencySynchronizerActor: ActorRef
+  ): Unit = {
     currencyService.getPrice(currency).onComplete {
       case Success(Good(price)) =>
         logger.info(s"${currency.entryName} price synced")
-        currencySynchronizerActor ! CurrencySynchronizerActor.UpdatePrice(currency, price)
+        currencySynchronizerActor ! CurrencySynchronizerActor
+          .UpdatePrice(currency, price)
       case Success(Bad(error)) =>
-        logger.info(s"${currency.entryName} price syncronization failed due to $error")
+        logger.info(
+          s"${currency.entryName} price syncronization failed due to $error"
+        )
       case Failure(exception) =>
         logger.info(
           s"${currency.entryName} price syncronization failed due to ${exception.getLocalizedMessage}",

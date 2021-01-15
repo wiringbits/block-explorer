@@ -12,7 +12,10 @@ trait StatisticsDataHandler[F[_]] {
 
   def getRewardsSummary(numberOfBlocks: Int): F[BlockRewardsSummary]
 
-  def getTPoSMerchantStakingAddresses(merchantAddress: Address): F[List[Address]]
+  def getTPoSMerchantStakingAddresses(
+      merchantAddress: Address
+  ): F[List[Address]]
 }
 
-trait StatisticsBlockingDataHandler extends StatisticsDataHandler[ApplicationResult]
+trait StatisticsBlockingDataHandler
+    extends StatisticsDataHandler[ApplicationResult]

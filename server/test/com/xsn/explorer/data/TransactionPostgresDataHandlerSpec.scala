@@ -18,17 +18,21 @@ import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.EitherValues._
 
-class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
+class TransactionPostgresDataHandlerSpec
+    extends PostgresDataHandlerSpec
+    with BeforeAndAfter {
 
   import DataGenerator._
 
-  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () =>
+    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
   lazy val blockDataHandler = createBlockDataHandler(database)
 
-  val defaultOrdering = FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
+  val defaultOrdering =
+    FieldOrdering(TransactionField.Time, OrderingCondition.DescendingOrder)
 
   val blockList = LedgerHelper.blockList.take(6)
 
@@ -54,10 +58,16 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       val expected = Transaction.Output(
         address = createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
-        txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"),
+        txid = createTransactionId(
+          "67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"
+        ),
         index = 0,
         value = BigDecimal(76500000),
-        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get
+        script = HexString
+          .from(
+            "2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac"
+          )
+          .get
       )
 
       val result = dataHandler.getUnspentOutputs(expected.address.get).get
@@ -67,16 +77,24 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
   }
 
   "getOutput" should {
-    val txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8")
+    val txid = createTransactionId(
+      "67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"
+    )
 
     "return the output" in {
       val index = 0
       val expected = Transaction.Output(
         address = createAddress("XdJnCKYNwzCz8ATv8Eu75gonaHyfr9qXg9"),
-        txid = createTransactionId("67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"),
+        txid = createTransactionId(
+          "67aa0bd8b9297ca6ee25a1e5c2e3a8dbbcc1e20eab76b6d1bdf9d69f8a5356b8"
+        ),
         index = 0,
         value = BigDecimal(76500000.000000000000000),
-        script = HexString.from("2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac").get
+        script = HexString
+          .from(
+            "2103e8c52f2c5155771492907095753a43ce776e1fa7c5e769a67a9f3db4467ec029ac"
+          )
+          .get
       )
 
       clearDatabase()
@@ -91,12 +109,18 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val index = 10
 
       val result = dataHandler.getOutput(txid, index)
-      result must be(Bad(TransactionError.OutputNotFound(txid, index)).accumulating)
+      result must be(
+        Bad(TransactionError.OutputNotFound(txid, index)).accumulating
+      )
     }
 
     "not corrupt the output" in {
-      val txid = createTransactionId("9969603dca74d14d29d1d5f56b94c7872551607f8c2d6837ab9715c60721b50e")
-      val rpcTx = TransactionLoader.getWithValues(txid.string).copy(blockhash = block.hash)
+      val txid = createTransactionId(
+        "9969603dca74d14d29d1d5f56b94c7872551607f8c2d6837ab9715c60721b50e"
+      )
+      val rpcTx = TransactionLoader
+        .getWithValues(txid.string)
+        .copy(blockhash = block.hash)
       val tx = Transaction.fromRPC(rpcTx)._1
       val expected = Transaction.Output(
         txid = txid,
@@ -104,7 +128,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         value = 0.01,
         addresses = List.empty,
         script = HexString
-          .from("0804678afd04678afd75a820894eeb82f9a851f5d1cb1be3249f58bc8d259963832c5e7474a76f7a859ee95c87")
+          .from(
+            "0804678afd04678afd75a820894eeb82f9a851f5d1cb1be3249f58bc8d259963832c5e7474a76f7a859ee95c87"
+          )
           .get
       )
 
@@ -123,16 +149,34 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val outputs = List(
-      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
-      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
+      Transaction.Output(
+        randomTransactionId,
+        0,
+        BigDecimal(50),
+        randomAddress,
+        randomHexString()
+      ),
+      Transaction.Output(
+        randomTransactionId,
+        1,
+        BigDecimal(250),
+        randomAddress,
+        HexString.from("00").get
+      )
     )
 
-    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-      case (txid, time) =>
-        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
-    }
+    val transactions =
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+        case (txid, time) =>
+          Transaction.HasIO(
+            Transaction(txid, blockhash, time, Size(1000)),
+            inputs,
+            outputs.map(_.copy(txid = txid))
+          )
+      }
 
-    val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
+    val block = randomBlock(blockhash = blockhash)
+      .copy(transactions = transactions.map(_.id))
 
     def prepare() = {
       createBlock(block, transactions)
@@ -142,25 +186,29 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val sorted = condition match {
         case OrderingCondition.AscendingOrder =>
           transactions
-            .sortWith {
-              case (a, b) =>
-                if (a.time < b.time) true
-                else if (a.time > b.time) false
-                else a.id.string.compareTo(b.id.string) < 0
+            .sortWith { case (a, b) =>
+              if (a.time < b.time) true
+              else if (a.time > b.time) false
+              else a.id.string.compareTo(b.id.string) < 0
             }
 
         case OrderingCondition.DescendingOrder =>
           transactions
-            .sortWith {
-              case (a, b) =>
-                if (a.time > b.time) true
-                else if (a.time < b.time) false
-                else a.id.string.compareTo(b.id.string) < 0
+            .sortWith { case (a, b) =>
+              if (a.time > b.time) true
+              else if (a.time < b.time) false
+              else a.id.string.compareTo(b.id.string) < 0
             }
       }
 
-      def matchOnlyData(expected: Transaction.HasIO, actual: Transaction.HasIO) = {
-        actual.copy(inputs = List.empty, outputs = List.empty) mustEqual expected.copy(
+      def matchOnlyData(
+          expected: Transaction.HasIO,
+          actual: Transaction.HasIO
+      ) = {
+        actual.copy(
+          inputs = List.empty,
+          outputs = List.empty
+        ) mustEqual expected.copy(
           inputs = List.empty,
           outputs = List.empty
         )
@@ -179,7 +227,9 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
         val lastSeenTxid = sorted.head.id
         val expected = sorted(1)
-        val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
+        val result = dataHandler
+          .getBy(address, Limit(1), Option(lastSeenTxid), condition)
+          .get
         matchOnlyData(expected, result.head)
       }
 
@@ -188,13 +238,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
         val lastSeenTxid = sorted(2).id
         val expected = sorted(3)
-        val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
+        val result = dataHandler
+          .getBy(address, Limit(1), Option(lastSeenTxid), condition)
+          .get
         matchOnlyData(expected, result.head)
       }
 
       s"[$tag] return no elements on unknown lastSeenTransaction" in {
-        val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
-        val result = dataHandler.getBy(address, Limit(1), Option(lastSeenTxid), condition).get
+        val lastSeenTxid = createTransactionId(
+          "00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8"
+        )
+        val result = dataHandler
+          .getBy(address, Limit(1), Option(lastSeenTxid), condition)
+          .get
         result must be(empty)
       }
     }
@@ -212,16 +268,34 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val outputs = List(
-      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
-      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
+      Transaction.Output(
+        randomTransactionId,
+        0,
+        BigDecimal(50),
+        randomAddress,
+        randomHexString()
+      ),
+      Transaction.Output(
+        randomTransactionId,
+        1,
+        BigDecimal(250),
+        randomAddress,
+        HexString.from("00").get
+      )
     )
 
-    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-      case (txid, time) =>
-        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
-    }
+    val transactions =
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+        case (txid, time) =>
+          Transaction.HasIO(
+            Transaction(txid, blockhash, time, Size(1000)),
+            inputs,
+            outputs.map(_.copy(txid = txid))
+          )
+      }
 
-    val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
+    val block = randomBlock(blockhash = blockhash)
+      .copy(transactions = transactions.map(_.id))
 
     def prepare() = {
       createBlock(block, transactions)
@@ -231,29 +305,34 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       val sorted = condition match {
         case OrderingCondition.AscendingOrder =>
           transactions
-            .sortWith {
-              case (a, b) =>
-                if (a.time < b.time) true
-                else if (a.time > b.time) false
-                else a.id.string.compareTo(b.id.string) < 0
+            .sortWith { case (a, b) =>
+              if (a.time < b.time) true
+              else if (a.time > b.time) false
+              else a.id.string.compareTo(b.id.string) < 0
             }
 
         case OrderingCondition.DescendingOrder =>
           transactions
-            .sortWith {
-              case (a, b) =>
-                if (a.time > b.time) true
-                else if (a.time < b.time) false
-                else a.id.string.compareTo(b.id.string) < 0
+            .sortWith { case (a, b) =>
+              if (a.time > b.time) true
+              else if (a.time < b.time) false
+              else a.id.string.compareTo(b.id.string) < 0
             }
       }
 
       s"[$tag] return the first elements" in {
         prepare()
         val expected = TransactionInfo(
-          sorted.head.id, sorted.head.blockhash, sorted.head.time, sorted.head.size, BigDecimal(300), BigDecimal(300), Height(0)
+          sorted.head.id,
+          sorted.head.blockhash,
+          sorted.head.time,
+          sorted.head.size,
+          BigDecimal(300),
+          BigDecimal(300),
+          Height(0)
         )
-        val result = dataHandler.getByAddress(address, Limit(1), None, condition).get
+        val result =
+          dataHandler.getByAddress(address, Limit(1), None, condition).get
 
         result.head.id mustEqual expected.id
         result.head.blockhash mustEqual expected.blockhash
@@ -264,18 +343,30 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
         val lastSeenTxid = sorted.head.id
         val expected = TransactionInfo(
-          sorted(1).id, sorted(1).blockhash, sorted(1).time, sorted(1).size, BigDecimal(0), BigDecimal(0), Height(0)
+          sorted(1).id,
+          sorted(1).blockhash,
+          sorted(1).time,
+          sorted(1).size,
+          BigDecimal(0),
+          BigDecimal(0),
+          Height(0)
         )
 
-        val result = dataHandler.getByAddress(address, Limit(1), Option(lastSeenTxid), condition).get
-                
+        val result = dataHandler
+          .getByAddress(address, Limit(1), Option(lastSeenTxid), condition)
+          .get
+
         result.head.id mustEqual expected.id
         result.head.blockhash mustEqual expected.blockhash
       }
 
       s"[$tag] return no elements on unknown lastSeenTransaction" in {
-        val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
-        val result = dataHandler.getByAddress(address, Limit(1), Option(lastSeenTxid), condition).get
+        val lastSeenTxid = createTransactionId(
+          "00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8"
+        )
+        val result = dataHandler
+          .getByAddress(address, Limit(1), Option(lastSeenTxid), condition)
+          .get
         result must be(empty)
       }
     }
@@ -293,35 +384,59 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
     )
 
     val outputs = List(
-      Transaction.Output(randomTransactionId, 0, BigDecimal(50), randomAddress, randomHexString()),
-      Transaction.Output(randomTransactionId, 1, BigDecimal(250), randomAddress, HexString.from("00").get)
+      Transaction.Output(
+        randomTransactionId,
+        0,
+        BigDecimal(50),
+        randomAddress,
+        randomHexString()
+      ),
+      Transaction.Output(
+        randomTransactionId,
+        1,
+        BigDecimal(250),
+        randomAddress,
+        HexString.from("00").get
+      )
     )
 
-    val transactions = List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-      case (txid, time) =>
-        Transaction.HasIO(Transaction(txid, blockhash, time, Size(1000)), inputs, outputs.map(_.copy(txid = txid)))
-    }
+    val transactions =
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
+        case (txid, time) =>
+          Transaction.HasIO(
+            Transaction(txid, blockhash, time, Size(1000)),
+            inputs,
+            outputs.map(_.copy(txid = txid))
+          )
+      }
 
-    val block = randomBlock(blockhash = blockhash).copy(transactions = transactions.map(_.id))
+    val block = randomBlock(blockhash = blockhash)
+      .copy(transactions = transactions.map(_.id))
 
     def prepare() = {
       createBlock(block, transactions)
     }
 
     val sorted = transactions
-      .sortWith {
-        case (a, b) =>
-          if (a.time > b.time) true
-          else if (a.time < b.time) false
-          else a.id.string.compareTo(b.id.string) < 0
+      .sortWith { case (a, b) =>
+        if (a.time > b.time) true
+        else if (a.time < b.time) false
+        else a.id.string.compareTo(b.id.string) < 0
       }
 
     "return the last element without last seen tx" in {
       prepare()
       val expected = TransactionInfo(
-        dummyTransaction.id, dummyTransaction.blockhash, dummyTransaction.time, dummyTransaction.size, BigDecimal(300), BigDecimal(300), Height(0)
+        dummyTransaction.id,
+        dummyTransaction.blockhash,
+        dummyTransaction.time,
+        dummyTransaction.size,
+        BigDecimal(300),
+        BigDecimal(300),
+        Height(0)
       )
-      val result = dataHandler.get(Limit(1), None, OrderingCondition.DescendingOrder).get
+      val result =
+        dataHandler.get(Limit(1), None, OrderingCondition.DescendingOrder).get
 
       result.head.id mustEqual expected.id
       result.head.blockhash mustEqual expected.blockhash
@@ -331,21 +446,33 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       prepare()
 
       val lastSeenTxid = dummyTransaction.id
-      
+
       val txWithIO = sorted.head
       val expected = TransactionInfo(
-        txWithIO.id, txWithIO.blockhash, txWithIO.time, txWithIO.size, BigDecimal(0), BigDecimal(0), Height(0)
+        txWithIO.id,
+        txWithIO.blockhash,
+        txWithIO.time,
+        txWithIO.size,
+        BigDecimal(0),
+        BigDecimal(0),
+        Height(0)
       )
 
-      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder).get
+      val result = dataHandler
+        .get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder)
+        .get
 
       result.head.id mustEqual expected.id
       result.head.blockhash mustEqual expected.blockhash
     }
 
     "return no elements on unknown lastSeenTransaction" in {
-      val lastSeenTxid = createTransactionId("00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8")
-      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder).get
+      val lastSeenTxid = createTransactionId(
+        "00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8"
+      )
+      val result = dataHandler
+        .get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder)
+        .get
 
       result must be(empty)
     }
@@ -362,11 +489,22 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       val newTxid = randomTransactionId
       val outputs = List(
-        Transaction.Output(newTxid, 0, BigDecimal(50), randomAddress, randomHexString()),
-        Transaction.Output(newTxid, 1, BigDecimal(250), randomAddress, randomHexString())
+        Transaction
+          .Output(newTxid, 0, BigDecimal(50), randomAddress, randomHexString()),
+        Transaction.Output(
+          newTxid,
+          1,
+          BigDecimal(250),
+          randomAddress,
+          randomHexString()
+        )
       )
 
-      val transaction = Transaction.HasIO(Transaction(newTxid, blockhash, 321, Size(1000)), inputs, outputs)
+      val transaction = Transaction.HasIO(
+        Transaction(newTxid, blockhash, 321, Size(1000)),
+        inputs,
+        outputs
+      )
 
       val newTxid2 = randomTransactionId
       val newAddress = randomAddress
@@ -393,7 +531,11 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       val transactions = List(transaction, transaction2)
 
-      val block = this.block.copy(hash = blockhash, height = Height(10), transactions = transactions.map(_.id))
+      val block = this.block.copy(
+        hash = blockhash,
+        height = Height(10),
+        transactions = transactions.map(_.id)
+      )
 
       createBlock(block, transactions)
 
@@ -442,15 +584,28 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
     val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
     val result =
-      ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, Some(reward))
+      ledgerDataHandler.push(
+        block.withTransactions(transactions),
+        List.empty,
+        emptyFilterFactory,
+        Some(reward)
+      )
 
     result.isGood mustEqual true
   }
 
-  private def createBlock(block: Block.Canonical, transactions: List[Transaction.HasIO]) = {
+  private def createBlock(
+      block: Block.Canonical,
+      transactions: List[Transaction.HasIO]
+  ) = {
     val reward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
     val result =
-      ledgerDataHandler.push(block.withTransactions(transactions), List.empty, emptyFilterFactory, Some(reward))
+      ledgerDataHandler.push(
+        block.withTransactions(transactions),
+        List.empty,
+        emptyFilterFactory,
+        Some(reward)
+      )
 
     result.isGood mustEqual true
   }

@@ -66,7 +66,10 @@ trait DataGenerator {
     )
   }
 
-  def randomOutput(txid: TransactionId = randomTransactionId, index: Int = nextInt(100)): Transaction.Output = {
+  def randomOutput(
+      txid: TransactionId = randomTransactionId,
+      index: Int = nextInt(100)
+  ): Transaction.Output = {
     Transaction.Output(
       txid = txid,
       index = index,
@@ -106,16 +109,16 @@ trait DataGenerator {
     )
   }
 
-  def randomInputs(utxos: List[Transaction.Output]): List[Transaction.Input] = utxos match {
-    case Nil => List.empty
-    case _ =>
-      randomItems(utxos, scala.util.Random.nextInt(utxos.size))
-        .map(randomInput)
-  }
+  def randomInputs(utxos: List[Transaction.Output]): List[Transaction.Input] =
+    utxos match {
+      case Nil => List.empty
+      case _ =>
+        randomItems(utxos, scala.util.Random.nextInt(utxos.size))
+          .map(randomInput)
+    }
 
-  /**
-   * Generate a random transaction spending the given utxos
-   */
+  /** Generate a random transaction spending the given utxos
+    */
   def randomTransaction(
       blockhash: Blockhash,
       id: TransactionId = randomTransactionId,
@@ -130,16 +133,17 @@ trait DataGenerator {
     )
   }
 
-  def createInputs(outputs: List[Transaction.Output]): List[Transaction.Input] = {
-    outputs.zipWithIndex.map {
-      case (output, index) =>
-        Transaction.Input(
-          fromTxid = output.txid,
-          fromOutputIndex = output.index,
-          index = index,
-          value = output.value,
-          addresses = output.addresses
-        )
+  def createInputs(
+      outputs: List[Transaction.Output]
+  ): List[Transaction.Input] = {
+    outputs.zipWithIndex.map { case (output, index) =>
+      Transaction.Input(
+        fromTxid = output.txid,
+        fromOutputIndex = output.index,
+        index = index,
+        value = output.value,
+        addresses = output.addresses
+      )
     }
   }
 
@@ -148,9 +152,15 @@ trait DataGenerator {
       index: Int = scala.util.Random.nextInt(100)
   ): TPoSContract = {
     val state = randomItem(TPoSContract.State.values.toList)
-    val commission = TPoSContract.Commission.from(scala.util.Random.nextInt(50) + 1).get
+    val commission =
+      TPoSContract.Commission.from(scala.util.Random.nextInt(50) + 1).get
     val details = TPoSContract.Details(randomAddress, randomAddress, commission)
-    TPoSContract(TPoSContract.Id(txid, index), details = details, time = System.currentTimeMillis(), state)
+    TPoSContract(
+      TPoSContract.Id(txid, index),
+      details = details,
+      time = System.currentTimeMillis(),
+      state
+    )
   }
 }
 

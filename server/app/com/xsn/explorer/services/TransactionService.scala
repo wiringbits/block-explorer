@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
-class TransactionService @Inject()(
+class TransactionService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
     orderingConditionParser: OrderingConditionParser,
     addressValidator: AddressValidator,
@@ -34,11 +34,20 @@ class TransactionService @Inject()(
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
 
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
-      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery)
+        .toFutureOr
+      orderingCondition <- orderingConditionParser
+        .parseReuslt(orderingConditionString)
+        .toFutureOr
 
-      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
-      transactions <- transactionFutureDataHandler.getBy(address, limit, lastSeenTxid, orderingCondition).toFutureOr
+      lastSeenTxid <- validate(
+        lastSeenTxidString,
+        transactionIdValidator.validate
+      ).toFutureOr
+      transactions <- transactionFutureDataHandler
+        .getBy(address, limit, lastSeenTxid, orderingCondition)
+        .toFutureOr
     } yield {
       val lightTxs = transactions.map(toLightWalletTransaction)
 
@@ -58,11 +67,20 @@ class TransactionService @Inject()(
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
 
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
-      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery)
+        .toFutureOr
+      orderingCondition <- orderingConditionParser
+        .parseReuslt(orderingConditionString)
+        .toFutureOr
 
-      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
-      transactions <- transactionFutureDataHandler.getByAddress(address, limit, lastSeenTxid, orderingCondition).toFutureOr
+      lastSeenTxid <- validate(
+        lastSeenTxidString,
+        transactionIdValidator.validate
+      ).toFutureOr
+      transactions <- transactionFutureDataHandler
+        .getByAddress(address, limit, lastSeenTxid, orderingCondition)
+        .toFutureOr
     } yield WrappedResult(transactions)
 
     result.toFuture
@@ -74,12 +92,21 @@ class TransactionService @Inject()(
       orderingConditionString: String
   ): FutureApplicationResult[WrappedResult[List[TransactionInfo]]] = {
     val result = for {
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery)
+        .toFutureOr
 
-      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
-      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+      lastSeenTxid <- validate(
+        lastSeenTxidString,
+        transactionIdValidator.validate
+      ).toFutureOr
+      orderingCondition <- orderingConditionParser
+        .parseReuslt(orderingConditionString)
+        .toFutureOr
 
-      r <- transactionFutureDataHandler.get(limit, lastSeenTxid, orderingCondition).toFutureOr
+      r <- transactionFutureDataHandler
+        .get(limit, lastSeenTxid, orderingCondition)
+        .toFutureOr
     } yield WrappedResult(r)
 
     result.toFuture
@@ -92,10 +119,17 @@ class TransactionService @Inject()(
   ): FutureApplicationResult[WrappedResult[List[TransactionWithValues]]] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery)
+        .toFutureOr
 
-      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
-      r <- transactionFutureDataHandler.getByBlockhash(blockhash, limit, lastSeenTxid).toFutureOr
+      lastSeenTxid <- validate(
+        lastSeenTxidString,
+        transactionIdValidator.validate
+      ).toFutureOr
+      r <- transactionFutureDataHandler
+        .getByBlockhash(blockhash, limit, lastSeenTxid)
+        .toFutureOr
     } yield WrappedResult(r)
 
     result.toFuture
@@ -109,10 +143,17 @@ class TransactionService @Inject()(
 
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxTransactionsPerQuery)
+        .toFutureOr
 
-      lastSeenTxid <- validate(lastSeenTxidString, transactionIdValidator.validate).toFutureOr
-      transactions <- transactionFutureDataHandler.getTransactionsWithIOBy(blockhash, limit, lastSeenTxid).toFutureOr
+      lastSeenTxid <- validate(
+        lastSeenTxidString,
+        transactionIdValidator.validate
+      ).toFutureOr
+      transactions <- transactionFutureDataHandler
+        .getTransactionsWithIOBy(blockhash, limit, lastSeenTxid)
+        .toFutureOr
     } yield {
       val lightTxs = transactions.map(toLightWalletTransaction)
 

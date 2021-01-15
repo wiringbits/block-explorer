@@ -3,7 +3,11 @@ package com.xsn.explorer.services.synchronizer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.config.{LedgerSynchronizerConfig, NotificationsConfig}
-import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
+import com.xsn.explorer.data.async.{
+  BlockFutureDataHandler,
+  LedgerFutureDataHandler,
+  TransactionFutureDataHandler
+}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.DataHandlerObjects._
@@ -16,7 +20,12 @@ import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.services.validators.BlockhashValidator
-import com.xsn.explorer.services.{BlockService, EmailService, TransactionCollectorService, XSNService}
+import com.xsn.explorer.services.{
+  BlockService,
+  EmailService,
+  TransactionCollectorService,
+  XSNService
+}
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -24,7 +33,10 @@ import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter with ScalaFutures {
+class LedgerSynchronizerSpec
+    extends PostgresDataHandlerSpec
+    with BeforeAndAfter
+    with ScalaFutures {
 
   lazy val dataHandler = createLedgerDataHandler(database)
   lazy val transactionDataHandler = createTransactionDataHandler(database)
@@ -38,10 +50,16 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   }
 
   testWith("legacy")(legacyConstructor)
-  testWith("new-parallel-synchronizer")(newConstructor(useParallelSynchronizer = true))
-  testWith("new-no-parallel-synchronizer")(newConstructor(useParallelSynchronizer = false))
+  testWith("new-parallel-synchronizer")(
+    newConstructor(useParallelSynchronizer = true)
+  )
+  testWith("new-no-parallel-synchronizer")(
+    newConstructor(useParallelSynchronizer = false)
+  )
 
-  private def testWith(tag: String)(implicit constructor: XSNService => LedgerSynchronizer): Unit = {
+  private def testWith(
+      tag: String
+  )(implicit constructor: XSNService => LedgerSynchronizer): Unit = {
     s"synchronize - $tag" should {
       "add the genensis block to the empty ledger" in {
         val synchronizer = ledgerSynchronizerService(genesis)
@@ -108,12 +126,21 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
         val block2 = fullBlockList(2)
         val block3 = fullBlockList(3)
         val newBlock2 =
-          fullBlockList(4).copy(previousBlockhash = Some(block1.hash), height = Height(block1.height.int + 1))
+          fullBlockList(4).copy(
+            previousBlockhash = Some(block1.hash),
+            height = Height(block1.height.int + 1)
+          )
         val newBlock3 =
-          fullBlockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(newBlock2.height.int + 1))
+          fullBlockList(5).copy(
+            previousBlockhash = Some(newBlock2.hash),
+            height = Height(newBlock2.height.int + 1)
+          )
 
         val initialBlocks = List(genesis, block1, block2, block3)
-        createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
+        createBlocks(
+          ledgerSynchronizerService(initialBlocks: _*),
+          initialBlocks: _*
+        )
 
         val finalBlocks = List(
           genesis,
@@ -133,12 +160,24 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
         val block1 = fullBlockList(1)
         val block2 = fullBlockList(2)
         val block3 = fullBlockList(3)
-        val newBlock2 = fullBlockList(4).copy(previousBlockhash = block2.previousBlockhash, height = block2.height)
-        val newBlock3 = fullBlockList(5).copy(previousBlockhash = Some(newBlock2.hash), height = Height(3))
-        val newBlock4 = fullBlockList(6).copy(previousBlockhash = Some(newBlock3.hash), height = Height(4))
+        val newBlock2 = fullBlockList(4).copy(
+          previousBlockhash = block2.previousBlockhash,
+          height = block2.height
+        )
+        val newBlock3 = fullBlockList(5).copy(
+          previousBlockhash = Some(newBlock2.hash),
+          height = Height(3)
+        )
+        val newBlock4 = fullBlockList(6).copy(
+          previousBlockhash = Some(newBlock3.hash),
+          height = Height(4)
+        )
 
         val initialBlocks = List(genesis, block1, block2, block3)
-        createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
+        createBlocks(
+          ledgerSynchronizerService(initialBlocks: _*),
+          initialBlocks: _*
+        )
 
         val finalBlocks = List(
           genesis,
@@ -157,10 +196,16 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
 
       "handle reorganization, ledger has 6 blocks, a rechain occurs from block 2 while adding new block 2" in {
         val initialBlocks = fullBlockList.take(6)
-        createBlocks(ledgerSynchronizerService(initialBlocks: _*), initialBlocks: _*)
+        createBlocks(
+          ledgerSynchronizerService(initialBlocks: _*),
+          initialBlocks: _*
+        )
 
         val block1 = fullBlockList(1)
-        val newBlock2 = fullBlockList.drop(6).head.copy(previousBlockhash = Some(block1.hash), height = Height(2))
+        val newBlock2 = fullBlockList
+          .drop(6)
+          .head
+          .copy(previousBlockhash = Some(block1.hash), height = Height(2))
         val finalBlocks = List(
           genesis,
           block1.copy(nextBlockhash = Some(newBlock2.hash)),
@@ -193,11 +238,16 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
 
   private def countBlocks() = {
     database.withConnection { implicit conn =>
-      _root_.anorm.SQL("""SELECT COUNT(*) FROM blocks""").as(_root_.anorm.SqlParser.scalar[Int].single)
+      _root_.anorm
+        .SQL("""SELECT COUNT(*) FROM blocks""")
+        .as(_root_.anorm.SqlParser.scalar[Int].single)
     }
   }
 
-  private def createBlocks(synchronizer: LedgerSynchronizer, blocks: Block[_]*): Unit = {
+  private def createBlocks(
+      synchronizer: LedgerSynchronizer,
+      blocks: Block[_]*
+  ): Unit = {
     blocks
       .foreach { block =>
         whenReady(synchronizer.synchronize(block.hash)) { result =>
@@ -208,7 +258,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
 
   private def ledgerSynchronizerService(
       blocks: Block.HasTransactions[TransactionVIN]*
-  )(implicit constructor: XSNService => LedgerSynchronizer): LedgerSynchronizer = {
+  )(implicit
+      constructor: XSNService => LedgerSynchronizer
+  ): LedgerSynchronizer = {
 
     import io.scalaland.chimney.dsl._
 
@@ -235,7 +287,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
           }
       }
 
-      override def getBlock(blockhash: Blockhash): FutureApplicationResult[Block.Canonical] = {
+      override def getBlock(
+          blockhash: Blockhash
+      ): FutureApplicationResult[Block.Canonical] = {
         canonicalBlocks
           .find(_.hash == blockhash)
           .map { block =>
@@ -246,12 +300,15 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
           }
       }
 
-      override def getLatestBlock(): FutureApplicationResult[Block.Canonical] = {
+      override def getLatestBlock()
+          : FutureApplicationResult[Block.Canonical] = {
         val block = cleanGenesisBlock(canonicalBlocks.maxBy(_.height.int))
         Future.successful(Good(block))
       }
 
-      override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+      override def getBlockhash(
+          height: Height
+      ): FutureApplicationResult[Blockhash] = {
         val maybe = blocks.find(_.height == height).map(_.hash)
         val result = Or.from(maybe, One(BlockNotFoundError))
         Future.successful(result)
@@ -261,7 +318,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     constructor(xsnService)
   }
 
-  private def newConstructor(useParallelSynchronizer: Boolean)(xsnService: XSNService): LedgerSynchronizer = {
+  private def newConstructor(
+      useParallelSynchronizer: Boolean
+  )(xsnService: XSNService): LedgerSynchronizer = {
     val synchronizerConfig = new LedgerSynchronizerConfig {
       override def enabled: Boolean = true
 
@@ -275,7 +334,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     }
     val dummyRetryableDataHandler = new DummyRetryableDataHandler
     val blockFutureDataHandler =
-      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
+      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(
+        Executors.databaseEC
+      )
     val blockService = new BlockService(
       xsnService,
       blockFutureDataHandler,
@@ -287,7 +348,10 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
-      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
+      new TransactionFutureDataHandler(
+        transactionDataHandler,
+        dummyRetryableDataHandler
+      )(Executors.databaseEC)
     )
 
     val syncOps = new LedgerSynchronizationOps(
@@ -297,15 +361,22 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
       blockService,
       transactionCollectorService
     )
-    val syncStatusService = new LedgerSynchronizationStatusService(syncOps, xsnService, blockFutureDataHandler)
-    val blockChunkFutureRepository = new BlockChunkRepository.FutureImpl(blockChunkRepository)
+    val syncStatusService = new LedgerSynchronizationStatusService(
+      syncOps,
+      xsnService,
+      blockFutureDataHandler
+    )
+    val blockChunkFutureRepository =
+      new BlockChunkRepository.FutureImpl(blockChunkRepository)
     val addOps = new BlockParallelChunkAddOps(blockChunkFutureRepository)
     val blockParallelChunkSynchronizer =
       new BlockParallelChunkSynchronizer(blockChunkFutureRepository, addOps)
     new LedgerSynchronizerService(
       synchronizerConfig,
       xsnService,
-      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(Executors.databaseEC),
+      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(
+        Executors.databaseEC
+      ),
       syncStatusService,
       syncOps,
       blockChunkFutureRepository,
@@ -318,7 +389,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
   private def legacyConstructor(xsnService: XSNService): LedgerSynchronizer = {
     val dummyRetryableDataHandler = new DummyRetryableDataHandler
     val blockFutureDataHandler =
-      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
+      new BlockFutureDataHandler(blockDataHandler, dummyRetryableDataHandler)(
+        Executors.databaseEC
+      )
     val blockService = new BlockService(
       xsnService,
       blockFutureDataHandler,
@@ -330,7 +403,10 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     )
     val transactionCollectorService = new TransactionCollectorService(
       xsnService,
-      new TransactionFutureDataHandler(transactionDataHandler, dummyRetryableDataHandler)(Executors.databaseEC)
+      new TransactionFutureDataHandler(
+        transactionDataHandler,
+        dummyRetryableDataHandler
+      )(Executors.databaseEC)
     )
     val syncOps = new LedgerSynchronizationOps(
       Config.explorerConfig,
@@ -341,7 +417,9 @@ class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter
     )
     new LegacyLedgerSynchronizerService(
       xsnService,
-      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(Executors.databaseEC),
+      new LedgerFutureDataHandler(dataHandler, dummyRetryableDataHandler)(
+        Executors.databaseEC
+      ),
       blockFutureDataHandler,
       syncOps
     )

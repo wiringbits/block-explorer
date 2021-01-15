@@ -9,7 +9,9 @@ import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.Rew
 
 class BlockRewardPostgresDAO {
 
-  def upsert(blockhash: Blockhash, reward: Reward)(implicit conn: Connection): Unit = {
+  def upsert(blockhash: Blockhash, reward: Reward)(implicit
+      conn: Connection
+  ): Unit = {
     val _ = SQL(
       """
         |INSERT INTO block_rewards(blockhash, value, address, type, staked_amount, staked_time)
@@ -23,17 +25,18 @@ class BlockRewardPostgresDAO {
         |    staked_time = EXCLUDED.staked_time
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray,
-        'value -> reward.blockReward.value,
-        'address -> reward.blockReward.address.string,
-        'type -> reward.rewardType.entryName,
-        'staked_amount -> reward.stake.map(_.stakedAmount),
-        'staked_time -> reward.stake.map(_.stakedTime)
-      )
-      .execute()
+      'blockhash -> blockhash.toBytesBE.toArray,
+      'value -> reward.blockReward.value,
+      'address -> reward.blockReward.address.string,
+      'type -> reward.rewardType.entryName,
+      'staked_amount -> reward.stake.map(_.stakedAmount),
+      'staked_time -> reward.stake.map(_.stakedTime)
+    ).execute()
   }
 
-  def deleteBy(blockhash: Blockhash)(implicit conn: Connection): List[Reward] = {
+  def deleteBy(
+      blockhash: Blockhash
+  )(implicit conn: Connection): List[Reward] = {
     SQL(
       """
         |DELETE FROM block_rewards
@@ -41,9 +44,8 @@ class BlockRewardPostgresDAO {
         |RETURNING address, value, type, staked_amount, staked_time
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray
-      )
-      .as(parseBlockReward.*)
+      'blockhash -> blockhash.toBytesBE.toArray
+    ).as(parseBlockReward.*)
   }
 
   def getBy(blockhash: Blockhash)(implicit conn: Connection): List[Reward] = {
@@ -55,8 +57,7 @@ class BlockRewardPostgresDAO {
         |ORDER BY type
     """.stripMargin
     ).on(
-        "blockhash" -> blockhash.toBytesBE.toArray
-      )
-      .as(parseBlockReward.*)
+      "blockhash" -> blockhash.toBytesBE.toArray
+    ).as(parseBlockReward.*)
   }
 }

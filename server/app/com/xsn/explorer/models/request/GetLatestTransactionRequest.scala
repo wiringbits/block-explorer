@@ -9,5 +9,6 @@ case class GetLatestTransactionRequest(addresses: Every[Address])
 
 object GetLatestTransactionRequest {
 
-  implicit val reads: Reads[GetLatestTransactionRequest] = Json.reads[GetLatestTransactionRequest]
+  implicit val reads: Reads[GetLatestTransactionRequest] =
+    Json.reads[GetLatestTransactionRequest]
 }

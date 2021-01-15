@@ -12,7 +12,7 @@ class UnsignedByte(val byte: Byte) extends AnyVal {
     missing + string
   }
 
-  def toInt: Int = byte.toInt & 0xFF
+  def toInt: Int = byte.toInt & 0xff
 
   def bits: List[Bit] = {
     toFixedBinaryString
@@ -26,9 +26,8 @@ object UnsignedByte {
   def parse(bits: List[Bit]): UnsignedByte = {
     require(bits.size <= 8)
 
-    val int = bits.foldLeft(0) {
-      case (acc, cur) =>
-        (acc * 2) + cur.toInt
+    val int = bits.foldLeft(0) { case (acc, cur) =>
+      (acc * 2) + cur.toInt
     }
 
     new UnsignedByte(int.asInstanceOf[Byte])

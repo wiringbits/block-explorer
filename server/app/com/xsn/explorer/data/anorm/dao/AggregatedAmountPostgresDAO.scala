@@ -6,7 +6,9 @@ import anorm._
 
 class AggregatedAmountPostgresDAO {
 
-  def updateAvailableCoins(delta: BigDecimal)(implicit conn: Connection): Unit = {
+  def updateAvailableCoins(
+      delta: BigDecimal
+  )(implicit conn: Connection): Unit = {
     val affectedRows = SQL(
       """
         |INSERT INTO aggregated_amounts (name, value)
@@ -15,9 +17,8 @@ class AggregatedAmountPostgresDAO {
         |UPDATE SET value = aggregated_amounts.value + EXCLUDED.value
       """.stripMargin
     ).on(
-        'delta -> delta
-      )
-      .executeUpdate()
+      'delta -> delta
+    ).executeUpdate()
 
     require(affectedRows == 1)
   }

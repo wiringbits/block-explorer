@@ -4,12 +4,12 @@ import com.xsn.explorer.models.values._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-/**
- * Represents a block coming from the RPC server.
- */
+/** Represents a block coming from the RPC server.
+  */
 sealed trait Block[Tx] {
   def hash: Blockhash
-  def previousBlockhash: Option[Blockhash] // first block doesn't have a previous block
+  def previousBlockhash
+      : Option[Blockhash] // first block doesn't have a previous block
   def nextBlockhash: Option[Blockhash] // last block doesn't have a next block
   def merkleRoot: Blockhash
   def transactions: List[Tx]
@@ -126,47 +126,50 @@ object Block {
 
   implicit val canonicalWrites: Writes[Canonical] = Json.writes[Canonical]
 
-  implicit val hasTransactionsReads: Reads[HasTransactions[TransactionVIN]] = (json: JsValue) => {
-    def readTransactions(implicit reads: Reads[Transaction[TransactionVIN]]) = {
-      (json \ "tx").validate[List[Transaction[TransactionVIN]]]
+  implicit val hasTransactionsReads: Reads[HasTransactions[TransactionVIN]] =
+    (json: JsValue) => {
+      def readTransactions(implicit
+          reads: Reads[Transaction[TransactionVIN]]
+      ) = {
+        (json \ "tx").validate[List[Transaction[TransactionVIN]]]
+      }
+
+      for {
+        hash <- (json \ "hash").validate[Blockhash]
+        previousBlockhash <- (json \ "previousblockhash").validateOpt[Blockhash]
+        nextBlockhash <- (json \ "nextblockhash").validateOpt[Blockhash]
+        merkleRoot <- (json \ "merkleroot").validate[Blockhash]
+        confirmations <- (json \ "confirmations").validate[Confirmations]
+        height <- (json \ "height").validate[Height]
+        size <- (json \ "size").validate[Size]
+        version <- (json \ "version").validate[Int]
+        time <- (json \ "time").validate[Long]
+        medianTime <- (json \ "mediantime").validate[Long]
+        nonce <- (json \ "nonce").validate[Long]
+        bits <- (json \ "bits").validate[String]
+        chainwork <- (json \ "chainwork").validate[String]
+        difficulty <- (json \ "difficulty").validate[BigDecimal]
+        tposContract <- (json \ "tposcontract").validateOpt[TransactionId]
+
+        txReads = Transaction.batchReads(hash, confirmations, time)
+        transactions <- readTransactions(txReads)
+      } yield Block.HasTransactions(
+        hash,
+        previousBlockhash,
+        nextBlockhash,
+        merkleRoot,
+        transactions,
+        confirmations,
+        size,
+        height,
+        version,
+        time,
+        medianTime,
+        nonce,
+        bits,
+        chainwork,
+        difficulty,
+        tposContract
+      )
     }
-
-    for {
-      hash <- (json \ "hash").validate[Blockhash]
-      previousBlockhash <- (json \ "previousblockhash").validateOpt[Blockhash]
-      nextBlockhash <- (json \ "nextblockhash").validateOpt[Blockhash]
-      merkleRoot <- (json \ "merkleroot").validate[Blockhash]
-      confirmations <- (json \ "confirmations").validate[Confirmations]
-      height <- (json \ "height").validate[Height]
-      size <- (json \ "size").validate[Size]
-      version <- (json \ "version").validate[Int]
-      time <- (json \ "time").validate[Long]
-      medianTime <- (json \ "mediantime").validate[Long]
-      nonce <- (json \ "nonce").validate[Long]
-      bits <- (json \ "bits").validate[String]
-      chainwork <- (json \ "chainwork").validate[String]
-      difficulty <- (json \ "difficulty").validate[BigDecimal]
-      tposContract <- (json \ "tposcontract").validateOpt[TransactionId]
-
-      txReads = Transaction.batchReads(hash, confirmations, time)
-      transactions <- readTransactions(txReads)
-    } yield Block.HasTransactions(
-      hash,
-      previousBlockhash,
-      nextBlockhash,
-      merkleRoot,
-      transactions,
-      confirmations,
-      size,
-      height,
-      version,
-      time,
-      medianTime,
-      nonce,
-      bits,
-      chainwork,
-      difficulty,
-      tposContract
-    )
-  }
 }

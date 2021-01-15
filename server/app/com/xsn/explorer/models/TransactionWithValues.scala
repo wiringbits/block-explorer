@@ -14,5 +14,6 @@ case class TransactionWithValues(
 
 object TransactionWithValues {
 
-  implicit val writes: Writes[TransactionWithValues] = Json.writes[TransactionWithValues]
+  implicit val writes: Writes[TransactionWithValues] =
+    Json.writes[TransactionWithValues]
 }

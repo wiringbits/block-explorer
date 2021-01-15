@@ -71,19 +71,20 @@ object BlockHeader {
       filter: GolombCodedSet
   ) extends BlockHeader
 
-  private implicit val filterWrites: Writes[GolombCodedSet] = (obj: GolombCodedSet) => {
-    Json.obj(
-      "n" -> obj.n,
-      "m" -> obj.m,
-      "p" -> obj.p,
-      "hex" -> obj.hex.string
-    )
-  }
+  private implicit val filterWrites: Writes[GolombCodedSet] =
+    (obj: GolombCodedSet) => {
+      Json.obj(
+        "n" -> obj.n,
+        "m" -> obj.m,
+        "p" -> obj.p,
+        "hex" -> obj.hex.string
+      )
+    }
 
   val partialWrites: Writes[BlockHeader] = (obj: BlockHeader) => {
     val filterMaybe = obj match {
       case x: HasFilter => Some(x.filter)
-      case _ => Option.empty
+      case _            => Option.empty
     }
 
     Json.obj(
@@ -102,7 +103,7 @@ object BlockHeader {
   val completeWrites: Writes[BlockHeader] = (obj: BlockHeader) => {
     val filterMaybe = obj match {
       case x: HasFilter => Some(x.filter)
-      case _ => Option.empty
+      case _            => Option.empty
     }
 
     Json.obj(

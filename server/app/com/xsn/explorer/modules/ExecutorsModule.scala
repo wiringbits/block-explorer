@@ -12,8 +12,12 @@ class ExecutorsModule extends AbstractModule {
 
   override def configure(): Unit = {
     val _ = (
-      bind(classOf[ExternalServiceExecutionContext]).to(classOf[ExternalServiceAkkaExecutionContext]),
-      bind(classOf[DatabaseExecutionContext]).to(classOf[DatabaseAkkaExecutionContext])
+      bind(classOf[ExternalServiceExecutionContext]).to(
+        classOf[ExternalServiceAkkaExecutionContext]
+      ),
+      bind(classOf[DatabaseExecutionContext]).to(
+        classOf[DatabaseAkkaExecutionContext]
+      )
     )
   }
 }

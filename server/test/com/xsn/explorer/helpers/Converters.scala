@@ -6,7 +6,9 @@ import scala.language.implicitConversions
 
 object Converters {
 
-  implicit def toPersistedBlock(rpcBlock: rpc.Block.Canonical): persisted.Block = {
+  implicit def toPersistedBlock(
+      rpcBlock: rpc.Block.Canonical
+  ): persisted.Block = {
     transformers.toPersistedBlock(rpcBlock, BlockExtractionMethod.ProofOfWork)
   }
 }

@@ -9,23 +9,34 @@ class ConfigModule extends AbstractModule {
   override def configure(): Unit = {
     val _ = (
       bind(classOf[RPCConfig]).to(classOf[PlayRPCConfig]),
-      bind(classOf[LedgerSynchronizerConfig]).to(classOf[LedgerSynchronizerPlayConfig]),
+      bind(classOf[LedgerSynchronizerConfig]).to(
+        classOf[LedgerSynchronizerPlayConfig]
+      ),
       bind(classOf[ExplorerConfig]).to(classOf[ExplorerConfig.Play])
     )
   }
 
   @Provides
-  def coinMarketCapConfig(config: Configuration): CoinMarketCapConfig = CoinMarketCapConfig(config)
+  def coinMarketCapConfig(config: Configuration): CoinMarketCapConfig =
+    CoinMarketCapConfig(config)
 
   @Provides
-  def currencuSynchronizerConfig(config: Configuration): CurrencySynchronizerConfig = CurrencySynchronizerConfig(config)
+  def currencuSynchronizerConfig(
+      config: Configuration
+  ): CurrencySynchronizerConfig = CurrencySynchronizerConfig(config)
 
   @Provides
-  def masternodeSynchronizerConfig(config: Configuration): MasternodeSynchronizerConfig = MasternodeSynchronizerConfig(config)
+  def masternodeSynchronizerConfig(
+      config: Configuration
+  ): MasternodeSynchronizerConfig = MasternodeSynchronizerConfig(config)
 
   @Provides
-  def merchantnodeSynchronizerConfig(config: Configuration): MerchantnodeSynchronizerConfig = MerchantnodeSynchronizerConfig(config)
+  def merchantnodeSynchronizerConfig(
+      config: Configuration
+  ): MerchantnodeSynchronizerConfig = MerchantnodeSynchronizerConfig(config)
 
   @Provides
-  def nodeStatsSynchronizerConfig(config: Configuration): NodeStatsSynchronizerConfig = NodeStatsSynchronizerConfig(config)
+  def nodeStatsSynchronizerConfig(
+      config: Configuration
+  ): NodeStatsSynchronizerConfig = NodeStatsSynchronizerConfig(config)
 }

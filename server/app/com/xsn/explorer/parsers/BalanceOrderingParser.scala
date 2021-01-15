@@ -8,9 +8,12 @@ class BalanceOrderingParser extends FieldOrderingParser[BalanceField] {
 
   override protected val defaultField = BalanceField.Available
 
-  override protected val defaultOrderingCondition: OrderingCondition = OrderingCondition.DescendingOrder
+  override protected val defaultOrderingCondition: OrderingCondition =
+    OrderingCondition.DescendingOrder
 
-  override protected def parseField(unsafeField: String): Option[BalanceField] = {
+  override protected def parseField(
+      unsafeField: String
+  ): Option[BalanceField] = {
     BalanceField.withNameOption(unsafeField)
   }
 }

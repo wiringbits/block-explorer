@@ -6,7 +6,12 @@ import com.alexitc.playsonify.models.pagination.Limit
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
+import com.xsn.explorer.helpers.{
+  DataHelper,
+  FileBasedXSNService,
+  TransactionDummyDataHandler,
+  TransactionLoader
+}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
@@ -21,15 +26,25 @@ class TransactionsControllerSpec extends MyAPISpec {
 
   import DataHelper._
 
-  private val coinbaseTx = TransactionLoader.get("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
-  private val nonCoinbaseTx = TransactionLoader.get("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+  private val coinbaseTx = TransactionLoader.get(
+    "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+  )
+  private val nonCoinbaseTx = TransactionLoader.get(
+    "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+  )
   private val severalInputsTx =
-    TransactionLoader.get("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb")
+    TransactionLoader.get(
+      "a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb"
+    )
 
   private val transactionList = List(
     TransactionInfo(
-      createTransactionId("92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"),
-      createBlockhash("ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"),
+      createTransactionId(
+        "92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"
+      ),
+      createBlockhash(
+        "ad22f0dcea2fdaa357aac6eab00695cf07b487e34113598909f625c24629c981"
+      ),
       12312312L,
       Size(1000),
       sent = 50,
@@ -37,8 +52,12 @@ class TransactionsControllerSpec extends MyAPISpec {
       height = Height(2)
     ),
     TransactionInfo(
-      createTransactionId("0c0f595a004eab5cf62ea70570f175701d120a0da31c8222d2d99fc60bf96577"),
-      createBlockhash("e2df117061eb6ed4d2832616dd7a5f07b01ad3d148c9d7f9a1628d339d6caedb"),
+      createTransactionId(
+        "0c0f595a004eab5cf62ea70570f175701d120a0da31c8222d2d99fc60bf96577"
+      ),
+      createBlockhash(
+        "e2df117061eb6ed4d2832616dd7a5f07b01ad3d148c9d7f9a1628d339d6caedb"
+      ),
       1521700630L,
       Size(1000),
       sent = 100,
@@ -50,7 +69,10 @@ class TransactionsControllerSpec extends MyAPISpec {
   private val customXSNService = new FileBasedXSNService
 
   private val transactionDataHandler = new TransactionDummyDataHandler {
-    override def getOutput(txid: TransactionId, index: Int): ApplicationResult[persisted.Transaction.Output] = {
+    override def getOutput(
+        txid: TransactionId,
+        index: Int
+    ): ApplicationResult[persisted.Transaction.Output] = {
       Bad(TransactionError.OutputNotFound(txid, index)).accumulating
     }
 
@@ -92,7 +114,10 @@ class TransactionsControllerSpec extends MyAPISpec {
       outputJsonList.size mustEqual 1
 
       val outputJson = outputJsonList.head
-      (outputJson \ "address").as[String] mustEqual tx.vout.head.addresses.flatMap(_.headOption).get.string
+      (outputJson \ "address").as[String] mustEqual tx.vout.head.addresses
+        .flatMap(_.headOption)
+        .get
+        .string
       (outputJson \ "value").as[BigDecimal] mustEqual tx.vout.head.value
     }
 
@@ -106,7 +131,9 @@ class TransactionsControllerSpec extends MyAPISpec {
           )
         ).map { v =>
           rpc.TransactionVIN.HasValues(
-            createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"),
+            createTransactionId(
+              "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+            ),
             0,
             v.value,
             v.addresses,
@@ -132,19 +159,33 @@ class TransactionsControllerSpec extends MyAPISpec {
       inputJsonList.size mustEqual 1
 
       val inputJson = inputJsonList.head
-      (inputJson \ "address").as[String] mustEqual details.input.head.address.map(_.string).getOrElse("")
+      (inputJson \ "address").as[String] mustEqual details.input.head.address
+        .map(_.string)
+        .getOrElse("")
       (inputJson \ "value").as[BigDecimal] mustEqual details.input.head.value
 
       val outputJsonList = (json \ "output").as[List[JsValue]]
       outputJsonList.size mustEqual 3
 
       val outputJson2 = outputJsonList.drop(1).head
-      (outputJson2 \ "address").as[String] mustEqual details.output.drop(1).head.address.map(_.string).getOrElse("")
-      (outputJson2 \ "value").as[BigDecimal] mustEqual details.output.drop(1).head.value
+      (outputJson2 \ "address").as[String] mustEqual details.output
+        .drop(1)
+        .head
+        .address
+        .map(_.string)
+        .getOrElse("")
+      (outputJson2 \ "value")
+        .as[BigDecimal] mustEqual details.output.drop(1).head.value
 
       val outputJson3 = outputJsonList.drop(2).head
-      (outputJson3 \ "address").as[String] mustEqual details.output.drop(2).head.address.map(_.string).getOrElse("")
-      (outputJson3 \ "value").as[BigDecimal] mustEqual details.output.drop(2).head.value
+      (outputJson3 \ "address").as[String] mustEqual details.output
+        .drop(2)
+        .head
+        .address
+        .map(_.string)
+        .getOrElse("")
+      (outputJson3 \ "value")
+        .as[BigDecimal] mustEqual details.output.drop(2).head.value
     }
 
     "return a transaction with several inputs" in {
@@ -171,7 +212,8 @@ class TransactionsControllerSpec extends MyAPISpec {
       inputJsonList.size mustEqual 11
 
       inputJsonList.foreach { inputJson =>
-        (inputJson \ "address").as[String] mustEqual inputValue.address.map(_.string).getOrElse("")
+        (inputJson \ "address")
+          .as[String] mustEqual inputValue.address.map(_.string).getOrElse("")
         (inputJson \ "value").as[BigDecimal] mustEqual inputValue.value
       }
 
@@ -179,17 +221,24 @@ class TransactionsControllerSpec extends MyAPISpec {
       outputJsonList.size mustEqual 2
 
       val outputJson = outputJsonList.head
-      (outputJson \ "address").as[String] mustEqual "XcmqLX4qptMgAigXTVH4SJRVb6ZKmq8rjH"
-      (outputJson \ "value").as[BigDecimal] mustEqual BigDecimal("55664.05066658")
+      (outputJson \ "address")
+        .as[String] mustEqual "XcmqLX4qptMgAigXTVH4SJRVb6ZKmq8rjH"
+      (outputJson \ "value").as[BigDecimal] mustEqual BigDecimal(
+        "55664.05066658"
+      )
 
       val outputJson2 = outputJsonList.drop(1).head
-      (outputJson2 \ "address").as[String] mustEqual "XvUAd4vQtFtZ7v2Uo8e6aSsiRLAwyq1jwb"
-      (outputJson2 \ "value").as[BigDecimal] mustEqual BigDecimal("750000.00000000")
+      (outputJson2 \ "address")
+        .as[String] mustEqual "XvUAd4vQtFtZ7v2Uo8e6aSsiRLAwyq1jwb"
+      (outputJson2 \ "value").as[BigDecimal] mustEqual BigDecimal(
+        "750000.00000000"
+      )
     }
 
     "fail on wrong transaction format" in {
       // 63 characters
-      val txid = "000001d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+      val txid =
+        "000001d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
       val response = GET(url(txid))
 
       status(response) mustEqual BAD_REQUEST
@@ -199,13 +248,15 @@ class TransactionsControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
       val error = errorList.head
 
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "transactionId"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
 
     "fail on unknown transaction" in {
-      val txid = "0000001d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+      val txid =
+        "0000001d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
       val response = GET(url(txid))
 
       status(response) mustEqual BAD_REQUEST
@@ -215,7 +266,8 @@ class TransactionsControllerSpec extends MyAPISpec {
       errorList.size mustEqual 1
       val error = errorList.head
 
-      (error \ "type").as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
+      (error \ "type")
+        .as[String] mustEqual PublicErrorRenderer.FieldValidationErrorType
       (error \ "field").as[String] mustEqual "transactionId"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
@@ -258,7 +310,9 @@ class TransactionsControllerSpec extends MyAPISpec {
 
     "return the transactions with lastSeenTxid" in {
       val response =
-        GET("/transactions?limit=1&lastSeenTxid=92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8")
+        GET(
+          "/transactions?limit=1&lastSeenTxid=92c51e4fe89466faa734d6207a7ef6115fa1dd33f7156b006fafc6bb85a79eb8"
+        )
 
       status(response) mustEqual OK
       val json = contentAsJson(response)
@@ -301,21 +355,26 @@ class TransactionsControllerSpec extends MyAPISpec {
       pending
     }
     "bad txid format" in {
-      val response = GET(url("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c6"))
+      val response = GET(
+        url("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c6")
+      )
 
       status(response) mustEqual BAD_REQUEST
       val json = contentAsJson(response)
 
       val errors = (json \ "errors").as[List[JsValue]]
       (errors.head \ "field").as[String] mustEqual "transactionId"
-      (errors.head \ "message").as[String] mustEqual "Invalid transaction format"
+      (errors.head \ "message")
+        .as[String] mustEqual "Invalid transaction format"
 
       val cacheHeader = header("Cache-Control", response)
       cacheHeader mustBe None
     }
 
     "when transaction doesn't exists" in {
-      val response = GET(url("a3c43d22bbba31a6e5c00f465cb9c5a1a365407df4cc90efa8a865656b52c1ec"))
+      val response = GET(
+        url("a3c43d22bbba31a6e5c00f465cb9c5a1a365407df4cc90efa8a865656b52c1ec")
+      )
 
       status(response) mustEqual BAD_REQUEST
       val json = contentAsJson(response)

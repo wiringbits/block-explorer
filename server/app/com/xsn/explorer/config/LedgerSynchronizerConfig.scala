@@ -18,20 +18,30 @@ trait LedgerSynchronizerConfig {
   def parallelSynchronizer: Boolean
 }
 
-class LedgerSynchronizerPlayConfig @Inject()(config: Configuration) extends LedgerSynchronizerConfig {
+class LedgerSynchronizerPlayConfig @Inject() (config: Configuration)
+    extends LedgerSynchronizerConfig {
 
-  override lazy val enabled: Boolean = config.getOptional[Boolean]("synchronizer.enabled").getOrElse(false)
+  override lazy val enabled: Boolean =
+    config.getOptional[Boolean]("synchronizer.enabled").getOrElse(false)
 
   override lazy val initialDelay: FiniteDuration =
-    config.getOptional[FiniteDuration]("synchronizer.initialDelay").getOrElse(15.seconds)
+    config
+      .getOptional[FiniteDuration]("synchronizer.initialDelay")
+      .getOrElse(15.seconds)
 
   override lazy val interval: FiniteDuration =
-    config.getOptional[FiniteDuration]("synchronizer.interval").getOrElse(60.seconds)
+    config
+      .getOptional[FiniteDuration]("synchronizer.interval")
+      .getOrElse(60.seconds)
 
   override lazy val useNewSynchronizer: Boolean =
-    config.getOptional[Boolean]("synchronizer.useNewSynchronizer").getOrElse(false)
+    config
+      .getOptional[Boolean]("synchronizer.useNewSynchronizer")
+      .getOrElse(false)
 
   override lazy val parallelSynchronizer: Boolean = {
-    config.getOptional[Boolean]("synchronizer.parallelSynchronizer").getOrElse(false)
+    config
+      .getOptional[Boolean]("synchronizer.parallelSynchronizer")
+      .getOrElse(false)
   }
 }

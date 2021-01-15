@@ -12,7 +12,9 @@ class TPoSContractDAO {
 
   import TPoSContractParsers._
 
-  def create(contract: TPoSContract)(implicit conn: Connection): TPoSContract = {
+  def create(
+      contract: TPoSContract
+  )(implicit conn: Connection): TPoSContract = {
     SQL(
       """
         |INSERT INTO tpos_contracts
@@ -22,15 +24,14 @@ class TPoSContractDAO {
         |RETURNING txid, index, owner, merchant, merchant_commission, state, time
       """.stripMargin
     ).on(
-        'txid -> contract.id.txid.toBytesBE.toArray,
-        'index -> contract.id.index,
-        'owner -> contract.details.owner.string,
-        'merchant -> contract.details.merchant.string,
-        'merchant_commission -> contract.details.merchantCommission.int,
-        'state -> contract.state.entryName,
-        'time -> contract.time
-      )
-      .as(parseTPoSContract.single)
+      'txid -> contract.id.txid.toBytesBE.toArray,
+      'index -> contract.id.index,
+      'owner -> contract.details.owner.string,
+      'merchant -> contract.details.merchant.string,
+      'merchant_commission -> contract.details.merchantCommission.int,
+      'state -> contract.state.entryName,
+      'time -> contract.time
+    ).as(parseTPoSContract.single)
   }
 
   def upsert(contract: TPoSContract)(implicit conn: Connection): Unit = {
@@ -50,18 +51,19 @@ class TPoSContractDAO {
         |    time = EXCLUDED.time
       """.stripMargin
     ).on(
-        'txid -> contract.id.txid.toBytesBE.toArray,
-        'index -> contract.id.index,
-        'owner -> contract.details.owner.string,
-        'merchant -> contract.details.merchant.string,
-        'merchant_commission -> contract.details.merchantCommission.int,
-        'state -> contract.state.entryName,
-        'time -> contract.time
-      )
-      .executeUpdate()
+      'txid -> contract.id.txid.toBytesBE.toArray,
+      'index -> contract.id.index,
+      'owner -> contract.details.owner.string,
+      'merchant -> contract.details.merchant.string,
+      'merchant_commission -> contract.details.merchantCommission.int,
+      'state -> contract.state.entryName,
+      'time -> contract.time
+    ).executeUpdate()
   }
 
-  def deleteBy(txid: TransactionId)(implicit conn: Connection): Option[TPoSContract] = {
+  def deleteBy(
+      txid: TransactionId
+  )(implicit conn: Connection): Option[TPoSContract] = {
     SQL(
       """
         |DELETE FROM tpos_contracts
@@ -69,12 +71,13 @@ class TPoSContractDAO {
         |RETURNING txid, index, owner, merchant, merchant_commission, state, time
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray
-      )
-      .as(parseTPoSContract.singleOpt)
+      'txid -> txid.toBytesBE.toArray
+    ).as(parseTPoSContract.singleOpt)
   }
 
-  def close(id: TPoSContract.Id, closedOn: TransactionId)(implicit conn: Connection): Unit = {
+  def close(id: TPoSContract.Id, closedOn: TransactionId)(implicit
+      conn: Connection
+  ): Unit = {
     val _ = SQL(
       """
         |UPDATE tpos_contracts
@@ -84,12 +87,11 @@ class TPoSContractDAO {
         |      index = {index}
       """.stripMargin
     ).on(
-        'txid -> id.txid.toBytesBE.toArray,
-        'index -> id.index,
-        'state -> TPoSContract.State.Closed.entryName,
-        'closed_on -> closedOn.toBytesBE.toArray
-      )
-      .executeUpdate()
+      'txid -> id.txid.toBytesBE.toArray,
+      'index -> id.index,
+      'state -> TPoSContract.State.Closed.entryName,
+      'closed_on -> closedOn.toBytesBE.toArray
+    ).executeUpdate()
   }
 
   def open(id: TPoSContract.Id)(implicit conn: Connection): Unit = {
@@ -102,11 +104,10 @@ class TPoSContractDAO {
         |      index = {index}
       """.stripMargin
     ).on(
-        'txid -> id.txid.toBytesBE.toArray,
-        'index -> id.index,
-        'state -> TPoSContract.State.Active.entryName
-      )
-      .executeUpdate()
+      'txid -> id.txid.toBytesBE.toArray,
+      'index -> id.index,
+      'state -> TPoSContract.State.Active.entryName
+    ).executeUpdate()
   }
 
   def getBy(address: Address)(implicit conn: Connection): List[TPoSContract] = {
@@ -118,12 +119,13 @@ class TPoSContractDAO {
         |ORDER BY time DESC
       """.stripMargin
     ).on(
-        'address -> address.string
-      )
-      .as(parseTPoSContract.*)
+      'address -> address.string
+    ).as(parseTPoSContract.*)
   }
 
-  def getTPoSMerchantStakingAddresses(merchantAddress: Address)(implicit conn: Connection): List[Address] = {
+  def getTPoSMerchantStakingAddresses(
+      merchantAddress: Address
+  )(implicit conn: Connection): List[Address] = {
     SQL(
       """
         |SELECT owner

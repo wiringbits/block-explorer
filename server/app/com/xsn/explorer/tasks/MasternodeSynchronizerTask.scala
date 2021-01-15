@@ -11,11 +11,11 @@ import com.xsn.explorer.services.synchronizer.MasternodeSynchronizerActor
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class MasternodeSynchronizerTask @Inject()(
+class MasternodeSynchronizerTask @Inject() (
     config: MasternodeSynchronizerConfig,
     xsnService: XSNService,
     actorSystem: ActorSystem,
-    masternodeSynchronizerActor: MasternodeSynchronizerActor.Ref 
+    masternodeSynchronizerActor: MasternodeSynchronizerActor.Ref
 )(implicit ec: ExecutionContext) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -31,11 +31,17 @@ class MasternodeSynchronizerTask @Inject()(
         xsnService.getMasternodes().onComplete {
           case Success(Good(masternodes)) =>
             logger.info(s"Masternode information synced ${masternodes.length}")
-            masternodeSynchronizerActor.ref ! MasternodeSynchronizerActor.UpdateMasternodes(masternodes)
+            masternodeSynchronizerActor.ref ! MasternodeSynchronizerActor
+              .UpdateMasternodes(masternodes)
           case Success(Bad(error)) =>
-            logger.warn(s"Masternode information syncronization failed due to $error")
+            logger.warn(
+              s"Masternode information syncronization failed due to $error"
+            )
           case Failure(exception) =>
-            logger.error(s"Masternode information syncronization failed due to ${exception.getMessage}", exception)
+            logger.error(
+              s"Masternode information syncronization failed due to ${exception.getMessage}",
+              exception
+            )
         }
       }
     } else {

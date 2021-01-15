@@ -17,7 +17,9 @@ class MasternodeSynchronizerActor extends Actor {
     case MasternodeSynchronizerActor.UpdateMasternodes(newMasternodes) =>
       become(behavior(newMasternodes))
     case MasternodeSynchronizerActor.GetMasternode(ipAddress) =>
-      sender() ! masternodes.find(x => x.ip.split(":").headOption.contains(ipAddress.string))
+      sender() ! masternodes.find(x =>
+        x.ip.split(":").headOption.contains(ipAddress.string)
+      )
     case MasternodeSynchronizerActor.GetMasternodes =>
       sender() ! masternodes
     case MasternodeSynchronizerActor.GetMasternodeCount =>
@@ -34,7 +36,9 @@ object MasternodeSynchronizerActor {
 
   object Ref {
 
-    def apply(name: String = "masternode-synchronizer")(implicit system: ActorSystem): Ref = {
+    def apply(
+        name: String = "masternode-synchronizer"
+    )(implicit system: ActorSystem): Ref = {
       val actor = system.actorOf(Props(new MasternodeSynchronizerActor), name)
       new Ref(actor)
     }

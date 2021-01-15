@@ -9,7 +9,10 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 @com.github.ghik.silencer.silent
-class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
+class RetryableFutureSpec
+    extends AsyncWordSpec
+    with MustMatchers
+    with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()
@@ -55,12 +58,13 @@ class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAnd
   private val retryOnRuntimeException = (result: Try[Int]) => {
     result match {
       case Failure(_: RuntimeException) => true
-      case _ => false
+      case _                            => false
     }
   }
 
   private val threeRetries = List.fill(3)(100.millis)
-  private val withThreeRetriesOnRuntimeException = RetryableFuture(threeRetries)(retryOnRuntimeException)(_)
+  private val withThreeRetriesOnRuntimeException =
+    RetryableFuture(threeRetries)(retryOnRuntimeException)(_)
 
   "RetryableFuture" should {
     "succeed after retrying" in {
@@ -107,41 +111,41 @@ class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAnd
   "withExponentialBackoff" should {
     "Calculate the right delays with initial delay and max delay" in {
       val operation = UnstableOperation(4, new RuntimeException)
-      val retryWithExponentialBackoff = RetryableFuture.withExponentialBackoff[Int](50.millis, 500.millis)
+      val retryWithExponentialBackoff =
+        RetryableFuture.withExponentialBackoff[Int](50.millis, 500.millis)
       val result = retryWithExponentialBackoff(retryOnRuntimeException) {
         operation.execute
       }
 
       val expecetedDelays = List(50.millis, 100.millis, 200.millis, 400.millis)
 
-      result.map(
-        _ =>
-          expecetedDelays
-            .zip(operation.getDelays)
-            .map {
-              case (d1, d2) => isCloseTo(d1.toMillis, d2.toMillis)
-            }
-            .forall(a => a) must be(true)
+      result.map(_ =>
+        expecetedDelays
+          .zip(operation.getDelays)
+          .map { case (d1, d2) =>
+            isCloseTo(d1.toMillis, d2.toMillis)
+          }
+          .forall(a => a) must be(true)
       )
     }
 
     "Calculate the right delays with initial delay and max retries" in {
       val operation = UnstableOperation(4, new RuntimeException)
-      val retryWithExponentialBackoff = RetryableFuture.withExponentialBackoff[Int](50.millis, 4)
+      val retryWithExponentialBackoff =
+        RetryableFuture.withExponentialBackoff[Int](50.millis, 4)
       val result = retryWithExponentialBackoff(retryOnRuntimeException) {
         operation.execute
       }
 
       val expecetedDelays = List(50.millis, 100.millis, 200.millis, 400.millis)
 
-      result.map(
-        _ =>
-          expecetedDelays
-            .zip(operation.getDelays)
-            .map {
-              case (d1, d2) => isCloseTo(d1.toMillis, d2.toMillis)
-            }
-            .forall(a => a) must be(true)
+      result.map(_ =>
+        expecetedDelays
+          .zip(operation.getDelays)
+          .map { case (d1, d2) =>
+            isCloseTo(d1.toMillis, d2.toMillis)
+          }
+          .forall(a => a) must be(true)
       )
     }
   }

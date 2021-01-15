@@ -21,14 +21,17 @@ class HealthControllerSpec extends MyAPISpec {
 
   val application: Application = guiceApplicationBuilder
     .overrides(bind[XSNService].to(xsnServiceMock))
-    .overrides(bind[StatisticsBlockingDataHandler].to(statisticsDataHandlerMock))
+    .overrides(
+      bind[StatisticsBlockingDataHandler].to(statisticsDataHandlerMock)
+    )
     .build()
 
   "GET /health" should {
     "return OK" in {
       val latestXSNBlock = DataGenerator.randomBlock().copy(height = Height(19))
       val stats = Statistics(10, 0, None, None)
-      when(xsnServiceMock.getLatestBlock()).thenReturn(Future.successful(Good(latestXSNBlock)))
+      when(xsnServiceMock.getLatestBlock())
+        .thenReturn(Future.successful(Good(latestXSNBlock)))
       when(statisticsDataHandlerMock.getStatistics()).thenReturn(Good(stats))
       val response = GET("/health")
 
@@ -38,7 +41,8 @@ class HealthControllerSpec extends MyAPISpec {
     "return Internal Server Error if there are 10 missing blocks" in {
       val latestXSNBlock = DataGenerator.randomBlock().copy(height = Height(20))
       val stats = Statistics(10, 0, None, None)
-      when(xsnServiceMock.getLatestBlock()).thenReturn(Future.successful(Good(latestXSNBlock)))
+      when(xsnServiceMock.getLatestBlock())
+        .thenReturn(Future.successful(Good(latestXSNBlock)))
       when(statisticsDataHandlerMock.getStatistics()).thenReturn(Good(stats))
       val response = GET("/health")
 

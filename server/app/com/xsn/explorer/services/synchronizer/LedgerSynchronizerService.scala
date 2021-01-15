@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LedgerSynchronizerService @Inject()(
+class LedgerSynchronizerService @Inject() (
     synchronizerConfig: LedgerSynchronizerConfig,
     xsnService: XSNService,
     ledgerDataHandler: LedgerFutureDataHandler,
@@ -31,12 +31,11 @@ class LedgerSynchronizerService @Inject()(
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  /**
-   * Synchronize the given block with our ledger database.
-   *
-   * This method must not be called concurrently, otherwise, it is likely that
-   * the database will get corrupted.
-   */
+  /** Synchronize the given block with our ledger database.
+    *
+    * This method must not be called concurrently, otherwise, it is likely that
+    * the database will get corrupted.
+    */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
       _ <- applyPendingUpdate().toFutureOr
@@ -63,16 +62,22 @@ class LedgerSynchronizerService @Inject()(
         val inner = for {
           block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
           data <- syncOps.getBlockData(block).toFutureOr
-          _ <- blockParallelChunkSynchronizer.sync(data._1, data._2, data._3, data._4).toFutureOr
+          _ <- blockParallelChunkSynchronizer
+            .sync(data._1, data._2, data._3, data._4)
+            .toFutureOr
         } yield ()
 
         inner.toFuture.flatMap {
           case Good(_) => Future.successful(Good(()))
           case Bad(One(BlockNotFoundError)) =>
-            logger.warn(s"The block $blockhash was partially synced but is not in the node anymore, rolling back")
+            logger.warn(
+              s"The block $blockhash was partially synced but is not in the node anymore, rolling back"
+            )
             blockParallelChunkSynchronizer.rollback(blockhash)
           case Bad(e) =>
-            logger.warn(s"The block $blockhash was partially synced but it wasn't retrieved from the node, errors = $e")
+            logger.warn(
+              s"The block $blockhash was partially synced but it wasn't retrieved from the node, errors = $e"
+            )
             Future.successful(Bad(e))
         }.toFutureOr
     }
@@ -83,7 +88,9 @@ class LedgerSynchronizerService @Inject()(
     result
   }
 
-  private def sync(status: SynchronizationStatus): FutureApplicationResult[Unit] = {
+  private def sync(
+      status: SynchronizationStatus
+  ): FutureApplicationResult[Unit] = {
     status match {
       case SynchronizationStatus.Synced =>
         Future.successful(Good(()))
@@ -103,11 +110,15 @@ class LedgerSynchronizerService @Inject()(
         result.toFuture
 
       case SynchronizationStatus.PendingReorganization(cutPoint, goal) =>
-        logger.info(s"Applying reorganization, cutPoint = $cutPoint, goal = $goal")
+        logger.info(
+          s"Applying reorganization, cutPoint = $cutPoint, goal = $goal"
+        )
         val result = for {
           latestRemoved <- rollback(cutPoint)
           interval = latestRemoved.height.int to goal.int
-          _ = logger.info(s"${latestRemoved.hash} rolled back, now syncing $interval")
+          _ = logger.info(
+            s"${latestRemoved.hash} rolled back, now syncing $interval"
+          )
           _ <- sync(latestRemoved.height.int to goal.int).toFutureOr
         } yield {
           logger.info("Reorganization completed")
@@ -162,7 +173,9 @@ class LedgerSynchronizerService @Inject()(
       }
   }
 
-  private def append(newBlock: rpc.Block.HasTransactions[_]): FutureApplicationResult[Unit] = {
+  private def append(
+      newBlock: rpc.Block.HasTransactions[_]
+  ): FutureApplicationResult[Unit] = {
     val timer = Kamon
       .timer("appendBlock")
       .withTag("hash", newBlock.hash.string)
@@ -173,13 +186,26 @@ class LedgerSynchronizerService @Inject()(
       data <- syncOps.getBlockData(newBlock).toFutureOr
       (blockWithTransactions, tposContracts, filterFactory, rewards) = data
       _ = notify(blockWithTransactions)
-      _ <- if (synchronizerConfig.parallelSynchronizer) {
-        blockParallelChunkSynchronizer
-          .sync(blockWithTransactions.asTip, tposContracts, filterFactory, rewards)
-          .toFutureOr
-      } else {
-        ledgerDataHandler.push(blockWithTransactions.asTip, tposContracts, filterFactory, rewards).toFutureOr
-      }
+      _ <-
+        if (synchronizerConfig.parallelSynchronizer) {
+          blockParallelChunkSynchronizer
+            .sync(
+              blockWithTransactions.asTip,
+              tposContracts,
+              filterFactory,
+              rewards
+            )
+            .toFutureOr
+        } else {
+          ledgerDataHandler
+            .push(
+              blockWithTransactions.asTip,
+              tposContracts,
+              filterFactory,
+              rewards
+            )
+            .toFutureOr
+        }
     } yield {
       if (blockWithTransactions.height.int % 5000 == 0) {
         logger.info(s"Caught up to block ${blockWithTransactions.height}")
@@ -197,11 +223,16 @@ class LedgerSynchronizerService @Inject()(
   }
 
   private def notify(tx: persisted.Transaction.HasIO): Unit = {
-    val received = tx.inputs.flatMap(_.addresses).filter(notificationsConfig.monitoredAddresses.contains)
-    val sent = tx.outputs.flatMap(_.addresses).filter(notificationsConfig.monitoredAddresses.contains)
+    val received = tx.inputs
+      .flatMap(_.addresses)
+      .filter(notificationsConfig.monitoredAddresses.contains)
+    val sent = tx.outputs
+      .flatMap(_.addresses)
+      .filter(notificationsConfig.monitoredAddresses.contains)
     val involved = (received ++ sent).toSet
     if (involved.nonEmpty) {
-      val subject = "ALERT - There are new operations on the monitored XSN addresses"
+      val subject =
+        "ALERT - There are new operations on the monitored XSN addresses"
       val lines = involved
         .map { x =>
           s"- $x"
@@ -211,7 +242,11 @@ class LedgerSynchronizerService @Inject()(
 
       // send the notifications in the background, errors are logged in the email layer
       val _ = Future {
-        emailService.sendEmail(subject = subject, text = text, recipients = notificationsConfig.recipients)
+        emailService.sendEmail(
+          subject = subject,
+          text = text,
+          recipients = notificationsConfig.recipients
+        )
       }
     } else {
       ()
