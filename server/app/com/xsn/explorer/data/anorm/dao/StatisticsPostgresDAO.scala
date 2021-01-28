@@ -76,16 +76,16 @@ class StatisticsPostgresDAO {
         |WHERE b.time >= {start_date}
       """.stripMargin
     ).on(
-        'start_date -> startDate.toEpochMilli
-      )
-      .as(SqlParser.scalar[Long].singleOpt)
+      'start_date -> startDate.getEpochSecond
+    ).as(SqlParser.scalar[Long].singleOpt)
       .getOrElse(0)
   }
 }
 
 object StatisticsPostgresDAO {
 
-  /** We need to exclude the burn address from the total supply.
-    */
+  /**
+   * We need to exclude the burn address from the total supply.
+   */
   val BurnAddress = "XmPe9BHRsmZeThtYF34YYjdnrjmcAUn8bC"
 }

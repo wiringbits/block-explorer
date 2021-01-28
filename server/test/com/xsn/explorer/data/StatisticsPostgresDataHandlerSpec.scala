@@ -429,7 +429,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         nextBlockhash = None,
         height = Height(blockHeight),
         extractionMethod = extractionMethod,
-        time = time.toEpochMilli
+        time = time.getEpochSecond
       )
 
     val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
