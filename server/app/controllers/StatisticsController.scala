@@ -4,7 +4,9 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.services.StatisticsService
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
+
+import scala.concurrent.duration._
 
 class StatisticsController @Inject() (
     statisticsService: StatisticsService,
@@ -34,14 +36,15 @@ class StatisticsController @Inject() (
   }
 
   def getBlockRewardsSummary() = public { _ =>
-    statisticsService
-      .getRewardsSummary(1000)
-      .toFutureOr
-      .map { value =>
-        val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
-      }
-      .toFuture
+    val response = for {
+      blockRewards <- statisticsService.getRewardsSummary(1000).toFutureOr
+      rewardedAddressesCount <- statisticsService.getRewardedAddressesCount(72.hours).toFutureOr
+
+      rewardsJson = Json.toJson(blockRewards).as[JsObject]
+      result = rewardsJson + ("rewardedAddressesCountLast72Hours" -> Json.toJson(rewardedAddressesCount))
+    } yield Ok(result).withHeaders("Cache-Control" -> "public, max-age=60")
+
+    response.toFuture
   }
 
   def getCurrency(currency: Option[String]) = public { _ =>

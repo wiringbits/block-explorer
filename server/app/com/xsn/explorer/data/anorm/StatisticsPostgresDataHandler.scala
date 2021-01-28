@@ -1,13 +1,15 @@
 package com.xsn.explorer.data.anorm
 
-import javax.inject.Inject
+import java.time.Instant
+
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.{StatisticsPostgresDAO, TPoSContractDAO}
+import com.xsn.explorer.models.values.Address
 import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import javax.inject.Inject
 import org.scalactic.Good
 import play.api.db.Database
-import com.xsn.explorer.models.values.Address
 
 class StatisticsPostgresDataHandler @Inject() (
     override val database: Database,
@@ -16,10 +18,9 @@ class StatisticsPostgresDataHandler @Inject() (
 ) extends StatisticsBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  override def getStatistics(): ApplicationResult[Statistics] = withConnection {
-    implicit conn =>
-      val result = statisticsDAO.getStatistics
-      Good(result)
+  override def getStatistics(): ApplicationResult[Statistics] = withConnection { implicit conn =>
+    val result = statisticsDAO.getStatistics
+    Good(result)
   }
 
   override def getRewardsSummary(
@@ -33,4 +34,9 @@ class StatisticsPostgresDataHandler @Inject() (
   ): ApplicationResult[List[Address]] = withConnection { implicit conn =>
     Good(tposContractDAO.getTPoSMerchantStakingAddresses(merchantAddress))
   }
+
+  override def getRewardedAddressesCount(startDate: Instant): ApplicationResult[Long] =
+    withConnection { implicit conn =>
+      Good(statisticsDAO.getRewardedAddressesCount(startDate))
+    }
 }

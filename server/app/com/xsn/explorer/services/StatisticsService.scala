@@ -1,19 +1,14 @@
 package com.xsn.explorer.services
 
-import akka.pattern.ask
+import java.time.Instant
+
 import akka.actor.ActorSystem
+import akka.pattern.ask
+import akka.util.Timeout
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{
-  StatisticsFutureDataHandler,
-  BalanceFutureDataHandler
-}
-import com.xsn.explorer.models.{
-  MarketStatistics,
-  StatisticsDetails,
-  NodeStatistics,
-  SynchronizationProgress
-}
+import com.xsn.explorer.data.async.{StatisticsFutureDataHandler, BalanceFutureDataHandler}
+import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, NodeStatistics, SynchronizationProgress}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
   MasternodeRepository,
@@ -22,10 +17,9 @@ import com.xsn.explorer.services.synchronizer.repository.{
 }
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
-import akka.util.Timeout
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 class StatisticsService @Inject() (
     xsnService: XSNService,
@@ -97,8 +91,7 @@ class StatisticsService @Inject() (
     result.toFuture
   }
 
-  def getSynchronizationProgress
-      : FutureApplicationResult[SynchronizationProgress] = {
+  def getSynchronizationProgress: FutureApplicationResult[SynchronizationProgress] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val rpcBlock = xsnService.getLatestBlock()
 
@@ -127,13 +120,19 @@ class StatisticsService @Inject() (
       .map(Good(_))
   }
 
+  def getRewardedAddressesCount(period: FiniteDuration): FutureApplicationResult[Long] = {
+    val startDate = Instant.now.minusSeconds(period.toSeconds)
+
+    statisticsFutureDataHandler.getRewardedAddressesCount(startDate)
+  }
+
   private def discardErrors[T](
       value: FutureApplicationResult[T]
   ): FutureApplicationResult[Option[T]] = {
     value
       .map {
         case Good(result) => Good(Some(result))
-        case Bad(_)       => Good(None)
+        case Bad(_) => Good(None)
       }
       .recover { case _: Throwable => Good(None) }
   }

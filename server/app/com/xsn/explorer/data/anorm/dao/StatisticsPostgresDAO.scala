@@ -1,6 +1,7 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
+import java.time.Instant
 
 import anorm._
 import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseSummary
@@ -63,6 +64,22 @@ class StatisticsPostgresDAO {
     ).on(
       'number_of_blocks -> numberOfBlocks
     ).as(parseSummary.single)
+  }
+
+  def getRewardedAddressesCount(startDate: Instant)(implicit conn: Connection): Long = {
+    SQL(
+      """
+        |SELECT
+        |  COUNT(DISTINCT address) AS count
+        |FROM block_rewards r
+        |INNER JOIN blocks b USING(blockhash)
+        |WHERE b.time >= {start_date}
+      """.stripMargin
+    ).on(
+        'start_date -> startDate.toEpochMilli
+      )
+      .as(SqlParser.scalar[Long].singleOpt)
+      .getOrElse(0)
   }
 }
 

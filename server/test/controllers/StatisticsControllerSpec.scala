@@ -1,16 +1,12 @@
 package controllers
 
+import java.time.Instant
+
 import akka.actor.{Actor, ActorSystem, Props}
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.{
-  BlockRewardsSummary,
-  MarketInformation,
-  MarketStatistics,
-  Statistics,
-  NodeStatistics
-}
+import com.xsn.explorer.models.{BlockRewardsSummary, MarketInformation, MarketStatistics, Statistics, NodeStatistics}
 import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
@@ -30,6 +26,7 @@ import play.api.test.Helpers._
 import scala.concurrent.Future
 
 class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
+
   override def afterAll: Unit = {
     actorSystem.terminate()
     ()
@@ -72,6 +69,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         address: Address
     ): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
 
+    override def getRewardedAddressesCount(startDate: Instant): ApplicationResult[Long] = Good(123L)
   }
 
   val xsnService = mock[XSNService]
@@ -94,12 +92,12 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     .build()
 
   class CurrencyActorMock extends Actor {
-    override def receive: Receive = {
-      case CurrencySynchronizerActor.GetMarketStatistics =>
-        val map: Map[Currency, BigDecimal] =
-          Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
-        val reply = MarketStatistics(map, MarketInformation(0, 0))
-        sender() ! reply
+
+    override def receive: Receive = { case CurrencySynchronizerActor.GetMarketStatistics =>
+      val map: Map[Currency, BigDecimal] =
+        Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+      val reply = MarketStatistics(map, MarketInformation(0, 0))
+      sender() ! reply
     }
   }
 
@@ -224,6 +222,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal(
         "70000.12345678"
       )
+      (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
     }
   }
 

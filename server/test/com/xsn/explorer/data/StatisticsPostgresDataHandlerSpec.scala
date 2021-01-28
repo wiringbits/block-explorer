@@ -1,44 +1,34 @@
 package com.xsn.explorer.data
 
+import java.time.Instant
+
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{
-  BalancePostgresDAO,
-  StatisticsPostgresDAO,
-  TPoSContractDAO
-}
-import com.xsn.explorer.data.anorm.{
-  BalancePostgresDataHandler,
-  StatisticsPostgresDataHandler
-}
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
+import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
 import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
 import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
-import com.xsn.explorer.models.{
-  BlockExtractionMethod,
-  BlockReward,
-  BlockRewards,
-  PoSBlockRewards,
-  TPoSBlockRewards
-}
+import com.xsn.explorer.models.{BlockExtractionMethod, BlockReward, BlockRewards, PoSBlockRewards, TPoSBlockRewards}
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.{Address, Height}
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
+import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class StatisticsPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   val secondsInOneDay = 24 * 60 * 60
+
   lazy val dataHandler = new StatisticsPostgresDataHandler(
     database,
     new StatisticsPostgresDAO,
     new TPoSContractDAO()
   )
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
+
   lazy val balanceDataHandler =
     new BalancePostgresDataHandler(
       database,
@@ -351,6 +341,64 @@ class StatisticsPostgresDataHandlerSpec
 
   }
 
+  "getRewardedAddressesCount" should {
+    "get the count of rewarded addresses in the last 72 hours" in {
+      val address1 = DataGenerator.randomAddress
+      val address2 = DataGenerator.randomAddress
+      val address3 = DataGenerator.randomAddress
+      val address4 = DataGenerator.randomAddress
+
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address1,
+        rewarMerchantdAddress = address4,
+        time = Instant.now
+      )
+
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address2,
+        rewarMerchantdAddress = address4,
+        time = Instant.now
+      )
+
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address3,
+        rewarMerchantdAddress = address4,
+        time = Instant.now.minusSeconds(73.hours.toSeconds)
+      )
+
+      val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
+      dataHandler.getRewardedAddressesCount(startDate) match {
+        case Good(count) =>
+          count mustBe 3
+        case _ => fail
+      }
+    }
+
+    "return 0 when there are no rewards" in {
+      val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
+      dataHandler.getRewardedAddressesCount(startDate) match {
+        case Good(count) =>
+          count mustBe 0
+        case _ => fail
+      }
+    }
+  }
+
   private def setAvailableCoins(total: BigDecimal) = {
     database.withConnection { implicit conn =>
       _root_.anorm
@@ -369,10 +417,10 @@ class StatisticsPostgresDataHandlerSpec
       blockhash: String,
       blockHeight: Int,
       extractionMethod: BlockExtractionMethod,
-      reward: BlockRewards
+      reward: BlockRewards,
+      time: Instant
   ) = {
-    val emptyFilterFactory = () =>
-      GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+    val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
     val block = BlockLoader
       .get(blockhash)
@@ -380,7 +428,8 @@ class StatisticsPostgresDataHandlerSpec
         previousBlockhash = None,
         nextBlockhash = None,
         height = Height(blockHeight),
-        extractionMethod = extractionMethod
+        extractionMethod = extractionMethod,
+        time = time.toEpochMilli
       )
 
     val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
@@ -395,10 +444,12 @@ class StatisticsPostgresDataHandlerSpec
       blockHeight: Int,
       rewardValue: BigDecimal,
       rewardStakedValue: BigDecimal,
-      rewardStakeWaitTime: Long
+      rewardStakeWaitTime: Long,
+      rewardAddress: Address = DataGenerator.randomAddress,
+      time: Instant = Instant.now
   ) = {
     val reward = PoSBlockRewards(
-      BlockReward(DataGenerator.randomAddress, rewardValue),
+      BlockReward(rewardAddress, rewardValue),
       None,
       rewardStakedValue,
       rewardStakeWaitTime
@@ -408,7 +459,8 @@ class StatisticsPostgresDataHandlerSpec
       blockhash,
       blockHeight,
       BlockExtractionMethod.ProofOfStake,
-      reward
+      reward,
+      time
     )
   }
 
@@ -417,11 +469,14 @@ class StatisticsPostgresDataHandlerSpec
       blockHeight: Int,
       rewardValue: BigDecimal,
       rewardStakedValue: BigDecimal,
-      rewardStakeWaitTime: Long
+      rewardStakeWaitTime: Long,
+      rewardOwnerAddress: Address = DataGenerator.randomAddress,
+      rewarMerchantdAddress: Address = DataGenerator.randomAddress,
+      time: Instant = Instant.now
   ) = {
     val reward = TPoSBlockRewards(
-      BlockReward(DataGenerator.randomAddress, rewardValue * 0.9),
-      BlockReward(DataGenerator.randomAddress, rewardValue * 0.1),
+      BlockReward(rewardOwnerAddress, rewardValue * 0.9),
+      BlockReward(rewarMerchantdAddress, rewardValue * 0.1),
       None,
       rewardStakedValue,
       rewardStakeWaitTime
@@ -431,7 +486,8 @@ class StatisticsPostgresDataHandlerSpec
       blockhash,
       blockHeight,
       BlockExtractionMethod.TrustlessProofOfStake,
-      reward
+      reward,
+      time
     )
   }
 

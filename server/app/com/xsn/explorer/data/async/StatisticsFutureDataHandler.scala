@@ -1,5 +1,7 @@
 package com.xsn.explorer.data.async
 
+import java.time.Instant
+
 import javax.inject.Inject
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.{
@@ -44,4 +46,10 @@ class StatisticsFutureDataHandler @Inject() (
       }
     }
 
+  override def getRewardedAddressesCount(startDate: Instant): FutureApplicationResult[Long] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getRewardedAddressesCount(startDate)
+      }
+    }
 }
