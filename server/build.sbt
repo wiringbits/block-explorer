@@ -75,8 +75,8 @@ libraryDependencies += "com.google.guava" % "guava" % "30.1-jre"
 
 libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
 
-libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.11"
-libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.11"
+libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.12"
+libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.12"
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
 libraryDependencies += "org.mockito" %% "mockito-scala" % "1.16.23" % Test
