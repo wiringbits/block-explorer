@@ -70,6 +70,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     ): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
 
     override def getRewardedAddressesCount(startDate: Instant): ApplicationResult[Long] = Good(123L)
+
+    override def getRewardedAddressesSum(startDate: Instant): ApplicationResult[Long] = Good(123456L)
   }
 
   val xsnService = mock[XSNService]
@@ -223,6 +225,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         "70000.12345678"
       )
       (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
+      (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual 123456L
     }
   }
 

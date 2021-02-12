@@ -80,6 +80,20 @@ class StatisticsPostgresDAO {
     ).as(SqlParser.scalar[Long].singleOpt)
       .getOrElse(0)
   }
+
+  def getRewardedAddressesSum(startDate: Instant)(implicit conn: Connection): Long = {
+    SQL(
+      """
+        |SELECT  COALESCE(SUM(value),0) AS amount
+        |FROM block_rewards r
+        |INNER JOIN blocks b USING(blockhash)
+        |WHERE b.time >= {start_date}
+      """.stripMargin
+    ).on(
+      'start_date -> startDate.getEpochSecond
+    ).as(SqlParser.scalar[Long].singleOpt)
+      .getOrElse(0)
+  }
 }
 
 object StatisticsPostgresDAO {

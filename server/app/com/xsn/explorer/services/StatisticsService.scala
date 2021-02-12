@@ -126,6 +126,12 @@ class StatisticsService @Inject() (
     statisticsFutureDataHandler.getRewardedAddressesCount(startDate)
   }
 
+  def getRewardedAddressesSum(period: FiniteDuration): FutureApplicationResult[Long] = {
+    val startDate = Instant.now.minusSeconds(period.toSeconds)
+
+    statisticsFutureDataHandler.getRewardedAddressesSum(startDate)
+  }
+
   private def discardErrors[T](
       value: FutureApplicationResult[T]
   ): FutureApplicationResult[Option[T]] = {

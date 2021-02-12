@@ -399,6 +399,64 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     }
   }
 
+  "getRewardedAddressesSum" should {
+    "get the amount of rewarded addresses in the last 72 hours" in {
+      val address1 = DataGenerator.randomAddress
+      val address2 = DataGenerator.randomAddress
+      val address3 = DataGenerator.randomAddress
+      val address4 = DataGenerator.randomAddress
+
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address1,
+        rewarMerchantdAddress = address4,
+        time = Instant.now
+      )
+
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address2,
+        rewarMerchantdAddress = address4,
+        time = Instant.now
+      )
+
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = address3,
+        rewarMerchantdAddress = address4,
+        time = Instant.now.minusSeconds(73.hours.toSeconds)
+      )
+
+      val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
+      dataHandler.getRewardedAddressesSum(startDate) match {
+        case Good(count) =>
+          count mustBe 400
+        case _ => fail
+      }
+    }
+
+    "return 0 when there are no rewards" in {
+      val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
+      dataHandler.getRewardedAddressesCount(startDate) match {
+        case Good(count) =>
+          count mustBe 0
+        case _ => fail
+      }
+    }
+  }
+
   private def setAvailableCoins(total: BigDecimal) = {
     database.withConnection { implicit conn =>
       _root_.anorm

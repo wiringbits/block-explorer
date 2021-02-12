@@ -39,4 +39,9 @@ class StatisticsPostgresDataHandler @Inject() (
     withConnection { implicit conn =>
       Good(statisticsDAO.getRewardedAddressesCount(startDate))
     }
+
+  override def getRewardedAddressesSum(startDate: Instant): ApplicationResult[Long] =
+    withConnection { implicit conn =>
+      Good(statisticsDAO.getRewardedAddressesSum(startDate))
+    }
 }

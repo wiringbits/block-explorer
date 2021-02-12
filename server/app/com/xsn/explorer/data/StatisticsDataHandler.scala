@@ -19,6 +19,8 @@ trait StatisticsDataHandler[F[_]] {
   def getTPoSMerchantStakingAddresses(
       merchantAddress: Address
   ): F[List[Address]]
+
+  def getRewardedAddressesSum(startDate: Instant): F[Long]
 }
 
 trait StatisticsBlockingDataHandler extends StatisticsDataHandler[ApplicationResult]
