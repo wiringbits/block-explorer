@@ -1,10 +1,9 @@
 package com.xsn.explorer.data
 
 import java.time.Instant
-
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.models.values.Address
-import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 
 import scala.language.higherKinds
 
@@ -14,7 +13,7 @@ trait StatisticsDataHandler[F[_]] {
 
   def getRewardsSummary(numberOfBlocks: Int): F[BlockRewardsSummary]
 
-  def getRewardedAddressesCount(startDate: Instant): F[Long]
+  def getRewardedAddresses(startDate: Instant): F[AddressesReward]
 
   def getTPoSMerchantStakingAddresses(
       merchantAddress: Address

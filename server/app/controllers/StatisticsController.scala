@@ -38,11 +38,14 @@ class StatisticsController @Inject() (
   def getBlockRewardsSummary() = public { _ =>
     val response = for {
       blockRewards <- statisticsService.getRewardsSummary(1000).toFutureOr
-      rewardedAddressesCount <- statisticsService.getRewardedAddressesCount(72.hours).toFutureOr
+      rewardedAddresses <- statisticsService.getRewardedAddresses(72.hours).toFutureOr
 
       rewardsJson = Json.toJson(blockRewards).as[JsObject]
-      result = rewardsJson + ("rewardedAddressesCountLast72Hours" -> Json.toJson(rewardedAddressesCount))
-    } yield Ok(result).withHeaders("Cache-Control" -> "public, max-age=60")
+      result = rewardsJson + ("rewardedAddressesCountLast72Hours" -> Json.toJson(rewardedAddresses.addressesNumber)) +
+        ("rewardedAddressesSumLast72Hours" -> Json.toJson(rewardedAddresses.amount))
+    } yield {
+      Ok(result).withHeaders("Cache-Control" -> "public, max-age=3600")
+    }
 
     response.toFuture
   }

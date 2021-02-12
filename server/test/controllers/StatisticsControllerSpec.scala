@@ -1,12 +1,18 @@
 package controllers
 
 import java.time.Instant
-
 import akka.actor.{Actor, ActorSystem, Props}
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.{BlockRewardsSummary, MarketInformation, MarketStatistics, Statistics, NodeStatistics}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  BlockRewardsSummary,
+  MarketInformation,
+  MarketStatistics,
+  NodeStatistics,
+  Statistics
+}
 import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
@@ -69,7 +75,9 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         address: Address
     ): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
 
-    override def getRewardedAddressesCount(startDate: Instant): ApplicationResult[Long] = Good(123L)
+    override def getRewardedAddresses(startDate: Instant): ApplicationResult[AddressesReward] = Good(
+      AddressesReward(123L, BigDecimal(1000.0))
+    )
   }
 
   val xsnService = mock[XSNService]
@@ -223,6 +231,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         "70000.12345678"
       )
       (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
+
+      (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual BigDecimal(1000)
     }
   }
 

@@ -2,11 +2,8 @@ package com.xsn.explorer.data.anorm.parsers
 
 import anorm.SqlParser._
 import anorm._
-import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{
-  Reward,
-  Stake
-}
-import com.xsn.explorer.models.{BlockReward, BlockRewardsSummary, RewardType}
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{Reward, Stake}
+import com.xsn.explorer.models.{AddressesReward, BlockReward, BlockRewardsSummary, RewardType}
 
 object BlockRewardParsers {
 
@@ -53,4 +50,8 @@ object BlockRewardParsers {
           averageWaitTime
         )
     }
+
+  val addressSummaryParser = (get[Long]("count") ~ get[BigDecimal]("amount")).map { case count ~ amount =>
+    AddressesReward(addressesNumber = count, amount = amount)
+  }
 }

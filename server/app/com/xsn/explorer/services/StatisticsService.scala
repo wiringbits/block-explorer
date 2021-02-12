@@ -1,20 +1,26 @@
 package com.xsn.explorer.services
 
 import java.time.Instant
-
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{StatisticsFutureDataHandler, BalanceFutureDataHandler}
-import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, NodeStatistics, SynchronizationProgress}
+import com.xsn.explorer.data.async.{BalanceFutureDataHandler, StatisticsFutureDataHandler}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  MarketStatistics,
+  NodeStatistics,
+  StatisticsDetails,
+  SynchronizationProgress
+}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
   MasternodeRepository,
   MerchantnodeRepository,
   NodeStatsRepository
 }
+
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 
@@ -120,10 +126,10 @@ class StatisticsService @Inject() (
       .map(Good(_))
   }
 
-  def getRewardedAddressesCount(period: FiniteDuration): FutureApplicationResult[Long] = {
+  def getRewardedAddresses(period: FiniteDuration): FutureApplicationResult[AddressesReward] = {
     val startDate = Instant.now.minusSeconds(period.toSeconds)
 
-    statisticsFutureDataHandler.getRewardedAddressesCount(startDate)
+    statisticsFutureDataHandler.getRewardedAddresses(startDate)
   }
 
   private def discardErrors[T](

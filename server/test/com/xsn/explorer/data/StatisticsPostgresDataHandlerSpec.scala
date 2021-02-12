@@ -1,7 +1,6 @@
 package com.xsn.explorer.data
 
 import java.time.Instant
-
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
@@ -10,11 +9,19 @@ import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
 import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
 import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
-import com.xsn.explorer.models.{BlockExtractionMethod, BlockReward, BlockRewards, PoSBlockRewards, TPoSBlockRewards}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  BlockExtractionMethod,
+  BlockReward,
+  BlockRewards,
+  PoSBlockRewards,
+  TPoSBlockRewards
+}
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.{Address, Height}
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
+
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
@@ -382,18 +389,20 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       )
 
       val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
-      dataHandler.getRewardedAddressesCount(startDate) match {
-        case Good(count) =>
-          count mustBe 3
+      val expected = AddressesReward(3, BigDecimal(400))
+      dataHandler.getRewardedAddresses(startDate) match {
+        case Good(result) =>
+          result mustBe expected
         case _ => fail
       }
     }
 
     "return 0 when there are no rewards" in {
       val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
-      dataHandler.getRewardedAddressesCount(startDate) match {
-        case Good(count) =>
-          count mustBe 0
+      val expected = AddressesReward(0, BigDecimal(0))
+      dataHandler.getRewardedAddresses(startDate) match {
+        case Good(result) =>
+          result mustBe expected
         case _ => fail
       }
     }

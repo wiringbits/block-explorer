@@ -2,11 +2,10 @@ package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
 import java.time.Instant
-
 import anorm._
-import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseSummary
+import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{addressSummaryParser, parseSummary}
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
-import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 import org.slf4j.LoggerFactory
 
 class StatisticsPostgresDAO {
@@ -66,19 +65,18 @@ class StatisticsPostgresDAO {
     ).as(parseSummary.single)
   }
 
-  def getRewardedAddressesCount(startDate: Instant)(implicit conn: Connection): Long = {
+  def getRewardedAddresses(startDate: Instant)(implicit conn: Connection): AddressesReward = {
     SQL(
       """
         |SELECT
-        |  COUNT(DISTINCT address) AS count
+        |  COUNT(DISTINCT address) AS count, COALESCE(SUM(value),0) AS amount
         |FROM block_rewards r
         |INNER JOIN blocks b USING(blockhash)
         |WHERE b.time >= {start_date}
       """.stripMargin
     ).on(
       'start_date -> startDate.getEpochSecond
-    ).as(SqlParser.scalar[Long].singleOpt)
-      .getOrElse(0)
+    ).as(addressSummaryParser.single)
   }
 }
 
