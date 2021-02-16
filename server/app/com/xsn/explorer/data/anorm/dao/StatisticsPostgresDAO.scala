@@ -74,6 +74,7 @@ class StatisticsPostgresDAO {
         |  FROM block_rewards r
         |  INNER JOIN blocks b USING(blockhash)
         |  WHERE b.time >= {start_date}
+        |    AND r.type != 'MASTERNODE'
         |)
         |
         |SELECT
