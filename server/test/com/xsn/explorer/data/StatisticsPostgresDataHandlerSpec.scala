@@ -1,6 +1,7 @@
 package com.xsn.explorer.data
 
 import java.time.Instant
+
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
@@ -9,6 +10,8 @@ import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
 import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
 import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
+import com.xsn.explorer.models.persisted.Balance
+import com.xsn.explorer.models.values.{Address, Height}
 import com.xsn.explorer.models.{
   AddressesReward,
   BlockExtractionMethod,
@@ -17,8 +20,6 @@ import com.xsn.explorer.models.{
   PoSBlockRewards,
   TPoSBlockRewards
 }
-import com.xsn.explorer.models.persisted.Balance
-import com.xsn.explorer.models.values.{Address, Height}
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
@@ -388,8 +389,13 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         time = Instant.now.minusSeconds(73.hours.toSeconds)
       )
 
+      addBalance(Balance(address = address1, received = BigDecimal(500), spent = BigDecimal(100)))
+      addBalance(Balance(address = address2, received = BigDecimal(500), spent = BigDecimal(200)))
+      addBalance(Balance(address = address3, received = BigDecimal(500), spent = BigDecimal(300)))
+      addBalance(Balance(address = address4, received = BigDecimal(500), spent = BigDecimal(400)))
+
       val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
-      val expected = AddressesReward(3, BigDecimal(400))
+      val expected = AddressesReward(3, BigDecimal(800))
       dataHandler.getRewardedAddresses(startDate) match {
         case Good(result) =>
           result mustBe expected
@@ -419,6 +425,26 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
           """.stripMargin
         )
         .executeUpdate()
+    }
+  }
+
+  private def addBalance(balance: Balance): Unit = {
+    database.withConnection { implicit conn =>
+      _root_.anorm
+        .SQL(
+          """
+          |INSERT INTO balances(address, received, spent)
+          |VALUES({address}, {received}, {spent})
+      """.stripMargin
+        )
+        .on(
+          'address -> balance.address.string,
+          'received -> balance.received,
+          'spent -> balance.spent
+        )
+        .execute()
+
+      ()
     }
   }
 

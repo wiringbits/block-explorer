@@ -68,11 +68,27 @@ class StatisticsPostgresDAO {
   def getRewardedAddresses(startDate: Instant)(implicit conn: Connection): AddressesReward = {
     SQL(
       """
+        |WITH addresses AS (
+        |  SELECT
+        |    DISTINCT address
+        |  FROM block_rewards r
+        |  INNER JOIN blocks b USING(blockhash)
+        |  WHERE b.time >= {start_date}
+        |)
+        |
         |SELECT
-        |  COUNT(DISTINCT address) AS count, COALESCE(SUM(value),0) AS amount
-        |FROM block_rewards r
-        |INNER JOIN blocks b USING(blockhash)
-        |WHERE b.time >= {start_date}
+        |  COUNT(*) AS count,
+        |  COALESCE(
+        |    SUM(
+        |      COALESCE(
+        |        b.received - b.spent,
+        |        0
+        |      )
+        |    ),
+        |    0
+        |  ) AS amount
+        |FROM addresses a
+        |LEFT JOIN balances b USING(address)
       """.stripMargin
     ).on(
       'start_date -> startDate.getEpochSecond
