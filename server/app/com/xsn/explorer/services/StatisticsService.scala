@@ -1,6 +1,5 @@
 package com.xsn.explorer.services
 
-import java.time.Instant
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
@@ -11,21 +10,23 @@ import com.xsn.explorer.models.{
   AddressesReward,
   MarketStatistics,
   NodeStatistics,
+  ROI,
   StatisticsDetails,
   SynchronizationProgress
 }
-import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import com.xsn.explorer.services.synchronizer.repository.{
   MasternodeRepository,
   MerchantnodeRepository,
   NodeStatsRepository
 }
-
-import javax.inject.Inject
+import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import org.scalactic.{Bad, Good}
 
+import java.time.Instant
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.math.BigDecimal.RoundingMode
 
 class StatisticsService @Inject() (
     xsnService: XSNService,
@@ -42,15 +43,17 @@ class StatisticsService @Inject() (
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val mnStats = masternodeRepository.getCount()
+    val masternodesEnabled = masternodeRepository.getEnabledCount()
     val tposStats = merchantnodeRepository.getCount()
     val difficultyF = xsnService.getDifficulty()
 
     val result = for {
       stats <- dbStats.toFutureOr
       mnCount <- mnStats.map(x => Good(Some(x))).toFutureOr
+      mnEnabledCount <- masternodesEnabled.map(x => Good(Some(x))).toFutureOr
       difficulty <- discardErrors(difficultyF).toFutureOr
       tposCount <- tposStats.map(x => Good(Some(x))).toFutureOr
-    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty)
+    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty, mnEnabledCount)
 
     result.toFuture
   }
@@ -130,6 +133,20 @@ class StatisticsService @Inject() (
     val startDate = Instant.now.minusSeconds(period.toSeconds)
 
     statisticsFutureDataHandler.getRewardedAddresses(startDate)
+  }
+
+  def getROI(rewardedAddressesSumLast72Hours: BigDecimal): FutureApplicationResult[ROI] = {
+    masternodeRepository.getEnabledCount().map { enabledMasternodes =>
+      val mnROI: BigDecimal =
+        if (enabledMasternodes > 0)
+          (BigDecimal(12960) / (enabledMasternodes * BigDecimal(15000)) * BigDecimal(365)).setScale(8, RoundingMode.UP)
+        else BigDecimal(0)
+      val stakingROI: BigDecimal =
+        if (rewardedAddressesSumLast72Hours > 0)
+          (BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(365).setScale(8, RoundingMode.UP)
+        else BigDecimal(0)
+      Good(ROI(masternodes = mnROI, staking = stakingROI))
+    }
   }
 
   private def discardErrors[T](

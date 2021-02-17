@@ -6,7 +6,8 @@ case class StatisticsDetails(
     statistics: Statistics,
     masternodes: Option[Int],
     tposnodes: Option[Int],
-    difficulty: Option[BigDecimal]
+    difficulty: Option[BigDecimal],
+    masternodes_enabled: Option[Int]
 )
 
 object StatisticsDetails {
@@ -25,7 +26,8 @@ object StatisticsDetails {
       ),
       "masternodes" -> obj.masternodes.map(c => JsNumber.apply(c)),
       "tposnodes" -> obj.tposnodes.map(c => JsNumber.apply(c)),
-      "difficulty" -> obj.difficulty.map(c => JsNumber.apply(c))
+      "difficulty" -> obj.difficulty.map(c => JsNumber.apply(c)),
+      "masternodes_enabled" -> obj.masternodes_enabled.map(c => JsNumber.apply(c))
     ).flatMap { case (key, maybe) =>
       maybe.map(key -> _)
     }

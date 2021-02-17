@@ -113,9 +113,13 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     "return the server statistics" in {
       val masternodes = 1000
       val tposnodes = 100
+      val enabledMasternodes = 200
+
       val difficulty = BigDecimal("129.1827211827212")
       when(masternodeRepository.getCount())
         .thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
       when(masternodeRepository.getAll()).thenReturn(Future.successful(List()))
       when(merchantnodeRepository.getCount())
         .thenReturn(Future.successful(tposnodes))
@@ -136,13 +140,18 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "masternodes").as[Int] mustEqual masternodes
       (json \ "tposnodes").as[Int] mustEqual tposnodes
       (json \ "difficulty").as[BigDecimal] mustEqual difficulty
+      (json \ "masternodes_enabled").as[Int] mustEqual enabledMasternodes
+
     }
 
     "return the stats even if getting the difficulty throws an exception" in {
       val masternodes = 1000
+      val enabledMasternodes = 200
       val tposnodes = 100
       when(masternodeRepository.getCount())
         .thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
       when(merchantnodeRepository.getCount())
         .thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.failed(new Exception))
@@ -205,34 +214,26 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   "GET /rewards-summary" should {
     "get rewards summary" in {
+
+      val enabledMasternodes = 40
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
+
       val response = GET(s"/rewards-summary")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
-      (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal(
-        "1000.12345678"
-      )
-      (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal(
-        "4800.12345678"
-      )
-      (json \ "medianInput").as[BigDecimal] mustEqual BigDecimal(
-        "4900.12345678"
-      )
-      (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal(
-        "5000.12345678"
-      )
-      (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal(
-        "4500.12345678"
-      )
-      (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal(
-        "60000.12345678"
-      )
-      (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal(
-        "70000.12345678"
-      )
+      (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal("1000.12345678")
+      (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal("4800.12345678")
+      (json \ "medianInput").as[BigDecimal] mustEqual BigDecimal("4900.12345678")
+      (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
+      (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
+      (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
+      (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal("70000.12345678")
       (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
-
       (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual BigDecimal(1000)
+      (json \ "masternodesROI").as[BigDecimal] mustEqual BigDecimal(7.884)
+      (json \ "stakingROI").as[BigDecimal] mustEqual BigDecimal(4730.4)
     }
   }
 
