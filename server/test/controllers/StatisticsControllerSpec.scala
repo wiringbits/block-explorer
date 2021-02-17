@@ -51,8 +51,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     masternodesProtocols = Map("70209" -> 950, "70210" -> 50),
     tposnodes = 100,
     enabledTposnodes = 90,
-    tposnodesProtocols = Map("70209" -> 90),
-    coinsStaking = 100
+    tposnodesProtocols = Map("70209" -> 90)
   )
 
   val dataHandler = new StatisticsBlockingDataHandler {
@@ -182,7 +181,6 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       val tposnodes = 100
       val enabledTposnodes = 90
       val tnProtocols = Map("70209" -> 90)
-      val coinsStaking = 100
 
       when(masternodeRepository.getCount())
         .thenReturn(Future.successful(masternodes))
@@ -196,8 +194,6 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         .thenReturn(Future.successful(enabledTposnodes))
       when(merchantnodeRepository.getProtocols())
         .thenReturn(Future.successful(tnProtocols))
-      when(nodeStatsRepository.getCoinsStaking())
-        .thenReturn(Future.successful(coinsStaking))
 
       val response = GET("/node-stats")
 

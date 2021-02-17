@@ -14,11 +14,7 @@ import com.xsn.explorer.models.{
   StatisticsDetails,
   SynchronizationProgress
 }
-import com.xsn.explorer.services.synchronizer.repository.{
-  MasternodeRepository,
-  MerchantnodeRepository,
-  NodeStatsRepository
-}
+import com.xsn.explorer.services.synchronizer.repository.{MasternodeRepository, MerchantnodeRepository}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import org.scalactic.{Bad, Good}
 
@@ -34,8 +30,7 @@ class StatisticsService @Inject() (
     statisticsFutureDataHandler: StatisticsFutureDataHandler,
     balanceFutureDataHandler: BalanceFutureDataHandler,
     merchantnodeRepository: MerchantnodeRepository,
-    masternodeRepository: MasternodeRepository,
-    nodeStatsRepository: NodeStatsRepository
+    masternodeRepository: MasternodeRepository
 )(implicit
     ec: ExecutionContext
 ) {
@@ -66,7 +61,6 @@ class StatisticsService @Inject() (
       tposCount <- merchantnodeRepository.getCount()
       tposEnabledCount <- merchantnodeRepository.getEnabledCount()
       tposProtocols <- merchantnodeRepository.getProtocols()
-      coinsStaking <- nodeStatsRepository.getCoinsStaking()
     } yield {
       val stats = NodeStatistics(
         masternodes = mnCount,
@@ -74,8 +68,7 @@ class StatisticsService @Inject() (
         masternodesProtocols = mnProtocols,
         tposnodes = tposCount,
         enabledTposnodes = tposEnabledCount,
-        tposnodesProtocols = tposProtocols,
-        coinsStaking = coinsStaking
+        tposnodesProtocols = tposProtocols
       )
       Good(stats)
     }
@@ -143,7 +136,7 @@ class StatisticsService @Inject() (
         else BigDecimal(0)
       val stakingROI: BigDecimal =
         if (rewardedAddressesSumLast72Hours > 0)
-          (BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(365).setScale(8, RoundingMode.UP)
+          ((BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(365)).setScale(8, RoundingMode.UP)
         else BigDecimal(0)
       Good(ROI(masternodes = mnROI, staking = stakingROI))
     }
