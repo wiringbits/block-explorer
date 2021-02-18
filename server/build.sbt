@@ -58,7 +58,7 @@ libraryDependencies ++= Seq(
 libraryDependencies += "com.google.inject" % "guice" % "4.2.3"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.4"
 libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.9"
-libraryDependencies += "org.postgresql" % "postgresql" % "42.2.18"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3"
