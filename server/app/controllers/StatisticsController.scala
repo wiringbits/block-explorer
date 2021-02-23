@@ -40,7 +40,7 @@ class StatisticsController @Inject() (
       blockRewards <- statisticsService.getRewardsSummary(1000).toFutureOr
       rewardedAddresses <- statisticsService.getRewardedAddresses(72.hours).toFutureOr
       roi <- statisticsService.getROI(rewardedAddresses.amount).toFutureOr
-
+      coinsTrustlesslyStaking <- statisticsService.getStakingCoins().toFutureOr
     } yield {
 
       val rewardsJson = Json.toJson(blockRewards).as[JsObject]
@@ -48,7 +48,8 @@ class StatisticsController @Inject() (
         ("rewardedAddressesCountLast72Hours" -> Json.toJson(rewardedAddresses.addressesNumber)) +
         ("rewardedAddressesSumLast72Hours" -> Json.toJson(rewardedAddresses.amount)) +
         ("masternodesROI" -> Json.toJson(roi.masternodes)) +
-        ("stakingROI" -> Json.toJson(roi.staking))
+        ("stakingROI" -> Json.toJson(roi.staking)) +
+        ("coinsTrustlesslyStaking" -> Json.toJson(coinsTrustlesslyStaking))
 
       Ok(result).withHeaders("Cache-Control" -> "public, max-age=3600")
     }

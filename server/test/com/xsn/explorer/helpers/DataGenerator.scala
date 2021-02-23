@@ -117,8 +117,9 @@ trait DataGenerator {
           .map(randomInput)
     }
 
-  /** Generate a random transaction spending the given utxos
-    */
+  /**
+   * Generate a random transaction spending the given utxos
+   */
   def randomTransaction(
       blockhash: Blockhash,
       id: TransactionId = randomTransactionId,
@@ -149,9 +150,10 @@ trait DataGenerator {
 
   def randomTPoSContract(
       txid: TransactionId = randomTransactionId,
-      index: Int = scala.util.Random.nextInt(100)
+      index: Int = scala.util.Random.nextInt(100),
+      state: TPoSContract.State = randomItem(TPoSContract.State.values.toList)
   ): TPoSContract = {
-    val state = randomItem(TPoSContract.State.values.toList)
+
     val commission =
       TPoSContract.Commission.from(scala.util.Random.nextInt(50) + 1).get
     val details = TPoSContract.Details(randomAddress, randomAddress, commission)

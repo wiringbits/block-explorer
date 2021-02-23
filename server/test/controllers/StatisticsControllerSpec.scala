@@ -77,6 +77,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     override def getRewardedAddresses(startDate: Instant): ApplicationResult[AddressesReward] = Good(
       AddressesReward(123L, BigDecimal(1000.0))
     )
+
+    override def getStakingCoins(): ApplicationResult[BigDecimal] = Good(BigDecimal(6000))
   }
 
   val xsnService = mock[XSNService]
@@ -212,8 +214,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     "get rewards summary" in {
 
       val enabledMasternodes = 40
-      when(masternodeRepository.getEnabledCount())
-        .thenReturn(Future.successful(enabledMasternodes))
+      when(masternodeRepository.getEnabledCount()).thenReturn(Future.successful(enabledMasternodes))
 
       val response = GET(s"/rewards-summary")
       status(response) mustEqual OK
@@ -230,6 +231,7 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual BigDecimal(1000)
       (json \ "masternodesROI").as[BigDecimal] mustEqual BigDecimal(7.884)
       (json \ "stakingROI").as[BigDecimal] mustEqual BigDecimal(4730.4)
+      (json \ "coinsTrustlesslyStaking").as[BigDecimal] mustEqual BigDecimal(6000)
     }
   }
 

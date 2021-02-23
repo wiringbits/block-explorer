@@ -1,10 +1,12 @@
 package com.xsn.explorer.data
 
-import java.time.Instant
-
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
-import com.xsn.explorer.data.anorm.{BalancePostgresDataHandler, StatisticsPostgresDataHandler}
+import com.xsn.explorer.data.anorm.{
+  BalancePostgresDataHandler,
+  LedgerPostgresDataHandler,
+  StatisticsPostgresDataHandler
+}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
@@ -18,24 +20,26 @@ import com.xsn.explorer.models.{
   BlockReward,
   BlockRewards,
   PoSBlockRewards,
-  TPoSBlockRewards
+  TPoSBlockRewards,
+  TPoSContract
 }
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
+import java.time.Instant
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
-  val secondsInOneDay = 24 * 60 * 60
+  val secondsInOneDay: Int = 24 * 60 * 60
 
   lazy val dataHandler = new StatisticsPostgresDataHandler(
     database,
     new StatisticsPostgresDAO,
     new TPoSContractDAO()
   )
-  lazy val ledgerDataHandler = createLedgerDataHandler(database)
+  lazy val ledgerDataHandler: LedgerPostgresDataHandler = createLedgerDataHandler(database)
 
   lazy val balanceDataHandler =
     new BalancePostgresDataHandler(
@@ -414,6 +418,132 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     }
   }
 
+  "getStakingCoins" should {
+    "get the correct amount for the active tpos contracts" in {
+
+      val contract1 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Active)
+      val contract2 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Active)
+      val contract3 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+
+      val rewardOwnerAddress1 = contract1.details.owner
+      val rewarMerchantdAddress1 = contract1.details.merchant
+      val rewardOwnerAddress2 = contract2.details.owner
+      val rewarMerchantdAddress2 = contract2.details.merchant
+      val rewardOwnerAddress3 = contract3.details.owner
+      val rewarMerchantdAddress3 = contract3.details.merchant
+
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        600,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress1,
+        rewarMerchantdAddress = rewarMerchantdAddress1,
+        time = Instant.now,
+        List(contract1)
+      )
+
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        900,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress2,
+        rewarMerchantdAddress = rewarMerchantdAddress2,
+        time = Instant.now,
+        List(contract2)
+      )
+
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress3,
+        rewarMerchantdAddress = rewarMerchantdAddress3,
+        time = Instant.now.minusSeconds(73.hours.toSeconds),
+        List(contract3)
+      )
+
+      addBalance(Balance(address = rewardOwnerAddress1, received = BigDecimal(500), spent = BigDecimal(100)))
+      addBalance(Balance(address = rewardOwnerAddress2, received = BigDecimal(500), spent = BigDecimal(200)))
+      addBalance(Balance(address = rewardOwnerAddress3, received = BigDecimal(500), spent = BigDecimal(300)))
+
+      val expected = BigDecimal(700)
+
+      dataHandler.getStakingCoins() match {
+        case Good(result) =>
+          result mustBe expected
+        case _ => fail
+      }
+    }
+
+    "get 0 when there aren't any active tpos contract" in {
+
+      val contract1 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+      val contract2 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+      val contract3 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+
+      val rewardOwnerAddress1 = contract1.details.owner
+      val rewarMerchantdAddress1 = contract1.details.merchant
+      val rewardOwnerAddress2 = contract2.details.owner
+      val rewarMerchantdAddress2 = contract2.details.merchant
+      val rewardOwnerAddress3 = contract3.details.owner
+      val rewarMerchantdAddress3 = contract3.details.merchant
+
+      pushTPoSBlock(
+        "00000b59875e80b0afc6c657bc5318d39e03532b7d97fb78a4c7bd55c4840c32",
+        0,
+        600,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress1,
+        rewarMerchantdAddress = rewarMerchantdAddress1,
+        time = Instant.now,
+        List(contract1)
+      )
+
+      pushTPoSBlock(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34",
+        1,
+        900,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress2,
+        rewarMerchantdAddress = rewarMerchantdAddress2,
+        time = Instant.now,
+        List(contract2)
+      )
+
+      pushTPoSBlock(
+        "1ca318b7a26ed67ca7c8c9b5069d653ba224bf86989125d1dfbb0973b7d6a5e0",
+        2,
+        200,
+        9999,
+        2 * secondsInOneDay,
+        rewardOwnerAddress = rewardOwnerAddress3,
+        rewarMerchantdAddress = rewarMerchantdAddress3,
+        time = Instant.now.minusSeconds(73.hours.toSeconds),
+        List(contract3)
+      )
+
+      addBalance(Balance(address = rewardOwnerAddress1, received = BigDecimal(500), spent = BigDecimal(100)))
+      addBalance(Balance(address = rewardOwnerAddress2, received = BigDecimal(500), spent = BigDecimal(200)))
+      addBalance(Balance(address = rewardOwnerAddress3, received = BigDecimal(500), spent = BigDecimal(300)))
+
+      val expected = BigDecimal(0)
+
+      dataHandler.getStakingCoins() match {
+        case Good(result) =>
+          result mustBe expected
+        case _ => fail
+      }
+    }
+  }
+
   private def setAvailableCoins(total: BigDecimal) = {
     database.withConnection { implicit conn =>
       _root_.anorm
@@ -453,7 +583,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       blockHeight: Int,
       extractionMethod: BlockExtractionMethod,
       reward: BlockRewards,
-      time: Instant
+      time: Instant,
+      tposContracts: List[TPoSContract] = List.empty
   ) = {
     val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
@@ -467,10 +598,14 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         time = time.getEpochSecond
       )
 
-    val tx = randomTransaction(blockhash = block.hash, utxos = List.empty)
+    val tx = tposContracts match {
+      case Nil => randomTransaction(blockhash = block.hash, utxos = List.empty)
+      case ::(head, _) => randomTransaction(blockhash = block.hash, utxos = List.empty, id = head.txid)
+    }
     val blockWithTransactions = block.withTransactions(List(tx))
+
     ledgerDataHandler
-      .push(blockWithTransactions, List.empty, emptyFilterFactory, Some(reward))
+      .push(blockWithTransactions, tposContracts, emptyFilterFactory, Some(reward))
       .isGood mustEqual true
   }
 
@@ -507,7 +642,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       rewardStakeWaitTime: Long,
       rewardOwnerAddress: Address = DataGenerator.randomAddress,
       rewarMerchantdAddress: Address = DataGenerator.randomAddress,
-      time: Instant = Instant.now
+      time: Instant = Instant.now,
+      contracts: List[TPoSContract] = List.empty
   ) = {
     val reward = TPoSBlockRewards(
       BlockReward(rewardOwnerAddress, rewardValue * 0.9),
@@ -522,7 +658,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       blockHeight,
       BlockExtractionMethod.TrustlessProofOfStake,
       reward,
-      time
+      time,
+      contracts
     )
   }
 

@@ -39,4 +39,9 @@ class StatisticsPostgresDataHandler @Inject() (
     withConnection { implicit conn =>
       Good(statisticsDAO.getRewardedAddresses(startDate))
     }
+
+  override def getStakingCoins(): ApplicationResult[BigDecimal] =
+    withConnection { implicit conn =>
+      Good(statisticsDAO.getStakingCoins())
+    }
 }

@@ -18,6 +18,8 @@ trait StatisticsDataHandler[F[_]] {
   def getTPoSMerchantStakingAddresses(
       merchantAddress: Address
   ): F[List[Address]]
+
+  def getStakingCoins(): F[BigDecimal]
 }
 
 trait StatisticsBlockingDataHandler extends StatisticsDataHandler[ApplicationResult]

@@ -142,6 +142,10 @@ class StatisticsService @Inject() (
     }
   }
 
+  def getStakingCoins(): FutureApplicationResult[BigDecimal] = {
+    statisticsFutureDataHandler.getStakingCoins()
+  }
+
   private def discardErrors[T](
       value: FutureApplicationResult[T]
   ): FutureApplicationResult[Option[T]] = {

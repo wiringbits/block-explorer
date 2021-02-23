@@ -95,6 +95,31 @@ class StatisticsPostgresDAO {
       'start_date -> startDate.getEpochSecond
     ).as(addressSummaryParser.single)
   }
+
+  def getStakingCoins()(implicit conn: Connection): BigDecimal = {
+    SQL("""
+          |WITH addresses AS (
+          |  SELECT
+          |    DISTINCT owner AS address
+          |  FROM tpos_contracts
+          |  WHERE state = 'ACTIVE'
+          |)
+          |
+          |SELECT
+          |  COALESCE(
+          |    SUM(
+          |      COALESCE(
+          |        b.received - b.spent,
+          |        0
+          |      )
+          |    ),
+          |    0
+          |  ) AS amount
+          |FROM addresses a
+          |LEFT JOIN balances b USING(address)
+          | 
+          """.stripMargin).as(SqlParser.scalar[BigDecimal].singleOpt).getOrElse(BigDecimal(0))
+  }
 }
 
 object StatisticsPostgresDAO {

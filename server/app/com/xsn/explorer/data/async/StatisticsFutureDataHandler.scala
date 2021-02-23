@@ -48,4 +48,11 @@ class StatisticsFutureDataHandler @Inject() (
         blockingDataHandler.getRewardedAddresses(startDate)
       }
     }
+
+  override def getStakingCoins(): FutureApplicationResult[BigDecimal] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getStakingCoins()
+      }
+    }
 }
