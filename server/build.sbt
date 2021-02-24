@@ -79,7 +79,7 @@ libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.12"
 libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.12"
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala" % "1.16.27" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala" % "1.16.29" % Test
 libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.16.29" % Test
 
 libraryDependencies ++= Seq(
