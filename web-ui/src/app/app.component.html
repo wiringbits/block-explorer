@@ -1,8 +1,12 @@
-<app-navbar></app-navbar>
+<div class="tab-container">
+  <app-navbar></app-navbar>
+</div>
 <div class="tab-container">
   <div class="col-lg-10 col-lg-offset-1 col-md-12">
     <router-outlet></router-outlet>
   </div>
 </div>
-<ng-http-loader [filteredUrlPatterns]="['/blocks$']"></ng-http-loader>
-<app-footer></app-footer>
+<div class="tab-container">
+  <ng-http-loader [filteredUrlPatterns]="['/blocks$']"></ng-http-loader>
+  <app-footer></app-footer>
+</div>
