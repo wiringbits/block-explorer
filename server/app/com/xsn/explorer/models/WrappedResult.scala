@@ -6,5 +6,6 @@ case class WrappedResult[+T](data: T)
 
 object WrappedResult {
 
-  implicit def writes[T: Writes]: Writes[WrappedResult[T]] = Json.writes[WrappedResult[T]]
+  implicit def writes[T: Writes]: Writes[WrappedResult[T]] =
+    Json.writes[WrappedResult[T]]
 }

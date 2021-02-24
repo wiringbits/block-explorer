@@ -8,18 +8,35 @@ sealed trait TransactionVIN {
   def txid: TransactionId
   def voutIndex: Int
 
-  def withValues(value: BigDecimal, addresses: List[Address], pubKeyScript: HexString): TransactionVIN.HasValues = {
+  def withValues(
+      value: BigDecimal,
+      addresses: List[Address],
+      pubKeyScript: HexString
+  ): TransactionVIN.HasValues = {
     TransactionVIN.HasValues(txid, voutIndex, value, addresses, pubKeyScript)
   }
 
-  def withValues(value: BigDecimal, address: Address, pubKeyScript: HexString): TransactionVIN.HasValues = {
-    TransactionVIN.HasValues(txid, voutIndex, value, List(address), pubKeyScript)
+  def withValues(
+      value: BigDecimal,
+      address: Address,
+      pubKeyScript: HexString
+  ): TransactionVIN.HasValues = {
+    TransactionVIN.HasValues(
+      txid,
+      voutIndex,
+      value,
+      List(address),
+      pubKeyScript
+    )
   }
 }
 
 object TransactionVIN {
 
-  final case class Raw(override val txid: TransactionId, override val voutIndex: Int) extends TransactionVIN
+  final case class Raw(
+      override val txid: TransactionId,
+      override val voutIndex: Int
+  ) extends TransactionVIN
   final case class HasValues(
       override val txid: TransactionId,
       override val voutIndex: Int,

@@ -14,10 +14,13 @@ trait NodeStatsRepository {
 object NodeStatsRepository {
   private implicit val timeout: Timeout = 10.seconds
 
-  class ActorImpl @Inject()(actor: NodeStatsSynchronizerActor.Ref) extends NodeStatsRepository {
-    
+  class ActorImpl @Inject() (actor: NodeStatsSynchronizerActor.Ref)
+      extends NodeStatsRepository {
+
     override def getCoinsStaking(): Future[BigDecimal] = {
-      actor.ref.ask(NodeStatsSynchronizerActor.GetCoinsStaking).mapTo[BigDecimal]
+      actor.ref
+        .ask(NodeStatsSynchronizerActor.GetCoinsStaking)
+        .mapTo[BigDecimal]
     }
 
   }

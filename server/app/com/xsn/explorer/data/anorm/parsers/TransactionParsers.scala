@@ -3,7 +3,10 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm.~
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
+import com.xsn.explorer.models.persisted.{
+  AddressTransactionDetails,
+  Transaction
+}
 import com.xsn.explorer.models.values._
 
 object TransactionParsers {
@@ -19,9 +22,11 @@ object TransactionParsers {
   val parseHexScript = parseHexString("hex_script")
   val parseHeight = int("height").map(Height.apply)
 
-  val parseTransaction = (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map {
-    case txid ~ blockhash ~ time ~ size => Transaction(txid, blockhash, time, size)
-  }
+  val parseTransaction =
+    (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map {
+      case txid ~ blockhash ~ time ~ size =>
+        Transaction(txid, blockhash, time, size)
+    }
 
   val parseTransactionWithValues = (parseTransactionId() ~
     parseBlockhashBytes() ~
@@ -48,24 +53,27 @@ object TransactionParsers {
 
   val parseTransactionInput =
     (parseFromTxid ~ parseFromOutputIndex ~ parseIndex ~ parseValue ~ parseAddresses)
-      .map {
-        case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
-          Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
+      .map { case fromTxid ~ fromOutputIndex ~ index ~ value ~ addresses =>
+        Transaction.Input(fromTxid, fromOutputIndex, index, value, addresses)
       }
 
   val parseTransactionOutput = (parseTransactionId() ~
     parseIndex ~
     parseValue ~
     parseAddresses ~
-    parseHexScript).map {
-
-    case txid ~ index ~ value ~ addresses ~ script =>
-      Transaction.Output(txid, index, value, addresses, script)
+    parseHexScript).map { case txid ~ index ~ value ~ addresses ~ script =>
+    Transaction.Output(txid, index, value, addresses, script)
   }
 
   val parseAddressTransactionDetails =
-    (parseAddress() ~ parseTransactionId() ~ parseSent ~ parseReceived ~ parseTime).map {
-      case address ~ txid ~ sent ~ received ~ time =>
-        AddressTransactionDetails(address, txid, time = time, sent = sent, received = received)
-    }
+    (parseAddress() ~ parseTransactionId() ~ parseSent ~ parseReceived ~ parseTime)
+      .map { case address ~ txid ~ sent ~ received ~ time =>
+        AddressTransactionDetails(
+          address,
+          txid,
+          time = time,
+          sent = sent,
+          received = received
+        )
+      }
 }

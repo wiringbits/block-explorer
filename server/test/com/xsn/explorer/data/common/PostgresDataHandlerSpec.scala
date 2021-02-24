@@ -11,20 +11,19 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.db.evolutions.Evolutions
 import play.api.db.{Database, Databases}
 
-/**
- * Allow us to write integration tests depending in a postgres database.
- *
- * The database is launched in a docker instance using docker-it-scala library.
- *
- * When the database is started, play evolutions are automatically applied, the
- * idea is to let you write tests like this:
- * {{{
- *   class UserPostgresDALSpec extends PostgresDALSpec {
- *     lazy val dal = new UserPostgresDAL(database)
- *     ...
- *   }
- * }}}
- */
+/** Allow us to write integration tests depending in a postgres database.
+  *
+  * The database is launched in a docker instance using docker-it-scala library.
+  *
+  * When the database is started, play evolutions are automatically applied, the
+  * idea is to let you write tests like this:
+  * {{{
+  *   class UserPostgresDALSpec extends PostgresDALSpec {
+  *     lazy val dal = new UserPostgresDAL(database)
+  *     ...
+  *   }
+  * }}}
+  */
 trait PostgresDataHandlerSpec
     extends AnyWordSpec
     with Matchers
@@ -36,7 +35,9 @@ trait PostgresDataHandlerSpec
 
   implicit val pc = PatienceConfig(Span(20, Seconds), Span(1, Second))
 
-  override implicit val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
+  override implicit val dockerFactory: DockerFactory = new SpotifyDockerFactory(
+    DefaultDockerClient.fromEnv().build()
+  )
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -72,7 +73,9 @@ trait PostgresDataHandlerSpec
       _root_.anorm.SQL("""DELETE FROM balances""").execute()
       _root_.anorm.SQL("""DELETE FROM hidden_addresses""").execute()
       _root_.anorm.SQL("""DELETE FROM aggregated_amounts""").execute()
-      _root_.anorm.SQL("""DELETE FROM block_synchronization_progress""").execute()
+      _root_.anorm
+        .SQL("""DELETE FROM block_synchronization_progress""")
+        .execute()
     }
   }
 }

@@ -20,9 +20,12 @@ trait MerchantnodeRepository {
 object MerchantnodeRepository {
   private implicit val timeout: Timeout = 10.seconds
 
-  class ActorImpl @Inject()(actor: MerchantnodeSynchronizerActor.Ref) extends MerchantnodeRepository {
+  class ActorImpl @Inject() (actor: MerchantnodeSynchronizerActor.Ref)
+      extends MerchantnodeRepository {
     override def getAll(): Future[List[Merchantnode]] = {
-      actor.ref.ask(MerchantnodeSynchronizerActor.GetMerchantnodes).mapTo[List[Merchantnode]]
+      actor.ref
+        .ask(MerchantnodeSynchronizerActor.GetMerchantnodes)
+        .mapTo[List[Merchantnode]]
     }
 
     override def find(ipAddress: IPAddress): Future[Option[Merchantnode]] = {
@@ -32,15 +35,21 @@ object MerchantnodeRepository {
     }
 
     override def getCount(): Future[Int] = {
-      actor.ref.ask(MerchantnodeSynchronizerActor.GetMerchantnodeCount).mapTo[Int]
+      actor.ref
+        .ask(MerchantnodeSynchronizerActor.GetMerchantnodeCount)
+        .mapTo[Int]
     }
 
     override def getEnabledCount(): Future[Int] = {
-      actor.ref.ask(MerchantnodeSynchronizerActor.GetEnabledMerchantnodeCount).mapTo[Int]
+      actor.ref
+        .ask(MerchantnodeSynchronizerActor.GetEnabledMerchantnodeCount)
+        .mapTo[Int]
     }
 
     override def getProtocols(): Future[Map[String, Int]] = {
-      actor.ref.ask(MerchantnodeSynchronizerActor.GetMerchantnodeProtocols).mapTo[Map[String, Int]]
+      actor.ref
+        .ask(MerchantnodeSynchronizerActor.GetMerchantnodeProtocols)
+        .mapTo[Map[String, Int]]
     }
   }
 }

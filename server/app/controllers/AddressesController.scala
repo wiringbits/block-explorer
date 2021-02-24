@@ -4,13 +4,17 @@ import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
+import com.xsn.explorer.services.{
+  AddressService,
+  TPoSContractService,
+  TransactionService
+}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json._
 
-class AddressesController @Inject()(
+class AddressesController @Inject() (
     addressService: AddressService,
     transactionService: TransactionService,
     tposContractService: TPoSContractService,
@@ -30,10 +34,20 @@ class AddressesController @Inject()(
       .toFuture
   }
 
-  def getLightWalletTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
+  def getLightWalletTransactions(
+      address: String,
+      limit: Int,
+      lastSeenTxid: Option[String],
+      orderingCondition: String
+  ) =
     public { _ =>
       transactionService
-        .getLightWalletTransactions(address, Limit(limit), lastSeenTxid, orderingCondition)
+        .getLightWalletTransactions(
+          address,
+          Limit(limit),
+          lastSeenTxid,
+          orderingCondition
+        )
         .toFutureOr
         .map { value =>
           val response = Ok(Json.toJson(value))
@@ -42,21 +56,25 @@ class AddressesController @Inject()(
         .toFuture
     }
 
-    def getTransactions(address: String, limit: Int, lastSeenTxid: Option[String], orderingCondition: String) =
-      public { _ =>
-        transactionService
-          .getByAddress(address, Limit(limit), lastSeenTxid, orderingCondition)
-          .toFutureOr
-          .map { value =>
-            val response = Ok(Json.toJson(value))
-            response.withHeaders("Cache-Control" -> "public, max-age=60")
-          }
-          .toFuture
-      }
+  def getTransactions(
+      address: String,
+      limit: Int,
+      lastSeenTxid: Option[String],
+      orderingCondition: String
+  ) =
+    public { _ =>
+      transactionService
+        .getByAddress(address, Limit(limit), lastSeenTxid, orderingCondition)
+        .toFutureOr
+        .map { value =>
+          val response = Ok(Json.toJson(value))
+          response.withHeaders("Cache-Control" -> "public, max-age=60")
+        }
+        .toFuture
+    }
 
-  /**
-   * Format to keep compatibility with the previous approach using the RPC api.
-   */
+  /** Format to keep compatibility with the previous approach using the RPC api.
+    */
   implicit private val writes: Writes[Transaction.Output] = Writes { obj =>
     val address = obj.addresses.headOption
       .map(_.string)
@@ -100,21 +118,24 @@ class AddressesController @Inject()(
 
 object AddressesController {
 
-  implicit val inputWrites: Writes[LightWalletTransaction.Input] = Json.writes[LightWalletTransaction.Input]
-  implicit val outputWrites: Writes[LightWalletTransaction.Output] = (obj: LightWalletTransaction.Output) => {
-    val address = obj.addresses.headOption
-      .map(_.string)
-      .map(JsString.apply)
-      .getOrElse(JsNull)
+  implicit val inputWrites: Writes[LightWalletTransaction.Input] =
+    Json.writes[LightWalletTransaction.Input]
+  implicit val outputWrites: Writes[LightWalletTransaction.Output] =
+    (obj: LightWalletTransaction.Output) => {
+      val address = obj.addresses.headOption
+        .map(_.string)
+        .map(JsString.apply)
+        .getOrElse(JsNull)
 
-    Json.obj(
-      "index" -> obj.index,
-      "value" -> obj.value,
-      "address" -> address,
-      "addresses" -> obj.addresses
-    )
-  }
+      Json.obj(
+        "index" -> obj.index,
+        "value" -> obj.value,
+        "address" -> address,
+        "addresses" -> obj.addresses
+      )
+    }
 
-  implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] = Json.writes[LightWalletTransaction]
+  implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] =
+    Json.writes[LightWalletTransaction]
 
 }

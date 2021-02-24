@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class DatabaseMigrationsTask @Inject()(
+class DatabaseMigrationsTask @Inject() (
     actorSystem: ActorSystem,
     migration: MigrationRunner
 )(implicit ec: ExecutionContext) {

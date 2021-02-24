@@ -1,6 +1,9 @@
 package com.xsn.explorer.data.async
 
-import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.core.{
+  FutureApplicationResult,
+  FuturePaginatedResult
+}
 import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.PaginatedQuery
@@ -13,38 +16,44 @@ import javax.inject.Inject
 
 import scala.concurrent.Future
 
-class BalanceFutureDataHandler @Inject()(
+class BalanceFutureDataHandler @Inject() (
     blockingDataHandler: BalanceBlockingDataHandler,
     retryableFutureDataHandler: RetryableDataHandler
-)(
-    implicit ec: DatabaseExecutionContext
+)(implicit
+    ec: DatabaseExecutionContext
 ) extends BalanceDataHandler[FutureApplicationResult] {
 
-  override def upsert(balance: Balance): FutureApplicationResult[Balance] = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.upsert(balance)
+  override def upsert(balance: Balance): FutureApplicationResult[Balance] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.upsert(balance)
+      }
     }
-  }
 
-  override def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField]): FuturePaginatedResult[Balance] =
+  override def get(
+      query: PaginatedQuery,
+      ordering: FieldOrdering[BalanceField]
+  ): FuturePaginatedResult[Balance] =
     retryableFutureDataHandler.retrying {
       Future {
         blockingDataHandler.get(query, ordering)
       }
     }
 
-  override def getBy(address: Address): FutureApplicationResult[Balance] = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.getBy(address)
+  override def getBy(address: Address): FutureApplicationResult[Balance] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getBy(address)
+      }
     }
-  }
 
   override def getHighestBalances(
       limit: pagination.Limit,
       lastSeenAddress: Option[Address]
-  ): FutureApplicationResult[List[Balance]] = retryableFutureDataHandler.retrying {
-    Future {
-      blockingDataHandler.getHighestBalances(limit, lastSeenAddress)
+  ): FutureApplicationResult[List[Balance]] =
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getHighestBalances(limit, lastSeenAddress)
+      }
     }
-  }
 }

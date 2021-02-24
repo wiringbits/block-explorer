@@ -11,7 +11,9 @@ class BlockFilterPostgresDAO {
 
   import BlockFilterParsers._
 
-  def insert(blockhash: Blockhash, filter: GolombCodedSet)(implicit conn: Connection): GolombCodedSet = {
+  def insert(blockhash: Blockhash, filter: GolombCodedSet)(implicit
+      conn: Connection
+  ): GolombCodedSet = {
     SQL(
       """
         |INSERT INTO block_address_gcs
@@ -21,16 +23,17 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray,
-        'm -> filter.m,
-        'n -> filter.n,
-        'p -> filter.p,
-        'hex -> filter.getHexString.toBytes
-      )
-      .as(parseFilter.single)
+      'blockhash -> blockhash.toBytesBE.toArray,
+      'm -> filter.m,
+      'n -> filter.n,
+      'p -> filter.p,
+      'hex -> filter.getHexString.toBytes
+    ).as(parseFilter.single)
   }
 
-  def upsert(blockhash: Blockhash, filter: GolombCodedSet)(implicit conn: Connection): Unit = {
+  def upsert(blockhash: Blockhash, filter: GolombCodedSet)(implicit
+      conn: Connection
+  ): Unit = {
     val _ = SQL(
       """
         |INSERT INTO block_address_gcs
@@ -44,16 +47,17 @@ class BlockFilterPostgresDAO {
         |    hex = EXCLUDED.hex
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray,
-        'm -> filter.m,
-        'n -> filter.n,
-        'p -> filter.p,
-        'hex -> filter.getHexString.toBytes
-      )
-      .execute()
+      'blockhash -> blockhash.toBytesBE.toArray,
+      'm -> filter.m,
+      'n -> filter.n,
+      'p -> filter.p,
+      'hex -> filter.getHexString.toBytes
+    ).execute()
   }
 
-  def delete(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
+  def delete(
+      blockhash: Blockhash
+  )(implicit conn: Connection): Option[GolombCodedSet] = {
     SQL(
       """
         |DELETE FROM block_address_gcs
@@ -61,12 +65,13 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray
-      )
-      .as(parseFilter.singleOpt)
+      'blockhash -> blockhash.toBytesBE.toArray
+    ).as(parseFilter.singleOpt)
   }
 
-  def getBy(blockhash: Blockhash)(implicit conn: Connection): Option[GolombCodedSet] = {
+  def getBy(
+      blockhash: Blockhash
+  )(implicit conn: Connection): Option[GolombCodedSet] = {
     SQL(
       """
         |SELECT blockhash, m, n, p, hex
@@ -74,8 +79,7 @@ class BlockFilterPostgresDAO {
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-        'blockhash -> blockhash.toBytesBE.toArray
-      )
-      .as(parseFilter.singleOpt)
+      'blockhash -> blockhash.toBytesBE.toArray
+    ).as(parseFilter.singleOpt)
   }
 }

@@ -1,11 +1,11 @@
 package com.xsn.explorer.data.anorm.dao
 
 import java.sql.Connection
-
+import java.time.Instant
 import anorm._
-import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.parseSummary
+import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{addressSummaryParser, parseSummary}
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
-import com.xsn.explorer.models.{BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 import org.slf4j.LoggerFactory
 
 class StatisticsPostgresDAO {
@@ -32,7 +32,9 @@ class StatisticsPostgresDAO {
     result
   }
 
-  def getSummary(numberOfBlocks: Int)(implicit conn: Connection): BlockRewardsSummary = {
+  def getSummary(
+      numberOfBlocks: Int
+  )(implicit conn: Connection): BlockRewardsSummary = {
     SQL(
       """
         |SELECT
@@ -59,9 +61,64 @@ class StatisticsPostgresDAO {
         |) t
       """.stripMargin
     ).on(
-        'number_of_blocks -> numberOfBlocks
-      )
-      .as(parseSummary.single)
+      'number_of_blocks -> numberOfBlocks
+    ).as(parseSummary.single)
+  }
+
+  def getRewardedAddresses(startDate: Instant)(implicit conn: Connection): AddressesReward = {
+    SQL(
+      """
+        |WITH addresses AS (
+        |  SELECT
+        |    DISTINCT address
+        |  FROM block_rewards r
+        |  INNER JOIN blocks b USING(blockhash)
+        |  WHERE b.time >= {start_date}
+        |    AND r.type != 'MASTERNODE'
+        |)
+        |
+        |SELECT
+        |  COUNT(*) AS count,
+        |  COALESCE(
+        |    SUM(
+        |      COALESCE(
+        |        b.received - b.spent,
+        |        0
+        |      )
+        |    ),
+        |    0
+        |  ) AS amount
+        |FROM addresses a
+        |LEFT JOIN balances b USING(address)
+      """.stripMargin
+    ).on(
+      'start_date -> startDate.getEpochSecond
+    ).as(addressSummaryParser.single)
+  }
+
+  def getStakingCoins()(implicit conn: Connection): BigDecimal = {
+    SQL("""
+          |WITH addresses AS (
+          |  SELECT
+          |    DISTINCT owner AS address
+          |  FROM tpos_contracts
+          |  WHERE state = 'ACTIVE'
+          |)
+          |
+          |SELECT
+          |  COALESCE(
+          |    SUM(
+          |      COALESCE(
+          |        b.received - b.spent,
+          |        0
+          |      )
+          |    ),
+          |    0
+          |  ) AS amount
+          |FROM addresses a
+          |LEFT JOIN balances b USING(address)
+          | 
+          """.stripMargin).as(SqlParser.scalar[BigDecimal].singleOpt).getOrElse(BigDecimal(0))
   }
 }
 

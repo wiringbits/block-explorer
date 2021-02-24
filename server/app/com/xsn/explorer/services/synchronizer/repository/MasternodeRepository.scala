@@ -20,9 +20,12 @@ trait MasternodeRepository {
 object MasternodeRepository {
   private implicit val timeout: Timeout = 10.seconds
 
-  class ActorImpl @Inject()(actor: MasternodeSynchronizerActor.Ref) extends MasternodeRepository {
+  class ActorImpl @Inject() (actor: MasternodeSynchronizerActor.Ref)
+      extends MasternodeRepository {
     override def getAll(): Future[List[Masternode]] = {
-      actor.ref.ask(MasternodeSynchronizerActor.GetMasternodes).mapTo[List[Masternode]]
+      actor.ref
+        .ask(MasternodeSynchronizerActor.GetMasternodes)
+        .mapTo[List[Masternode]]
     }
 
     override def find(ipAddress: IPAddress): Future[Option[Masternode]] = {
@@ -36,11 +39,15 @@ object MasternodeRepository {
     }
 
     override def getEnabledCount(): Future[Int] = {
-      actor.ref.ask(MasternodeSynchronizerActor.GetEnabledMasternodeCount).mapTo[Int]
+      actor.ref
+        .ask(MasternodeSynchronizerActor.GetEnabledMasternodeCount)
+        .mapTo[Int]
     }
 
     override def getProtocols(): Future[Map[String, Int]] = {
-      actor.ref.ask(MasternodeSynchronizerActor.GetMasternodeProtocols).mapTo[Map[String, Int]]
+      actor.ref
+        .ask(MasternodeSynchronizerActor.GetMasternodeProtocols)
+        .mapTo[Map[String, Int]]
     }
   }
 }

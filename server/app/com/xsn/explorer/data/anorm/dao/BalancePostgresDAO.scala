@@ -12,11 +12,12 @@ import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.Address
 import javax.inject.Inject
 
-class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter) {
+class BalancePostgresDAO @Inject() (
+    fieldOrderingSQLInterpreter: FieldOrderingSQLInterpreter
+) {
 
-  /**
-   * create or update the balance for an address
-   */
+  /** create or update the balance for an address
+    */
   def upsert(partial: Balance)(implicit conn: Connection): Option[Balance] = {
     SQL(
       """
@@ -30,14 +31,15 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         |RETURNING address, received, spent
       """.stripMargin
     ).on(
-        'address -> partial.address.string,
-        'received -> partial.received,
-        'spent -> partial.spent
-      )
-      .as(parseBalance.singleOpt)
+      'address -> partial.address.string,
+      'received -> partial.received,
+      'spent -> partial.spent
+    ).as(parseBalance.singleOpt)
   }
 
-  def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField])(implicit conn: Connection): List[Balance] = {
+  def get(query: PaginatedQuery, ordering: FieldOrdering[BalanceField])(implicit
+      conn: Connection
+  ): List[Balance] = {
 
     val orderBy = fieldOrderingSQLInterpreter.toOrderByClause(ordering)
     SQL(
@@ -49,10 +51,9 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         |LIMIT {limit}
       """.stripMargin
     ).on(
-        'offset -> query.offset.int,
-        'limit -> query.limit.int
-      )
-      .as(parseBalance.*)
+      'offset -> query.offset.int,
+      'limit -> query.limit.int
+    ).as(parseBalance.*)
   }
 
   def count(implicit conn: Connection): Count = {
@@ -74,15 +75,15 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
          |wHERE address = {address}
       """.stripMargin
     ).on(
-        'address -> address.string
-      )
-      .as(parseBalance.singleOpt)
+      'address -> address.string
+    ).as(parseBalance.singleOpt)
   }
 
-  /**
-   * Get the highest balances (excluding hidden_addresses).
-   */
-  def getHighestBalances(limit: Limit)(implicit conn: Connection): List[Balance] = {
+  /** Get the highest balances (excluding hidden_addresses).
+    */
+  def getHighestBalances(
+      limit: Limit
+  )(implicit conn: Connection): List[Balance] = {
     SQL(
       """
         |SELECT address, received, spent
@@ -91,17 +92,17 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         |LIMIT {limit}
       """.stripMargin
     ).on(
-        'limit -> limit.int
-      )
-      .as(parseBalance.*)
+      'limit -> limit.int
+    ).as(parseBalance.*)
   }
 
-  /**
-   * Get the highest balances excluding the balances until the given address (excluding hidden_addresses).
-   *
-   * Note, the results across calls might not be stable if the given address changes its balance drastically.
-   */
-  def getHighestBalances(lastSeenAddress: Address, limit: Limit)(implicit conn: Connection): List[Balance] = {
+  /** Get the highest balances excluding the balances until the given address (excluding hidden_addresses).
+    *
+    * Note, the results across calls might not be stable if the given address changes its balance drastically.
+    */
+  def getHighestBalances(lastSeenAddress: Address, limit: Limit)(implicit
+      conn: Connection
+  ): List[Balance] = {
     SQL(
       """
         |WITH CTE AS (
@@ -117,9 +118,8 @@ class BalancePostgresDAO @Inject()(fieldOrderingSQLInterpreter: FieldOrderingSQL
         |LIMIT {limit}
       """.stripMargin
     ).on(
-        'limit -> limit.int,
-        'lastSeenAddress -> lastSeenAddress.string
-      )
-      .as(parseBalance.*)
+      'limit -> limit.int,
+      'lastSeenAddress -> lastSeenAddress.string
+    ).as(parseBalance.*)
   }
 }

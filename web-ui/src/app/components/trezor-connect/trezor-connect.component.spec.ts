@@ -11,6 +11,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
+import { TposContractsService } from '../../services/tposcontracts.service';
+import { NotificationService } from '../../services/notification.service';
 
 describe('TrezorConnectComponent', () => {
   let component: TrezorConnectComponent;
@@ -22,7 +24,10 @@ describe('TrezorConnectComponent', () => {
     .createSpyObj('TransactionsService', ['getRaw', 'push']);
   const trezorRepositoryServiceSpy: jasmine.SpyObj<TrezorRepositoryService> = jasmine
     .createSpyObj('TrezorRepositoryService', ['get', 'add']);
-
+  const TposContractsServiceSpy: jasmine.SpyObj<TposContractsService> = jasmine
+    .createSpyObj('TposContractsService', ['encodeTPOS']);
+  const NotificationServiceSpy: jasmine.SpyObj<NotificationService> = jasmine
+    .createSpyObj('NotificationService', ['info', 'error', 'warning']);
   beforeEach(async(() => {
     transactionsServiceSpy.getRaw.and.returnValue(Observable.create());
     trezorRepositoryServiceSpy.get.and.returnValue(Array<TrezorAddress>());
@@ -38,11 +43,14 @@ describe('TrezorConnectComponent', () => {
       providers: [
         { provide: AddressesService, useValue: addressesServiceSpy },
         { provide: TransactionsService, useValue: transactionsServiceSpy },
-        { provide: TrezorRepositoryService, useValue: trezorRepositoryServiceSpy }
+        { provide: TrezorRepositoryService, useValue: trezorRepositoryServiceSpy },
+        { provide: TposContractsService, useValue: TposContractsServiceSpy },
+        { provide: NotificationService, useValue: NotificationServiceSpy }
+
       ],
       schemas: [NO_ERRORS_SCHEMA]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -6,7 +6,11 @@ import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
+import com.xsn.explorer.errors.{
+  BlockNotFoundError,
+  BlockRewardsNotFoundError,
+  XSNMessageError
+}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.persisted.BlockInfo
@@ -21,7 +25,7 @@ import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BlockService @Inject()(
+class BlockService @Inject() (
     xsnService: XSNService,
     blockDataHandler: BlockFutureDataHandler,
     paginatedQueryValidator: PaginatedQueryValidator,
@@ -40,23 +44,39 @@ class BlockService @Inject()(
   ): FutureApplicationResult[(WrappedResult[List[BlockHeader]], Boolean)] = {
 
     val result = for {
-      lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
-      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+      lastSeenHash <- validate(
+        lastSeenHashString,
+        blockhashValidator.validate
+      ).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery)
+        .toFutureOr
+      orderingCondition <- orderingConditionParser
+        .parseReuslt(orderingConditionString)
+        .toFutureOr
 
-      headers <- blockDataHandler.getHeaders(limit, orderingCondition, lastSeenHash).toFutureOr
+      headers <- blockDataHandler
+        .getHeaders(limit, orderingCondition, lastSeenHash)
+        .toFutureOr
       _ <- (headers, lastSeenHash) match {
         // if there are no headers but a hash was seen, check whether the given hash actually exists
-        case (Nil, Some(hash)) => blockDataHandler.getHeader(hash, includeFilter = false).toFutureOr
+        case (Nil, Some(hash)) =>
+          blockDataHandler.getHeader(hash, includeFilter = false).toFutureOr
         case _ => Future.successful(Good(())).toFutureOr
       }
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
-    } yield (WrappedResult(headers), canCacheResult(orderingCondition, limit.int, latestBlock, headers))
+    } yield (
+      WrappedResult(headers),
+      canCacheResult(orderingCondition, limit.int, latestBlock, headers)
+    )
 
     result.toFuture
   }
 
-  def getBlockHeader(blockhashString: String, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = {
+  def getBlockHeader(
+      blockhashString: String,
+      includeFilter: Boolean
+  ): FutureApplicationResult[BlockHeader] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       header <- blockDataHandler.getHeader(blockhash, includeFilter).toFutureOr
@@ -65,7 +85,10 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def getBlockHeader(height: Height, includeFilter: Boolean): FutureApplicationResult[BlockHeader] = {
+  def getBlockHeader(
+      height: Height,
+      includeFilter: Boolean
+  ): FutureApplicationResult[BlockHeader] = {
     blockDataHandler.getHeader(height, includeFilter)
   }
 
@@ -79,7 +102,9 @@ class BlockService @Inject()(
     ordering == OrderingCondition.AscendingOrder && // from oldest to newest
     result.size == expectedSize && // a complete query
     expectedSize > 0 && // non empty result
-    result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
+    result.lastOption.exists(
+      _.height.int + 20 < latestKnownBlock.height.int
+    ) // there are at least 20 more blocks (unlikely to occur rollbacks)
   }
 
   private def canCacheResultBlockInfo(
@@ -92,7 +117,9 @@ class BlockService @Inject()(
     ordering == OrderingCondition.AscendingOrder && // from oldest to newest
     result.size == expectedSize && // a complete query
     expectedSize > 0 && // non empty result
-    result.lastOption.exists(_.height.int + 20 < latestKnownBlock.height.int) // there are at least 20 more blocks (unlikely to occur rollbacks)
+    result.lastOption.exists(
+      _.height.int + 20 < latestKnownBlock.height.int
+    ) // there are at least 20 more blocks (unlikely to occur rollbacks)
   }
 
   def getRawBlock(blockhashString: String): FutureApplicationResult[JsValue] = {
@@ -113,7 +140,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def getDetails(blockhashString: String): FutureApplicationResult[BlockDetails] = {
+  def getDetails(
+      blockhashString: String
+  ): FutureApplicationResult[BlockDetails] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       details <- getDetailsPrivate(blockhash).toFutureOr
@@ -134,7 +163,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  def getHexEncodedBlock(blockhashString: String): FutureApplicationResult[String] = {
+  def getHexEncodedBlock(
+      blockhashString: String
+  ): FutureApplicationResult[String] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
 
@@ -147,7 +178,9 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getDetailsPrivate(blockhash: Blockhash): FutureApplicationResult[BlockDetails] = {
+  private def getDetailsPrivate(
+      blockhash: Blockhash
+  ): FutureApplicationResult[BlockDetails] = {
     val result = for {
       block <- xsnService
         .getBlock(blockhash)
@@ -155,7 +188,7 @@ class BlockService @Inject()(
 
       rewards <- getBlockRewards(block).map {
         case Good(value) => Good(Some(value))
-        case Bad(_) => Good(None)
+        case Bad(_)      => Good(None)
       }.toFutureOr
 
     } yield BlockDetails(block, rewards)
@@ -165,10 +198,9 @@ class BlockService @Inject()(
 
   def getLatestBlocks(): FutureApplicationResult[List[Block.Canonical]] = {
 
-    /**
-     * Temporal workaround to retrieve the latest blocks, they
-     * will be retrieved from the database once available.
-     */
+    /** Temporal workaround to retrieve the latest blocks, they
+      * will be retrieved from the database once available.
+      */
     val result = for {
       a <- xsnService.getLatestBlock().toFutureOr
       b <- xsnService.getBlock(a.previousBlockhash.get).toFutureOr
@@ -192,31 +224,48 @@ class BlockService @Inject()(
   ): FutureApplicationResult[(WrappedResult[List[BlockInfo]], Boolean)] = {
 
     val result = for {
-      lastSeenHash <- validate(lastSeenHashString, blockhashValidator.validate).toFutureOr
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery).toFutureOr
-      orderingCondition <- orderingConditionParser.parseReuslt(orderingConditionString).toFutureOr
+      lastSeenHash <- validate(
+        lastSeenHashString,
+        blockhashValidator.validate
+      ).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), maxHeadersPerQuery)
+        .toFutureOr
+      orderingCondition <- orderingConditionParser
+        .parseReuslt(orderingConditionString)
+        .toFutureOr
 
-      blocks <- blockDataHandler.getBlocks(limit, orderingCondition, lastSeenHash).toFutureOr
+      blocks <- blockDataHandler
+        .getBlocks(limit, orderingCondition, lastSeenHash)
+        .toFutureOr
       _ <- (blocks, lastSeenHash) match {
         // if there are no blocks but a hash was seen, check whether the given hash actually exists
         case (Nil, Some(hash)) => blockDataHandler.getBlock(hash).toFutureOr
-        case _ => Future.successful(Good(())).toFutureOr
+        case _                 => Future.successful(Good(())).toFutureOr
       }
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
-    } yield (WrappedResult(blocks), canCacheResultBlockInfo(orderingCondition, limit.int, latestBlock, blocks))
+    } yield (
+      WrappedResult(blocks),
+      canCacheResultBlockInfo(orderingCondition, limit.int, latestBlock, blocks)
+    )
 
     result.toFuture
   }
 
-  def extractionMethod(block: rpc.Block[_]): FutureApplicationResult[BlockExtractionMethod] = {
+  def extractionMethod(
+      block: rpc.Block[_]
+  ): FutureApplicationResult[BlockExtractionMethod] = {
     isTPoS(block).toFutureOr.flatMap {
-      case true => Future.successful(Good(BlockExtractionMethod.TrustlessProofOfStake)).toFutureOr
+      case true =>
+        Future
+          .successful(Good(BlockExtractionMethod.TrustlessProofOfStake))
+          .toFutureOr
       case false => {
         if (block.transactions.isEmpty) {
           Future.successful(Good(BlockExtractionMethod.ProofOfWork)).toFutureOr
         } else {
           isPoS(block).toFutureOr.map {
-            case true => BlockExtractionMethod.ProofOfStake
+            case true  => BlockExtractionMethod.ProofOfStake
             case false => BlockExtractionMethod.ProofOfWork
           }
         }
@@ -233,20 +282,42 @@ class BlockService @Inject()(
     }
   }
 
-  def getBlockLite(blockhashString: String): FutureApplicationResult[(JsValue, Boolean)] = {
+  def getBlockLite(
+      blockhashString: String
+  ): FutureApplicationResult[(JsValue, Boolean)] = {
     val result = for {
       blockhash <- blockhashValidator.validate(blockhashString).toFutureOr
       json <- xsnService.getFullRawBlock(blockhash).toFutureOr
-      size <- Or.from((json \ "size").asOpt[Size], One(BlockNotFoundError)).toFutureOr
-      height <- Or.from((json \ "height").asOpt[Height], One(BlockNotFoundError)).toFutureOr
-      version <- Or.from((json \ "version").asOpt[Int], One(BlockNotFoundError)).toFutureOr
-      merkleRoot <- Or.from((json \ "merkleroot").asOpt[Blockhash], One(BlockNotFoundError)).toFutureOr
-      time <- Or.from((json \ "time").asOpt[Long], One(BlockNotFoundError)).toFutureOr
-      medianTime <- Or.from((json \ "mediantime").asOpt[Long], One(BlockNotFoundError)).toFutureOr
-      nonce <- Or.from((json \ "nonce").asOpt[Long], One(BlockNotFoundError)).toFutureOr
-      bits <- Or.from((json \ "bits").asOpt[String], One(BlockNotFoundError)).toFutureOr
-      chainwork <- Or.from((json \ "chainwork").asOpt[String], One(BlockNotFoundError)).toFutureOr
-      difficulty <- Or.from((json \ "difficulty").asOpt[BigDecimal], One(BlockNotFoundError)).toFutureOr
+      size <- Or
+        .from((json \ "size").asOpt[Size], One(BlockNotFoundError))
+        .toFutureOr
+      height <- Or
+        .from((json \ "height").asOpt[Height], One(BlockNotFoundError))
+        .toFutureOr
+      version <- Or
+        .from((json \ "version").asOpt[Int], One(BlockNotFoundError))
+        .toFutureOr
+      merkleRoot <- Or
+        .from((json \ "merkleroot").asOpt[Blockhash], One(BlockNotFoundError))
+        .toFutureOr
+      time <- Or
+        .from((json \ "time").asOpt[Long], One(BlockNotFoundError))
+        .toFutureOr
+      medianTime <- Or
+        .from((json \ "mediantime").asOpt[Long], One(BlockNotFoundError))
+        .toFutureOr
+      nonce <- Or
+        .from((json \ "nonce").asOpt[Long], One(BlockNotFoundError))
+        .toFutureOr
+      bits <- Or
+        .from((json \ "bits").asOpt[String], One(BlockNotFoundError))
+        .toFutureOr
+      chainwork <- Or
+        .from((json \ "chainwork").asOpt[String], One(BlockNotFoundError))
+        .toFutureOr
+      difficulty <- Or
+        .from((json \ "difficulty").asOpt[BigDecimal], One(BlockNotFoundError))
+        .toFutureOr
       latestBlock <- xsnService.getLatestBlock().toFutureOr
       previousBlockhash = (json \ "previousblockhash").asOpt[Blockhash]
       nextBlockhash = (json \ "nextblockhash").asOpt[Blockhash]
@@ -274,9 +345,10 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getHexFromTransactions(list: List[JsValue]): List[String] = list.map { tx =>
-    (tx \ "hex").as[String]
-  }
+  private def getHexFromTransactions(list: List[JsValue]): List[String] =
+    list.map { tx =>
+      (tx \ "hex").as[String]
+    }
 
   private def isPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {
     val result = for {
@@ -287,7 +359,9 @@ class BlockService @Inject()(
   }
 
   private def isTPoS(block: rpc.Block[_]): FutureApplicationResult[Boolean] = {
-    block.tposContract.map(xsnService.isTPoSContract).getOrElse(Future.successful(Good(false)))
+    block.tposContract
+      .map(xsnService.isTPoSContract)
+      .getOrElse(Future.successful(Good(false)))
   }
 
   def getBlockRewards(
@@ -295,13 +369,16 @@ class BlockService @Inject()(
       extractionMethod: BlockExtractionMethod
   ): FutureApplicationResult[BlockRewards] = {
     extractionMethod match {
-      case BlockExtractionMethod.ProofOfWork => getPoWBlockRewards(block)
+      case BlockExtractionMethod.ProofOfWork  => getPoWBlockRewards(block)
       case BlockExtractionMethod.ProofOfStake => getPoSBlockRewards(block)
-      case BlockExtractionMethod.TrustlessProofOfStake => getTPoSBlockRewards(block)
+      case BlockExtractionMethod.TrustlessProofOfStake =>
+        getTPoSBlockRewards(block)
     }
   }
 
-  private def getBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
+  private def getBlockRewards(
+      block: Block[_]
+  ): FutureApplicationResult[BlockRewards] = {
     val result = for {
       method <- extractionMethod(block).toFutureOr
       rewards <- getBlockRewards(block, method).toFutureOr
@@ -310,17 +387,25 @@ class BlockService @Inject()(
     result.toFuture
   }
 
-  private def getPoWBlockRewards(block: Block[_]): FutureApplicationResult[PoWBlockRewards] = {
+  private def getPoWBlockRewards(
+      block: Block[_]
+  ): FutureApplicationResult[PoWBlockRewards] = {
     val result = for {
       tx <- getCoinbase(block).toFutureOr
-      vout <- transactionLogic.getVOUT(0, tx, BlockRewardsNotFoundError).toFutureOr
-      address <- transactionLogic.getAddress(vout, BlockRewardsNotFoundError).toFutureOr
+      vout <- transactionLogic
+        .getVOUT(0, tx, BlockRewardsNotFoundError)
+        .toFutureOr
+      address <- transactionLogic
+        .getAddress(vout, BlockRewardsNotFoundError)
+        .toFutureOr
     } yield PoWBlockRewards(BlockReward(address, vout.value))
 
     result.toFuture
   }
 
-  private def getPoSBlockRewards(block: Block[_]): FutureApplicationResult[PoSBlockRewards] = {
+  private def getPoSBlockRewards(
+      block: Block[_]
+  ): FutureApplicationResult[PoSBlockRewards] = {
     val result = for {
       coinstakeTx <- getCoinstakeTransaction(block).toFutureOr
       coinstakeTxVIN <- transactionLogic
@@ -331,7 +416,11 @@ class BlockService @Inject()(
         .getTransaction(coinstakeTxVIN.txid)
         .toFutureOr
       previousToCoinstakeVOUT <- transactionLogic
-        .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
+        .getVOUT(
+          coinstakeTxVIN,
+          previousToCoinstakeTx,
+          BlockRewardsNotFoundError
+        )
         .toFutureOr
 
       coinstakeAddress <- transactionLogic
@@ -339,14 +428,21 @@ class BlockService @Inject()(
         .toFutureOr
 
       rewards <- blockLogic
-        .getPoSRewards(coinstakeTx, coinstakeAddress, previousToCoinstakeTx, previousToCoinstakeVOUT.value)
+        .getPoSRewards(
+          coinstakeTx,
+          coinstakeAddress,
+          previousToCoinstakeTx,
+          previousToCoinstakeVOUT.value
+        )
         .toFutureOr
     } yield rewards
 
     result.toFuture
   }
 
-  private def getTPoSBlockRewards(block: Block[_]): FutureApplicationResult[BlockRewards] = {
+  private def getTPoSBlockRewards(
+      block: Block[_]
+  ): FutureApplicationResult[BlockRewards] = {
     val result = for {
       coinstakeTx <- getCoinstakeTransaction(block).toFutureOr
       coinstakeTxVIN <- transactionLogic
@@ -357,7 +453,11 @@ class BlockService @Inject()(
         .getTransaction(coinstakeTxVIN.txid)
         .toFutureOr
       previousToCoinstakeVOUT <- transactionLogic
-        .getVOUT(coinstakeTxVIN, previousToCoinstakeTx, BlockRewardsNotFoundError)
+        .getVOUT(
+          coinstakeTxVIN,
+          previousToCoinstakeTx,
+          BlockRewardsNotFoundError
+        )
         .toFutureOr
 
       tposTxId <- blockLogic
@@ -372,14 +472,21 @@ class BlockService @Inject()(
         .toFutureOr
 
       rewards <- blockLogic
-        .getTPoSRewards(coinstakeTx, contract, previousToCoinstakeTx, previousToCoinstakeVOUT.value)
+        .getTPoSRewards(
+          coinstakeTx,
+          contract,
+          previousToCoinstakeTx,
+          previousToCoinstakeVOUT.value
+        )
         .toFutureOr
     } yield rewards
 
     result.toFuture
   }
 
-  private def getCoinbase(block: rpc.Block[_]): FutureApplicationResult[rpc.Transaction[_]] = {
+  private def getCoinbase(
+      block: rpc.Block[_]
+  ): FutureApplicationResult[rpc.Transaction[_]] = {
     block match {
       case b: Block.Canonical =>
         val result = for {
@@ -397,7 +504,9 @@ class BlockService @Inject()(
 
   // TODO: Fix me, compiler problem due to type erasure
   @com.github.ghik.silencer.silent
-  private def getCoinstakeTransaction(block: Block[_]): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
+  private def getCoinstakeTransaction(
+      block: Block[_]
+  ): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     block match {
       case b: Block.Canonical =>
         val result = for {

@@ -22,6 +22,13 @@ sealed abstract class Currency(override val entryName: String) extends EnumEntry
 object Currency extends Enum[Currency] {
   final case object USD extends Currency("USD")
   final case object BTC extends Currency("BTC")
+  final case object EUR extends Currency("EUR")
+  final case object GBP extends Currency("GBP")
+  final case object JPY extends Currency("JPY")
+  final case object MXN extends Currency("MXN")
+  final case object NZD extends Currency("NZD")
+  final case object TRY extends Currency("TRY")
+  final case object UAH extends Currency("UAH")
 
   val values = findValues
 }
@@ -31,12 +38,12 @@ trait CurrencyService {
   def getMarketInformation(): FutureApplicationResult[MarketInformation]
 }
 
-class CurrencyServiceCoinMarketCapImpl @Inject()(
+class CurrencyServiceCoinMarketCapImpl @Inject() (
     ws: WSClient,
     coinMarketCapConfig: CoinMarketCapConfig,
     retryConfig: RetryConfig
-)(
-    implicit ec: ExternalServiceExecutionContext,
+)(implicit
+    ec: ExternalServiceExecutionContext,
     scheduler: Scheduler
 ) extends CurrencyService {
 
@@ -49,7 +56,9 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
       )
   }
 
-  private def retrying[A](f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
+  private def retrying[A](
+      f: => FutureApplicationResult[A]
+  ): FutureApplicationResult[A] = {
     val retry = RetryableFuture.withExponentialBackoff[ApplicationResult[A]](
       retryConfig.initialDelay,
       retryConfig.maxDelay
@@ -60,8 +69,8 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
       case Success(Bad(One(CoinMarketCapRequestFailedError(502)))) => true
       case Success(Bad(One(CoinMarketCapRequestFailedError(503)))) => true
       case Success(Bad(One(CoinMarketCapRequestFailedError(504)))) => true
-      case Failure(_: ConnectException) => true
-      case _ => false
+      case Failure(_: ConnectException)                            => true
+      case _                                                       => false
     }
 
     retry(shouldRetry) {
@@ -69,7 +78,9 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
     }
   }
 
-  override def getPrice(currency: Currency): FutureApplicationResult[BigDecimal] = {
+  override def getPrice(
+      currency: Currency
+  ): FutureApplicationResult[BigDecimal] = {
     retrying {
       val url =
         s"v1/tools/price-conversion?id=${coinMarketCapConfig.coinID.string}&amount=1&convert=${currency.entryName}"
@@ -100,17 +111,21 @@ class CurrencyServiceCoinMarketCapImpl @Inject()(
           case (200, r) =>
             Try(r.json).toOption
               .map { json =>
-                val volume = (json \ "data" \ coinId \ "quote" \ "USD" \ "volume_24h")
-                  .asOpt[BigDecimal]
-                  .map(Good(_))
-                  .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+                val volume =
+                  (json \ "data" \ coinId \ "quote" \ "USD" \ "volume_24h")
+                    .asOpt[BigDecimal]
+                    .map(Good(_))
+                    .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
 
-                val marketcap = (json \ "data" \ coinId \ "quote" \ "USD" \ "market_cap")
-                  .asOpt[BigDecimal]
-                  .map(Good(_))
-                  .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
+                val marketcap =
+                  (json \ "data" \ coinId \ "quote" \ "USD" \ "market_cap")
+                    .asOpt[BigDecimal]
+                    .map(Good(_))
+                    .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
 
-                withGood(volume, marketcap)((volume, marketcap) => MarketInformation(volume, marketcap))
+                withGood(volume, marketcap)((volume, marketcap) =>
+                  MarketInformation(volume, marketcap)
+                )
               }
               .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
           case (code, _) =>

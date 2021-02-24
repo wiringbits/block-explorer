@@ -1,24 +1,38 @@
 package controllers
 
+import java.time.Instant
 import akka.actor.{Actor, ActorSystem, Props}
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.data.StatisticsBlockingDataHandler
 import com.xsn.explorer.errors.XSNUnexpectedResponseError
-import com.xsn.explorer.models.{BlockRewardsSummary, MarketInformation, MarketStatistics, Statistics, NodeStatistics}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  BlockRewardsSummary,
+  MarketInformation,
+  MarketStatistics,
+  NodeStatistics,
+  Statistics
+}
 import com.xsn.explorer.services.{Currency, XSNService}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
-import com.xsn.explorer.services.synchronizer.repository.{MasternodeRepository, MerchantnodeRepository, NodeStatsRepository}
+import com.xsn.explorer.services.synchronizer.repository.{
+  MasternodeRepository,
+  MerchantnodeRepository,
+  NodeStatsRepository
+}
 import controllers.common.MyAPISpec
 import org.mockito.MockitoSugar.{when, _}
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfterAll
 import com.xsn.explorer.models.values.Address
 import play.api.inject.bind
+import play.api.libs.json.Json
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
 class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
+
   override def afterAll: Unit = {
     actorSystem.terminate()
     ()
@@ -32,13 +46,12 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   )
 
   val nodeStats = NodeStatistics(
-      masternodes = 1000,
-      enabledMasternodes = 900,
-      masternodesProtocols = Map("70209" -> 950, "70210" -> 50),
-      tposnodes = 100,
-      enabledTposnodes = 90,
-      tposnodesProtocols = Map("70209" -> 90),
-      coinsStaking = 100
+    masternodes = 1000,
+    enabledMasternodes = 900,
+    masternodesProtocols = Map("70209" -> 950, "70210" -> 50),
+    tposnodes = 100,
+    enabledTposnodes = 90,
+    tposnodesProtocols = Map("70209" -> 90)
   )
 
   val dataHandler = new StatisticsBlockingDataHandler {
@@ -57,8 +70,15 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         )
       )
 
-    override def getTPoSMerchantStakingAddresses(address: Address): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
+    override def getTPoSMerchantStakingAddresses(
+        address: Address
+    ): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
 
+    override def getRewardedAddresses(startDate: Instant): ApplicationResult[AddressesReward] = Good(
+      AddressesReward(123L, BigDecimal(1000.0))
+    )
+
+    override def getStakingCoins(): ApplicationResult[BigDecimal] = Good(BigDecimal(6000))
   }
 
   val xsnService = mock[XSNService]
@@ -66,6 +86,10 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
   val merchantnodeRepository = mock[MerchantnodeRepository]
   val nodeStatsRepository = mock[NodeStatsRepository]
   val actorSystem = ActorSystem()
+  actorSystem.actorOf(
+    Props(classOf[CurrencyActorMock], this),
+    "currency_synchronizer"
+  )
 
   override val application = guiceApplicationBuilder
     .overrides(bind[StatisticsBlockingDataHandler].to(dataHandler))
@@ -77,11 +101,12 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     .build()
 
   class CurrencyActorMock extends Actor {
-    override def receive: Receive = {
-      case CurrencySynchronizerActor.GetMarketStatistics =>
-        val map: Map[Currency, BigDecimal] = Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
-        val reply = MarketStatistics(map, MarketInformation(0, 0))
-        sender() ! reply
+
+    override def receive: Receive = { case CurrencySynchronizerActor.GetMarketStatistics =>
+      val map: Map[Currency, BigDecimal] =
+        Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+      val reply = MarketStatistics(map, MarketInformation(0, 0))
+      sender() ! reply
     }
   }
 
@@ -89,12 +114,20 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     "return the server statistics" in {
       val masternodes = 1000
       val tposnodes = 100
+      val enabledMasternodes = 200
+
       val difficulty = BigDecimal("129.1827211827212")
-      when(masternodeRepository.getCount()).thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getCount())
+        .thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
       when(masternodeRepository.getAll()).thenReturn(Future.successful(List()))
-      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
-      when(merchantnodeRepository.getAll()).thenReturn(Future.successful(List()))
-      when(xsnService.getDifficulty()).thenReturn(Future.successful(Good(difficulty)))
+      when(merchantnodeRepository.getCount())
+        .thenReturn(Future.successful(tposnodes))
+      when(merchantnodeRepository.getAll())
+        .thenReturn(Future.successful(List()))
+      when(xsnService.getDifficulty())
+        .thenReturn(Future.successful(Good(difficulty)))
 
       val response = GET("/stats")
 
@@ -103,17 +136,25 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "blocks").as[Int] mustEqual stats.blocks
       (json \ "transactions").as[Int] mustEqual stats.transactions
       (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
-      (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
+      (json \ "circulatingSupply")
+        .as[BigDecimal] mustEqual stats.circulatingSupply.get
       (json \ "masternodes").as[Int] mustEqual masternodes
       (json \ "tposnodes").as[Int] mustEqual tposnodes
       (json \ "difficulty").as[BigDecimal] mustEqual difficulty
+      (json \ "masternodes_enabled").as[Int] mustEqual enabledMasternodes
+
     }
 
     "return the stats even if getting the difficulty throws an exception" in {
       val masternodes = 1000
+      val enabledMasternodes = 200
       val tposnodes = 100
-      when(masternodeRepository.getCount()).thenReturn(Future.successful(masternodes))
-      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
+      when(masternodeRepository.getCount())
+        .thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
+      when(merchantnodeRepository.getCount())
+        .thenReturn(Future.successful(tposnodes))
       when(xsnService.getDifficulty()).thenReturn(Future.failed(new Exception))
 
       missingDifficultyTest(masternodes)
@@ -122,9 +163,13 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     "return the stats even if the difficulty isn't available" in {
       val masternodes = 1000
       val tposnodes = 100
-      when(masternodeRepository.getCount()).thenReturn(Future.successful(masternodes))
-      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
-      when(xsnService.getDifficulty()).thenReturn(Future.successful(Bad(XSNUnexpectedResponseError).accumulating))
+      when(masternodeRepository.getCount())
+        .thenReturn(Future.successful(masternodes))
+      when(merchantnodeRepository.getCount())
+        .thenReturn(Future.successful(tposnodes))
+      when(xsnService.getDifficulty()).thenReturn(
+        Future.successful(Bad(XSNUnexpectedResponseError).accumulating)
+      )
 
       missingDifficultyTest(masternodes)
     }
@@ -138,15 +183,19 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       val tposnodes = 100
       val enabledTposnodes = 90
       val tnProtocols = Map("70209" -> 90)
-      val coinsStaking = 100
 
-      when(masternodeRepository.getCount()).thenReturn(Future.successful(masternodes))
-      when(masternodeRepository.getEnabledCount()).thenReturn(Future.successful(enabledMasternodes))
-      when(masternodeRepository.getProtocols()).thenReturn(Future.successful(mnProtocols))
-      when(merchantnodeRepository.getCount()).thenReturn(Future.successful(tposnodes))
-      when(merchantnodeRepository.getEnabledCount()).thenReturn(Future.successful(enabledTposnodes))
-      when(merchantnodeRepository.getProtocols()).thenReturn(Future.successful(tnProtocols))
-      when(nodeStatsRepository.getCoinsStaking()).thenReturn(Future.successful(coinsStaking))
+      when(masternodeRepository.getCount())
+        .thenReturn(Future.successful(masternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
+      when(masternodeRepository.getProtocols())
+        .thenReturn(Future.successful(mnProtocols))
+      when(merchantnodeRepository.getCount())
+        .thenReturn(Future.successful(tposnodes))
+      when(merchantnodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledTposnodes))
+      when(merchantnodeRepository.getProtocols())
+        .thenReturn(Future.successful(tnProtocols))
 
       val response = GET("/node-stats")
 
@@ -163,6 +212,10 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   "GET /rewards-summary" should {
     "get rewards summary" in {
+
+      val enabledMasternodes = 40
+      when(masternodeRepository.getEnabledCount()).thenReturn(Future.successful(enabledMasternodes))
+
       val response = GET(s"/rewards-summary")
       status(response) mustEqual OK
 
@@ -174,19 +227,47 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
       (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
       (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
       (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal("70000.12345678")
+      (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
+      (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual BigDecimal(1000)
+      (json \ "masternodesROI").as[BigDecimal] mustEqual BigDecimal(7.884)
+      (json \ "stakingROI").as[BigDecimal] mustEqual BigDecimal(4730.4)
+      (json \ "coinsTrustlesslyStaking").as[BigDecimal] mustEqual BigDecimal(6000)
     }
   }
 
   "GET /prices" should {
     "get currency values" in {
-      actorSystem.actorOf(Props(classOf[CurrencyActorMock], this), "currency_synchronizer")
-
       val response = GET("/prices")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
       (json \ "usd").as[BigDecimal] mustEqual 0.071231351
       (json \ "btc").as[BigDecimal] mustEqual 0.063465494
+    }
+
+    "get a specific currency" in {
+      val response = GET("/prices?currency=usd")
+      status(response) mustEqual OK
+
+      val expected = Json.obj("usd" -> 0.071231351)
+      val json = contentAsJson(response)
+
+      json mustEqual expected
+    }
+
+    "getting a specific currency is case insensitive" in {
+      val response = GET("/prices?currency=USD")
+      status(response) mustEqual OK
+
+      val expected = Json.obj("usd" -> 0.071231351)
+      val json = contentAsJson(response)
+
+      json mustEqual expected
+    }
+
+    "return not found when currency does not exist" in {
+      val response = GET("/prices?currency=asd")
+      status(response) mustEqual NOT_FOUND
     }
   }
 
@@ -198,7 +279,8 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     (json \ "blocks").as[Int] mustEqual stats.blocks
     (json \ "transactions").as[Int] mustEqual stats.transactions
     (json \ "totalSupply").as[BigDecimal] mustEqual stats.totalSupply.get
-    (json \ "circulatingSupply").as[BigDecimal] mustEqual stats.circulatingSupply.get
+    (json \ "circulatingSupply")
+      .as[BigDecimal] mustEqual stats.circulatingSupply.get
     (json \ "masternodes").as[Int] mustEqual masternodes
   }
 }

@@ -49,6 +49,12 @@ object LedgerHelper {
     val merchantReward = BlockReward(Address.from(list(1)).get, 100)
     val masternodeReward = BlockReward(Address.from(list.head).get, 250)
 
-    TPoSBlockRewards(ownerReward, merchantReward, Some(masternodeReward), 10000, 120000)
+    TPoSBlockRewards(
+      ownerReward,
+      merchantReward,
+      Some(masternodeReward),
+      10000,
+      120000
+    )
   }
 }

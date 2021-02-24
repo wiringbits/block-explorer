@@ -58,6 +58,39 @@ server {
     proxy_pass http://10.136.160.52:9000;
   }
 
+  location /api/eth/prices {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/eth/prices /prices/eth break;
+    proxy_pass http://10.136.12.87:9000;
+  }
+
+  location /api/usdt/prices {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/usdt/prices /prices/usdt break;
+    proxy_pass http://10.136.12.87:9000;
+  }
+
+  # kept temporary for backwards compatibility with clients
+  location /api/weth {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/weth/(.*) /$1 break;
+    proxy_pass http://10.136.12.87:9000;
+  }
+
+  location /api/eth {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/eth/(.*) /$1 break;
+    proxy_pass http://10.136.12.87:9000;
+  }
+
   location /api {
     rewrite ^/api/(.*) /$1 break;
     proxy_pass http://10.136.160.52:9000;

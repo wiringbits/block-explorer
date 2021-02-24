@@ -16,12 +16,11 @@ class AddressSpec extends WordSpec with MustMatchers with OptionValues {
 
   "from" should {
 
-    addresses.foreach {
-      case (tpe, input) =>
-        s"allow $tpe" in {
-          val result = Address.from(input)
-          result.value.string mustEqual input
-        }
+    addresses.foreach { case (tpe, input) =>
+      s"allow $tpe" in {
+        val result = Address.from(input)
+        result.value.string mustEqual input
+      }
     }
 
     "reject an empty string" in {

@@ -8,8 +8,7 @@ case class NodeStatistics(
     masternodesProtocols: Map[String, Int],
     tposnodes: Int,
     enabledTposnodes: Int,
-    tposnodesProtocols: Map[String, Int],
-    coinsStaking: BigDecimal
+    tposnodesProtocols: Map[String, Int]
 )
 
 object NodeStatistics {

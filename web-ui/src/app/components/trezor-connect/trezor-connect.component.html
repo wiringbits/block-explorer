@@ -1,73 +1,158 @@
 <div class="wrapper">
+  <label class="trezor-span">Trezor Wallet</label>
+  <label class="fourth-position complete">{{ 'label.balance' | translate }}:
+    {{ satoshiToXsn(getAvailableSatoshis()) | explorerCurrency }}</label>
+  <input type="button" class="btn btn-primary last-position reset-button" value="{{ 'label.resetWallet' | translate }}"
+    (click)="resetWallet()">
 
-  <label class="begin">Trezor Wallet</label>
   <div class="begin">
     <tabset>
-      <label>Balance {{ satoshiToXsn(getAvailableSatoshis()) | explorerCurrency }}</label><br>
+
       <tab heading="Receive">
-        <label> {{ 'label.receiveXSN' | translate }}</label><br>
-        <ul id="addressList">
-          <li *ngFor="let item of trezorAddresses">
-            <label>Address: {{item.serializedPath}}</label>
-            <p *ngIf="isTrezorAddressVerified(item.address) else elseBlock">
-              <label>{{item.address}}</label><br>
-              <a routerLink="/addresses/{{item.address}}">{{ 'message.more' | translate }}</a>
-            </p>
-            <ng-template #elseBlock>
-              <p>
-                <input type="button" class="btn btn-primary btn-serach" value="{{ 'action.verifyAddress' | translate }}" (click)="verifyAddress(item)"><br>
-              </p>
-            </ng-template>
-          </li>
-        </ul>
-        <select #selectedAddressType (change) = "refresh()">
-          <option value=44>Legacy</option>
-          <option value=84>Segwit</option>
-          <option value=49 selected>P2shsegwit</option>
-        </select>
-        <br>
-        <br>
-        <input type="button" class="btn btn-primary btn-serach" value="Add" (click)="generateNextAddress(+selectedAddressType.value)">
+        <label> {{ 'label.receiveXSN' | translate }}</label>
+        <div class="row add-address">
+          <div class="col-xs-8 col-md-6">
+            <select #selectedAddressType class="form-control" (change)="refresh()">
+              <option value=44>Legacy</option>
+              <option value=84>Segwit</option>
+              <option value=49 selected>P2shsegwit</option>
+            </select>
+          </div>
+          <div class="col-xs-3">
+            <button type="button" class="btn btn-primary" title="Add a new address"
+              (click)="generateNextAddress(+selectedAddressType.value)"><span class="glyphicon glyphicon-plus"></span>
+              {{ 'label.add' | translate }}</button>
+          </div>
+        </div>
+
+        <table id="addressList" class="table table-responsive table-borderless">
+          <thead>
+            <tr>
+              <th>{{ 'label.path' | translate }}</th>
+              <th>{{ 'label.address' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr *ngFor="let item of trezorAddresses">
+              <td>
+                {{item.serializedPath}}
+              </td>
+              <td>
+                <div>
+                  <a routerLink="/addresses/{{item.address}}"> {{item.address}}</a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </tab>
+
       <tab heading="Send">
         <div class="tab-wrapper">
           <label class="first-position"> {{ 'label.sendXSN' | translate }}</label>
           <div class="first-position">{{ 'label.address' | translate }}</div>
-          <input class="second-position complete black-text" #destinationAddress type="text">
+          <input class="second-position complete black-text form-control" #destinationAddress type="text" (change)="destinationAddress.value = destinationAddress.value.trim()">
           <div class="first-position">{{ 'label.amount' | translate }}</div>
-          <input class="second-position complete black-text" #amountValue (change)="precise(amountValue)" #amountXSN type="number" min="0" step="0.00000001">
+          <input class="second-position complete black-text form-control" #amountValue
+            type="number" min="0" step="0.00000001" (change)="precise(amountValue)">
           <div class="first-position">{{ 'label.fee' | translate }}</div>
-          <select class="second-position" #selectedFee (change) = "refresh()">
-            <option value="1000">{{ 'label.highFee' | translate }}</option>
-            <option value="500" selected>{{ 'label.normalFee' | translate }}</option>
-            <option value="100">{{ 'label.lowFee' | translate }}</option>
+          <select class="second-position form-control" #selectedFee (change)="refresh()">
+            <option *ngFor="let fee of transactionFees" value="{{fee.amount}}">
+              {{fee.name}} ({{fee.amount}} {{ 'label.satoshis' | translate }})
+            </option>
           </select>
-          <div class="third-position complete">{{ selectedFee.value }} {{ 'label.satoshis' | translate }}</div>
           <input class="first-position btn btn-primary btn-serach" type="button" value="{{ 'label.send' | translate }}"
-          (click)="signTransaction(destinationAddress.value, amountXSN.value, selectedFee.value)">
+            (click)="signTransaction(destinationAddress.value, amountValue.value, selectedFee.value)">
         </div>
         <br>
-        <label>Generated transaction id: </label>
+        <label>{{'label.generatedTransaction' | translate}}: </label>
         <br>
         <a routerLink="/transactions/{{ txid }}">{{ txid }}</a>
       </tab>
+
       <tab heading="TPOS">
-        <b>Coming soon</b>
-        <!-- <label> {{ 'label.tpos' | translate }}</label><br>
-        Merchant address:<br>
-        <input class="black-text" #merchantAddress type="text"><br>
-        MerchantStake address:<br>
-        <select #selectedStakeAddress>
-          <option *ngFor="let item of trezorAddresses">{{ item.address }}</option>
-        </select><br>
-        Comisión:<br>
-        <input class="black-text" #commisionXSN type="number" min="0"><br>
-        <br>
-        <input type="button" class="btn btn-primary btn-serach" value="{{ 'label.send' | translate }}" (click)="sendTPOS()"> -->
+        <label class="first-position"> {{ 'label.createContract' | translate }}</label>
+
+        <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
+          autocomplete="off">
+          <div class="row">
+
+            <div class="form-group col-md-6 col-xs-8">
+              <label for="MerchantAddress">{{ 'label.merchantAddress' | translate }}</label>
+              <input type="text" class="form-control" aria-describedby="merchantAddress"
+                placeholder="{{ 'label.enterMerchantAddress' | translate }}" formControlName="merchantAddress"
+                name="merchantAddress">
+              <span
+                *ngIf="tposContractFormControl.get('merchantAddress').invalid && tposContractFormControl.get('merchantAddress').touched"
+                class="text-danger">Merchant address is required</span>
+            </div>
+          </div>
+          <div class="row">
+
+            <div class="form-group col-md-6 col-xs-8">
+              <label for="AmountXSN">{{ 'label.amount' | translate }}</label>
+              <input class="form-control" (change)="precise(amountXSN)" #amountXSN type="number" min="0"
+                step="0.00000001" placeholder="Enter amount in xsn" formControlName="contractAmount"
+                name="contractAmount">
+              <span
+                *ngIf="tposContractFormControl.get('contractAmount').invalid && tposContractFormControl.get('contractAmount').touched"
+                class="text-danger">Amount is required</span>
+            </div>
+          </div>
+
+          <div class="row">
+
+            <div class="form-group col-md-6 col-xs-8">
+              <label for="CommisionPercent">{{ 'label.commision' | translate }}</label>
+              <input class="form-control" #commisionPercent type="number" min="1" max="100"
+                placeholder="Enter commision percent" formControlName="commissionPercent" name="commissionPercent">
+              <span
+                *ngIf="tposContractFormControl.get('commissionPercent').invalid && tposContractFormControl.get('commissionPercent').touched"
+                class="text-danger">Commision is required</span>
+            </div>
+          </div>
+          <label *ngIf="tposAddress">Tpos Address:
+            <a routerLink="/addresses/{{tposAddress.address}}">{{tposAddress.address}}</a>
+          </label>
+          <br>
+          <label *ngIf="tposTransaction">Tpos Transaction:
+            <a routerLink="/transactions/{{tposTransaction}}">{{tposTransaction}}</a>
+          </label>
+          <br>
+          <label *ngIf="generatedTransaction">Generated Transaction:
+            <a routerLink="/transactions/{{generatedTransaction}}">{{generatedTransaction}}</a>
+          </label>
+
+          <div class="row">
+            <div class="form-group col-md-4 col-xs-6">
+              <button type="button" class="btn btn-primary" [disabled]="tposContractFormControl.invalid"
+                (click)="sendTPOS()">{{ 'label.send' | translate }}</button>
+            </div>
+          </div>
+
+        </form>
+        <table class="table table-responsive table-borderless">
+          <thead>
+            <tr>
+              <th>{{ 'label.ownerAddress' | translate }}</th>
+              <th>{{ 'label.merchantAddress' | translate }}</th>
+              <th>{{ 'label.merchantCommission' | translate }}</th>
+              <th>{{ 'label.state' | translate }}</th>
+              <th>{{ 'label.transaction' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of tposContracts">
+              <td><a routerLink="/addresses/{{item.owner}}">{{item.owner}}</a></td>
+              <td><a routerLink="/addresses/{{item.merchant}}">{{item.merchant}}</a></td>
+              <td>{{item.merchantCommission}} %</td>
+              <td>{{item.state}}</td>
+              <td><a routerLink="/transactions/{{item.txid}}">{{item.txid}}</a></td>
+            </tr>
+          </tbody>
+        </table>
       </tab>
     </tabset>
-    <br>
-    <input type="button" class="btn btn-primary btn-serach" value="{{ 'label.resetWallet' | translate }}" (click)="resetWallet()">
-    <br>
   </div>
 </div>

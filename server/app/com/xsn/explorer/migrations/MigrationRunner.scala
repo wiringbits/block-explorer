@@ -9,7 +9,9 @@ import play.api.db.Database
 import scala.concurrent.ExecutionContext
 
 @com.github.ghik.silencer.silent
-class MigrationRunner @Inject()(db: MigrationRunner.DatabaseOperations)(implicit ec: ExecutionContext) {
+class MigrationRunner @Inject() (db: MigrationRunner.DatabaseOperations)(
+    implicit ec: ExecutionContext
+) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -20,7 +22,9 @@ class MigrationRunner @Inject()(db: MigrationRunner.DatabaseOperations)(implicit
     val previousPercentage: Int = 100 * (migratedHeight - 1) / targetHeight
 
     if (percentage != 0 && percentage != previousPercentage) {
-      logger.info(s"migrated block at height ${migratedHeight}, ${percentage}% done")
+      logger.info(
+        s"migrated block at height ${migratedHeight}, ${percentage}% done"
+      )
     }
   }
 }
@@ -28,6 +32,7 @@ class MigrationRunner @Inject()(db: MigrationRunner.DatabaseOperations)(implicit
 object MigrationRunner {
 
   @com.github.ghik.silencer.silent
-  class DatabaseOperations @Inject()(override val database: Database)(implicit dbEC: DatabaseExecutionContext)
-      extends AnormPostgresDataHandler {}
+  class DatabaseOperations @Inject() (override val database: Database)(implicit
+      dbEC: DatabaseExecutionContext
+  ) extends AnormPostgresDataHandler {}
 }

@@ -1,16 +1,26 @@
 package com.xsn.explorer.data.serializers
 
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
-import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{Reward, Stake}
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{
+  Reward,
+  Stake
+}
 import com.xsn.explorer.helpers.DataGenerator
-import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, RewardType, TPoSBlockRewards}
+import com.xsn.explorer.models.{
+  BlockReward,
+  PoSBlockRewards,
+  PoWBlockRewards,
+  RewardType,
+  TPoSBlockRewards
+}
 import org.scalatest.{MustMatchers, WordSpec}
 
 @com.github.ghik.silencer.silent
 class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
   "serialize" should {
     "serialize PoW block" in {
-      val blockReward = PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
+      val blockReward =
+        PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 100))
       val result = BlockRewardPostgresSerializer.serialize(blockReward)
 
       result.head.blockReward.address mustEqual blockReward.reward.address
@@ -44,7 +54,12 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
     }
 
     "serialize PoS block without masternode" in {
-      val blockReward = PoSBlockRewards(BlockReward(DataGenerator.randomAddress, 100), None, 1000, 123)
+      val blockReward = PoSBlockRewards(
+        BlockReward(DataGenerator.randomAddress, 100),
+        None,
+        1000,
+        123
+      )
       val result = BlockRewardPostgresSerializer.serialize(blockReward)
 
       result.length mustEqual 1
@@ -114,7 +129,13 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
   "deserialize" should {
     "deserialize PoW block" in {
-      val rewards = List(Reward(BlockReward(DataGenerator.randomAddress, 100), RewardType.PoW, None))
+      val rewards = List(
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 100),
+          RewardType.PoW,
+          None
+        )
+      )
       val result = BlockRewardPostgresSerializer.deserialize(rewards)
 
       result match {
@@ -127,8 +148,16 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
     "deserialize PoS block with masternode" in {
       val rewards = List(
-        Reward(BlockReward(DataGenerator.randomAddress, 100), RewardType.PoS, Some(Stake(1000, 123))),
-        Reward(BlockReward(DataGenerator.randomAddress, 50), RewardType.Masternode, None)
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 100),
+          RewardType.PoS,
+          Some(Stake(1000, 123))
+        ),
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 50),
+          RewardType.Masternode,
+          None
+        )
       )
       val result = BlockRewardPostgresSerializer.deserialize(rewards)
 
@@ -145,7 +174,13 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
     }
 
     "deserialize PoS block without masternode" in {
-      val rewards = List(Reward(BlockReward(DataGenerator.randomAddress, 100), RewardType.PoS, Some(Stake(1000, 123))))
+      val rewards = List(
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 100),
+          RewardType.PoS,
+          Some(Stake(1000, 123))
+        )
+      )
       val result = BlockRewardPostgresSerializer.deserialize(rewards)
 
       result match {
@@ -161,9 +196,21 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
     "deserialize TPoS block with masternode" in {
       val rewards = List(
-        Reward(BlockReward(DataGenerator.randomAddress, 50), RewardType.Masternode, None),
-        Reward(BlockReward(DataGenerator.randomAddress, 100), RewardType.TPoSOwner, Some(Stake(1000, 123))),
-        Reward(BlockReward(DataGenerator.randomAddress, 200), RewardType.TPoSMerchant, None)
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 50),
+          RewardType.Masternode,
+          None
+        ),
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 100),
+          RewardType.TPoSOwner,
+          Some(Stake(1000, 123))
+        ),
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 200),
+          RewardType.TPoSMerchant,
+          None
+        )
       )
       val result = BlockRewardPostgresSerializer.deserialize(rewards)
 
@@ -183,8 +230,16 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
     "deserialize TPoS block without masternode" in {
       val rewards = List(
-        Reward(BlockReward(DataGenerator.randomAddress, 100), RewardType.TPoSOwner, Some(Stake(1000, 123))),
-        Reward(BlockReward(DataGenerator.randomAddress, 200), RewardType.TPoSMerchant, None)
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 100),
+          RewardType.TPoSOwner,
+          Some(Stake(1000, 123))
+        ),
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 200),
+          RewardType.TPoSMerchant,
+          None
+        )
       )
       val result = BlockRewardPostgresSerializer.deserialize(rewards)
 
@@ -208,7 +263,13 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
     }
 
     "deserialize fail with an unknown reward structure" in {
-      val rewards = List(Reward(BlockReward(DataGenerator.randomAddress, 200), RewardType.TPoSMerchant, None))
+      val rewards = List(
+        Reward(
+          BlockReward(DataGenerator.randomAddress, 200),
+          RewardType.TPoSMerchant,
+          None
+        )
+      )
       an[RuntimeException] should be thrownBy {
         BlockRewardPostgresSerializer.deserialize(rewards)
       }

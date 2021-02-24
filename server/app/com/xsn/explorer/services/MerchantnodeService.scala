@@ -1,9 +1,20 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
-import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition, OrderingQuery}
-import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
+import com.alexitc.playsonify.core.{
+  FutureApplicationResult,
+  FuturePaginatedResult
+}
+import com.alexitc.playsonify.models.ordering.{
+  FieldOrdering,
+  OrderingCondition,
+  OrderingQuery
+}
+import com.alexitc.playsonify.models.pagination.{
+  Count,
+  PaginatedQuery,
+  PaginatedResult
+}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.errors.{IPAddressFormatError, MerchantnodeNotFoundError}
 import com.xsn.explorer.models.fields.MerchantnodeField
@@ -16,20 +27,22 @@ import org.scalactic.{Bad, Good}
 
 import scala.concurrent.ExecutionContext
 
-class MerchantnodeService @Inject()(
+class MerchantnodeService @Inject() (
     queryValidator: PaginatedQueryValidator,
     merchantnodeOrderingParser: MerchantnodeOrderingParser,
     merchantnodeRepository: MerchantnodeRepository
 )(implicit ec: ExecutionContext) {
 
   private val maxTransactionsPerQuery = 2000
-  
+
   def getMerchantnodes(
       paginatedQuery: PaginatedQuery,
       orderingQuery: OrderingQuery
   ): FuturePaginatedResult[Merchantnode] = {
     val result = for {
-      validatedQuery <- queryValidator.validate(paginatedQuery, maxTransactionsPerQuery).toFutureOr
+      validatedQuery <- queryValidator
+        .validate(paginatedQuery, maxTransactionsPerQuery)
+        .toFutureOr
       ordering <- merchantnodeOrderingParser.from(orderingQuery).toFutureOr
       merchantnodes <- merchantnodeRepository.getAll().map(Good(_)).toFutureOr
     } yield build(merchantnodes, validatedQuery, ordering)
@@ -37,7 +50,9 @@ class MerchantnodeService @Inject()(
     result.toFuture
   }
 
-  def getMerchantnode(ipAddressString: String): FutureApplicationResult[Merchantnode] = {
+  def getMerchantnode(
+      ipAddressString: String
+  ): FutureApplicationResult[Merchantnode] = {
     val result = for {
       ipAddress <- IPAddress
         .from(ipAddressString)
@@ -49,7 +64,7 @@ class MerchantnodeService @Inject()(
         .find(ipAddress)
         .map {
           case Some(x) => Good(x)
-          case None => Bad(MerchantnodeNotFoundError).accumulating
+          case None    => Bad(MerchantnodeNotFoundError).accumulating
         }
         .toFutureOr
     } yield merchantnode
@@ -57,27 +72,38 @@ class MerchantnodeService @Inject()(
     result.toFuture
   }
 
-  private def build(list: List[Merchantnode], query: PaginatedQuery, ordering: FieldOrdering[MerchantnodeField]) = {      
+  private def build(
+      list: List[Merchantnode],
+      query: PaginatedQuery,
+      ordering: FieldOrdering[MerchantnodeField]
+  ) = {
     val partial = sort(list, ordering)
       .slice(query.offset.int, query.offset.int + query.limit.int)
 
     PaginatedResult(query.offset, query.limit, Count(list.size), partial)
   }
 
-  private def sort(list: List[Merchantnode], ordering: FieldOrdering[MerchantnodeField]) = {
+  private def sort(
+      list: List[Merchantnode],
+      ordering: FieldOrdering[MerchantnodeField]
+  ) = {
     val sorted = sortByField(list, ordering.field)
     applyOrderingCondition(sorted, ordering.orderingCondition)
   }
 
-  private def sortByField(list: List[Merchantnode], field: MerchantnodeField) = field match {
-    case MerchantnodeField.ActiveSeconds => list.sortBy(_.activeSeconds)
-    case MerchantnodeField.IP => list.sortBy(_.ip)
-    case MerchantnodeField.LastSeen => list.sortBy(_.lastSeen)
-    case MerchantnodeField.Status => list.sortBy(_.status)
-  }
+  private def sortByField(list: List[Merchantnode], field: MerchantnodeField) =
+    field match {
+      case MerchantnodeField.ActiveSeconds => list.sortBy(_.activeSeconds)
+      case MerchantnodeField.IP            => list.sortBy(_.ip)
+      case MerchantnodeField.LastSeen      => list.sortBy(_.lastSeen)
+      case MerchantnodeField.Status        => list.sortBy(_.status)
+    }
 
-  private def applyOrderingCondition[A](list: List[A], orderingCondition: OrderingCondition) = orderingCondition match {
-    case OrderingCondition.AscendingOrder => list
+  private def applyOrderingCondition[A](
+      list: List[A],
+      orderingCondition: OrderingCondition
+  ) = orderingCondition match {
+    case OrderingCondition.AscendingOrder  => list
     case OrderingCondition.DescendingOrder => list.reverse
   }
 }

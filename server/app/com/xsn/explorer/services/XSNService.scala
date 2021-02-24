@@ -24,13 +24,19 @@ import scala.util.{Failure, Success, Try}
 
 trait XSNService {
 
-  def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]]
+  def getTransaction(
+      txid: TransactionId
+  ): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]]
 
   def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue]
 
-  def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical]
+  def getBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.Canonical]
 
-  def getFullBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]]
+  def getFullBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]]
 
   def getHexEncodedBlock(blockhash: Blockhash): FutureApplicationResult[String]
 
@@ -50,7 +56,9 @@ trait XSNService {
 
   def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]]
 
-  def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode]
+  def getMasternode(
+      ipAddress: IPAddress
+  ): FutureApplicationResult[rpc.Masternode]
 
   def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]]
 
@@ -60,9 +68,15 @@ trait XSNService {
 
   def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean]
 
-  def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue]
+  def estimateSmartFee(
+      confirmationsTarget: Int
+  ): FutureApplicationResult[JsValue]
 
-  def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue]
+  def getTxOut(
+      txid: TransactionId,
+      index: Int,
+      includeMempool: Boolean
+  ): FutureApplicationResult[JsValue]
 
   def cleanGenesisBlock(block: rpc.Block.Canonical): rpc.Block.Canonical = {
     Option(block)
@@ -80,16 +94,18 @@ trait XSNService {
       signature: String
   ): FutureApplicationResult[String]
 
-  def getTPoSContractDetails(transactionId: TransactionId): FutureApplicationResult[TPoSContract.Details]
+  def getTPoSContractDetails(
+      transactionId: TransactionId
+  ): FutureApplicationResult[TPoSContract.Details]
 }
 
-class XSNServiceRPCImpl @Inject()(
+class XSNServiceRPCImpl @Inject() (
     ws: WSClient,
     rpcConfig: RPCConfig,
     explorerConfig: ExplorerConfig,
     retryConfig: RetryConfig
-)(
-    implicit ec: ExternalServiceExecutionContext,
+)(implicit
+    ec: ExternalServiceExecutionContext,
     scheduler: Scheduler
 ) extends XSNService {
 
@@ -98,43 +114,60 @@ class XSNServiceRPCImpl @Inject()(
 
   private val server = ws
     .url(rpcConfig.host.string)
-    .withAuth(rpcConfig.username.string, rpcConfig.password.string, WSAuthScheme.BASIC)
+    .withAuth(
+      rpcConfig.username.string,
+      rpcConfig.password.string,
+      WSAuthScheme.BASIC
+    )
     .withHttpHeaders("Content-Type" -> "text/plain")
 
-  private def retrying[A](name: String)(f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
+  private def retrying[A](
+      name: String
+  )(f: => FutureApplicationResult[A]): FutureApplicationResult[A] = {
     val retry = RetryableFuture.withExponentialBackoff[ApplicationResult[A]](
       retryConfig.initialDelay,
       retryConfig.maxDelay
     )
     val shouldRetry: Try[ApplicationResult[A]] => Boolean = {
       case Success(Bad(One(XSNWorkQueueDepthExceeded))) => true
-      case Success(Bad(One(XSNWarmingUp))) => true
-      case Failure(_: ConnectException) => true
-      case _ => false
+      case Success(Bad(One(XSNWarmingUp)))              => true
+      case Failure(_: ConnectException)                 => true
+      case _                                            => false
     }
 
     retry(shouldRetry) {
-      val span = Kamon.clientSpanBuilder(component = "xsn-service", operationName = name).start()
+      val timer = Kamon
+        .timer("xsn-service")
+        .withTag("operation", name)
+        .start()
+
       val result = f
 
-      result.onComplete {
-        case Success(_) => span.finish()
-        case Failure(ex) => span.fail(ex)
-      }
+      result.onComplete(_ => timer.stop())
       result
     }
   }
 
-  override def getTransaction(txid: TransactionId): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
+  override def getTransaction(
+      txid: TransactionId
+  ): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     val result = retrying("gettransaction") {
       server
-        .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
+        .post(
+          s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }"""
+        )
         .map { response =>
-          val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](response, errorCodeMapper)
+          val maybe = getResult[rpc.Transaction[rpc.TransactionVIN]](
+            response,
+            errorCodeMapper
+          )
           maybe.getOrElse {
-            getResult[rpc.UnconfirmedTransaction[rpc.TransactionVIN]](response, errorCodeMapper)
+            getResult[rpc.UnconfirmedTransaction[rpc.TransactionVIN]](
+              response,
+              errorCodeMapper
+            )
               .map(_ => Bad(UnconfirmedTransaction).accumulating)
               .getOrElse {
                 logger.debug(
@@ -148,19 +181,24 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get transaction $txid, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get transaction $txid, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getRawTransaction(txid: TransactionId): FutureApplicationResult[JsValue] = {
+  override def getRawTransaction(
+      txid: TransactionId
+  ): FutureApplicationResult[JsValue] = {
     val errorCodeMapper = Map(-5 -> TransactionError.NotFound(txid))
 
     val result = retrying("getrawtransaction") {
       server
-        .post(s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }""")
+        .post(
+          s"""{ "jsonrpc": "1.0", "method": "getrawtransaction", "params": ["${txid.string}", 1] }"""
+        )
         .map { response =>
           val maybe = getResult[JsValue](response, errorCodeMapper)
           maybe.getOrElse {
@@ -174,16 +212,20 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get raw transaction $txid, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get raw transaction $txid, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical] = {
+  override def getBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.Canonical] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
     val result = retrying("getblock") {
       server
@@ -193,7 +235,7 @@ class XSNServiceRPCImpl @Inject()(
           maybe
             .map {
               case Good(block) => Good(cleanGenesisBlock(block))
-              case x => x
+              case x           => x
             }
             .getOrElse {
               logger.debug(
@@ -206,7 +248,8 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get block $blockhash, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -217,17 +260,21 @@ class XSNServiceRPCImpl @Inject()(
       blockhash: Blockhash
   ): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
 
     val result = retrying("getblock") {
       server
         .post(body)
         .map { response =>
-          val maybe = getResult[rpc.Block.HasTransactions[rpc.TransactionVIN]](response, errorCodeMapper)
+          val maybe = getResult[rpc.Block.HasTransactions[rpc.TransactionVIN]](
+            response,
+            errorCodeMapper
+          )
           maybe
             .map {
               case Good(block) => Good(block)
-              case x => x
+              case x           => x
             }
             .getOrElse {
               logger.debug(
@@ -240,7 +287,8 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get full block $blockhash, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get full block $blockhash, errors = $errors")
       case _ => ()
     }
 
@@ -251,7 +299,8 @@ class XSNServiceRPCImpl @Inject()(
       blockhash: Blockhash
   ): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 0] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 0] }"""
 
     val result = retrying("getblock") {
       server
@@ -269,16 +318,22 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get hex encoded block $blockhash, errors = $errors")
+      case Bad(errors) =>
+        logger.info(
+          s"Failed to get hex encoded block $blockhash, errors = $errors"
+        )
       case _ => ()
     }
 
     result
   }
 
-  override def getRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+  override def getRawBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[JsValue] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}"] }"""
 
     val result = retrying("getblock") {
       server
@@ -296,16 +351,20 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get raw block $blockhash, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get raw block $blockhash, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getFullRawBlock(blockhash: Blockhash): FutureApplicationResult[JsValue] = {
+  override def getFullRawBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[JsValue] = {
     val errorCodeMapper = Map(-5 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblock", "params": ["${blockhash.string}", 2] }"""
 
     val result = retrying("getblock") {
       server
@@ -323,16 +382,22 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get full raw block $blockhash, errors = $errors")
+      case Bad(errors) =>
+        logger.info(
+          s"Failed to get full raw block $blockhash, errors = $errors"
+        )
       case _ => ()
     }
 
     result
   }
 
-  override def getBlockhash(height: Height): FutureApplicationResult[Blockhash] = {
+  override def getBlockhash(
+      height: Height
+  ): FutureApplicationResult[Blockhash] = {
     val errorCodeMapper = Map(-8 -> BlockNotFoundError)
-    val body = s"""{ "jsonrpc": "1.0", "method": "getblockhash", "params": [${height.int}] }"""
+    val body =
+      s"""{ "jsonrpc": "1.0", "method": "getblockhash", "params": [${height.int}] }"""
 
     val result = retrying("getblockhash") {
       server
@@ -350,14 +415,16 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get blockhash $height, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get blockhash $height, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical] = {
+  override def getLatestBlock()
+      : FutureApplicationResult[rpc.Block.Canonical] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -383,7 +450,7 @@ class XSNServiceRPCImpl @Inject()(
 
             block <- getBlock(blockhash).map {
               case Good(block) => Good(cleanGenesisBlock(block))
-              case x => x
+              case x           => x
             }.toFutureOr
           } yield block
 
@@ -392,14 +459,16 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get latest block, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get latest block, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = {
+  override def getServerStatistics()
+      : FutureApplicationResult[rpc.ServerStatistics] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -424,7 +493,8 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get server statistics, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get server statistics, errors = $errors")
       case _ => ()
     }
 
@@ -456,7 +526,8 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get master node count, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get master node count, errors = $errors")
       case _ => ()
     }
 
@@ -488,14 +559,16 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get difficulty, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get difficulty, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] = {
+  override def getMasternodes()
+      : FutureApplicationResult[List[rpc.Masternode]] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -510,7 +583,7 @@ class XSNServiceRPCImpl @Inject()(
         .map { response =>
           val maybe = getResult[Map[String, String]](response)
             .map {
-              case Good(map) => Good(rpc.Masternode.fromMap(map))
+              case Good(map)   => Good(rpc.Masternode.fromMap(map))
               case Bad(errors) => Bad(errors)
             }
 
@@ -525,14 +598,17 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get master nodes, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get master nodes, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getMasternode(ipAddress: IPAddress): FutureApplicationResult[rpc.Masternode] = {
+  override def getMasternode(
+      ipAddress: IPAddress
+  ): FutureApplicationResult[rpc.Masternode] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -568,14 +644,16 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get master node $ipAddress, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get master node $ipAddress, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]] = {
+  override def getMerchantnodes()
+      : FutureApplicationResult[List[rpc.Merchantnode]] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -590,7 +668,7 @@ class XSNServiceRPCImpl @Inject()(
         .map { response =>
           val maybe = getResult[Map[String, String]](response)
             .map {
-              case Good(map) => Good(rpc.Merchantnode.fromMap(map))
+              case Good(map)   => Good(rpc.Merchantnode.fromMap(map))
               case Bad(errors) => Bad(errors)
             }
 
@@ -605,14 +683,17 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get merchant nodes, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get merchant nodes, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def getUnspentOutputs(address: Address): FutureApplicationResult[JsValue] = {
+  override def getUnspentOutputs(
+      address: Address
+  ): FutureApplicationResult[JsValue] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -639,14 +720,17 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get unspent outputs $address, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get unspent outputs $address, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def sendRawTransaction(hex: HexString): FutureApplicationResult[String] = {
+  override def sendRawTransaction(
+      hex: HexString
+  ): FutureApplicationResult[String] = {
     val errorCodeMapper = Map(
       -26 -> TransactionError.InvalidRawTransaction,
       -25 -> TransactionError.MissingInputs,
@@ -681,14 +765,17 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to send raw transaction $hex, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to send raw transaction $hex, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def isTPoSContract(txid: TransactionId): FutureApplicationResult[Boolean] = {
+  override def isTPoSContract(
+      txid: TransactionId
+  ): FutureApplicationResult[Boolean] = {
     val innerBody = Json.obj("txid" -> txid.string, "check_spent" -> 0)
     val body = Json.obj(
       "jsonrpc" -> "1.0",
@@ -719,14 +806,17 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get is TPoS contract $txid, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to get is TPoS contract $txid, errors = $errors")
       case _ => ()
     }
 
     result
   }
 
-  override def estimateSmartFee(confirmationsTarget: Int): FutureApplicationResult[JsValue] = {
+  override def estimateSmartFee(
+      confirmationsTarget: Int
+  ): FutureApplicationResult[JsValue] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -752,14 +842,21 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to estimate smart fee $confirmationsTarget, errors = $errors")
+      case Bad(errors) =>
+        logger.info(
+          s"Failed to estimate smart fee $confirmationsTarget, errors = $errors"
+        )
       case _ => ()
     }
 
     result
   }
 
-  override def getTxOut(txid: TransactionId, index: Int, includeMempool: Boolean): FutureApplicationResult[JsValue] = {
+  override def getTxOut(
+      txid: TransactionId,
+      index: Int,
+      includeMempool: Boolean
+  ): FutureApplicationResult[JsValue] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -785,7 +882,7 @@ class XSNServiceRPCImpl @Inject()(
 
     result.foreach {
       case Bad(errors) => logger.info(s"Failed to get TxOut, errors = $errors")
-      case _ => ()
+      case _           => ()
     }
 
     result
@@ -821,7 +918,8 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to encode the TPoS contract, errors = $errors")
+      case Bad(errors) =>
+        logger.info(s"Failed to encode the TPoS contract, errors = $errors")
       case _ => ()
     }
 
@@ -829,7 +927,9 @@ class XSNServiceRPCImpl @Inject()(
 
   }
 
-  override def getTPoSContractDetails(txid: TransactionId): FutureApplicationResult[TPoSContract.Details] = {
+  override def getTPoSContractDetails(
+      txid: TransactionId
+  ): FutureApplicationResult[TPoSContract.Details] = {
     val innerBody = Json.obj("txid" -> txid)
     val body = Json.obj(
       "jsonrpc" -> "1.0",
@@ -856,14 +956,20 @@ class XSNServiceRPCImpl @Inject()(
     }
 
     result.foreach {
-      case Bad(errors) => logger.info(s"Failed to get the TPoS contract details: $txid, errors = $errors")
+      case Bad(errors) =>
+        logger.info(
+          s"Failed to get the TPoS contract details: $txid, errors = $errors"
+        )
       case _ => ()
     }
 
     result
   }
 
-  private def mapError(json: JsValue, errorCodeMapper: Map[Int, ApplicationError]): Option[ApplicationError] = {
+  private def mapError(
+      json: JsValue,
+      errorCodeMapper: Map[Int, ApplicationError]
+  ): Option[ApplicationError] = {
     val jsonErrorMaybe = (json \ "error")
       .asOpt[JsValue]
       .filter(_ != JsNull)
@@ -873,7 +979,9 @@ class XSNServiceRPCImpl @Inject()(
         // from error code if possible
         (jsonError \ "code")
           .asOpt[Int]
-          .flatMap(code => errorCodeMapper.get(code) orElse defaultErrorCodeMapper.get(code))
+          .flatMap(code =>
+            errorCodeMapper.get(code) orElse defaultErrorCodeMapper.get(code)
+          )
           .orElse {
             // from message
             (jsonError \ "message")
@@ -884,14 +992,17 @@ class XSNServiceRPCImpl @Inject()(
       }
 
     errorMaybe
-      .collect {
-        case XSNMessageError("Work queue depth exceeded") => XSNWorkQueueDepthExceeded
+      .collect { case XSNMessageError("Work queue depth exceeded") =>
+        XSNWorkQueueDepthExceeded
       }
       .orElse(errorMaybe)
   }
 
-  private def getResult[A](response: WSResponse, errorCodeMapper: Map[Int, ApplicationError] = Map.empty)(
-      implicit reads: Reads[A]
+  private def getResult[A](
+      response: WSResponse,
+      errorCodeMapper: Map[Int, ApplicationError] = Map.empty
+  )(implicit
+      reads: Reads[A]
   ): Option[ApplicationResult[A]] = {
 
     val maybe = Option(response)
@@ -904,7 +1015,9 @@ class XSNServiceRPCImpl @Inject()(
           val x = (json \ "result").validate[A]
           x.asEither.left.foreach { errors =>
             val msg = errors
-              .map { case (path, error) => path.toJsonString -> error.toString() }
+              .map { case (path, error) =>
+                path.toJsonString -> error.toString()
+              }
               .mkString(", ")
             logger.debug(s"Failed to decode result, errors = ${msg}")
           }
@@ -932,8 +1045,8 @@ class XSNServiceRPCImpl @Inject()(
       }
       .orElse {
         // if still there is no error, the response might not be a json
-        Try(response.body).collect {
-          case "Work queue depth exceeded" => Bad(XSNWorkQueueDepthExceeded).accumulating
+        Try(response.body).collect { case "Work queue depth exceeded" =>
+          Bad(XSNWorkQueueDepthExceeded).accumulating
         }.toOption
       }
   }

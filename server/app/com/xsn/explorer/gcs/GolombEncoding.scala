@@ -5,21 +5,19 @@ import com.xsn.explorer.models._
 
 import scala.collection.SortedSet
 
-/**
- * A Golomb-coded set, matches all items in the set with probability 1, and matches other items with probability 1/M.
- *
- * The encoding is also parameterized by P, the bit length of the remainder code.
- *
- * see https://github.com/bitcoin/bips/blob/master/bip-0158.mediawikis
- */
+/** A Golomb-coded set, matches all items in the set with probability 1, and matches other items with probability 1/M.
+  *
+  * The encoding is also parameterized by P, the bit length of the remainder code.
+  *
+  * see https://github.com/bitcoin/bips/blob/master/bip-0158.mediawikis
+  */
 class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   require(p > 1 && p < 31)
 
   private val hasher = Hashing.sipHash24(key.k0, key.k1)
 
-  /**
-   * Encodes the given word set.
-   */
+  /** Encodes the given word set.
+    */
   def encode(words: Set[String]): GolombCodedSet = {
     encodeData(words.map(_.getBytes))
   }
@@ -46,17 +44,19 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     GolombCodedSet.apply(p = p, m = m, n = data.size, data = encodedBytes)
   }
 
-  /**
-   * Recovers the hashes from the encoded bytes.
-   *
-   * This method doesn't handle corrupted inputs, which shouldn't be a problem because
-   * the method is used only to verify that the filter is correct.
-   *
-   * @param encoded the encoded bytes, we expect them to be correct
-   * @param n the number of words encoded in the bytes
-   * @return the recovered sorted set of hashes
-   */
-  private[gcs] def decode(encoded: List[UnsignedByte], n: Int): SortedSet[BigInt] = {
+  /** Recovers the hashes from the encoded bytes.
+    *
+    * This method doesn't handle corrupted inputs, which shouldn't be a problem because
+    * the method is used only to verify that the filter is correct.
+    *
+    * @param encoded the encoded bytes, we expect them to be correct
+    * @param n the number of words encoded in the bytes
+    * @return the recovered sorted set of hashes
+    */
+  private[gcs] def decode(
+      encoded: List[UnsignedByte],
+      n: Int
+  ): SortedSet[BigInt] = {
     val encodedBits = encoded.flatMap(_.bits)
     val (_, _, result) = List
       .fill(n)(0)
@@ -70,9 +70,8 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     result.to[SortedSet]
   }
 
-  /**
-   * Maps the word set to a sorted set of hashes.
-   */
+  /** Maps the word set to a sorted set of hashes.
+    */
   private[gcs] def hashes(data: Set[Array[Byte]]): SortedSet[BigInt] = {
     val modulus = BigInt(m) * data.size
     val f = fastReduction(_: BigInt, modulus)
@@ -117,9 +116,8 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
   }
 
   private def toBigInt(bits: List[Bit]): BigInt = {
-    bits.foldLeft(BigInt(0)) {
-      case (acc, cur) =>
-        (acc * 2) + cur.toInt
+    bits.foldLeft(BigInt(0)) { case (acc, cur) =>
+      (acc * 2) + cur.toInt
     }
   }
 
@@ -131,35 +129,34 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     List.fill(size - bits.size)(Bit.Zero) ++ bits
   }
 
-  /**
-   * NOTE: This is a copy from https://github.com/btcsuite/btcutil/blob/master/gcs/gcs.go
-   *       that is used for compatibility reasons, here we don't care about such optimizations
-   *       because a filter is built once per block and never queried.
-   *
-   * Original docs:
-   * fastReduction calculates a mapping that's more ore less equivalent to: x mod N.
-   *
-   * However, instead of using a mod operation, which using a non-power of two
-   * will lead to slowness on many processors due to unnecessary division, we
-   * instead use a "multiply-and-shift" trick which eliminates all divisions,
-   * described in:
-   * https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
-   *
-   * * v * N  >> log_2(N)
-   *
-   * In our case, using 64-bit integers, log_2 is 64. As most processors don't
-   * support 128-bit arithmetic natively, we'll be super portable and unfold the
-   * operation into several operations with 64-bit arithmetic. As inputs, we the
-   * number to reduce, and our modulus N divided into its high 32-bits and lower
-   * 32-bits.
-   */
+  /** NOTE: This is a copy from https://github.com/btcsuite/btcutil/blob/master/gcs/gcs.go
+    *       that is used for compatibility reasons, here we don't care about such optimizations
+    *       because a filter is built once per block and never queried.
+    *
+    * Original docs:
+    * fastReduction calculates a mapping that's more ore less equivalent to: x mod N.
+    *
+    * However, instead of using a mod operation, which using a non-power of two
+    * will lead to slowness on many processors due to unnecessary division, we
+    * instead use a "multiply-and-shift" trick which eliminates all divisions,
+    * described in:
+    * https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+    *
+    * * v * N  >> log_2(N)
+    *
+    * In our case, using 64-bit integers, log_2 is 64. As most processors don't
+    * support 128-bit arithmetic natively, we'll be super portable and unfold the
+    * operation into several operations with 64-bit arithmetic. As inputs, we the
+    * number to reduce, and our modulus N divided into its high 32-bits and lower
+    * 32-bits.
+    */
   private def fastReduction(v: BigInt, modulus: BigInt): BigInt = {
     val nHi = modulus >> 32
-    val nLo = modulus & 0XFFFFFFFFL
+    val nLo = modulus & 0xffffffffL
 
     // First, we'll spit the item we need to reduce into its higher and lower bits.
     val vhi = v >> 32
-    val vlo = v & 0XFFFFFFFFL
+    val vlo = v & 0xffffffffL
 
     // Then, we distribute multiplication over each part.
     val vnphi = vhi * nHi
@@ -168,7 +165,8 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     val vnplo = vlo * nLo
 
     // We calculate the carry bit.
-    val carry = ((vnpmid & 0XFFFFFFFFL) + (npvmid & 0XFFFFFFFFL) + (vnplo >> 32)) >> 32
+    val carry =
+      ((vnpmid & 0xffffffffL) + (npvmid & 0xffffffffL) + (vnplo >> 32)) >> 32
 
     // Last, we add the high bits, the middle bits, and the carry.
     val result = vnphi + (vnpmid >> 32) + (npvmid >> 32) + carry
@@ -186,7 +184,9 @@ object GolombEncoding {
     new GolombEncoding(p = DefaultP, m = DefaultM, key = key)
   }
 
-  def encode(block: rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]): GolombCodedSet = {
+  def encode(
+      block: rpc.Block.HasTransactions[rpc.TransactionVIN.HasValues]
+  ): GolombCodedSet = {
     val key = SipHashKey.fromBtcutil(block.hash)
     val encoder = default(key)
 

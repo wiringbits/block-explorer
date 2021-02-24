@@ -6,9 +6,12 @@ class HexString private (val string: String) extends AnyVal {
 
   override def toString: String = string
 
-  def toBytes: Array[Byte] = string.grouped(2).map(Integer.parseInt(_, 16).asInstanceOf[Byte]).toArray
+  def toBytes: Array[Byte] =
+    string.grouped(2).map(Integer.parseInt(_, 16).asInstanceOf[Byte]).toArray
 
-  def concat(hex: HexString): HexString = new HexString(this.string + hex.string)
+  def concat(hex: HexString): HexString = new HexString(
+    this.string + hex.string
+  )
 
   def drop(count: Int) = new HexString(string.drop(count))
 

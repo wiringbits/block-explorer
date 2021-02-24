@@ -7,7 +7,7 @@ import { AlertModule } from 'ngx-bootstrap';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgHttpLoaderModule } from 'ng-http-loader';
 
@@ -22,6 +22,7 @@ import { NotificationService } from './services/notification.service';
 import { TickerService } from './services/ticker.service';
 import { TransactionsService } from './services/transactions.service';
 import { TrezorRepositoryService } from './services/trezor-repository.service';
+import { TposContractsService } from './services/tposcontracts.service';
 
 import { AppComponent } from './app.component';
 import { TrezorConnectComponent } from './components/trezor-connect/trezor-connect.component';
@@ -47,7 +48,8 @@ import { CalculatorComponent } from './components/calculator/calculator.componen
     NgHttpLoaderModule,
     TranslateModule.forRoot(),
     TabsModule.forRoot(),
-    AlertModule.forRoot()
+    AlertModule.forRoot(),
+    ReactiveFormsModule
   ],
   providers: [
     AddressesService,
@@ -61,7 +63,8 @@ import { CalculatorComponent } from './components/calculator/calculator.componen
     NotificationService,
     TickerService,
     TransactionsService,
-    TrezorRepositoryService
+    TrezorRepositoryService,
+    TposContractsService
   ],
   bootstrap: [AppComponent]
 })

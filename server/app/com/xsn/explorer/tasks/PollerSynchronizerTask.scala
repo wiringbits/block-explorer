@@ -4,7 +4,10 @@ import akka.actor.ActorSystem
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.config.LedgerSynchronizerConfig
 import com.xsn.explorer.services.XSNService
-import com.xsn.explorer.services.synchronizer.{LedgerSynchronizerService, LegacyLedgerSynchronizerService}
+import com.xsn.explorer.services.synchronizer.{
+  LedgerSynchronizerService,
+  LegacyLedgerSynchronizerService
+}
 import javax.inject.Inject
 import org.scalactic.Bad
 import org.slf4j.LoggerFactory
@@ -12,7 +15,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
-class PollerSynchronizerTask @Inject()(
+class PollerSynchronizerTask @Inject() (
     config: LedgerSynchronizerConfig,
     actorSystem: ActorSystem,
     xsnService: XSNService,
@@ -38,20 +41,22 @@ class PollerSynchronizerTask @Inject()(
   private def run(): Unit = {
     val result = for {
       block <- xsnService.getLatestBlock().toFutureOr
-      _ <- if (config.useNewSynchronizer) {
-        newSynchronizer.synchronize(block.hash).toFutureOr
-      } else {
-        ledgerSynchronizerService.synchronize(block.hash).toFutureOr
-      }
+      _ <-
+        if (config.useNewSynchronizer) {
+          newSynchronizer.synchronize(block.hash).toFutureOr
+        } else {
+          ledgerSynchronizerService.synchronize(block.hash).toFutureOr
+        }
     } yield ()
 
     result.toFuture
       .map {
-        case Bad(errors) => logger.error(s"Failed to sync latest block, errors = $errors")
+        case Bad(errors) =>
+          logger.error(s"Failed to sync latest block, errors = $errors")
         case _ => ()
       }
-      .recover {
-        case NonFatal(ex) => logger.error("Failed to sync latest block", ex)
+      .recover { case NonFatal(ex) =>
+        logger.error("Failed to sync latest block", ex)
       }
       .foreach { _ =>
         actorSystem.scheduler.scheduleOnce(config.interval) { run() }

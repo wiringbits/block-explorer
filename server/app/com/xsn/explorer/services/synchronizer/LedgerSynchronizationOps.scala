@@ -8,7 +8,11 @@ import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers.toPersistedBlock
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
+import com.xsn.explorer.services.{
+  BlockService,
+  TransactionCollectorService,
+  XSNService
+}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import kamon.Kamon
@@ -16,9 +20,8 @@ import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
-private[synchronizer] class LedgerSynchronizationOps @Inject()(
+private[synchronizer] class LedgerSynchronizationOps @Inject() (
     explorerConfig: ExplorerConfig,
     blockDataHandler: BlockFutureDataHandler,
     xsnService: XSNService,
@@ -37,12 +40,16 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       .toFuture
   }
 
-  def getRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.Canonical] = {
+  def getRPCBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.Canonical] = {
     val result = for {
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
-      if (explorerConfig.liteVersionConfig.enabled &&
-        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
+      if (
+        explorerConfig.liteVersionConfig.enabled &&
+        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock
+      ) {
 
         // lite version, ignore transactions
         rpcBlock.copy(transactions = List.empty)
@@ -54,10 +61,12 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
     result.toFuture
   }
 
-  def getFullRPCBlock(blockhash: Blockhash): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
-    val span = Kamon
-      .spanBuilder(operationName = "getFullRPCBlock")
-      .tag("blockhash", blockhash.string)
+  def getFullRPCBlock(
+      blockhash: Blockhash
+  ): FutureApplicationResult[rpc.Block.HasTransactions[rpc.TransactionVIN]] = {
+    val timer = Kamon
+      .timer("getFullRPCBlock")
+      .withTag("blockhash", blockhash.string)
       .start()
 
     import io.scalaland.chimney.dsl._
@@ -66,8 +75,10 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
       // we need to get the canonical block in order to evalu
       rpcBlock <- xsnService.getBlock(blockhash).toFutureOr
     } yield {
-      if (explorerConfig.liteVersionConfig.enabled &&
-        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock) {
+      if (
+        explorerConfig.liteVersionConfig.enabled &&
+        rpcBlock.height.int < explorerConfig.liteVersionConfig.syncTransactionsFromBlock
+      ) {
 
         // lite version, ignore transactions
         val liteBlock = rpcBlock
@@ -82,19 +93,18 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
 
     val result = partial.flatMap(_.toFutureOr).toFuture
 
-    result.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.onComplete(_ => timer.stop())
 
     result
   }
 
-  def getBlockData(rpcBlock: rpc.Block[_]): FutureApplicationResult[BlockData] = {
-    val span = Kamon
-      .spanBuilder(operationName = "getBlockData")
-      .tag("hash", rpcBlock.hash.string)
-      .tag("height", rpcBlock.height.int.toLong)
+  def getBlockData(
+      rpcBlock: rpc.Block[_]
+  ): FutureApplicationResult[BlockData] = {
+    val timer = Kamon
+      .timer("getBlockData")
+      .withTag("hash", rpcBlock.hash.string)
+      .withTag("height", rpcBlock.height.int.toLong)
       .start()
 
     val result = for {
@@ -110,14 +120,13 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
           s"The block = ${rpcBlock.hash} has phantom ${transactions.size - filteredTransactions.size} transactions, they are being discarded"
         )
       }
-      val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(filteredTransactions)
+      val block = toPersistedBlock(rpcBlock, extractionMethod).withTransactions(
+        filteredTransactions
+      )
       (block, contracts, filterFactory, rewards)
     }
 
-    result.toFuture.onComplete {
-      case Success(_) => span.finish()
-      case Failure(exception) => span.fail(exception)
-    }
+    result.toFuture.onComplete(_ => timer.stop())
 
     result.toFuture
   }
@@ -128,7 +137,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject()(
   ): FutureApplicationResult[Option[BlockRewards]] = {
     blockService.getBlockRewards(rpcBlock, extractionMethod).map {
       case Good(reward) => Good(Some(reward))
-      case Bad(_) => Good(None)
+      case Bad(_)       => Good(None)
     }
   }
 }

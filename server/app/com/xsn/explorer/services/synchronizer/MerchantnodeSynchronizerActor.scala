@@ -17,7 +17,9 @@ class MerchantnodeSynchronizerActor extends Actor {
     case MerchantnodeSynchronizerActor.UpdateMerchantnodes(newMerchantnodes) =>
       become(behavior(newMerchantnodes))
     case MerchantnodeSynchronizerActor.GetMerchantnode(ipAddress) =>
-      sender() ! merchantnodes.find(x => x.ip.split(":").headOption.contains(ipAddress.string))
+      sender() ! merchantnodes.find(x =>
+        x.ip.split(":").headOption.contains(ipAddress.string)
+      )
     case MerchantnodeSynchronizerActor.GetMerchantnodes =>
       sender() ! merchantnodes
     case MerchantnodeSynchronizerActor.GetMerchantnodeCount =>
@@ -34,7 +36,9 @@ object MerchantnodeSynchronizerActor {
 
   object Ref {
 
-    def apply(name: String = "merchantnode-synchronizer")(implicit system: ActorSystem): Ref = {
+    def apply(
+        name: String = "merchantnode-synchronizer"
+    )(implicit system: ActorSystem): Ref = {
       val actor = system.actorOf(Props(new MerchantnodeSynchronizerActor), name)
       new Ref(actor)
     }

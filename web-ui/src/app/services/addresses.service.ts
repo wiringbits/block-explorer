@@ -10,7 +10,7 @@ import { LightWalletTransaction } from '../models/light-wallet-transaction';
 import { Transaction } from '../models/transaction';
 import { UTXO } from '../models/utxo';
 import { WrappedResult } from '../models/wrapped-result';
-import { TposContract } from '../models/tposcontract';
+import { TposContract } from '../models/tpos-contract';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })

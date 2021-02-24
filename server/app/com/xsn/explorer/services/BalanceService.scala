@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
-class BalanceService @Inject()(
+class BalanceService @Inject() (
     paginatedQueryValidator: PaginatedQueryValidator,
     addressValidator: AddressValidator,
     balanceFutureDataHandler: BalanceFutureDataHandler
@@ -23,10 +23,17 @@ class BalanceService @Inject()(
       lastSeenAddressString: Option[String]
   ): FutureApplicationResult[WrappedResult[List[Balance]]] = {
     val result = for {
-      _ <- paginatedQueryValidator.validate(PaginatedQuery(Offset(0), limit), 100).toFutureOr
-      lastSeenAddress <- validate(lastSeenAddressString, addressValidator.validate).toFutureOr
+      _ <- paginatedQueryValidator
+        .validate(PaginatedQuery(Offset(0), limit), 100)
+        .toFutureOr
+      lastSeenAddress <- validate(
+        lastSeenAddressString,
+        addressValidator.validate
+      ).toFutureOr
 
-      data <- balanceFutureDataHandler.getHighestBalances(limit, lastSeenAddress).toFutureOr
+      data <- balanceFutureDataHandler
+        .getHighestBalances(limit, lastSeenAddress)
+        .toFutureOr
     } yield WrappedResult(data)
 
     result.toFuture

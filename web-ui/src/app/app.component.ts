@@ -129,6 +129,18 @@ export class AppComponent implements OnInit {
       'label.tposNodes': 'TPoS Nodes',
       'label.coinsStaking': 'Coins Staking',
       'label.coinsTrustlesslyStaking': 'Coins Trustlessly Staking',
+      'label.merchantAddress': 'Merchant Address',
+      'label.ownerAddress': 'Owner Address',
+      'label.merchantCommission': 'Merchant Commission',
+      'label.state': 'State',
+      'label.commision': 'Commision',
+      'label.add': 'Add',
+      'label.enterMerchantAddress': 'Enter merchant address',
+      'label.tposAddress': 'TPoS Address',
+      'label.path': 'Path',
+      'label.generatedTransaction': 'Generated transaction id',
+      'label.createContract': 'Create TPoS contract',
+
 
       'label.address': 'Address',
       'label.addresses': 'Addresses',
@@ -196,8 +208,6 @@ export class AppComponent implements OnInit {
 
       'label.isStakingCoinsTrustlessly': 'Is this address staking coins trustlessly?',
       'label.contractState': 'Contract state',
-      'label.merchantAddress': 'Merchant address',
-      'label.merchantCommission': 'Merchant commission',
       'label.contractTxid': 'Contract txid',
 
       'label.yes': 'Yes',

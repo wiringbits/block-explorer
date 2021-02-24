@@ -16,13 +16,18 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
   import DataHelper._
 
   lazy val dataHandler =
-    new BalancePostgresDataHandler(database, new BalancePostgresDAO(new FieldOrderingSQLInterpreter))
+    new BalancePostgresDataHandler(
+      database,
+      new BalancePostgresDAO(new FieldOrderingSQLInterpreter)
+    )
 
-  val defaultOrdering = FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder)
+  val defaultOrdering =
+    FieldOrdering(BalanceField.Available, OrderingCondition.DescendingOrder)
 
   "upsert" should {
     "create an empty balance" in {
-      val address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F")
+      val address =
+        DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F")
       val balance = Balance(address)
 
       val result = dataHandler.upsert(balance)
@@ -30,9 +35,12 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
 
     "update an existing balance" in {
-      val address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
-      val initialBalance = Balance(address, received = BigDecimal(10), spent = BigDecimal(5))
-      val patch = Balance(address, received = BigDecimal(10), spent = BigDecimal(10))
+      val address =
+        DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
+      val initialBalance =
+        Balance(address, received = BigDecimal(10), spent = BigDecimal(5))
+      val patch =
+        Balance(address, received = BigDecimal(10), spent = BigDecimal(10))
       val expected = combine(initialBalance, patch)
 
       dataHandler.upsert(initialBalance)
@@ -46,22 +54,26 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     val balances = List(
       Balance(
-        address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
+        address =
+          DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
         received = BigDecimal("1000"),
         spent = BigDecimal("0")
       ),
       Balance(
-        address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        address =
+          DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
         received = BigDecimal("1000"),
         spent = BigDecimal("100")
       ),
       Balance(
-        address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
+        address =
+          DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
         received = BigDecimal("10000"),
         spent = BigDecimal("1000")
       ),
       Balance(
-        address = DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
+        address =
+          DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
         received = BigDecimal("1000"),
         spent = BigDecimal("500")
       )
@@ -96,7 +108,8 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   "getBy address" should {
     "return empty values for unknown address" in {
-      val address = DataHelper.createAddress("XxQ7j37LfuXGSld5DZAwFKhT3s2ZMkW85F")
+      val address =
+        DataHelper.createAddress("XxQ7j37LfuXGSld5DZAwFKhT3s2ZMkW85F")
       val expected = Balance(address)
 
       val result = dataHandler.getBy(address)
@@ -104,7 +117,8 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     }
 
     "return the balance" in {
-      val address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAWfKhT3s2ZMkW85F")
+      val address =
+        DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAWfKhT3s2ZMkW85F")
       val balance = Balance(address, 1000, 500)
 
       dataHandler.upsert(balance).isGood mustEqual true
@@ -116,13 +130,35 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
   "getHighestBalances" should {
 
     val balances = List(
-      Balance(createAddress("XiHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 1000),
-      Balance(createAddress("XjHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 900),
-      Balance(createAddress("XkHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 900, spent = 100),
-      Balance(createAddress("XlHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 800),
-      Balance(createAddress("XmmmmSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 700),
-      Balance(createAddress("XnHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 600),
-      Balance(createAddress("XxxxxSR56uPHeXKwcpeVsE4nUfkHv5RqE3"), received = 2000)
+      Balance(
+        createAddress("XiHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 1000
+      ),
+      Balance(
+        createAddress("XjHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 900
+      ),
+      Balance(
+        createAddress("XkHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 900,
+        spent = 100
+      ),
+      Balance(
+        createAddress("XlHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 800
+      ),
+      Balance(
+        createAddress("XmmmmSR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 700
+      ),
+      Balance(
+        createAddress("XnHW7SR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 600
+      ),
+      Balance(
+        createAddress("XxxxxSR56uPHeXKwcpeVsE4nUfkHv5RqE3"),
+        received = 2000
+      )
     )
 
     def prepare() = {
@@ -153,7 +189,8 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
       val lastSeenAddress = balances.head.address
       val expected = balances(1)
-      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      val result =
+        dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
       result mustEqual List(expected)
     }
 
@@ -162,13 +199,15 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
       val lastSeenAddress = balances(2).address
       val expected = balances(3)
-      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      val result =
+        dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
       result mustEqual List(expected)
     }
 
     "return the no elements on unknown lastSeenTransaction" in {
       val lastSeenAddress = createAddress("XmHW7SR56uPHeXKwcpeVsE4nUfkHv5Rq12")
-      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      val result =
+        dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
       result must be(empty)
     }
 
@@ -177,7 +216,8 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
       val lastSeenAddress = balances(3).address
       val expected = balances(4)
-      val result = dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
+      val result =
+        dataHandler.getHighestBalances(Limit(1), Option(lastSeenAddress)).get
       result mustEqual List(expected)
     }
   }

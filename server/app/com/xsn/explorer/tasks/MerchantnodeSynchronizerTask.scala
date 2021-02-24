@@ -11,11 +11,11 @@ import com.xsn.explorer.services.synchronizer.MerchantnodeSynchronizerActor
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class MerchantnodeSynchronizerTask @Inject()(
+class MerchantnodeSynchronizerTask @Inject() (
     config: MerchantnodeSynchronizerConfig,
     xsnService: XSNService,
     actorSystem: ActorSystem,
-    merchantnodeSynchronizerActor: MerchantnodeSynchronizerActor.Ref 
+    merchantnodeSynchronizerActor: MerchantnodeSynchronizerActor.Ref
 )(implicit ec: ExecutionContext) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -30,12 +30,19 @@ class MerchantnodeSynchronizerTask @Inject()(
       actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
         xsnService.getMerchantnodes().onComplete {
           case Success(Good(merchantnodes)) =>
-            logger.info(s"Merchantnode information synced ${merchantnodes.length}")
-            merchantnodeSynchronizerActor.ref ! MerchantnodeSynchronizerActor.UpdateMerchantnodes(merchantnodes)
+            logger
+              .info(s"Merchantnode information synced ${merchantnodes.length}")
+            merchantnodeSynchronizerActor.ref ! MerchantnodeSynchronizerActor
+              .UpdateMerchantnodes(merchantnodes)
           case Success(Bad(error)) =>
-            logger.warn(s"Merchantnode information syncronization failed due to $error")
+            logger.warn(
+              s"Merchantnode information syncronization failed due to $error"
+            )
           case Failure(exception) =>
-            logger.error(s"Merchantnode information syncronization failed due to ${exception.getMessage}", exception)
+            logger.error(
+              s"Merchantnode information syncronization failed due to ${exception.getMessage}",
+              exception
+            )
         }
       }
     } else {

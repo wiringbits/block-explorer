@@ -5,11 +5,15 @@ import com.xsn.explorer.models.values.{Address, HexString}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Reads, __}
 
-case class ScriptPubKey(`type`: String, asm: String, hex: HexString, addresses: List[Address]) {
+case class ScriptPubKey(
+    `type`: String,
+    asm: String,
+    hex: HexString,
+    addresses: List[Address]
+) {
 
-  /**
-   * Get TPoS contract details if available
-   */
+  /** Get TPoS contract details if available
+    */
   def getTPoSContractDetails: Option[TPoSContract.Details] = {
     TPoSContract.Details.fromOutputScriptASM(asm)
   }

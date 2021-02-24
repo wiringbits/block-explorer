@@ -3,7 +3,10 @@ package com.xsn.explorer.services.currencyService
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.CoinMarketCapConfig.{CoinID, Host, Key}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
-import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUnexpectedResponseError}
+import com.xsn.explorer.errors.{
+  CoinMarketCapRequestFailedError,
+  CoinMarketCapUnexpectedResponseError
+}
 import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.services.CurrencyServiceCoinMarketCapImpl
 import org.mockito.ArgumentMatchers._
@@ -20,7 +23,9 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll {
+class GetMarketplaceInformationSpec
+    extends AsyncWordSpec
+    with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()
@@ -32,7 +37,8 @@ class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll
   val actorSystem = ActorSystem()
   val scheduler = actorSystem.scheduler
 
-  val coinMarketCapConfig = CoinMarketCapConfig(Host("host"), Key("key"), CoinID("id"))
+  val coinMarketCapConfig =
+    CoinMarketCapConfig(Host("host"), Key("key"), CoinID("id"))
 
   val retryConfig = RetryConfig(1.millisecond, 2.milliseconds)
 
@@ -41,11 +47,19 @@ class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll
   when(ws.url(anyString)).thenReturn(request)
   when(request.withHttpHeaders(any())).thenReturn(request)
 
-  val service = new CurrencyServiceCoinMarketCapImpl(ws, coinMarketCapConfig, retryConfig)(ec, scheduler)
+  val service =
+    new CurrencyServiceCoinMarketCapImpl(ws, coinMarketCapConfig, retryConfig)(
+      ec,
+      scheduler
+    )
 
-  def createSuccessfullResponse(volume: Option[BigDecimal], marketcap: Option[BigDecimal]): String = {
+  def createSuccessfullResponse(
+      volume: Option[BigDecimal],
+      marketcap: Option[BigDecimal]
+  ): String = {
     val volumeString = volume.map(v => s""""volume_24h": $v,""").getOrElse("")
-    val marketcapString = marketcap.map(m => s""""market_cap": $m,""").getOrElse("")
+    val marketcapString =
+      marketcap.map(m => s""""market_cap": $m,""").getOrElse("")
 
     s"""
        |{
@@ -95,7 +109,8 @@ class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll
     "get coin price" in {
       val volume = BigDecimal(65123)
       val marketcap = BigDecimal(5123456)
-      val responseBody = createSuccessfullResponse(Some(volume), Some(marketcap))
+      val responseBody =
+        createSuccessfullResponse(Some(volume), Some(marketcap))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
@@ -112,7 +127,8 @@ class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll
     "fail when status is not 200" in {
       val volume = BigDecimal(65123)
       val marketcap = BigDecimal(5123456)
-      val responseBody = createSuccessfullResponse(Some(volume), Some(marketcap))
+      val responseBody =
+        createSuccessfullResponse(Some(volume), Some(marketcap))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(502, json)
@@ -147,7 +163,10 @@ class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll
     }
   }
 
-  private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
+  private def mockRequest(
+      request: WSRequest,
+      response: WSResponse
+  )(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
     when(response.body).thenReturn(body.toString())

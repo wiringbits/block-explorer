@@ -1,48 +1,54 @@
 package com.xsn.explorer.services
 
-import akka.pattern.ask
 import akka.actor.ActorSystem
+import akka.pattern.ask
+import akka.util.Timeout
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{StatisticsFutureDataHandler, BalanceFutureDataHandler}
-import com.xsn.explorer.models.{MarketStatistics, StatisticsDetails, NodeStatistics, SynchronizationProgress}
-import com.xsn.explorer.tasks.CurrencySynchronizerActor
-import com.xsn.explorer.services.synchronizer.repository.{
-  MasternodeRepository,
-  MerchantnodeRepository,
-  NodeStatsRepository
+import com.xsn.explorer.data.async.{BalanceFutureDataHandler, StatisticsFutureDataHandler}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  MarketStatistics,
+  NodeStatistics,
+  ROI,
+  StatisticsDetails,
+  SynchronizationProgress
 }
-import javax.inject.Inject
+import com.xsn.explorer.services.synchronizer.repository.{MasternodeRepository, MerchantnodeRepository}
+import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import org.scalactic.{Bad, Good}
-import akka.util.Timeout
 
-import scala.concurrent.duration._
+import java.time.Instant
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+import scala.math.BigDecimal.RoundingMode
 
-class StatisticsService @Inject()(
+class StatisticsService @Inject() (
     xsnService: XSNService,
     actorSystem: ActorSystem,
     statisticsFutureDataHandler: StatisticsFutureDataHandler,
     balanceFutureDataHandler: BalanceFutureDataHandler,
     merchantnodeRepository: MerchantnodeRepository,
-    masternodeRepository: MasternodeRepository,
-    nodeStatsRepository: NodeStatsRepository
-)(
-    implicit ec: ExecutionContext
+    masternodeRepository: MasternodeRepository
+)(implicit
+    ec: ExecutionContext
 ) {
 
   def getStatistics(): FutureApplicationResult[StatisticsDetails] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val mnStats = masternodeRepository.getCount()
+    val masternodesEnabled = masternodeRepository.getEnabledCount()
     val tposStats = merchantnodeRepository.getCount()
     val difficultyF = xsnService.getDifficulty()
 
     val result = for {
       stats <- dbStats.toFutureOr
       mnCount <- mnStats.map(x => Good(Some(x))).toFutureOr
+      mnEnabledCount <- masternodesEnabled.map(x => Good(Some(x))).toFutureOr
       difficulty <- discardErrors(difficultyF).toFutureOr
       tposCount <- tposStats.map(x => Good(Some(x))).toFutureOr
-    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty)
+    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty, mnEnabledCount)
 
     result.toFuture
   }
@@ -55,7 +61,6 @@ class StatisticsService @Inject()(
       tposCount <- merchantnodeRepository.getCount()
       tposEnabledCount <- merchantnodeRepository.getEnabledCount()
       tposProtocols <- merchantnodeRepository.getProtocols()
-      coinsStaking <- nodeStatsRepository.getCoinsStaking()
     } yield {
       val stats = NodeStatistics(
         masternodes = mnCount,
@@ -63,8 +68,7 @@ class StatisticsService @Inject()(
         masternodesProtocols = mnProtocols,
         tposnodes = tposCount,
         enabledTposnodes = tposEnabledCount,
-        tposnodesProtocols = tposProtocols,
-        coinsStaking = coinsStaking
+        tposnodesProtocols = tposProtocols
       )
       Good(stats)
     }
@@ -80,7 +84,9 @@ class StatisticsService @Inject()(
         .map(t => t.payee)
         .map(statisticsFutureDataHandler.getTPoSMerchantStakingAddresses)
         .toFutureOr
-      coinsStaking <- tposAddressList.flatten.map(balanceFutureDataHandler.getBy).toFutureOr
+      coinsStaking <- tposAddressList.flatten
+        .map(balanceFutureDataHandler.getBy)
+        .toFutureOr
       coinsStakingSum = coinsStaking.map(t => t.available).sum
     } yield coinsStakingSum
 
@@ -94,7 +100,10 @@ class StatisticsService @Inject()(
     val result = for {
       stats <- dbStats.toFutureOr
       latestBlock <- rpcBlock.toFutureOr
-    } yield SynchronizationProgress(total = latestBlock.height.int, synced = stats.blocks)
+    } yield SynchronizationProgress(
+      total = latestBlock.height.int,
+      synced = stats.blocks
+    )
 
     result.toFuture
   }
@@ -113,7 +122,33 @@ class StatisticsService @Inject()(
       .map(Good(_))
   }
 
-  private def discardErrors[T](value: FutureApplicationResult[T]): FutureApplicationResult[Option[T]] = {
+  def getRewardedAddresses(period: FiniteDuration): FutureApplicationResult[AddressesReward] = {
+    val startDate = Instant.now.minusSeconds(period.toSeconds)
+
+    statisticsFutureDataHandler.getRewardedAddresses(startDate)
+  }
+
+  def getROI(rewardedAddressesSumLast72Hours: BigDecimal): FutureApplicationResult[ROI] = {
+    masternodeRepository.getEnabledCount().map { enabledMasternodes =>
+      val mnROI: BigDecimal =
+        if (enabledMasternodes > 0)
+          (BigDecimal(12960) / (enabledMasternodes * BigDecimal(15000)) * BigDecimal(365)).setScale(8, RoundingMode.UP)
+        else BigDecimal(0)
+      val stakingROI: BigDecimal =
+        if (rewardedAddressesSumLast72Hours > 0)
+          ((BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(365)).setScale(8, RoundingMode.UP)
+        else BigDecimal(0)
+      Good(ROI(masternodes = mnROI, staking = stakingROI))
+    }
+  }
+
+  def getStakingCoins(): FutureApplicationResult[BigDecimal] = {
+    statisticsFutureDataHandler.getStakingCoins()
+  }
+
+  private def discardErrors[T](
+      value: FutureApplicationResult[T]
+  ): FutureApplicationResult[Option[T]] = {
     value
       .map {
         case Good(result) => Good(Some(result))

@@ -24,7 +24,9 @@ object NodeStatsSynchronizerActor {
 
   object Ref {
 
-    def apply(name: String = "node-stats-synchronizer")(implicit system: ActorSystem): Ref = {
+    def apply(
+        name: String = "node-stats-synchronizer"
+    )(implicit system: ActorSystem): Ref = {
       val actor = system.actorOf(Props(new NodeStatsSynchronizerActor), name)
       new Ref(actor)
     }

@@ -15,14 +15,16 @@ import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TransactionRPCService @Inject()(
+class TransactionRPCService @Inject() (
     transactionIdValidator: TransactionIdValidator,
     transactionCollectorService: TransactionCollectorService,
     xsnService: XSNService
 )(implicit ec: ExecutionContext) {
   protected val logger = LoggerFactory.getLogger(this.getClass)
 
-  def getRawTransaction(txidString: String): FutureApplicationResult[JsValue] = {
+  def getRawTransaction(
+      txidString: String
+  ): FutureApplicationResult[JsValue] = {
     val result = for {
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       transaction <- xsnService.getRawTransaction(txid).toFutureOr
@@ -31,50 +33,82 @@ class TransactionRPCService @Inject()(
     result.toFuture
   }
 
-  def getTransactionDetails(txidString: String): FutureApplicationResult[TransactionDetails] = {
+  def getTransactionDetails(
+      txidString: String
+  ): FutureApplicationResult[TransactionDetails] = {
     val result = for {
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       transaction <- xsnService.getTransaction(txid).toFutureOr
-      vin <- transactionCollectorService.getRPCTransactionVIN(transaction.vin).toFutureOr
+      vin <- transactionCollectorService
+        .getRPCTransactionVIN(transaction.vin)
+        .toFutureOr
     } yield TransactionDetails.from(transaction.copy(vin = vin))
 
     result.toFuture
   }
 
-  def sendRawTransaction(hexString: String): FutureApplicationResult[JsValue] = {
+  def sendRawTransaction(
+      hexString: String
+  ): FutureApplicationResult[JsValue] = {
     val result = for {
-      hex <- Or.from(HexString.from(hexString), One(TransactionError.InvalidRawTransaction)).toFutureOr
+      hex <- Or
+        .from(
+          HexString.from(hexString),
+          One(TransactionError.InvalidRawTransaction)
+        )
+        .toFutureOr
       txid <- xsnService.sendRawTransaction(hex).toFutureOr
     } yield Json.obj("txid" -> JsString(txid))
 
     result.toFuture
   }
 
-  private def canCacheResult(latestKnownBlock: Block.Canonical, height: Height): Boolean = {
+  private def canCacheResult(
+      latestKnownBlock: Block.Canonical,
+      height: Height
+  ): Boolean = {
     height.int + 20 < latestKnownBlock.height.int // there are at least 20 more blocks (unlikely to occur rollbacks)
   }
 
-  def getTransactionLite(txidString: String): FutureApplicationResult[(JsValue, Boolean)] = {
+  def getTransactionLite(
+      txidString: String
+  ): FutureApplicationResult[(JsValue, Boolean)] = {
     val result = for {
       latestBlock <- xsnService.getLatestBlock().toFutureOr
       txid <- transactionIdValidator.validate(txidString).toFutureOr
       jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
-      hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
+      hex <- Or
+        .from(
+          (jsonTransaction \ "hex").asOpt[String],
+          One(TransactionError.NotFound(txid))
+        )
+        .toFutureOr
       blockhash <- Or
-        .from((jsonTransaction \ "blockhash").asOpt[Blockhash], One(TransactionError.NotFound(txid)))
+        .from(
+          (jsonTransaction \ "blockhash").asOpt[Blockhash],
+          One(TransactionError.NotFound(txid))
+        )
         .toFutureOr
       block <- xsnService.getBlock(blockhash).toFutureOr
       index = block.transactions.indexOf(txid)
       height = block.height
     } yield (
-      Json.obj("hex" -> hex, "blockhash" -> blockhash, "index" -> index, "height" -> height),
+      Json.obj(
+        "hex" -> hex,
+        "blockhash" -> blockhash,
+        "index" -> index,
+        "height" -> height
+      ),
       canCacheResult(latestBlock, height)
     )
 
     result.toFuture
   }
 
-  def getTransactionLite(height: Height, txindex: Int): FutureApplicationResult[(JsValue, Boolean)] = {
+  def getTransactionLite(
+      height: Height,
+      txindex: Int
+  ): FutureApplicationResult[(JsValue, Boolean)] = {
     val result = for {
       latestBlock <- xsnService.getLatestBlock().toFutureOr
       blockhash <- xsnService.getBlockhash(height).toFutureOr
@@ -84,13 +118,23 @@ class TransactionRPCService @Inject()(
           block.transactions
             .lift(txindex)
             .map(Good(_))
-            .getOrElse(Bad(One(TransactionError.IndexNotFound(height, txindex))))
+            .getOrElse(
+              Bad(One(TransactionError.IndexNotFound(height, txindex)))
+            )
         )
         .toFutureOr
       jsonTransaction <- xsnService.getRawTransaction(txid).toFutureOr
-      hex <- Or.from((jsonTransaction \ "hex").asOpt[String], One(TransactionError.NotFound(txid))).toFutureOr
+      hex <- Or
+        .from(
+          (jsonTransaction \ "hex").asOpt[String],
+          One(TransactionError.NotFound(txid))
+        )
+        .toFutureOr
     } yield (
-      Json.obj("hex" -> hex, "blockhash" -> blockhash) -> canCacheResult(latestBlock, height)
+      Json.obj("hex" -> hex, "blockhash" -> blockhash) -> canCacheResult(
+        latestBlock,
+        height
+      )
     )
 
     result.toFuture
@@ -105,7 +149,10 @@ class TransactionRPCService @Inject()(
       val x = for {
         value <- (json \ "value").asOpt[BigDecimal]
         jsonScriptHex <- (json \ "scriptPubKey" \ "hex").asOpt[String]
-      } yield Json.obj("value" -> value.toSatoshis.toString, "script" -> jsonScriptHex)
+      } yield Json.obj(
+        "value" -> value.toSatoshis.toString,
+        "script" -> jsonScriptHex
+      )
       x.getOrElse(Json.obj())
     }
 

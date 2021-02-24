@@ -4,13 +4,17 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.TransactionVIN
 import com.xsn.explorer.models.values._
 
-case class Transaction(id: TransactionId, blockhash: Blockhash, time: Long, size: Size)
+case class Transaction(
+    id: TransactionId,
+    blockhash: Blockhash,
+    time: Long,
+    size: Size
+)
 
 object Transaction {
 
-  /**
-   * The coins where generated on the given output index of the given txid (from).
-   */
+  /** The coins where generated on the given output index of the given txid (from).
+    */
   case class Input(
       fromTxid: TransactionId,
       fromOutputIndex: Int,
@@ -36,20 +40,36 @@ object Transaction {
     }
   }
 
-  case class Output(txid: TransactionId, index: Int, value: BigDecimal, addresses: List[Address], script: HexString) {
+  case class Output(
+      txid: TransactionId,
+      index: Int,
+      value: BigDecimal,
+      addresses: List[Address],
+      script: HexString
+  ) {
 
     def address: Option[Address] = addresses.headOption
   }
 
   object Output {
 
-    def apply(txid: TransactionId, index: Int, value: BigDecimal, address: Address, script: HexString): Output = {
+    def apply(
+        txid: TransactionId,
+        index: Int,
+        value: BigDecimal,
+        address: Address,
+        script: HexString
+    ): Output = {
 
       new Output(txid, index, value, List(address), script)
     }
   }
 
-  case class HasIO(transaction: Transaction, inputs: List[Transaction.Input], outputs: List[Transaction.Output]) {
+  case class HasIO(
+      transaction: Transaction,
+      inputs: List[Transaction.Input],
+      outputs: List[Transaction.Output]
+  ) {
 
     require(
       outputs.forall(_.txid == transaction.id),
@@ -62,23 +82,35 @@ object Transaction {
     def size: Size = transaction.size
   }
 
-  /**
-   * Transform a rpc transaction to a persisted transaction.
-   *
-   * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
-   */
-  def fromRPC(tx: rpc.Transaction[TransactionVIN.HasValues]): (HasIO, Boolean) = {
+  /** Transform a rpc transaction to a persisted transaction.
+    *
+    * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
+    */
+  def fromRPC(
+      tx: rpc.Transaction[TransactionVIN.HasValues]
+  ): (HasIO, Boolean) = {
     val inputs = tx.vin.zipWithIndex
-      .map {
-        case (vin, index) =>
-          Transaction.Input(vin.txid, vin.voutIndex, index, vin.value, vin.addresses)
+      .map { case (vin, index) =>
+        Transaction.Input(
+          vin.txid,
+          vin.voutIndex,
+          index,
+          vin.value,
+          vin.addresses
+        )
       }
 
     val outputs = tx.vout.flatMap { vout =>
       for {
         _ <- vout.addresses if vout.value > 0
         script <- vout.scriptPubKey.map(_.hex)
-      } yield Output(tx.id, vout.n, vout.value, vout.addresses.getOrElse(List.empty), script)
+      } yield Output(
+        tx.id,
+        vout.n,
+        vout.value,
+        vout.addresses.getOrElse(List.empty),
+        script
+      )
     }
 
     val transaction = Transaction(
@@ -91,13 +123,16 @@ object Transaction {
     (HasIO(transaction, inputs, outputs), seemsTPoSContract(tx))
   }
 
-  /**
-   * A transaction can have at most one contract
-   */
-  private def seemsTPoSContract(tx: rpc.Transaction[rpc.TransactionVIN.HasValues]): Boolean = {
+  /** A transaction can have at most one contract
+    */
+  private def seemsTPoSContract(
+      tx: rpc.Transaction[rpc.TransactionVIN.HasValues]
+  ): Boolean = {
     val collateralMaybe = tx.vout.find(_.value == 1)
     val zeroAmount = tx.vout.find(_.value == 0)
-    val hasOpReturn = zeroAmount.exists(t => t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN")))
+    val hasOpReturn = zeroAmount.exists(t =>
+      t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN"))
+    )
 
     collateralMaybe.isDefined && zeroAmount.isDefined && hasOpReturn
   }

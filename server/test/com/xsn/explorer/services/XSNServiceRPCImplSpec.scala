@@ -9,7 +9,12 @@ import com.xsn.explorer.errors.TransactionError.{
   UnconfirmedTransaction
 }
 import com.xsn.explorer.errors._
-import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
+import com.xsn.explorer.helpers.{
+  BlockLoader,
+  DataHelper,
+  Executors,
+  TransactionLoader
+}
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.TPoSContract.Commission
 import com.xsn.explorer.models.rpc.Masternode
@@ -50,7 +55,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   val explorerConfig = new ExplorerConfig {
     override def genesisBlock: Blockhash =
-      Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+      Blockhash
+        .from(
+          "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"
+        )
+        .get
 
     override def liteVersionConfig: ExplorerConfig.LiteVersionConfig = ???
   }
@@ -63,7 +72,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
   when(request.withAuth(anyString(), anyString(), any())).thenReturn(request)
   when(request.withHttpHeaders(any())).thenReturn(request)
 
-  val service = new XSNServiceRPCImpl(ws, rpcConfig, explorerConfig, retryConfig)(ec, scheduler)
+  val service =
+    new XSNServiceRPCImpl(ws, rpcConfig, explorerConfig, retryConfig)(
+      ec,
+      scheduler
+    )
 
   def createRPCSuccessfulResponse(result: JsValue): String = {
     s"""
@@ -90,8 +103,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "getTransaction" should {
     "handle coinbase" in {
-      val txid = createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
-      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val txid = createTransactionId(
+        "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+      )
+      val responseBody =
+        createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
@@ -107,8 +123,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle non-coinbase result" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
-      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
+      val responseBody =
+        createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
 
       val json = Json.parse(responseBody)
 
@@ -127,8 +146,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
     "handle transaction having no blocktime, nor time" in {
       // TODO: Remove this test when https://github.com/X9Developers/XSN/issues/72 is fixed.
-      val txid = createTransactionId("f24cd135c34ebb9032f8bc5b45599f1424980d34583df2847c4a4db584c94e97")
-      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val txid = createTransactionId(
+        "f24cd135c34ebb9032f8bc5b45599f1424980d34583df2847c4a4db584c94e97"
+      )
+      val responseBody =
+        createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
@@ -142,8 +164,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle transaction not found" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
-      val responseBody = createRPCErrorResponse(-5, "No information available about transaction")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
+      val responseBody =
+        createRPCErrorResponse(-5, "No information available about transaction")
       val json = Json.parse(responseBody)
       mockRequest(request, response)(500, json)
 
@@ -154,7 +179,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
     "handle error with message" in {
       val errorMessage = "Params must be an array"
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
       val responseBody = createRPCErrorResponse(-32600, errorMessage)
       val json = Json.parse(responseBody)
 
@@ -167,7 +194,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle non successful status" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
 
       mockRequest(request, response)(403, JsNull)
 
@@ -177,7 +206,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle unexpected error" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
 
       val responseBody = """{"result":null,"error":{},"id":null}"""
       val json = Json.parse(responseBody)
@@ -190,7 +221,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle work queue depth exceeded" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
 
       val responseBody = createRPCErrorResponse(-1, "Work queue depth exceeded")
       val json = Json.parse(responseBody)
@@ -203,7 +236,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle work queue depth exceeded (no json)" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
 
       val responseBody = "Work queue depth exceeded"
 
@@ -215,7 +250,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle xsn server warming up" in {
-      val txid = createTransactionId("0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641")
+      val txid = createTransactionId(
+        "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
+      )
 
       val responseBody = createRPCErrorResponse(-28, "Loading block index...")
       val json = Json.parse(responseBody)
@@ -228,8 +265,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "handle unconfirmed transaction" in {
-      val txid = createTransactionId("6b984d317623fdb3f40e5d64a4236de33b9cb1de5f12a6abe2e8f242f6572655")
-      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.toString))
+      val txid = createTransactionId(
+        "6b984d317623fdb3f40e5d64a4236de33b9cb1de5f12a6abe2e8f242f6572655"
+      )
+      val responseBody =
+        createRPCSuccessfulResponse(TransactionLoader.json(txid.toString))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
@@ -242,10 +282,13 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "getRawTransaction" should {
     "retrieve the raw transaction" in {
-      val txid = createTransactionId("024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c")
+      val txid = createTransactionId(
+        "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
+      )
       val expected = TransactionLoader.json(txid.string)
 
-      val responseBody = createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
+      val responseBody =
+        createRPCSuccessfulResponse(TransactionLoader.json(txid.string))
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
@@ -258,9 +301,15 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "getBlock" should {
     "return the genesis block" in {
-      val block = BlockLoader.json("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34")
+      val block = BlockLoader.json(
+        "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"
+      )
       val responseBody = createRPCSuccessfulResponse(block)
-      val blockhash = Blockhash.from("00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34").get
+      val blockhash = Blockhash
+        .from(
+          "00000c822abdbb23e28f79a49d29b41429737c6c7e15df40d1b1f1b35907ae34"
+        )
+        .get
 
       val json = Json.parse(responseBody)
 
@@ -276,9 +325,15 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "return a block" in {
-      val block = BlockLoader.json("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81")
+      val block = BlockLoader.json(
+        "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81"
+      )
       val responseBody = createRPCSuccessfulResponse(block)
-      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get
+      val blockhash = Blockhash
+        .from(
+          "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81"
+        )
+        .get
 
       val json = Json.parse(responseBody)
 
@@ -294,9 +349,15 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "return a TPoS block" in {
-      val block = BlockLoader.json("a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c")
+      val block = BlockLoader.json(
+        "a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c"
+      )
       val responseBody = createRPCSuccessfulResponse(block)
-      val blockhash = Blockhash.from("a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c").get
+      val blockhash = Blockhash
+        .from(
+          "a3a9fb111a3f85c3d920c2dc58ce14d541a65763834247ef958aa3b4d665ef9c"
+        )
+        .get
 
       val json = Json.parse(responseBody)
 
@@ -312,9 +373,14 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "fail on unknown block" in {
-      val responseBody = """{"result":null,"error":{"code":-5,"message":"Block not found"},"id":null}"""
+      val responseBody =
+        """{"result":null,"error":{"code":-5,"message":"Block not found"},"id":null}"""
 
-      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b80").get
+      val blockhash = Blockhash
+        .from(
+          "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b80"
+        )
+        .get
 
       val json = Json.parse(responseBody)
 
@@ -328,9 +394,15 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "getRawBlock" should {
     "return a block" in {
-      val block = BlockLoader.json("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81")
+      val block = BlockLoader.json(
+        "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81"
+      )
       val responseBody = createRPCSuccessfulResponse(block)
-      val blockhash = Blockhash.from("b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81").get
+      val blockhash = Blockhash
+        .from(
+          "b72dd1655408e9307ef5874be20422ee71029333283e2360975bc6073bdb2b81"
+        )
+        .get
 
       val json = Json.parse(responseBody)
 
@@ -344,7 +416,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "getBlockhash" should {
     "return the blockhash" in {
-      val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
+      val blockhash = Blockhash
+        .from(
+          "00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd"
+        )
+        .get
       val responseBody = createRPCSuccessfulResponse(JsString(blockhash.string))
 
       val json = Json.parse(responseBody)
@@ -442,7 +518,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       val expected = List(
         Masternode(
-          txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+          txid = TransactionId
+            .from(
+              "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
+            )
+            .get,
           ip = "45.77.136.212:62583",
           protocol = "70209",
           status = "WATCHDOG_EXPIRED",
@@ -451,7 +531,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
           Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
         ),
         Masternode(
-          txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+          txid = TransactionId
+            .from(
+              "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+            )
+            .get,
           ip = "45.32.148.13:62583",
           protocol = "70209",
           status = "ENABLED",
@@ -486,8 +570,13 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       val expected = List(
         Merchantnode(
-          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
-          txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get,
+          pubkey =
+            "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
+          txid = TransactionId
+            .from(
+              "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
+            )
+            .get,
           ip = "45.77.136.212:62583",
           protocol = "70209",
           status = "WATCHDOG_EXPIRED",
@@ -496,8 +585,13 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
           Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
         ),
         Merchantnode(
-          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
-          txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+          pubkey =
+            "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
+          txid = TransactionId
+            .from(
+              "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+            )
+            .get,
           ip = "45.32.148.13:62583",
           protocol = "70209",
           status = "ENABLED",
@@ -530,7 +624,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
         """.stripMargin
 
       val expected = Masternode(
-        txid = TransactionId.from("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01").get,
+        txid = TransactionId
+          .from(
+            "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+          )
+          .get,
         ip = "45.32.148.13:62583",
         protocol = "70209",
         status = "ENABLED",
@@ -597,7 +695,8 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val address = DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+      val address =
+        DataHelper.createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
       whenReady(service.getUnspentOutputs(address)) { result =>
         result mustEqual Good(Json.parse(content))
       }
@@ -606,7 +705,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   "isTPoSContract" should {
     "return true when the contract is valid" in {
-      val txid = createTransactionId("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01")
+      val txid = createTransactionId(
+        "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+      )
       val content = "Contract is valid"
       val responseBody = createRPCSuccessfulResponse(JsString(content))
       val json = Json.parse(responseBody)
@@ -619,7 +720,9 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
 
     "return false when the contract is not valid" in {
-      val txid = createTransactionId("b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01")
+      val txid = createTransactionId(
+        "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
+      )
       val content = "Contract invalid, error: Signature invalid"
       val responseBody = createRPCSuccessfulResponse(JsString(content))
       val json = Json.parse(responseBody)
@@ -671,12 +774,17 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val txid = createTransactionId("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b")
-      whenReady(service.getTxOut(txid, index = 1, includeMempool = true)) { result =>
-        result.isGood mustEqual true
-        (result.get \ "scriptPubKey" \ "hex")
-          .as[String] mustEqual "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac"
-        (result.get \ "value").as[Double] mustEqual 3233.5
+      val txid = createTransactionId(
+        "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+      )
+      whenReady(service.getTxOut(txid, index = 1, includeMempool = true)) {
+        result =>
+          result.isGood mustEqual true
+          (result.get \ "scriptPubKey" \ "hex")
+            .as[
+              String
+            ] mustEqual "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac"
+          (result.get \ "value").as[Double] mustEqual 3233.5
       }
     }
 
@@ -687,22 +795,31 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val txid = createTransactionId("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54c")
-      whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) { result =>
-        result mustEqual Good(JsNull)
+      val txid = createTransactionId(
+        "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54c"
+      )
+      whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) {
+        result =>
+          result mustEqual Good(JsNull)
       }
     }
   }
 
   "sendRawTransaction" should {
     "return the transaction hash" in {
-      val content = JsString("ae74538baa914f3799081ba78429d5d84f36a0127438e9f721dff584ac17b346")
+      val content = JsString(
+        "ae74538baa914f3799081ba78429d5d84f36a0127438e9f721dff584ac17b346"
+      )
       val responseBody = createRPCSuccessfulResponse(content)
       val json = Json.parse(responseBody)
 
       mockRequest(request, response)(200, json)
 
-      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      val transaction = HexString
+        .from(
+          "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+        )
+        .get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result.isGood mustEqual true
         result.get mustEqual "ae74538baa914f3799081ba78429d5d84f36a0127438e9f721dff584ac17b346"
@@ -715,7 +832,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      val transaction = HexString
+        .from(
+          "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+        )
+        .get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result mustEqual Bad(One(InvalidRawTransaction))
       }
@@ -727,7 +848,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      val transaction = HexString
+        .from(
+          "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+        )
+        .get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result mustEqual Bad(One(MissingInputs))
       }
@@ -739,7 +864,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      val transaction = HexString
+        .from(
+          "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+        )
+        .get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result mustEqual Bad(One(InvalidRawTransaction))
       }
@@ -751,7 +880,11 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       mockRequest(request, response)(200, json)
 
-      val transaction = HexString.from("af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b").get
+      val transaction = HexString
+        .from(
+          "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
+        )
+        .get
       whenReady(service.sendRawTransaction(transaction)) { result =>
         result mustEqual Bad(One(RawTransactionAlreadyExists))
       }
@@ -769,12 +902,20 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       mockRequest(request, response)(200, json)
 
       val tposAddress = Address.from("XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV").get
-      val merchantAddress = Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
+      val merchantAddress =
+        Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
       val merchantCommission = 10
       val signature =
         "201F2D052FB372248F89F9F2C9106BE9A670D5538C01E4F39215C92717B847D3EA2466E7D1D88010FF98996913ED024DDE8EBC860984F7806E5619C88CABF2EF06"
 
-      whenReady(service.encodeTPOSContract(tposAddress, merchantAddress, merchantCommission, signature)) { result =>
+      whenReady(
+        service.encodeTPOSContract(
+          tposAddress,
+          merchantAddress,
+          merchantCommission,
+          signature
+        )
+      ) { result =>
         result.isGood mustEqual true
         result.get mustEqual "020000000a001976a91495cf859d7a40c5d7fded2a03cb8d7dcf307eab1188ac1976a914a7e2ba4e0d91273d686f446fa04ca5fe800d452d88ac41201f2d052fb372248f89f9f2c9106be9a670d5538c01e4f39215c92717b847d3ea2466e7d1d88010ff98996913ed024dde8ebc860984f7806e5619c88cabf2ef06"
       }
@@ -796,10 +937,16 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       val json = Json.parse(responseBody)
       mockRequest(request, response)(200, json)
       val tposAddress = Address.from("XpLy7iJebcUbpmsH1PAiHRn8BrrMdw73KV").get
-      val merchantAddress = Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
+      val merchantAddress =
+        Address.from("XqzYHcK3STW5F22S7kep7dMU4sx3SKFMBv").get
       val merchantCommission = Commission.from(10).get
-      val txid = TransactionId.from("c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01").get
-      val expected = TPoSContract.Details(tposAddress, merchantAddress, merchantCommission)
+      val txid = TransactionId
+        .from(
+          "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
+        )
+        .get
+      val expected =
+        TPoSContract.Details(tposAddress, merchantAddress, merchantCommission)
 
       whenReady(service.getTPoSContractDetails(txid)) { result =>
         result.isGood mustEqual true
@@ -808,16 +955,24 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
     }
   }
 
-  private def mockRequest(request: WSRequest, response: WSResponse)(status: Int, body: JsValue) = {
+  private def mockRequest(
+      request: WSRequest,
+      response: WSResponse
+  )(status: Int, body: JsValue) = {
     when(response.status).thenReturn(status)
     when(response.json).thenReturn(body)
     when(response.body).thenReturn(body.toString())
-    when(request.post[AnyRef](any())(any())).thenReturn(Future.successful(response))
+    when(request.post[AnyRef](any())(any()))
+      .thenReturn(Future.successful(response))
   }
 
-  private def mockRequestString(request: WSRequest, response: WSResponse)(status: Int, body: String) = {
+  private def mockRequestString(
+      request: WSRequest,
+      response: WSResponse
+  )(status: Int, body: String) = {
     when(response.status).thenReturn(status)
     when(response.body).thenReturn(body)
-    when(request.post[String](anyString())(any())).thenReturn(Future.successful(response))
+    when(request.post[String](anyString())(any()))
+      .thenReturn(Future.successful(response))
   }
 }

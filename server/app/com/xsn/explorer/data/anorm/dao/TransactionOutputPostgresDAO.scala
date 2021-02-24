@@ -9,9 +9,11 @@ import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, TransactionId}
 import javax.inject.Inject
 
-class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
+class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
 
-  def getUnspentOutputs(address: Address)(implicit conn: Connection): List[Transaction.Output] = {
+  def getUnspentOutputs(
+      address: Address
+  )(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
         |SELECT txid, index, value, addresses, hex_script
@@ -21,12 +23,13 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |      value > 0
       """.stripMargin
     ).on(
-        'address -> address.string
-      )
-      .as(parseTransactionOutput.*)
+      'address -> address.string
+    ).as(parseTransactionOutput.*)
   }
 
-  def getOutput(txid: TransactionId, index: Int)(implicit conn: Connection): Option[Transaction.Output] = {
+  def getOutput(txid: TransactionId, index: Int)(implicit
+      conn: Connection
+  ): Option[Transaction.Output] = {
     SQL(
       """
         |SELECT txid, index, value, addresses, hex_script
@@ -35,10 +38,9 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |      index = {index}
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray,
-        'index -> index
-      )
-      .as(parseTransactionOutput.singleOpt)
+      'txid -> txid.toBytesBE.toArray,
+      'index -> index
+    ).as(parseTransactionOutput.singleOpt)
   }
 
   def batchInsertOutputs(
@@ -53,7 +55,9 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
             'txid -> output.txid.toBytesBE.toArray: NamedParameter,
             'index -> output.index: NamedParameter,
             'value -> output.value: NamedParameter,
-            'addresses -> output.addresses.map(_.string).toArray: NamedParameter,
+            'addresses -> output.addresses
+              .map(_.string)
+              .toArray: NamedParameter,
             'hex_script -> output.script.toBytes: NamedParameter
           )
         }
@@ -70,8 +74,10 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         )
 
         val success = batch.execute().forall(_ == 1)
-        if (success ||
-          explorerConfig.liteVersionConfig.enabled) {
+        if (
+          success ||
+          explorerConfig.liteVersionConfig.enabled
+        ) {
 
           Some(outputs)
         } else {
@@ -103,7 +109,9 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
       .execute()
   }
 
-  def deleteOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
+  def deleteOutputs(
+      txid: TransactionId
+  )(implicit conn: Connection): List[Transaction.Output] = {
     val result = SQL(
       """
         |DELETE FROM transaction_outputs
@@ -111,14 +119,15 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, hex_script, value, addresses
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray
-      )
-      .as(parseTransactionOutput.*)
+      'txid -> txid.toBytesBE.toArray
+    ).as(parseTransactionOutput.*)
 
     result
   }
 
-  def getOutputs(txid: TransactionId)(implicit conn: Connection): List[Transaction.Output] = {
+  def getOutputs(
+      txid: TransactionId
+  )(implicit conn: Connection): List[Transaction.Output] = {
     SQL(
       """
         |SELECT txid, index, hex_script, value, addresses
@@ -127,12 +136,13 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray
-      )
-      .as(parseTransactionOutput.*)
+      'txid -> txid.toBytesBE.toArray
+    ).as(parseTransactionOutput.*)
   }
 
-  def getOutputs(txid: TransactionId, address: Address)(implicit conn: Connection): List[Transaction.Output] = {
+  def getOutputs(txid: TransactionId, address: Address)(implicit
+      conn: Connection
+  ): List[Transaction.Output] = {
     SQL(
       """
         |SELECT txid, index, hex_script, value, addresses
@@ -142,13 +152,14 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-        'txid -> txid.toBytesBE.toArray,
-        'address -> address.string
-      )
-      .as(parseTransactionOutput.*)
+      'txid -> txid.toBytesBE.toArray,
+      'address -> address.string
+    ).as(parseTransactionOutput.*)
   }
 
-  def batchSpend(txid: TransactionId, inputs: List[Transaction.Input])(implicit conn: Connection): Option[Unit] = {
+  def batchSpend(txid: TransactionId, inputs: List[Transaction.Input])(implicit
+      conn: Connection
+  ): Option[Unit] = {
     inputs match {
       case Nil => Option(())
       case _ =>
@@ -179,8 +190,10 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
         """.stripMargin
         ).executeUpdate()
 
-        if (result == inputs.size ||
-          explorerConfig.liteVersionConfig.enabled) {
+        if (
+          result == inputs.size ||
+          explorerConfig.liteVersionConfig.enabled
+        ) {
 
           Option(())
         } else {
@@ -189,7 +202,9 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
     }
   }
 
-  def spend(txid: TransactionId, index: Int, spentOn: TransactionId)(implicit conn: Connection): Unit = {
+  def spend(txid: TransactionId, index: Int, spentOn: TransactionId)(implicit
+      conn: Connection
+  ): Unit = {
     val _ = SQL(
       s"""
          |UPDATE transaction_outputs
@@ -197,7 +212,10 @@ class TransactionOutputPostgresDAO @Inject()(explorerConfig: ExplorerConfig) {
          |WHERE txid = {txid} AND
          |      index = {index}
         """.stripMargin
-    ).on("txid" -> txid.toBytesBE.toArray, "index" -> index, "spent_on" -> spentOn.toBytesBE.toArray)
-      .executeUpdate()
+    ).on(
+      "txid" -> txid.toBytesBE.toArray,
+      "index" -> index,
+      "spent_on" -> spentOn.toBytesBE.toArray
+    ).executeUpdate()
   }
 }

@@ -9,12 +9,14 @@ import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
-class TPoSContractService @Inject()(
+class TPoSContractService @Inject() (
     addressValidator: AddressValidator,
     tposContractFutureDataHandler: TPoSContractFutureDataHandler
 )(implicit ec: ExecutionContext) {
 
-  def getBy(addressString: String): FutureApplicationResult[WrappedResult[List[TPoSContract]]] = {
+  def getBy(
+      addressString: String
+  ): FutureApplicationResult[WrappedResult[List[TPoSContract]]] = {
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
       contracts <- tposContractFutureDataHandler.getBy(address).toFutureOr

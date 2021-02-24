@@ -5,7 +5,9 @@ import com.xsn.explorer.models.values.Address
 
 object TransactionBalancesHelper {
 
-  def computeSpendMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
+  def computeSpendMap(
+      transactions: List[Transaction.HasIO]
+  ): Map[Address, BigDecimal] = {
     val addressValueList = for {
       tx <- transactions
       input <- tx.inputs
@@ -19,7 +21,9 @@ object TransactionBalancesHelper {
       }
   }
 
-  def computeReceiveMap(transactions: List[Transaction.HasIO]): Map[Address, BigDecimal] = {
+  def computeReceiveMap(
+      transactions: List[Transaction.HasIO]
+  ): Map[Address, BigDecimal] = {
     val addressValueList = for {
       tx <- transactions
       output <- tx.outputs
@@ -33,10 +37,11 @@ object TransactionBalancesHelper {
       }
   }
 
-  def computeBalances(transactions: List[Transaction.HasIO]): Iterable[Balance] = {
-    val spentList = computeSpendMap(transactions).map {
-      case (address, spent) =>
-        Balance(address, spent = spent)
+  def computeBalances(
+      transactions: List[Transaction.HasIO]
+  ): Iterable[Balance] = {
+    val spentList = computeSpendMap(transactions).map { case (address, spent) =>
+      Balance(address, spent = spent)
     }
 
     val receiveList = computeReceiveMap(transactions).map {
@@ -53,6 +58,10 @@ object TransactionBalancesHelper {
   }
 
   private def mergeBalances(a: Balance, b: Balance): Balance = {
-    Balance(a.address, spent = a.spent + b.spent, received = a.received + b.received)
+    Balance(
+      a.address,
+      spent = a.spent + b.spent,
+      received = a.received + b.received
+    )
   }
 }

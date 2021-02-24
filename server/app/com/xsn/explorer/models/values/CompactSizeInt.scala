@@ -1,10 +1,9 @@
 package com.xsn.explorer.models.values
 
-/**
- * Compact sized integer, a Bitcoin-native data structure
- *
- * @see https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers
- */
+/** Compact sized integer, a Bitcoin-native data structure
+  *
+  * @see https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers
+  */
 sealed abstract class CompactSizeInt {
 
   /** The number parsed from VarInt. */
@@ -21,7 +20,9 @@ sealed abstract class CompactSizeInt {
       case _ => "ff" + flipEndianness(f"$num%016x")
     }
 
-    HexString.from(string).getOrElse(throw new RuntimeException("Unexpected hex string"))
+    HexString
+      .from(string)
+      .getOrElse(throw new RuntimeException("Unexpected hex string"))
   }
 
   private def flipEndianness(hex: String) = {
@@ -30,7 +31,10 @@ sealed abstract class CompactSizeInt {
 }
 
 object CompactSizeInt {
-  private case class CompactSizeIntImpl(override val num: Long, override val size: Int) extends CompactSizeInt
+  private case class CompactSizeIntImpl(
+      override val num: Long,
+      override val size: Int
+  ) extends CompactSizeInt
 
   val zero: CompactSizeInt = CompactSizeInt(0L)
 
