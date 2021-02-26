@@ -270,3 +270,19 @@ pagination-controls /deep/ .ngx-pagination .pagination-previous.disabled::before
 pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
   color: #989DCC;
 }
+
+.pr-0 {
+  padding-right: 0!important;
+}
+
+.pl-0 {
+  padding-left: 0!important;
+}
+
+.ml-0 {
+  margin-left: 0!important;
+}
+
+.mr-0 {
+  margin-right: 0!important;
+}

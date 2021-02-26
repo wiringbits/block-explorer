@@ -1,4 +1,4 @@
-<div class="tab-content row">
+<div class="tab-content row ml-0 mr-0">
     <div class="page-title col-sm-3 col-xs-12">
         {{'label.transactinoLabel' | translate}}
     </div>
@@ -8,10 +8,10 @@
                 {{'label.height' | translate | uppercase}}: <span class="text-highlight">1551778</span>
             </div>
             <div>
-                {{'label.inflation' | translate | uppercase}}: <span class="text-highlight">7.58%</span>
+                {{'label.inflation' | translate | uppercase}}: <span class="text-highlight">{{ (10512000 * 100 / ticker.circulatingSupply).toFixed(2) }} %</span>
             </div>
             <div>
-                {{'label.price' | translate | uppercase}}: <span class="text-highlight">$2.63</span>
+                {{'label.price' | translate | uppercase}}: <span class="text-highlight">$ {{ prices.usd && prices.usd.toFixed(3)}}</span>
             </div>
         </div>
     </div>

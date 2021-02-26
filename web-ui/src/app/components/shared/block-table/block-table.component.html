@@ -11,19 +11,19 @@
       <table class="table table-borderless table-striped">
         <thead>
           <tr class="row">
-            <th class="col-xs-1">{{'label.height' | translate | uppercase}}</th>
+            <th class="col-xs-1 pr-0">{{'label.height' | translate | uppercase}}</th>
             <th class="col-xs-3" *ngIf="!hideBlockHash">{{'label.blockhash' | translate | uppercase}}</th>
-            <th class="col-xs-3">{{'label.extractedBy' | translate | uppercase}}</th>
+            <th class="col-xs-2">{{'label.extractedBy' | translate | uppercase}}</th>
             <th class="col-xs-2">{{'label.difficulty' | translate | uppercase}}</th>
-            <th class="col-xs-1">{{'label.transactions' | translate | uppercase}}</th>
-            <th class="col-xs-2">{{'label.blocktime' | translate | uppercase}}</th>
+            <th class="col-xs-2">{{'label.transactions' | translate | uppercase}}</th>
+            <th class="col-xs-2 pl-0">{{'label.blocktime' | translate | uppercase}}</th>
           </tr>
         </thead>
 
         <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="updateBlocks()"
           [scrollWindow]="true">
           <tr *ngFor="let item of blocks" [ngClass]="{ 'block-table': isBlockRecent(item) }">
-            <td>
+            <td class="pr-0">
               <a class="text-highlight" routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
             </td>
             <td *ngIf="!hideBlockHash">
@@ -32,7 +32,7 @@
             <td class="text-primary">{{extractedBy(item) | translate}}</td>
             <td class="text-primary">{{item.difficulty | number:'1.2-2'}}</td>
             <td class="text-primary">{{item.transactions}}</td>
-            <td class="text-primary">
+            <td class="text-primary pl-0">
               {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
               ({{amAgo(item.time)}})
             </td>

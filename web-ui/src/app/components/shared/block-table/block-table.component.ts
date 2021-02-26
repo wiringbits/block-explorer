@@ -60,7 +60,10 @@ export class BlockTableComponent implements OnInit, OnDestroy {
 
   private onBlockRetrieved(response: Block[]) {
     // this.latestBlockHeight = this.blocks.reduce((max, block) => Math.max(block.height, max), 0);
-    this.blocks = this.blocks.concat(response);
+    this.blocks = this.blocks.concat(response).sort(function (a, b) {
+      if (a.height > b.height) return -1;
+      else return 1;
+    });
   }
 
   private onError(response: any) {

@@ -9,6 +9,7 @@ import { TickerService } from '../../../services/ticker.service';
 })
 export class BlockListComponent implements OnInit {
 
+    ticker: ServerStats = new ServerStats();
     prices: Prices = new Prices();
     stats: ServerStats = new ServerStats();
 
@@ -27,6 +28,13 @@ export class BlockListComponent implements OnInit {
             .subscribe(
                 response => this.stats = response,
                 response => console.log(response)
+            );
+
+        this.tickerService
+            .get()
+            .subscribe(
+              response => this.ticker = response,
+              response => console.log(response)
             );
     }
 }

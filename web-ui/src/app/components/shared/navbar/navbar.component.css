@@ -5,9 +5,9 @@
 }
 
 .navbar-logo {
-  width: 35px;
-  height: 35px;
-  margin-top: -7.5px;
+  width: 117px;
+  height: 100px;
+  margin-top: -43.5px;
 }
 
 .navbar-brand {
@@ -35,6 +35,13 @@
   background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
 }
 
+.navbar-nav>li.active::after {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: " ";
+}
+
 .navbar-nav>li {
   background: transparent;
 }
@@ -49,7 +56,6 @@
 }
 
 .navbar-nav>li>.navbar-tab.main-tab:hover {
-  background-color: #a8a8a8;
   color: #286090;
 }
 

@@ -1,25 +1,27 @@
-<nav class="navbar navbar-default row">
-  <div class="container-fluid col-lg-4 col-lg-offset-1 col-md-5 col-sm-12">
-    <div class="navbar-header">
-      <a routerLink="/" class="navbar-brand">
-        <img class="navbar-logo" src="assets/xsn-logo.png" alt="Logo">
-      </a>
-      <a routerLink="/" class="title">
-        <span class="navbar-brand"><span class="navbar-brand-bold">XSN</span> Block Explorer</span>
-      </a>
+<nav class="navbar navbar-default">
+  <div class="row">
+    <div class="col-lg-4 col-md-5 col-sm-12 pr-0">
+      <div class="navbar-header">
+        <a routerLink="/" class="navbar-brand">
+          <img class="navbar-logo" src="assets/xsn-logo.png" alt="Logo">
+        </a>
+        <a routerLink="/" class="title">
+          <span class="navbar-brand"><span class="navbar-brand-bold">XSN</span> Block Explorer</span>
+        </a>
+      </div>
     </div>
-  </div>
 
-  <div class="col-lg-6 col-md-7 col-sm-12">
-    <app-finder></app-finder>
-  </div>
+    <div class="col-lg-8 col-md-7 col-sm-12 pl-0">
+      <app-finder></app-finder>
+    </div>
 
-  <div class="col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 navbar-tabbar">
-    <ul class="nav navbar-nav">
-      <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.path) }">
-        <a class="navbar-tab {{tab.mainTab ? 'main-tab' : ''}}"
-          routerLink="{{tab.path}}">{{tab.label | translate | uppercase}}</a>
-      </li>
-    </ul>
+    <div class="col-lg-12 col-md-12 col-sm-12 navbar-tabbar">
+      <ul class="nav navbar-nav">
+        <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.path) }">
+          <a class="navbar-tab {{tab.mainTab ? 'main-tab' : ''}}"
+            routerLink="{{tab.path}}">{{tab.label | translate | uppercase}}</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>

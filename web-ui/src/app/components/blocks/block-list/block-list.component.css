@@ -18,3 +18,8 @@
 .blocks-info>div {
     margin: 10px;
 }
+
+.tab-content {
+    margin-left: 0;
+    margin-right: 0;
+}
