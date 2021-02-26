@@ -31,7 +31,7 @@
             </td>
             <td class="text-primary">{{extractedBy(item) | translate}}</td>
             <td class="text-primary">{{item.difficulty | number:'1.2-2'}}</td>
-            <td class="text-primary">{{item.transactions}}</td>
+            <td class="text-primary">{{item.transactions.length}}</td>
             <td class="text-primary pl-0">
               {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
               ({{amAgo(item.time)}})

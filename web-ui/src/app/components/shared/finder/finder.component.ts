@@ -43,7 +43,7 @@ export class FinderComponent implements OnInit {
   private createForm() {
     const pattern = `(${ADDRESS_REGEX})|(${BLOCK_REGEX})|(${IP_ADDRESS_REGEX})|(${BLOCK_NUMBER_REGEX})`;
     this.form = this.formBuilder.group({
-      searchField: [null, [Validators.required, Validators.pattern(pattern)]],
+      searchField: [null, [/*Validators.required,*/ Validators.pattern(pattern)]],
     });
   }
 

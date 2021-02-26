@@ -26,15 +26,8 @@ export class BlockListComponent implements OnInit {
         this.tickerService
             .get()
             .subscribe(
-                response => this.stats = response,
+                response => this.ticker = this.stats = response,
                 response => console.log(response)
-            );
-
-        this.tickerService
-            .get()
-            .subscribe(
-              response => this.ticker = response,
-              response => console.log(response)
             );
     }
 }

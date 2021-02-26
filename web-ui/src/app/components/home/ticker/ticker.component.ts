@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 import { TickerService } from '../../../services/ticker.service';
+import { XSNService } from '../../../services/xsn.service';
 import { NodeStats, Prices, ServerStats } from '../../../models/ticker';
+import { RewardsSummary } from '../../../models/XSN';
 import { Config } from '../../../config';
 
 
@@ -15,9 +17,10 @@ export class TickerComponent implements OnInit {
   ticker: ServerStats = new ServerStats();
   nodeStats: NodeStats = new NodeStats();
   prices: Prices = new Prices();
+  rewardsSummary: RewardsSummary = new RewardsSummary();
   config = Config;
 
-  constructor(private tickerService: TickerService) { }
+  constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
     this.tickerService
@@ -38,6 +41,13 @@ export class TickerComponent implements OnInit {
     .getPrices()
     .subscribe(
       response => this.prices = response,
+      response => this.onError(response)
+    );
+
+    this.xsnService
+    .getRewardsSummary()
+    .subscribe(
+      response => this.rewardsSummary = response,
       response => this.onError(response)
     );
   }

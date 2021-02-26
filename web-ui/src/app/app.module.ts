@@ -23,6 +23,7 @@ import { TickerService } from './services/ticker.service';
 import { TransactionsService } from './services/transactions.service';
 import { TrezorRepositoryService } from './services/trezor-repository.service';
 import { TposContractsService } from './services/tposcontracts.service';
+import { XSNService } from './services/xsn.service';
 
 import { AppComponent } from './app.component';
 import { TrezorConnectComponent } from './components/trezor-connect/trezor-connect.component';
@@ -64,7 +65,8 @@ import { CalculatorComponent } from './components/calculator/calculator.componen
     TickerService,
     TransactionsService,
     TrezorRepositoryService,
-    TposContractsService
+    TposContractsService,
+    XSNService
   ],
   bootstrap: [AppComponent]
 })
