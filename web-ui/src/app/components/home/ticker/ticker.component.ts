@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TickerService } from '../../../services/ticker.service';
 import { XSNService } from '../../../services/xsn.service';
 import { NodeStats, Prices, ServerStats } from '../../../models/ticker';
-import { RewardsSummary } from '../../../models/XSN';
+import { RewardsSummary } from '../../../models/xsn';
 import { Config } from '../../../config';
 
 
