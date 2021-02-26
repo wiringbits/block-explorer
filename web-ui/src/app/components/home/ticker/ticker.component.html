@@ -160,7 +160,7 @@
           </span>
   
           <span *ngIf="ticker != null && ticker.masternodes != null">
-            {{rewardsSummary.masternodesROI.toFixed(2)}} %   Year
+            {{(rewardsSummary.masternodesROI * 100).toFixed(2)}} %   Year
           </span>
         </div>
       </div>
@@ -175,7 +175,7 @@
           </span>
   
           <span *ngIf="ticker != null && ticker.masternodes != null">
-            {{rewardsSummary.stakingROI.toFixed(2)}}%   Year
+            {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%   Year
           </span>
         </div>
       </div>

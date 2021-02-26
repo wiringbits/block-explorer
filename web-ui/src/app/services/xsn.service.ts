@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
-import { RewardsSummary } from '../models/xsn';
+import { RewardsSummary, NodeStats } from '../models/xsn';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -20,6 +20,11 @@ export class XSNService {
   getRewardsSummary(): Observable<RewardsSummary> {
     const url = `${this.baseUrl}/rewards-summary`;
     return this.http.get<RewardsSummary>(url);
+  }
+
+  getNodeStats(): Observable<NodeStats> {
+    const url = `${this.baseUrl}/node-stats`;
+    return this.http.get<NodeStats>(url);
   }
 
 }
