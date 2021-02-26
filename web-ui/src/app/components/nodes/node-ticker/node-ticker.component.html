@@ -57,7 +57,7 @@
           </span>
   
           <span *ngIf="nodeStats != null">
-            {{(rewardsSummary.masternodesROI * 100).toFixed(2)}} %   Year
+            {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%   Year
           </span>
         </div>
       </div>
@@ -138,7 +138,7 @@
           </span>
   
           <span *ngIf="nodeStats != null">
-            {{rewardsSummary.rewardedAddressesSumLast72Hours}} XSN <br/>
+            {{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
             <small>({{rewardsSummary.rewardedAddressesSumLast72Hours / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
@@ -201,7 +201,7 @@
           </span>
   
           <span *ngIf="nodeStats != null">
-            {{rewardsSummary.coinsTrustlesslyStaking}} XSN <br/>
+            {{rewardsSummary.coinsTrustlesslyStaking.toFixed(0)}} XSN <br/>
             <small>({{rewardsSummary.coinsTrustlesslyStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
