@@ -20,7 +20,7 @@
           </tr>
         </thead>
 
-        <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="updateBlocks()"
+        <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getBlocks(true)"
           [scrollWindow]="true">
           <tr *ngFor="let item of blocks" [ngClass]="{ 'block-table': isBlockRecent(item) }">
             <td class="pr-0">

@@ -7,11 +7,11 @@
         {{'label.blocks' | translate}}
       </div>
       <div class="col-sm-9 col-xs-12">
-        <a class="show-more text-primary" routerLink="/blocks">
+        <a class="show-more text-primary" (click)="updateBlocks()">
             {{'label.showMore' | translate | uppercase}}
         </a>
       </div>
-      <app-block-table [hideBlockHash]="true"></app-block-table>
+      <app-block-table [hideBlockHash]="true" [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
     </div>
   </div>
 
@@ -21,11 +21,11 @@
         {{'label.transactions' | translate}}
       </div>
       <div class="col-sm-9 col-xs-12">
-        <a class="show-more text-primary" routerLink="/transactions">
+        <a class="show-more text-primary" (click)="updateTransactions()">
           {{'label.showMore' | translate | uppercase}}
         </a>
       </div>
-      <app-transaction-table [hideBlockHash]="true"></app-transaction-table>
+      <app-transaction-table [hideBlockHash]="true" [transactions]="transactions" (updateTransactions)="updateTransactions($event)"></app-transaction-table>
     </div>
   </div>
 </div>

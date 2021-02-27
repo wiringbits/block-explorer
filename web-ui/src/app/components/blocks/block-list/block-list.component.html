@@ -16,6 +16,6 @@
         </div>
     </div>
     <div class="col-md-12 block-table-wrapper">
-        <app-block-table></app-block-table>
+        <app-block-table [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
     </div>
 </div>

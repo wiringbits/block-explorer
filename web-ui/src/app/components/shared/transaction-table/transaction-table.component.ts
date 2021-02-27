@@ -1,10 +1,6 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, EventEmitter, Output } from '@angular/core';
 
 import { Subscription } from 'rxjs';
-
-import { TransactionsService } from '../../../services/transactions.service';
-import { ErrorService } from '../../../services/error.service';
-import { AddressesService } from '../../../services/addresses.service';
 import { truncate, amAgo } from '../../../utils';
 import { Transaction } from '../../../models/transaction';
 
@@ -17,11 +13,12 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
 
   @Input()
   hideBlockHash: boolean;
-
   @Input()
   address: string;
-
+  @Input()
   transactions: Transaction[] = [];
+  @Output() updateTransactions: any = new EventEmitter();
+
   private subscription$: Subscription;
 
   limit = 20;
@@ -29,13 +26,9 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   truncate = truncate;
   amAgo = amAgo;
 
-  constructor(
-    private transactionsService: TransactionsService,
-    private addressesService: AddressesService,
-    private errorService: ErrorService) { }
+  constructor() { }
 
   ngOnInit() {
-    this.updateTransactions();
   }
 
   ngOnDestroy() {
@@ -44,40 +37,8 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateTransactions() {
-    let lastSeenTxId = '';
-    if (this.transactions.length > 0) {
-      lastSeenTxId = this.transactions[this.transactions.length - 1].id;
-    }
-
-    if (this.address) {
-      this.addressesService
-        .getTransactions(this.address, this.limit, lastSeenTxId)
-        .subscribe(
-          response => this.onTransactionRetrieved(response.data),
-          response => this.onError(response)
-        );
-    } else {
-      this.transactionsService
-        .getList(lastSeenTxId, this.limit)
-        .subscribe(
-          response => this.onTransactionRetrieved(response.data),
-          response => this.onError(response)
-        );
-    }
-  }
-
-  private onTransactionRetrieved(response: Transaction[]) {
-    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
-    this.transactions = this.transactions.concat(response).sort(function (a, b) {
-      if (a.height > b.height) return -1;
-      else return 1;
-    });
-
-  }
-
-  private onError(response: any) {
-    this.errorService.renderServerErrors(null, response);
+  getTransactions(isInfiniteScroll = false) {
+    this.updateTransactions.emit(isInfiniteScroll);
   }
 
   getResult(item: Transaction) {

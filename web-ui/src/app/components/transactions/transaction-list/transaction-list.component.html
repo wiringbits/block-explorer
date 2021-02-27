@@ -5,7 +5,7 @@
     <div class="col-sm-9 col-xs-12 text-label">
         <div class="blocks-info">
             <div>
-                {{'label.height' | translate | uppercase}}: <span class="text-highlight">1551778</span>
+                {{'label.height' | translate | uppercase}}: <span class="text-highlight">{{stats.blocks}}</span>
             </div>
             <div>
                 {{'label.inflation' | translate | uppercase}}: <span class="text-highlight">{{ (10512000 * 100 / ticker.circulatingSupply).toFixed(2) }} %</span>
@@ -16,6 +16,6 @@
         </div>
     </div>
     <div class="col-md-12 transaction-table-wrapper">
-        <app-transaction-table></app-transaction-table>
+        <app-transaction-table [transactions]="transactions" (updateTransactions)="updateTransactions($event)"></app-transaction-table>
     </div>
 </div>

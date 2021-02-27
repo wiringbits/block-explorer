@@ -192,6 +192,7 @@ export class AppComponent implements OnInit {
       'label.richestAddresses': 'Richest addresses',
       'label.masternodes': 'Masternodes',
       'label.percentOfCoins': 'Percent of coins',
+      'label.percentOfCircSupply': '% of circ. supply',
       'label.addressLabel': 'Label',
       'label.protocol': 'Protocol',
       'label.status': 'Status',

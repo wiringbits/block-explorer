@@ -21,3 +21,17 @@ export class NodeStats {
     enabledTposnodes: number;
     tposnodesProtocols: Record<string, number>;
 }
+
+export class Prices {
+    try: number;
+    gbp: number;
+    nzd: number;
+    uah: number;
+    mxn: number;
+    btc: number;
+    jpy: number;
+    marketcap: number;
+    usd: number;
+    volume: number;
+    eur: number;
+}

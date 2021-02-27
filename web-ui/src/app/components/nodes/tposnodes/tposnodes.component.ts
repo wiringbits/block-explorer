@@ -9,7 +9,7 @@ import { Tposnode } from '../../../models/tposnode';
 import { TposnodesService } from '../../../services/tposnodes.service';
 import { ErrorService } from '../../../services/error.service';
 
-import { amAgo } from '../../../utils';
+import { truncate, amAgo } from '../../../utils';
 
 @Component({
   selector: 'app-tposnodes',
@@ -27,6 +27,7 @@ export class TposnodesComponent implements OnInit {
   asyncItems: Observable<Tposnode[]>;
 
   amAgo = amAgo;
+  truncate = truncate;
 
   constructor(
     private tposnodesService: TposnodesService,
@@ -44,6 +45,6 @@ export class TposnodesComponent implements OnInit {
       .get(offset, limit, 'activeSeconds:desc').pipe(
         tap(response => this.total = response.total),
         tap(response => this.currentPage = 1 + (response.offset / this.pageSize)),
-        map(response => response.data));
+        map(response => response.data.map(item => { return {...item, ip: item["ip"].split(":")[0] } })));
   }
 }

@@ -9,7 +9,7 @@ import { Masternode } from '../../../models/masternode';
 import { MasternodesService } from '../../../services/masternodes.service';
 import { ErrorService } from '../../../services/error.service';
 
-import { amAgo } from '../../../utils';
+import { truncate, amAgo } from '../../../utils';
 
 @Component({
   selector: 'app-masternodes',
@@ -27,6 +27,7 @@ export class MasternodesComponent implements OnInit {
   asyncItems: Observable<Masternode[]>;
 
   amAgo = amAgo;
+  truncate = truncate;
 
   constructor(
     private masternodesService: MasternodesService,
@@ -44,6 +45,6 @@ export class MasternodesComponent implements OnInit {
       .get(offset, limit, 'activeSeconds:desc').pipe(
         tap(response => this.total = response.total),
         tap(response => this.currentPage = 1 + (response.offset / this.pageSize)),
-        map(response => response.data));
+        map(response => response.data.map(item => { return {...item, ip: item["ip"].split(":")[0] } })));
   }
 }
