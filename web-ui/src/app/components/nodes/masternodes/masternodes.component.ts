@@ -42,7 +42,7 @@ export class MasternodesComponent implements OnInit {
     const limit = this.pageSize;
 
     this.asyncItems = this.masternodesService
-      .get(offset, limit, 'activeSeconds:desc').pipe(
+      .get(offset, limit, 'lastSeen:desc').pipe(
         tap(response => this.total = response.total),
         tap(response => this.currentPage = 1 + (response.offset / this.pageSize)),
         map(response => response.data.map(item => { return { ...item, ip: item["ip"].split(":")[0] } }).sort(function (a, b) {

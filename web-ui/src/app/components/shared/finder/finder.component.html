@@ -18,10 +18,10 @@
       </div>
     </div>
 
-    <div [hidden]="!errorService.hasWrongValue(form, 'searchField')">
-      <span class="text-danger">{{ errorService.getFieldError(form, 'searchField') | translate }}</span>
+    <div >
+      <span class="text-danger">{{ (errorService.hasWrongValue(form, 'searchField') ? errorService.getFieldError(form, 'searchField') : "") | translate }}</span>
     </div>
 
   </form>
 </div>
-<br *ngIf="!errorService.hasWrongValue(form, 'searchField')">
+<!-- <br *ngIf="!errorService.hasWrongValue(form, 'searchField')"> -->
