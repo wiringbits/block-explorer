@@ -11,7 +11,7 @@ import { BlockTableComponent } from './block-table/block-table.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TransactionTableComponent } from './transaction-table/transaction-table.component';
 import { PipesModule } from '../../pipes/pipes.module';
-
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 @NgModule({
     imports: [
         CommonModule,
@@ -22,7 +22,8 @@ import { PipesModule } from '../../pipes/pipes.module';
         RouterModule,
         TranslateModule,
         MomentModule,
-        InfiniteScrollModule
+        InfiniteScrollModule,
+        BsDropdownModule.forRoot()
     ],
     declarations: [
         NavbarComponent,

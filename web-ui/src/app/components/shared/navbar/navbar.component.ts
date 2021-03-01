@@ -3,8 +3,11 @@ import { Router } from '@angular/router';
 
 class Tab {
   label: string;
-  path: string;
+  path?: string;
   mainTab: boolean;
+  hasChildren: boolean;
+  children?: Array<any>;
+  selector?: any;
 }
 
 @Component({
@@ -18,37 +21,63 @@ export class NavbarComponent implements OnInit {
     {
       label: 'Dashboard',
       path: '/',
-      mainTab: true
+      mainTab: true,
+      hasChildren: false,
+      selector: ['']
     },
     {
       label: 'Nodes',
       path: '/nodes',
-      mainTab: true
+      mainTab: true,
+      hasChildren: false,
+      selector: ['nodes']
     },
     {
       label: 'Blocks',
       path: '/blocks',
-      mainTab: true
+      mainTab: true,
+      hasChildren: false,
+      selector: ['blocks']
     },
     {
       label: 'Transactions',
       path: '/transactions',
-      mainTab: true
+      mainTab: true,
+      hasChildren: false,
+      selector: ['transactions']
     },
     {
       label: 'Addresses',
       path: '/addresses',
-      mainTab: true
+      mainTab: true,
+      hasChildren: false,
+      selector: ['addresses']
     },
     {
-      label: 'Calculator',
-      path: '/calculator',
-      mainTab: false
-    },
-    {
-      label: 'Governance',
-      path: '/governance',
-      mainTab: false
+      label: 'Tools',
+      path: '/tools',
+      mainTab: true,
+      hasChildren: true,
+      selector: ['trezor', 'calculator', 'governance'],
+      children: [{
+        label: 'Trazor Wallet',
+        path: '/trezor',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Calculator',
+        path: '/calculator',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Governance',
+        path: '/',
+        mainTab: false,
+        hasChildren: false,
+        selector: ''
+      }]
     }
   ];
 
@@ -61,14 +90,8 @@ export class NavbarComponent implements OnInit {
   }
 
   /* tabs */
-  isSelected(path: string): boolean {
-    path = path.replace(/\//g, '');
-
+  isSelected(path: any): boolean {
     const segments = this.router.url.split('/');
-    if (path === '/') {
-      return segments.length === 1;
-    }
-
-    return segments[1] === path;
+    return path.indexOf(segments[1]) > -1;
   }
 }

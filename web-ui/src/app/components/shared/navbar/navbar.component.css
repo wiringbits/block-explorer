@@ -62,3 +62,65 @@
 .navbar-nav>li.active>.navbar-tab {
   color: #FFFFFF;
 }
+
+.navbar-nav .dropdown-toggle {
+  background: transparent;
+  color: #989DCC;
+  height: 50px;
+}
+
+.navbar-nav ul.dropdown-menu {
+  width: 227px;
+  background: #222534 0% 0% no-repeat padding-box;
+  box-shadow: 0px 22px 33px #01D9DE17;
+  border: 1px solid #222534;
+  border-radius: 0px 0px 10px 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.navbar-nav ul.dropdown-menu:before {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: " ";
+  margin-top: -12px;
+}
+
+.navbar-nav ul.dropdown-menu li {
+  height: 48px;
+}
+
+.navbar-nav ul.dropdown-menu li:first-child {
+  margin-top: 10px;
+}
+
+.navbar-nav ul.dropdown-menu li a {
+  height: 48px;
+  color: #989DCC;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-nav ul.dropdown-menu li:hover {
+  /* color: #286090; */
+  background: #323442 0% 0% no-repeat padding-box;
+}
+
+.navbar-nav ul.dropdown-menu li.active a {
+  /* color: #286090; */
+  background: #323442 0% 0% no-repeat padding-box;
+  color: white;
+}
+
+.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+  background-color: transparent;
+}
+
+.navbar-nav ul.dropdown-menu li:hover a {
+  color: #286090;
+}
+
+.navbar-nav li.active .dropdown-toggle {
+  color: white;
+}

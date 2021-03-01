@@ -17,9 +17,22 @@
 
     <div class="col-lg-12 col-md-12 col-sm-12 navbar-tabbar">
       <ul class="nav navbar-nav">
-        <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.path) }">
-          <a class="navbar-tab {{tab.mainTab ? 'main-tab' : ''}}"
-            routerLink="{{tab.path}}">{{tab.label | translate | uppercase}}</a>
+        <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.selector)}">
+          <div *ngIf="tab.hasChildren; else elseBlock" class="btn-group dropdown" dropdown>
+            <button class="btn dropdown-toggle" type="button" aria-controls="dropdown-nested" dropdownToggle>{{tab.label | translate |
+              uppercase}}</button>
+            <ul id="dropdown-nested" class="dropdown-menu"
+                role="menu" aria-labelledby="button-nested">
+              <li role="menuitem" *ngFor="let child of tab.children" [ngClass]="{ 'active': isSelected(child.path)}">
+                <a class="dropdown-item" routerLink="{{child.path}}">{{child.label | translate | uppercase}}</a>
+              </li>
+            </ul>
+          </div>
+          
+          <ng-template #elseBlock>
+            <a class="navbar-tab {{tab.mainTab ? 'main-tab' : ''}} " routerLink="{{tab.path}}" >{{tab.label | translate |
+              uppercase}}</a>
+          </ng-template>
         </li>
       </ul>
     </div>
