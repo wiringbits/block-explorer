@@ -206,6 +206,7 @@ export class AppComponent implements OnInit {
       'label.enabled': 'Enabled',
       'label.distributedAcross': 'Distributed Across',
       'label.protocols': 'Protocols',
+      'label.totalCoinsMNStaking': 'Total coins MN+Staking',
 
       'label.isStakingCoinsTrustlessly': 'Is this address staking coins trustlessly?',
       'label.contractState': 'Contract state',

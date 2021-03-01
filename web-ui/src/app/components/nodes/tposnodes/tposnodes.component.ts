@@ -45,6 +45,9 @@ export class TposnodesComponent implements OnInit {
       .get(offset, limit, 'activeSeconds:desc').pipe(
         tap(response => this.total = response.total),
         tap(response => this.currentPage = 1 + (response.offset / this.pageSize)),
-        map(response => response.data.map(item => { return {...item, ip: item["ip"].split(":")[0] } })));
+        map(response => response.data.map(item => { return {...item, ip: item["ip"].split(":")[0] } }).sort(function (a, b) {
+          if (a.lastSeen > b.lastSeen) return -1;
+          return 1;
+        })));
   }
 }

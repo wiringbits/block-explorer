@@ -87,9 +87,25 @@
           </span>
   
           <span *ngIf="nodeStats != null && nodeStats.masternodesProtocols != null">
-            <div *ngFor="let item of nodeStats.masternodesProtocols | keyvalue">
+            <div *ngFor="let item of masternodesProtocols">
               {{item.key}}: {{item.value}} <small>({{item.value / nodeStats.masternodes | percent}})</small>
             </div>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.totalCoinsMNStaking' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodesProtocols == null">
+            {{'message.unavailable' | translate}}
+          </span>
+          
+          <span *ngIf="nodeStats != null">
+            {{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours).toFixed(0)}} XSN <br/>
+            <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
       </div>
@@ -202,6 +218,7 @@
   
           <span *ngIf="nodeStats != null">
             {{rewardsSummary.coinsTrustlesslyStaking.toFixed(0)}} XSN <br/>
+            <small>({{rewardsSummary.coinsTrustlesslyStaking / rewardsSummary.rewardedAddressesSumLast72Hours | number: '1.2-2' | percent}} of total coins staking)</small> <br/>
             <small>({{rewardsSummary.coinsTrustlesslyStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
