@@ -22,7 +22,7 @@
           </tr>
         </thead>
 
-        <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getTransactions(true)"
+        <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getTransactions()"
           [scrollWindow]="true">
           <tr *ngFor="let item of transactions">
             <td *ngIf="hideBlockHash">

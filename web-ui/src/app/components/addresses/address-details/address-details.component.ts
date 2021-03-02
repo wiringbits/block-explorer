@@ -12,6 +12,7 @@ import { getNumberOfRowsForScreen } from '../../../utils';
 import { addressLabels } from '../../../config';
 import { TposContract } from '../../../models/tposcontract';
 import { WrappedResult } from '../../../models/wrapped-result';
+import { Transaction } from '../../../models/transaction';
 
 @Component({
   selector: 'app-address-details',
@@ -27,6 +28,7 @@ export class AddressDetailsComponent implements OnInit {
 
   // pagination
   limit = 30;
+  transactions: Transaction[] = [];
   items: LightWalletTransaction[] = [];
 
   constructor(

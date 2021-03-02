@@ -16,6 +16,6 @@
         </div>
     </div>
     <div class="col-md-12 transaction-table-wrapper">
-        <app-transaction-table [transactions]="transactions" (updateTransactions)="updateTransactions($event)"></app-transaction-table>
+        <app-transaction-table [allowInfiniteScroll]="true"></app-transaction-table>
     </div>
 </div>

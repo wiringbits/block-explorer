@@ -2,7 +2,10 @@ import { Component, OnInit, OnDestroy, Input, EventEmitter, Output } from '@angu
 
 import { Subscription } from 'rxjs';
 import { truncate, amAgo } from '../../../utils';
+import { TransactionsService } from '../../../services/transactions.service';
 import { Transaction } from '../../../models/transaction';
+import { AddressesService } from '../../../services/addresses.service';
+import { ErrorService } from '../../../services/error.service';
 
 @Component({
   selector: 'app-transaction-table',
@@ -16,8 +19,8 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   @Input()
   address: string;
   @Input()
+  allowInfiniteScroll: boolean;
   transactions: Transaction[] = [];
-  @Output() updateTransactions: any = new EventEmitter();
 
   private subscription$: Subscription;
 
@@ -26,9 +29,10 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   truncate = truncate;
   amAgo = amAgo;
 
-  constructor() { }
+  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService) { }
 
   ngOnInit() {
+    this.updateTransactions();
   }
 
   ngOnDestroy() {
@@ -37,8 +41,46 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  getTransactions(isInfiniteScroll = false) {
-    this.updateTransactions.emit(isInfiniteScroll);
+  getTransactions() {
+    if (this.allowInfiniteScroll == false) {
+      return;
+    }
+    this.updateTransactions();
+  }
+
+  private updateTransactions() {
+    let lastSeenTxId = '';
+    if (this.transactions.length > 0) {
+      lastSeenTxId = this.transactions[this.transactions.length - 1].id;
+    }
+
+    if (this.address) {
+      this.addressesService
+        .getTransactions(this.address, this.limit, lastSeenTxId)
+        .subscribe(
+          response => this.onTransactionRetrieved(response.data),
+          response => this.onError(response)
+        );
+    } else {
+      this.transactionsService
+        .getList(lastSeenTxId, this.limit)
+        .subscribe(
+          response => this.onTransactionRetrieved(response.data),
+          response => this.onError(response)
+        );
+    }
+  }
+
+  private onTransactionRetrieved(response: Transaction[]) {
+    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
+    this.transactions = this.transactions.concat(response).filter(item => item["received"] > 0).sort(function (a, b) {
+      if (a.height > b.height) return -1;
+      else return 1;
+    });
+  }
+
+  private onError(response: any) {
+    this.errorService.renderServerErrors(null, response);
   }
 
   getResult(item: Transaction) {

@@ -29,7 +29,7 @@
             <td *ngIf="!hideBlockHash">
               <a class="text-highlight" routerLink="/blocks/{{item.hash}}">{{truncate(item.hash, 12, 8) | uppercase}}</a>
             </td>
-            <td class="text-primary">{{extractedBy(item) | translate}}</td>
+            <td class="text-primary">{{extractedBy(item)}}</td>
             <td class="text-primary">{{item.difficulty | number:'1.2-2'}}</td>
             <td class="text-primary">{{item.transactions.length}}</td>
             <td class="text-primary pl-0">

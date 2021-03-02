@@ -62,12 +62,18 @@ export class NavbarComponent implements OnInit {
       children: [{
         label: 'Trazor Wallet',
         path: '/trezor',
-        mainTab: false,
+        mainTab: true,
         hasChildren: false,
         selector: '/tools'
       },{
         label: 'Calculator',
         path: '/calculator',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'DEX stats',
+        path: '/dexstats',
         mainTab: false,
         hasChildren: false,
         selector: '/tools'
