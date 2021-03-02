@@ -1,6 +1,6 @@
 .btn-search {
   background: #FFFFFF08 0% 0% no-repeat padding-box;
-  height: 40px;
+  height: 45px;
   border: none;
   border-radius: 8px;
   margin-left: 0 !important;
@@ -28,4 +28,5 @@
 
 #searchField {
   color: #989DCC;
+  height: 45px;
 }

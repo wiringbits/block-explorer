@@ -50,7 +50,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6">
+          <div class="col-xs-6" *ngIf="tposContract">
             <div class="table-responsive">
               <table class="table table-borderless">
                 <thead>
@@ -100,7 +100,7 @@
         <h3 class="col-xs-12">{{'label.transactinoLabel' | translate}}</h3>
         
         <div class="row transaction-table-wrapper">
-          <app-transaction-table class="col-xs-12 pl-0 pr-0" address={{addressString}} [allowInfiniteScroll]="false" ></app-transaction-table>
+          <app-transaction-table class="col-xs-12 pl-0 pr-0" address={{addressString}} [allowInfiniteScroll]="true" ></app-transaction-table>
         </div>
       </div>
     </div>

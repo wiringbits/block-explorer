@@ -56,6 +56,7 @@ export class AddressDetailsComponent implements OnInit {
 
   private onTposContractsReceived(response: WrappedResult<TposContract>) {
     this.tposContract = response.data[0];
+    console.log(this.tposContract);
   }
 
   @HostListener('window:resize', ['$event'])

@@ -60,7 +60,7 @@ export class NavbarComponent implements OnInit {
       hasChildren: true,
       selector: ['trezor', 'calculator', 'governance'],
       children: [{
-        label: 'Trazor Wallet',
+        label: 'Trezor Wallet',
         path: '/trezor',
         mainTab: true,
         hasChildren: false,
