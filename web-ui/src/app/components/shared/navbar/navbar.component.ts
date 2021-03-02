@@ -96,8 +96,9 @@ export class NavbarComponent implements OnInit {
   }
 
   /* tabs */
-  isSelected(path: any): boolean {
+  isSelected(path: any, isSubmenu?: boolean): boolean {
     const segments = this.router.url.split('/');
+    if (isSubmenu && segments[1] == "") return false;
     return path.indexOf(segments[1]) > -1;
   }
 }
