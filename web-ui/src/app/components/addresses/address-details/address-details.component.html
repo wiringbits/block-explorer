@@ -67,7 +67,7 @@
                 <tbody>
                   <tr>
                     <td class="text-label">{{'label.isStakingCoinsTrustlessly' | translate}}</td>
-                    <td>{{'label.yes' | translate}}</td>
+                    <td>{{(addressString == tposContract.merchant ? 'label.yes' : 'label.yesOwnerOfTheStakedCoins') | translate}}</td>
                   </tr>
                   <tr>
                     <td class="text-label">{{'label.contractState' | translate}}</td>

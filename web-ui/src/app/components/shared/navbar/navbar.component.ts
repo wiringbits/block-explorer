@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 
 class Tab {
@@ -17,75 +17,8 @@ class Tab {
 })
 export class NavbarComponent implements OnInit {
 
-  public tabs: Tab[] = [
-    {
-      label: 'Dashboard',
-      path: '/',
-      mainTab: true,
-      hasChildren: false,
-      selector: ['']
-    },
-    {
-      label: 'Nodes',
-      path: '/nodes',
-      mainTab: true,
-      hasChildren: false,
-      selector: ['nodes']
-    },
-    {
-      label: 'Blocks',
-      path: '/blocks',
-      mainTab: true,
-      hasChildren: false,
-      selector: ['blocks']
-    },
-    {
-      label: 'Transactions',
-      path: '/transactions',
-      mainTab: true,
-      hasChildren: false,
-      selector: ['transactions']
-    },
-    {
-      label: 'Addresses',
-      path: '/addresses',
-      mainTab: true,
-      hasChildren: false,
-      selector: ['addresses']
-    },
-    {
-      label: 'Tools',
-      path: '/tools',
-      mainTab: true,
-      hasChildren: true,
-      selector: ['trezor', 'calculator', 'governance'],
-      children: [{
-        label: 'Trezor Wallet',
-        path: '/trezor',
-        mainTab: true,
-        hasChildren: false,
-        selector: '/tools'
-      },{
-        label: 'Calculator',
-        path: '/calculator',
-        mainTab: false,
-        hasChildren: false,
-        selector: '/tools'
-      },{
-        label: 'DEX stats',
-        path: '/dexstats',
-        mainTab: false,
-        hasChildren: false,
-        selector: '/tools'
-      },{
-        label: 'Governance',
-        path: '/',
-        mainTab: false,
-        hasChildren: false,
-        selector: ''
-      }]
-    }
-  ];
+  @Input()
+  public tabs: Tab[] = [];
 
   public currentUrl = null;
 

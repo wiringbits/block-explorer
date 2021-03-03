@@ -29,7 +29,6 @@ import { TposContractsService } from '../../services/tposcontracts.service';
 import { NotificationService } from '../../services/notification.service';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 
-
 @Component({
   selector: 'app-trezor-connect',
   templateUrl: './trezor-connect.component.html',

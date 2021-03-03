@@ -1,56 +1,61 @@
-<div class="wrapper">
-  <label class="trezor-span">Trezor Wallet</label>
-  <label class="fourth-position complete">{{ 'label.balance' | translate }}:
-    {{ satoshiToXsn(getAvailableSatoshis()) | explorerCurrency }}</label>
-  <input type="button" class="btn btn-primary last-position reset-button" value="{{ 'label.resetWallet' | translate }}"
-    (click)="resetWallet()">
+<div class="row ml-0 mr-0 page-content">
+  <div class="col-xs-12 page-header">
+    <h3 class="page-title">Trezor Wallet</h3>
+    <div>
+      <span class="ballance-label">{{ 'label.balance' | translate }}:
+        <span class="ballance-label__value">{{ satoshiToXsn(getAvailableSatoshis()) | explorerCurrency }}</span></span>
+      <a class="btn default-btn" (click)="resetWallet()">{{ 'label.resetWallet' | translate }}</a>
+    </div>
+  </div>
 
-  <div class="begin">
+  <div class="col-xs-12">
     <tabset>
-
-      <tab heading="Receive">
-        <label> {{ 'label.receiveXSN' | translate }}</label>
-        <div class="row add-address">
-          <div class="col-xs-8 col-md-6">
-            <select #selectedAddressType class="form-control" (change)="refresh()">
-              <option value=44>Legacy</option>
-              <option value=84>Segwit</option>
-              <option value=49 selected>P2shsegwit</option>
-            </select>
+      <tab heading="RECEIVE">
+        <div>
+          <h4 class="tab-title"> {{ 'label.receiveXSN' | translate }}</h4>
+          <div class="row add-address">
+            <div class="col-xs-12">
+              <div class="select-wrapper">
+                <select #selectedAddressType (change)="refresh()">
+                  <option value=44>Legacy</option>
+                  <option value=84>Segwit</option>
+                  <option value=49 selected>P2shsegwit</option>
+                </select>
+              </div>
+              <a class="btn default-btn add-btn" title="Add a new address"
+                (click)="generateNextAddress(+selectedAddressType.value)"><span class="glyphicon glyphicon-plus"></span>
+                {{ 'label.add' | translate }}</a>
+            </div>
           </div>
-          <div class="col-xs-3">
-            <button type="button" class="btn btn-primary" title="Add a new address"
-              (click)="generateNextAddress(+selectedAddressType.value)"><span class="glyphicon glyphicon-plus"></span>
-              {{ 'label.add' | translate }}</button>
+          <div class="row">
+            <table id="addressList" class="table table-responsive table-borderless">
+              <thead>
+                <tr>
+                  <th>{{ 'label.path' | translate | uppercase }}</th>
+                  <th>{{ 'label.address' | translate | uppercase }}</th>
+                </tr>
+              </thead>
+              <tbody>
+  
+                <tr *ngFor="let item of trezorAddresses">
+                  <td>
+                    {{item.serializedPath}}
+                  </td>
+                  <td>
+                    <div>
+                      <a routerLink="/addresses/{{item.address}}"> {{item.address}}</a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-
-        <table id="addressList" class="table table-responsive table-borderless">
-          <thead>
-            <tr>
-              <th>{{ 'label.path' | translate }}</th>
-              <th>{{ 'label.address' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-
-            <tr *ngFor="let item of trezorAddresses">
-              <td>
-                {{item.serializedPath}}
-              </td>
-              <td>
-                <div>
-                  <a routerLink="/addresses/{{item.address}}"> {{item.address}}</a>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </tab>
 
-      <tab heading="Send">
-        <div class="tab-wrapper">
-          <label class="first-position"> {{ 'label.sendXSN' | translate }}</label>
+      <tab heading="SEND">
+        <div>
+          <h4 class="tab-title"> {{ 'label.sendXSN' | translate }}</h4>
           <div class="first-position">{{ 'label.address' | translate }}</div>
           <input class="second-position complete black-text form-control" #destinationAddress type="text" (change)="destinationAddress.value = destinationAddress.value.trim()">
           <div class="first-position">{{ 'label.amount' | translate }}</div>

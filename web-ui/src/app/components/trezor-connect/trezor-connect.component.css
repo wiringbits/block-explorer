@@ -1,14 +1,91 @@
-.wrapper {
-  display: grid;
-  grid-template-columns: repeat(12, [col-start] 1fr);
-  grid-gap: 20px;
+.page-content {
+  background-color: #0F1223;
+  border-radius: 8px;
+}
+
+.page-header {
+  margin: 0;
+  padding: 0;
+  padding-left: 22px;
+  padding-right: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 66px;
+  border-bottom: none;
+}
+
+.page-header .page-title {
+  font-size: 20px;
+  line-height: 24px;
   color: white;
-
 }
 
-.begin {
-  grid-column: col-start 2 / span 5;
+.page-header .ballance-label {
+  font-size: 16px;
+  color: #989DCC;
+  margin-right: 36px;
 }
+
+.page-header .ballance-label .ballance-label__value {
+  color: white;
+}
+
+/deep/ .nav-tabs {
+  border-bottom: none;
+}
+
+/deep/ .nav-tabs>li>a {
+  margin: 0;
+  border: none;
+  color: #989DCC;
+}
+
+/deep/ .nav-tabs>li.active, /deep/ .nav-tabs>li:hover {
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+/deep/ .nav-tabs>li.active>a, /deep/ .nav-tabs>li>a:hover, /deep/ .nav-tabs>li>a:focus, /deep/ .nav-tabs>li.active>a:focus, /deep/ .nav-tabs>li.active>a:hover {
+  background: transparent;
+  border-bottom: none;
+  border: none;
+  color: #286090;
+}
+
+/deep/ .nav-tabs li.active a, /deep/ .nav-tabs>li.active>a:focus {
+  color: white;
+}
+
+/deep/ .nav-tabs li.active::after {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: "";
+}
+
+/deep/ .tab-content>.active {
+  width: 100%;
+}
+
+/deep/ .tab-content .tab-title {
+  font-size: 16px;
+  color: white;
+  margin-top: 31px;
+  margin-bottom: 15px;
+}
+
+.add-btn {
+  margin-left: 16px;
+}
+
+.add-address {
+  margin-bottom: 31px;
+}
+
+/* #addressList {
+  margin-right: -15px;
+  margin-left: -15px;
+} */
 
 .tab-wrapper {
   display: grid;
@@ -40,15 +117,6 @@
   grid-column: span 2;
 }
 
-select {
-  color: white;
-  background: #337AB7;
-}
-
-select.second-position {
-  min-width: 20rem;
-}
-
 .black-text {
   color: black;
 }
@@ -67,9 +135,9 @@ select.second-position {
   max-height: 35px;
 }
 
-.add-address {
-  margin-bottom: 1em;
-}
+
+
+
 
 @media screen and (max-width: 1200px) {
   .begin {

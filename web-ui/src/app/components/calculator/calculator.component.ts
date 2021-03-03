@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { NodeStats, Prices, ServerStats } from '../../models/ticker';
+import { Prices, ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
+import { XSNService } from '../../services/xsn.service';
+import { RewardsSummary, NodeStats } from '../../models/xsn';
 
 @Component({
   selector: 'app-calculator',
@@ -12,6 +14,7 @@ export class CalculatorComponent implements OnInit {
   transaction: any;
   prices: Prices = new Prices();
   stats: NodeStats = new NodeStats();
+  rewardsSummary: RewardsSummary = new RewardsSummary();
   serverStats: ServerStats = new ServerStats();
   holdAmount = 17531;
 
@@ -20,16 +23,9 @@ export class CalculatorComponent implements OnInit {
   masternodeCount = 1;
   xsnStaking = 2531;
 
-  constructor(private tickerService: TickerService) { }
+  constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
-    this.tickerService
-      .getNodeStats()
-      .subscribe(
-        response => this.stats = response,
-        response => this.onError(response)
-      );
-
     this.tickerService
       .get()
       .subscribe(
@@ -41,6 +37,22 @@ export class CalculatorComponent implements OnInit {
       .getPrices()
       .subscribe(
         response => this.prices = response,
+        response => this.onError(response)
+      );
+      
+    this.xsnService
+      .getRewardsSummary()
+      .subscribe(
+        response => this.rewardsSummary = response,
+        response => this.onError(response)
+      );
+
+    this.xsnService
+      .getNodeStats()
+      .subscribe(
+        response => {
+          this.stats = response;
+        },
         response => this.onError(response)
       );
   }

@@ -4,13 +4,20 @@ import { Component, OnInit } from '@angular/core';
 
 import { Router, NavigationEnd } from '@angular/router';
 
-
-
 import { TranslateService } from '@ngx-translate/core';
 
 import { DEFAULT_LANG, LanguageService } from './services/language.service';
 
 import { environment } from '../environments/environment';
+
+class Tab {
+  label: string;
+  path?: string;
+  mainTab: boolean;
+  hasChildren: boolean;
+  children?: Array<any>;
+  selector?: any;
+}
 
 @Component({
   selector: 'app-root',
@@ -18,6 +25,75 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  tabs: Tab[] = [
+    {
+      label: 'Dashboard',
+      path: '/',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['']
+    },
+    {
+      label: 'Nodes',
+      path: '/nodes',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['nodes']
+    },
+    {
+      label: 'Blocks',
+      path: '/blocks',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['blocks']
+    },
+    {
+      label: 'Transactions',
+      path: '/transactions',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['transactions']
+    },
+    {
+      label: 'Addresses',
+      path: '/addresses',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['addresses']
+    },
+    {
+      label: 'Tools',
+      path: '/tools',
+      mainTab: true,
+      hasChildren: true,
+      selector: ['trezor', 'calculator', 'governance'],
+      children: [{
+        label: 'Trezor Wallet',
+        path: '/trezor',
+        mainTab: true,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Calculator',
+        path: '/calculator',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'DEX stats',
+        path: '/dexstats',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Governance',
+        path: '/',
+        mainTab: false,
+        hasChildren: false,
+        selector: ''
+      }]
+    }
+  ]
 
   constructor(
     private translate: TranslateService,
@@ -213,6 +289,7 @@ export class AppComponent implements OnInit {
       'label.contractTxid': 'Contract txid',
 
       'label.yes': 'Yes',
+      'label.yesOwnerOfTheStakedCoins': 'Yes, it\'s the owner of the staked coins',
       'label.no': 'No',
       'label.tposDetails': 'TPoS Details',
 

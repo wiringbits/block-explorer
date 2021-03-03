@@ -286,3 +286,35 @@ pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
 .mr-0 {
   margin-right: 0!important;
 }
+
+.default-btn {
+  padding: 9px 18px 7px;
+  border-radius: 20px;
+  border: 2px solid #01D9DE;
+  cursor: pointer;
+  color: white;
+}
+
+.default-btn:hover {
+  color: #286090;
+}
+
+.select-wrapper {
+  display: inline-block;
+}
+
+select {
+  width: 394px;
+  height: 40px;
+  background: #222534 0% 0% no-repeat padding-box;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  padding-left: 19px;
+  padding-right: 16px;
+  border: none;
+}
+
+select:focus {
+  outline: none;
+}
