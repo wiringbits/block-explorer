@@ -322,3 +322,8 @@ select {
 select:focus {
   outline: none;
 }
+
+a.disabled {
+  color: grey;
+  pointer-events: none;
+}

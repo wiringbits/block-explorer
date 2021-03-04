@@ -103,8 +103,13 @@
   line-height: 14px;
 }
 
-.custom-form-row input, .custom-form select {
+.tab-content-send .custom-form-row input, .tab-content-send .custom-form select {
   max-width: 535px;
+  width: 100%;
+}
+
+.tab-content-tpos .custom-form-row input, .tab-content-tpos .custom-form select, .tab-content-tpos .custom-form-row > div {
+  max-width: 868px;
   width: 100%;
 }
 
@@ -130,6 +135,25 @@
   font-size: 14px;
   line-height: 24px;
   color: #989DCC;
+}
+
+.tab-content-tpos .custom-form {
+  padding-top: 15px;
+}
+
+.tab-content-tpos .custom-form-row {
+  min-height: 60px;
+  height: 60px;
+  margin-bottom: 0;
+}
+
+.tab-content-tpos .custom-form-row > div {
+  min-height: 60px;
+  height: 60px;
+}
+
+.tab-content-tpos .custom-form-row > .sub-label {
+  padding-bottom: 20px;
 }
 
 .tab-wrapper {

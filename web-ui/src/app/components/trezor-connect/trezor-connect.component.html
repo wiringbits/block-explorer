@@ -54,7 +54,7 @@
       </tab>
 
       <tab heading="SEND">
-        <div>
+        <div class="tab-content-send">
           <h4 class="tab-title"> {{ 'label.sendXSN' | translate }}</h4>
           <div class="row custom-form">
             <div class="col-xs-12 col-sm-6 ">
@@ -99,85 +99,96 @@
       </tab>
 
       <tab heading="TPOS">
-        <label class="first-position"> {{ 'label.createContract' | translate }}</label>
+        <div class="tab-content-tpos">
+          <h4 class="tab-title"> {{ 'label.createContract' | translate }}</h4>
+          <div class="row custom-form">
+            <div class="col-xs-12">
+              <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
+                autocomplete="off">
+                <div class="row">
+                  <div class="col-xs-12 col-sm-8 custom-form-row form-group">
+                    <span class="sub-label">{{ 'label.merchantAddress' | translate }}</span>
+                    <div>
+                      <input type="text" class="form-control" aria-describedby="merchantAddress"
+                      placeholder="{{ 'label.enterMerchantAddress' | translate }}" formControlName="merchantAddress"
+                      name="merchantAddress">
+                      <span
+                        *ngIf="tposContractFormControl.get('merchantAddress').invalid && tposContractFormControl.get('merchantAddress').touched"
+                        class="text-danger">Merchant address is required</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group custom-form-row col-sm-8 col-xs-12">
+                    <span class="sub-label">{{ 'label.amount' | translate }}</span>
+                    <div>
+                      <input class="form-control" (change)="precise(amountXSN)" #amountXSN type="number" min="0"
+                        step="0.00000001" placeholder="Enter amount in xsn" formControlName="contractAmount"
+                        name="contractAmount">
+                      <span
+                        *ngIf="tposContractFormControl.get('contractAmount').invalid && tposContractFormControl.get('contractAmount').touched"
+                        class="text-danger">Amount is required</span>
+                    </div>
+                  </div>
+                </div>
 
-        <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
-          autocomplete="off">
-          <div class="row">
+                <div class="row">
+                  <div class="form-group custom-form-row col-sm-8 col-xs-12">
+                    <span class="sub-label">{{ 'label.commision' | translate }}</span>
+                    <div>
+                      <input class="form-control" #commisionPercent type="number" min="1" max="100"
+                        placeholder="Enter commision percent" formControlName="commissionPercent" name="commissionPercent">
+                      <span
+                        *ngIf="tposContractFormControl.get('commissionPercent').invalid && tposContractFormControl.get('commissionPercent').touched"
+                        class="text-danger">Commision is required</span>
+                      </div>
+                  </div>
+                </div>
+                <label *ngIf="tposAddress">Tpos Address:
+                  <a routerLink="/addresses/{{tposAddress.address}}">{{tposAddress.address}}</a>
+                  <br>
+                </label>
+                
+                <label *ngIf="tposTransaction">Tpos Transaction:
+                  <a routerLink="/transactions/{{tposTransaction}}">{{tposTransaction}}</a>
+                </label>
+                <br>
+                <label *ngIf="generatedTransaction">Generated Transaction:
+                  <a routerLink="/transactions/{{generatedTransaction}}">{{generatedTransaction}}</a>
+                </label>
 
-            <div class="form-group col-md-6 col-xs-8">
-              <label for="MerchantAddress">{{ 'label.merchantAddress' | translate }}</label>
-              <input type="text" class="form-control" aria-describedby="merchantAddress"
-                placeholder="{{ 'label.enterMerchantAddress' | translate }}" formControlName="merchantAddress"
-                name="merchantAddress">
-              <span
-                *ngIf="tposContractFormControl.get('merchantAddress').invalid && tposContractFormControl.get('merchantAddress').touched"
-                class="text-danger">Merchant address is required</span>
+                <div class="row">
+                  <div class="form-group col-sm-8 col-xs-12">
+                    <a class="btn default-btn {{tposContractFormControl.invalid ? 'disabled' : ''}}" (click)="sendTPOS()">{{ 'label.send' | translate }}</a>
+                  </div>
+                </div>
+
+              </form>
             </div>
           </div>
-          <div class="row">
 
-            <div class="form-group col-md-6 col-xs-8">
-              <label for="AmountXSN">{{ 'label.amount' | translate }}</label>
-              <input class="form-control" (change)="precise(amountXSN)" #amountXSN type="number" min="0"
-                step="0.00000001" placeholder="Enter amount in xsn" formControlName="contractAmount"
-                name="contractAmount">
-              <span
-                *ngIf="tposContractFormControl.get('contractAmount').invalid && tposContractFormControl.get('contractAmount').touched"
-                class="text-danger">Amount is required</span>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="form-group col-md-6 col-xs-8">
-              <label for="CommisionPercent">{{ 'label.commision' | translate }}</label>
-              <input class="form-control" #commisionPercent type="number" min="1" max="100"
-                placeholder="Enter commision percent" formControlName="commissionPercent" name="commissionPercent">
-              <span
-                *ngIf="tposContractFormControl.get('commissionPercent').invalid && tposContractFormControl.get('commissionPercent').touched"
-                class="text-danger">Commision is required</span>
-            </div>
-          </div>
-          <label *ngIf="tposAddress">Tpos Address:
-            <a routerLink="/addresses/{{tposAddress.address}}">{{tposAddress.address}}</a>
-          </label>
-          <br>
-          <label *ngIf="tposTransaction">Tpos Transaction:
-            <a routerLink="/transactions/{{tposTransaction}}">{{tposTransaction}}</a>
-          </label>
-          <br>
-          <label *ngIf="generatedTransaction">Generated Transaction:
-            <a routerLink="/transactions/{{generatedTransaction}}">{{generatedTransaction}}</a>
-          </label>
-
-          <div class="row">
-            <div class="form-group col-md-4 col-xs-6">
-              <button type="button" class="btn btn-primary" [disabled]="tposContractFormControl.invalid"
-                (click)="sendTPOS()">{{ 'label.send' | translate }}</button>
-            </div>
-          </div>
-
-        </form>
-        <table class="table table-responsive table-borderless">
-          <thead>
-            <tr>
-              <th>{{ 'label.ownerAddress' | translate }}</th>
-              <th>{{ 'label.merchantAddress' | translate }}</th>
-              <th>{{ 'label.merchantCommission' | translate }}</th>
-              <th>{{ 'label.state' | translate }}</th>
-              <th>{{ 'label.transaction' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of tposContracts">
-              <td><a routerLink="/addresses/{{item.owner}}">{{item.owner}}</a></td>
-              <td><a routerLink="/addresses/{{item.merchant}}">{{item.merchant}}</a></td>
-              <td>{{item.merchantCommission}} %</td>
-              <td>{{item.state}}</td>
-              <td><a routerLink="/transactions/{{item.txid}}">{{item.txid}}</a></td>
-            </tr>
-          </tbody>
-        </table>
+          
+          <table class="table table-responsive table-borderless">
+            <thead>
+              <tr>
+                <th>{{ 'label.ownerAddress' | translate | uppercase }}</th>
+                <th>{{ 'label.merchantAddress' | translate | uppercase }}</th>
+                <th>{{ 'label.merchantCommission' | translate | uppercase }}</th>
+                <th>{{ 'label.state' | translate | uppercase }}</th>
+                <th>{{ 'label.transaction' | translate | uppercase }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of tposContracts">
+                <td><a routerLink="/addresses/{{item.owner}}">{{item.owner}}</a></td>
+                <td><a routerLink="/addresses/{{item.merchant}}">{{item.merchant}}</a></td>
+                <td>{{item.merchantCommission}} %</td>
+                <td>{{item.state}}</td>
+                <td><a routerLink="/transactions/{{item.txid}}">{{item.txid}}</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </tab>
     </tabset>
   </div>

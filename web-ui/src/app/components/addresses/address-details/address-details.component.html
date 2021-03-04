@@ -73,10 +73,16 @@
                     <td class="text-label">{{'label.contractState' | translate}}</td>
                     <td>{{tposContract ? tposContract.state : ''}}</td>
                   </tr>
-                  <tr>
+                  <tr *ngIf="tposContract && addressString == tposContract.merchant">
+                    <td class="text-label">{{'label.ownerAddress' | translate}}</td>
+                    <td>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContract.owner}}">{{tposContract.owner}}</a>
+                    </td>
+                  </tr>
+                  <tr *ngIf="tposContract && addressString == tposContract.owner">
                     <td class="text-label">{{'label.merchantAddress' | translate}}</td>
                     <td>
-                      <a *ngIf="tposContract" class="text-highlight" routerLink="/addresses/{{tposContract.merchant}}">{{tposContract.merchant}}</a>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContract.merchant}}">{{tposContract.merchant}}</a>
                     </td>
                   </tr>
                   <tr>
