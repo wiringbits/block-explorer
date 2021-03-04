@@ -36,7 +36,7 @@
                 </tr>
               </thead>
               <tbody>
-  
+
                 <tr *ngFor="let item of trezorAddresses">
                   <td>
                     {{item.serializedPath}}
@@ -56,24 +56,46 @@
       <tab heading="SEND">
         <div>
           <h4 class="tab-title"> {{ 'label.sendXSN' | translate }}</h4>
-          <div class="first-position">{{ 'label.address' | translate }}</div>
-          <input class="second-position complete black-text form-control" #destinationAddress type="text" (change)="destinationAddress.value = destinationAddress.value.trim()">
-          <div class="first-position">{{ 'label.amount' | translate }}</div>
-          <input class="second-position complete black-text form-control" #amountValue
-            type="number" min="0" step="0.00000001" (change)="precise(amountValue)">
-          <div class="first-position">{{ 'label.fee' | translate }}</div>
-          <select class="second-position form-control" #selectedFee (change)="refresh()">
-            <option *ngFor="let fee of transactionFees" value="{{fee.amount}}">
-              {{fee.name}} ({{fee.amount}} {{ 'label.satoshis' | translate }})
-            </option>
-          </select>
-          <input class="first-position btn btn-primary btn-serach" type="button" value="{{ 'label.send' | translate }}"
-            (click)="signTransaction(destinationAddress.value, amountValue.value, selectedFee.value)">
+          <div class="row custom-form">
+            <div class="col-xs-12 col-sm-6 ">
+              <div class="row mb-16">
+                <div class="col-xs-12 custom-form-row">
+                  <span class="sub-label">{{ 'label.address' | translate }}</span>
+                  <input class="form-control" #destinationAddress type="text"
+                    (change)="destinationAddress.value = destinationAddress.value.trim()">
+                </div>
+              </div>
+              <div class="row mb-16">
+                <div class="col-xs-12 custom-form-row">
+                  <span class="sub-label">{{ 'label.amount' | translate }}</span>
+                  <input class="form-control" #amountValue type="number" min="0" step="0.00000001"
+                    (change)="precise(amountValue)">
+                </div>
+              </div>
+              <div class="row mb-16">
+                <div class="col-xs-12 custom-form-row">
+                  <span class="sub-label">{{ 'label.fee' | translate }}</span>
+                  <select #selectedFee (change)="refresh()">
+                    <option *ngFor="let fee of transactionFees" value="{{fee.amount}}">
+                      {{fee.name}} ({{fee.amount}} {{ 'label.satoshis' | translate }})
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-16">
+                <div class="col-xs-12">
+                  <a class="btn default-btn btn-serach"
+                    (click)="signTransaction(destinationAddress.value, amountValue.value, selectedFee.value)">{{
+                    'label.send' | translate }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <span class="main-label">{{'label.generatedTransaction' | translate}}: </span>
+          <br>
+          <a routerLink="/transactions/{{ txid }}">{{ txid }}</a>
         </div>
-        <br>
-        <label>{{'label.generatedTransaction' | translate}}: </label>
-        <br>
-        <a routerLink="/transactions/{{ txid }}">{{ txid }}</a>
       </tab>
 
       <tab heading="TPOS">
@@ -107,7 +129,6 @@
           </div>
 
           <div class="row">
-
             <div class="form-group col-md-6 col-xs-8">
               <label for="CommisionPercent">{{ 'label.commision' | translate }}</label>
               <input class="form-control" #commisionPercent type="number" min="1" max="100"

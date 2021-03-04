@@ -1,8 +1,7 @@
 
 import { tap } from 'rxjs/operators';
 import { Component, OnInit, HostListener } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Balance } from '../../../models/balance';
 import { AddressesService } from '../../../services/addresses.service';
 import { ErrorService } from '../../../services/error.service';
@@ -33,12 +32,22 @@ export class AddressDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private addressesService: AddressesService,
     private errorService: ErrorService) { }
 
   ngOnInit() {
     const height = this.getScreenSize();
     this.limit = getNumberOfRowsForScreen(height);
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.reload();
+      }
+    });
+    this.reload();
+  }
+
+  reload() {
     this.addressString = this.route.snapshot.paramMap.get('id');
     this.addressesService.get(this.addressString).subscribe(
       response => this.onAddressRetrieved(response),

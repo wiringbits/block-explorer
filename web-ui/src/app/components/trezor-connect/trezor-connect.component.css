@@ -5,6 +5,7 @@
 
 .page-header {
   margin: 0;
+  margin-bottom: 20px;
   padding: 0;
   padding-left: 22px;
   padding-right: 22px;
@@ -12,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   height: 66px;
-  border-bottom: none;
+  border-bottom: 1px solid #181b2b;
 }
 
 .page-header .page-title {
@@ -74,47 +75,67 @@
   margin-bottom: 15px;
 }
 
+.tab-pane > div {
+  padding-left: 5px;
+}
+
 .add-btn {
   margin-left: 16px;
 }
 
 .add-address {
-  margin-bottom: 31px;
+  padding-bottom: 31px;
+  border-bottom: 1px solid #181b2b;
 }
 
-/* #addressList {
-  margin-right: -15px;
-  margin-left: -15px;
-} */
+.add-address .select-wrapper {
+  max-width: 490px;
+  width: 100%;
+}
+
+.add-address .select-wrapper select {
+  width: 100%;
+}
+
+.sub-label {
+  color: #989DCC;
+  font-size: 12px;
+  line-height: 14px;
+}
+
+.custom-form-row input, .custom-form select {
+  max-width: 535px;
+  width: 100%;
+}
+
+.custom-form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+} 
+
+.custom-form a {
+  float: right;
+  margin-top: 15px;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+.custom-form {
+  padding-bottom: 31px;
+  border-bottom: 1px solid #181b2b;
+}
+
+.main-label {
+  font-size: 14px;
+  line-height: 24px;
+  color: #989DCC;
+}
 
 .tab-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-gap: 8px;
-}
-
-.first-position {
-  grid-column: 1;
-}
-
-.second-position {
-  grid-column: 2;
-}
-
-.third-position {
-  grid-column: 3;
-}
-
-.fourth-position {
-  grid-column: 4;
-}
-
-.last-position {
-  grid-column: 6;
-}
-
-.complete {
-  grid-column: span 2;
 }
 
 .black-text {

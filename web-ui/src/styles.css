@@ -78,6 +78,7 @@ a {
 /* TextInput */
 
 input[type="text"],
+input[type=number],
 textarea {
   background: #FFFFFF08 0% 0% no-repeat padding-box !important;
   border-radius: 8px;
@@ -287,6 +288,10 @@ pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
   margin-right: 0!important;
 }
 
+.mb-16 {
+  margin-bottom: 16px!important;
+}
+
 .default-btn {
   padding: 9px 18px 7px;
   border-radius: 20px;
@@ -304,7 +309,6 @@ pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
 }
 
 select {
-  width: 394px;
   height: 40px;
   background: #222534 0% 0% no-repeat padding-box;
   border-radius: 8px;
