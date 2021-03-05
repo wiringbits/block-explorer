@@ -80,124 +80,66 @@
     </div>
 
     <div class="col-sm-12 col-md-8 col-md-pull-4 calculator-panel">
-        <div class="tab-content">
-            <div class="col-xs-12 text-primary page-title">
-                {{'label.calculator' | translate}}
-            </div>
-
-            <div class="col-xs-12 calculator-label">
-                {{'label.xsnAmountHold' | translate}}
-            </div>
-
-            <div class="col-xs-12">
-                <div class="calculator-hold-amount text-highlight">
-                    <span class="glyphicon glyphicon-tasks"></span>
-                    <input type="number" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" (ngModelChange)="onChangeAmount()" />
-                </div>
-            </div>
-
-            <div class="col-xs-12 calculator-optimal-setup">
-                <span class="text-label">{{'label.optimalSetup' | translate}} : </span>{{masternodeCount}} {{'label.masternodeAnd' | translate}} {{xsnStaking}} {{'label.xsnStaking' | translate}}
-            </div>
-
-            <div class="col-xs-12 calculator-more-profitable text-label">
-                <span class="text-highlight">{{'label.masternodeStakingRemaining' | translate}} </span>{{'label.moreProfitable' | translate}}
-            </div>
-
-            <div class="col-xs-12">
-                <div class="calculator-comparison-bar">
-                    <div class="col-xs-4 calculator-staking-bar">
-                        {{'label.stakingAllCoins' | translate}}
+        <tabset>
+            <tab heading="BLOCK REWARDS">
+                <div>
+                    <div class="col-xs-12 calculator-label">
+                        {{'label.xsnAmountHold' | translate}}
                     </div>
-                    <div class="col-xs-8 calculator-masternode-staking-bar">
-                        {{'label.masternodeStakingRemaining' | translate}}
+        
+                    <div class="col-xs-12">
+                        <div class="calculator-hold-amount text-highlight">
+                            <span class="glyphicon glyphicon-tasks"></span>
+                            <input type="number" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" (ngModelChange)="onChangeAmount()" />
+                        </div>
+                    </div>
+        
+                    <div class="col-xs-12 calculator-optimal-setup">
+                        <span class="text-label">{{'label.optimalSetup' | translate}} : </span>{{masternodeCount}} {{'label.masternodeAnd' | translate}} {{xsnStaking}} {{'label.xsnStaking' | translate}}
+                    </div>
+        
+                    <div class="col-xs-6 calculator-comparison-table">
+                        <h4 class="main-label">{{'label.stakingAllCoins' | translate}}</h4>
+
+                        <p class="sub-label">{{'label.daily' | translate}}:</p>
+                        <p>14.5347 XSN</p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
+
+                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
+                        <p>473.3261 XSN</p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
+
+                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
+                        <p>5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
+
+                        <!-- {{'label.waitingTimePerReward' | translate}} -->
+                    </div>
+                    <div class="col-xs-6 calculator-comparison-table">
+                        <h4 class="main-label">{{'label.masternodeStakingRemaining' | translate}}</h4>
+
+                        <p class="sub-label">{{'label.daily' | translate}}:</p>
+                        <p>14.5347 XSN</p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
+
+                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
+                        <p>473.3261 XSN</p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
+
+                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
+                        <p>5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></p>
+                        <p>$ 0.0000</p>
+                        <p>0.00000000 BTC</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="col-xs-12">
-                <table class="table table-responsive table-borderless calculator-comparison-table">
-                    <thead>
-                        <th class="col-xs-6 calculator-label">{{'label.daily' | translate}}</th>
-                        <th class="col-xs-6 calculator-label right-align">{{'label.daily' | translate}}</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>14.5347 XSN</td>
-                            <td class="right-align">14.5347 XSN</td>
-                        </tr>
-                        <tr>
-                            <td>$ 0.0000</td>
-                            <td class="right-align">$ 0.0000</td>
-                        </tr>
-                        <tr>
-                            <td>0.00000000 BTC</td>
-                            <td class="right-align">0.00000000 BTC</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="col-xs-12">
-                <table class="table table-responsive table-borderless calculator-comparison-table">
-                    <thead>
-                        <th class="col-xs-6 calculator-label">{{'label.monthly' | translate}}</th>
-                        <th class="col-xs-6 calculator-label right-align">{{'label.monthly' | translate}}</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>473.3261 XSN</td>
-                            <td class="right-align">473.3261 XSN</td>
-                        </tr>
-                        <tr>
-                            <td>$ 0.0000</td>
-                            <td class="right-align">$ 0.0000</td>
-                        </tr>
-                        <tr>
-                            <td>0.00000000 BTC</td>
-                            <td class="right-align">0.00000000 BTC</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="col-xs-12">
-                <table class="table table-responsive table-borderless calculator-comparison-table">
-                    <thead>
-                        <th class="col-xs-6 calculator-label">{{'label.yearly' | translate}}</th>
-                        <th class="col-xs-6 calculator-label right-align">{{'label.yearly' | translate}}</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></td>
-                            <td class="right-align">5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></td>
-                        </tr>
-                        <tr>
-                            <td>$ 0.0000</td>
-                            <td class="right-align">$ 0.0000</td>
-                        </tr>
-                        <tr>
-                            <td>0.00000000 BTC</td>
-                            <td class="right-align">0.00000000 BTC</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="col-xs-12">
-                <table class="table table-responsive table-borderless calculator-comparison-table">
-                    <thead>
-                        <th class="col-xs-6 calculator-label">{{'label.waitingTimePerReward' | translate}}</th>
-                        <th class="col-xs-6 calculator-label right-align">{{'label.waitingTimePerReward' | translate}}</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1.74 {{'label.days' | translate}}</td>
-                            <td class="right-align">1.74 {{'label.days' | translate}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            </tab>
+            <tab heading="DEX FEES + BLOCK REWARDS" [disabled]="true">
+            </tab>
+        </tabset>
     </div>
 </div>

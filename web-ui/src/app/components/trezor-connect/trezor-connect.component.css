@@ -32,43 +32,43 @@
   color: white;
 }
 
-/deep/ .nav-tabs {
+::ng-deep .nav-tabs {
   border-bottom: none;
 }
 
-/deep/ .nav-tabs>li>a {
+::ng-deep .nav-tabs>li>a {
   margin: 0;
   border: none;
   color: #989DCC;
 }
 
-/deep/ .nav-tabs>li.active, /deep/ .nav-tabs>li:hover {
+::ng-deep .nav-tabs>li.active, ::ng-deep .nav-tabs>li:hover {
   background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
 }
 
-/deep/ .nav-tabs>li.active>a, /deep/ .nav-tabs>li>a:hover, /deep/ .nav-tabs>li>a:focus, /deep/ .nav-tabs>li.active>a:focus, /deep/ .nav-tabs>li.active>a:hover {
+::ng-deep .nav-tabs>li.active>a, ::ng-deep .nav-tabs>li>a:hover, ::ng-deep .nav-tabs>li>a:focus, ::ng-deep .nav-tabs>li.active>a:focus, ::ng-deep .nav-tabs>li.active>a:hover {
   background: transparent;
   border-bottom: none;
   border: none;
   color: #286090;
 }
 
-/deep/ .nav-tabs li.active a, /deep/ .nav-tabs>li.active>a:focus {
+::ng-deep .nav-tabs li.active a, ::ng-deep .nav-tabs>li.active>a:focus {
   color: white;
 }
 
-/deep/ .nav-tabs li.active::after {
+::ng-deep .nav-tabs li.active::after {
   height: 2px;
   display: block;
   background: #01D9DE 0% 0% no-repeat padding-box;
   content: "";
 }
 
-/deep/ .tab-content>.active {
+::ng-deep .tab-content>.active {
   width: 100%;
 }
 
-/deep/ .tab-content .tab-title {
+::ng-deep .tab-content .tab-title {
   font-size: 16px;
   color: white;
   margin-top: 31px;
@@ -154,85 +154,4 @@
 
 .tab-content-tpos .custom-form-row > .sub-label {
   padding-bottom: 20px;
-}
-
-.tab-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-gap: 8px;
-}
-
-.black-text {
-  color: black;
-}
-
-.trezor-span {
-  grid-column: 2 / span 2;
-  font-size: 20px;
-
-}
-
-.address-type {
-  margin-right: 10px;
-}
-
-.reset-button {
-  max-height: 35px;
-}
-
-
-
-
-
-@media screen and (max-width: 1200px) {
-  .begin {
-    grid-column: col-start 2 / span 7;
-
-  }
-
-  .last-position {
-    grid-column: 8;
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  .begin {
-    grid-column: col-start 2 / span 10;
-
-  }
-
-  .last-position {
-    grid-column: 11;
-  }
-
-  .trezor-span {
-    grid-column: 2 / span 3;
-    font-size: 20px;
-
-  }
-
-}
-
-@media screen and (max-width: 800px) {
-  .begin {
-    grid-column: col-start 2 / span 11;
-  }
-
-  .last-position {
-    grid-column: 12;
-  }
-
-  .trezor-span {
-    grid-column: 2 / span 4;
-    font-size: 20px;
-
-  }
-}
-
-.show-all {
-  margin-left: 5px;
-}
-
-tr {
-  margin: auto;
 }
