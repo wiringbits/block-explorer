@@ -290,6 +290,7 @@ export class AppComponent implements OnInit {
 
       'label.yes': 'Yes',
       'label.yesOwnerOfTheStakedCoins': 'Yes, it\'s the owner of the staked coins',
+      'label.yesMerchantOfTheStakedCoins': 'Yes, it\'s the merchant of the staked coins',
       'label.no': 'No',
       'label.tposDetails': 'TPoS Details',
 

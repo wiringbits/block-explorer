@@ -35,6 +35,13 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
     this.updateTransactions();
   }
 
+  ngOnChanges(changes: any) {
+    if (changes.address.currentValue != changes.address.previousValue) {
+      this.transactions = [];
+      this.updateTransactions();    
+    }
+  }
+
   ngOnDestroy() {
     if (this.subscription$ != null) {
       this.subscription$.unsubscribe();

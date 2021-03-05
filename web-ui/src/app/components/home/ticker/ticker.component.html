@@ -42,11 +42,11 @@
         </span>
 
         <span *ngIf="ticker != null">
-          {{ticker.blocks}}
+          {{lastBlock.height}}
         </span>
 
         <span *ngIf="ticker != null" class="text-label sub-label">
-          Last 3 minutes ago
+          Last {{amAgo(lastBlock.time)}}
         </span>
       </div>
     </div>
