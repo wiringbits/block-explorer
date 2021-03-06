@@ -19,6 +19,7 @@
 .page-header .page-title {
   font-size: 20px;
   line-height: 24px;
+  font-weight: 500;
   color: white;
 }
 
@@ -69,7 +70,8 @@
 }
 
 ::ng-deep .tab-content .tab-title {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 500;
   color: white;
   margin-top: 31px;
   margin-bottom: 15px;
@@ -99,7 +101,7 @@
 
 .sub-label {
   color: #989DCC;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 14px;
 }
 

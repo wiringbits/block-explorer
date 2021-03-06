@@ -1,4 +1,4 @@
-::ng-deep .nav-tabs {
+::ng-deep .calculator-panel .nav-tabs {
     border-bottom: none;
     display: flex;
     justify-content: center;
@@ -56,6 +56,10 @@
     padding-top: 27px;
 }
 
+::ng-deep .calculator-panel .tab-content {
+    margin-bottom: 26px;
+}
+
 
 @media (min-width:992px) {
     .calculator-panel {
@@ -107,10 +111,11 @@
 
 .calculator-comparison-table {
     text-align: center;
+    padding-bottom: 60px;
 }
 
 .calculator-comparison-table + .calculator-comparison-table {
-    border-left: 1px solid #01D9DE;
+    border-left: 1px solid #090D1C;
 }
 
 .calculator-comparison-table .main-label {
