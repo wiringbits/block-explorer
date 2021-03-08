@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA  } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -11,6 +11,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgHttpLoaderModule } from 'ng-http-loader';
+import { NgxSpinnerModule } from "ngx-spinner";
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -32,12 +33,14 @@ import { SharedModule } from './components/shared/shared.module';
 import { PipesModule } from './pipes/pipes.module';
 import { TposnodesService } from './services/tposnodes.service';
 import { CalculatorComponent } from './components/calculator/calculator.component';
+import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TrezorConnectComponent,
-    CalculatorComponent
+    CalculatorComponent,
+    DexMonitorComponent
   ],
   imports: [
     AppRoutingModule,
@@ -52,8 +55,9 @@ import { CalculatorComponent } from './components/calculator/calculator.componen
     TabsModule.forRoot(),
     AlertModule.forRoot(),
     ReactiveFormsModule,
-    
+    NgxSpinnerModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     AddressesService,
     BalancesService,
@@ -70,6 +74,7 @@ import { CalculatorComponent } from './components/calculator/calculator.componen
     TposContractsService,
     XSNService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  
 })
 export class AppModule { }

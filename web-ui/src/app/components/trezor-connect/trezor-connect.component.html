@@ -144,18 +144,19 @@
                       </div>
                   </div>
                 </div>
-                <label *ngIf="tposAddress">Tpos Address:
+                <span class="sub-label" *ngIf="tposAddress">Tpos Address:
                   <a routerLink="/addresses/{{tposAddress.address}}">{{tposAddress.address}}</a>
                   <br>
-                </label>
+                </span>
                 
-                <label *ngIf="tposTransaction">Tpos Transaction:
+                <span class="sub-label" *ngIf="tposTransaction">Tpos Transaction:
                   <a routerLink="/transactions/{{tposTransaction}}">{{tposTransaction}}</a>
-                </label>
-                <br>
-                <label *ngIf="generatedTransaction">Generated Transaction:
+                  <br>
+                </span>
+
+                <span class="sub-label" *ngIf="generatedTransaction">Generated Transaction:
                   <a routerLink="/transactions/{{generatedTransaction}}">{{generatedTransaction}}</a>
-                </label>
+                </span>
 
                 <div class="row">
                   <div class="form-group col-sm-8 col-xs-12">

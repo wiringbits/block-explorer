@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgxSpinnerService } from "ngx-spinner";
 
 import { Subscription } from 'rxjs';
 import { truncate, amAgo } from '../../../utils';
@@ -21,6 +22,9 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   @Input()
   allowInfiniteScroll: boolean;
   transactions: Transaction[] = [];
+  isLoading: boolean;
+  percent: number;
+  timer: any;
 
   private subscription$: Subscription;
 
@@ -29,7 +33,7 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   truncate = truncate;
   amAgo = amAgo;
 
-  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService) { }
+  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService, private spinner: NgxSpinnerService) { }
 
   ngOnInit() {
     this.updateTransactions();
@@ -60,6 +64,11 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
     if (this.transactions.length > 0) {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;
     }
+    this.isLoading = true;
+    this.percent = 0;
+    this.timer = setInterval(() => {
+      this.percent += (100 - this.percent) / 2;
+    }, 500);
 
     if (this.address) {
       this.addressesService
@@ -79,6 +88,9 @@ export class TransactionTableComponent implements OnInit, OnDestroy {
   }
 
   private onTransactionRetrieved(response: Transaction[]) {
+    clearInterval(this.timer);
+    this.isLoading = false;
+    this.percent = 0;
     // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
     this.transactions = this.transactions.concat(response).filter(item => item["received"] > 0).sort(function (a, b) {
       if (a.height > b.height) return -1;

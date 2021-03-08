@@ -1,0 +1,178 @@
+.dex-monitor .page-header {
+  margin: 0;
+  margin-bottom: 27px;
+  padding: 31px 28px;
+  height: 139px;
+  background: transparent linear-gradient(288deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat padding-box;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.dex-monitor .main-label {
+  color: #989DCC;
+  font-size: 17px;
+  margin-bottom: 16px;
+  padding-left: 8px;
+  text-transform: uppercase;
+}
+
+.dex-monitor .page-header select {
+  max-width: 292px;
+  width: 100%;
+  padding-left: 20px;
+  font-size: 17px;
+}
+
+.dex-monitor .dex-monitor-stats-block {
+  display: flex;
+  justify-content: space-between;
+}
+
+.dex-monitor .dex-monitor_stat {
+  min-height: 286px;
+  background: #0F1223 0% 0% no-repeat padding-box;
+  border-radius: 8px;
+}
+
+.dex-monitor .total-volume.dex-monitor_stat {
+  text-align: center;
+  padding-top: 33px;
+  position: relative;
+}
+
+.dex-monitor .total-volume ul {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-left: 0;
+  position: absolute;
+  bottom: 0;
+  margin-bottom: 0;
+}
+
+.dex-monitor .total-volume ul li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #989DCC;
+  background: transparent;
+  flex: 1;
+  height: 64px;
+  font-size: 14px;
+  cursor: pointer;
+  position: relative;
+}
+
+.dex-monitor .total-volume ul li::after {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: " ";
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+
+.dex-monitor .total-volume ul li.active {
+  color: white;
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+.dex-monitor .total-volume .main-label {
+  margin-bottom: 0;
+}
+
+.dex-monitor .dex-monitor_stat .usd-amount {
+  font-size: 40px;
+  margin-bottom: 0;
+}
+
+.dex-monitor .dex-monitor_stat .btc-amount {
+  font-size: 21px;
+  margin-bottom: 0;
+}
+
+.dex-monitor .total-volume .usd-amount {
+  color: #01D9DE;
+  margin-top: 40px;
+}
+
+.dex-monitor .total-volume .btc-amount {
+  color: #989DCC;
+  margin-top: 35px;
+}
+
+.dex-monitor .burned-amount.dex-monitor_stat {
+  text-align: center;
+  padding-top: 33px;
+  padding-bottom: 44px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dex-monitor .burned-amount .usd-amount {
+  color: #FBAB5B;
+}
+
+.dex-monitor .burned-amount .btc-amount {
+  color: #989DCC;
+}
+
+.dex-monitor .dex-monitor_stat .coming-soon-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 180px;
+  height: 55px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background: rgba(255, 255, 255, 0.06) 0% 0% no-repeat padding-box;
+  color: #FBAB5B;
+  font-size: 17px;
+}
+
+.dex-monitor .dex-monitor_stat__small-group {
+  margin-top: 30px;
+  display: flex;
+}
+
+.dex-monitor .dex-monitor_stat__small {
+  flex: 1;
+  min-height: 158px;
+  background: transparent linear-gradient(319deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+  border-radius: 8px;
+  padding: 27px 20px;
+}
+
+.dex-monitor .dex-monitor_stat__small + .dex-monitor_stat__small {
+  margin-left: 44px;
+}
+
+.dex-monitor .dex-monitor_stat__small p {
+  color: #989DCC;
+  font-size: 14px;
+}
+
+.dex-monitor .dex-monitor_stat__small h3 {
+  color: white;
+  font-size: 36px;
+  font-weight: 300;
+  margin-top: 35px;
+}
+
+.dex-monitor .dex-monitor_stat__small.node {
+  background: url("../../../assets/node.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+}
+
+.dex-monitor .dex-monitor_stat__small.channel {
+  background: url("../../../assets/channel.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+}
+
+.dex-monitor .dex-monitor_stat__small.trade {
+  background: url("../../../assets/trade.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+}

@@ -66,7 +66,7 @@ export class AppComponent implements OnInit {
       path: '/tools',
       mainTab: true,
       hasChildren: true,
-      selector: ['trezor', 'calculator', 'governance'],
+      selector: ['trezor', 'calculator', 'governance', 'dex-monitor'],
       children: [{
         label: 'Trezor Wallet',
         path: '/trezor',
@@ -80,8 +80,8 @@ export class AppComponent implements OnInit {
         hasChildren: false,
         selector: '/tools'
       },{
-        label: 'DEX stats',
-        path: '/dexstats',
+        label: 'DEX Monitor',
+        path: '/dex-monitor',
         mainTab: false,
         hasChildren: false,
         selector: '/tools'

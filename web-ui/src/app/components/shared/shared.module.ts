@@ -1,8 +1,9 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgxSpinnerModule } from "ngx-spinner";
 import { MomentModule } from 'ngx-moment';
 import { NavbarComponent } from './navbar/navbar.component';
 import { FinderComponent } from './finder/finder.component';
@@ -12,6 +13,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TransactionTableComponent } from './transaction-table/transaction-table.component';
 import { PipesModule } from '../../pipes/pipes.module';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { NgCircleProgressModule } from 'ng-circle-progress';
+
 @NgModule({
     imports: [
         CommonModule,
@@ -23,7 +26,17 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
         TranslateModule,
         MomentModule,
         InfiniteScrollModule,
-        BsDropdownModule.forRoot()
+        NgxSpinnerModule,
+        BsDropdownModule.forRoot(),
+        NgCircleProgressModule.forRoot({
+            // set defaults here
+            radius: 100,
+            outerStrokeWidth: 16,
+            innerStrokeWidth: 8,
+            outerStrokeColor: "#78C000",
+            innerStrokeColor: "#C7E596",
+            animationDuration: 300,
+        })
     ],
     declarations: [
         NavbarComponent,
@@ -38,6 +51,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
         FooterComponent,
         BlockTableComponent,
         TransactionTableComponent
-    ]
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule { }

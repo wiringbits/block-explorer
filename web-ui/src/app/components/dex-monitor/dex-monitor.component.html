@@ -1,0 +1,50 @@
+<div class="row ml-0 mr-0 dex-monitor">
+  <div class="col-xs-12 page-header">
+    <p class="main-label">TRADING PAIR</p>
+    <select #selectedTradingPair [(ngModel)]="tradingPair" (change)="changeTradingPair()">
+      <option value="BTCUSD">BTC-USD</option>
+      <option value="XSNBTC">XSN-BTC</option>
+      <option value="LTCBTC">LTC-BTC</option>
+    </select>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 pl-0">
+    <div class="dex-monitor_stat total-volume">
+      <p class="main-label uppercase">Total Volume</p>
+      <h4 class="usd-amount">$ 1,087,456.67 USD</h4>
+      <p class="btc-amount">20.42394518 BTC</p>
+      <ul>
+        <li class="{{selectedTab == 0 ? 'active' : ''}}" (click)="selectTab(0)">24 Hours</li>
+        <li class="{{selectedTab == 1 ? 'active' : ''}}" (click)="selectTab(1)">1 Week</li>
+        <li class="{{selectedTab == 2 ? 'active' : ''}}" (click)="selectTab(2)">1 Month</li>
+        <li class="{{selectedTab == 3 ? 'active' : ''}}" (click)="selectTab(3)">Total</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 pr-0">
+    <div class="burned-amount dex-monitor_stat">
+      <p class="main-label uppercase">Burned Amount</p>
+      <h4 class="usd-amount">$ 0.00 USD</h4>
+      <p class="btc-amount">0.0 BTC</p>
+      <div class="coming-soon-badge">
+        Coming Soon
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 pr-0 pl-0 dex-monitor_stat__small-group">
+    <div class="dex-monitor_stat__small node">
+      <p class="sub-label">Number of Connected Nodes :</p>
+      <h3>20</h3>
+    </div>
+    <div class="dex-monitor_stat__small channel">
+      <p class="sub-label">Number of Channels :</p>
+      <h3>312</h3>
+    </div>
+    <div class="dex-monitor_stat__small trade">
+      <p class="sub-label">Number of Trades :</p>
+      <h3>4035</h3>
+    </div>
+  </div>
+</div>
