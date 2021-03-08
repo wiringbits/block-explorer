@@ -55,15 +55,15 @@ libraryDependencies ++= Seq(
   "com.alexitc" %% "playsonify-play-test" % playsonifyVersion % Test
 )
 
-libraryDependencies += "com.google.inject" % "guice" % "5.0.1"
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.5"
-libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.9"
+libraryDependencies += "com.google.inject" % "guice" % "4.2.3"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.6"
+libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.10"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.3"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
-libraryDependencies += "io.sentry" % "sentry-logback" % "4.2.0"
+libraryDependencies += "io.sentry" % "sentry-logback" % "4.3.0"
 
 libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.6.1"
