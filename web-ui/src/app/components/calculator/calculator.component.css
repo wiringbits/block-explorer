@@ -82,6 +82,7 @@
   color: #989DCC;
   font-weight: 300;
   margin-bottom: 5px;
+  letter-spacing: 0.9px;
 }
 
 .calculator-hold-amount {
@@ -136,6 +137,7 @@
     font-size: 12px;
     line-height: 24px;
     margin-top: 28px;
+    letter-spacing: 0.9px;
 }
 
 .calculator-stats-container {
