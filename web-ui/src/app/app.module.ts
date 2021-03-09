@@ -26,6 +26,7 @@ import { TransactionsService } from './services/transactions.service';
 import { TrezorRepositoryService } from './services/trezor-repository.service';
 import { TposContractsService } from './services/tposcontracts.service';
 import { XSNService } from './services/xsn.service';
+import { OrderBookService } from './services/orderbook.service';
 
 import { AppComponent } from './app.component';
 import { TrezorConnectComponent } from './components/trezor-connect/trezor-connect.component';
@@ -72,7 +73,8 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     TransactionsService,
     TrezorRepositoryService,
     TposContractsService,
-    XSNService
+    XSNService,
+    OrderBookService
   ],
   bootstrap: [AppComponent],
   

@@ -3,7 +3,8 @@
   margin-bottom: 27px;
   padding: 31px 28px;
   height: 139px;
-  background: transparent linear-gradient(288deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat padding-box;
+  background: url("../../../assets/dex-header-back.png") 95% 50% no-repeat, linear-gradient(288deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat padding-box;
+  /* background: transparent linear-gradient(288deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat padding-box; */
   border-radius: 8px;
   border-bottom: none;
 }
@@ -38,6 +39,7 @@
   text-align: center;
   padding-top: 33px;
   position: relative;
+  background: url("../../../assets/total-volume-back.png") 90% 50% no-repeat, #0F1223 0% 0% no-repeat padding-box;
 }
 
 .dex-monitor .total-volume ul {
@@ -110,6 +112,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background: url("../../../assets/burned-amount-back.png") 90% 50% no-repeat, #0F1223 0% 0% no-repeat padding-box;
 }
 
 .dex-monitor .burned-amount .usd-amount {
@@ -166,13 +169,13 @@
 }
 
 .dex-monitor .dex-monitor_stat__small.node {
-  background: url("../../../assets/node.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+  background: url("../../../assets/node.png") 90% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
 }
 
 .dex-monitor .dex-monitor_stat__small.channel {
-  background: url("../../../assets/channel.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+  background: url("../../../assets/channel.png") 90% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
 }
 
 .dex-monitor .dex-monitor_stat__small.trade {
-  background: url("../../../assets/trade.png") 80% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
+  background: url("../../../assets/trade.png") 90% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
 }
