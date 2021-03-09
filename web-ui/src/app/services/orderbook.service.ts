@@ -8,6 +8,7 @@ import { NodesInfo, TradesNumber, Volume } from '../models/orderbook';
 
 const HTTPOPTIONS = {
     exposeHeaders: 'Access-Control-Allow-Origin',
+    withCredentials: true,
     headers: new HttpHeaders({'Content-Type': 'application/json'})
 };
 
