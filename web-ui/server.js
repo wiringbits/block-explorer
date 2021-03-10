@@ -17,7 +17,7 @@ app.get('/', function (req, res) {
   res.render(path.join(__dirname + '/dist/index.html'));
 });
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Our app is running on port ${ PORT }`);
 });
