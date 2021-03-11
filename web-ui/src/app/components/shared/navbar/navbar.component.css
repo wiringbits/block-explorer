@@ -77,6 +77,7 @@
   border-radius: 0px 0px 10px 10px;
   padding-top: 10px;
   padding-bottom: 10px;
+  margin-top: 0;
 }
 
 .navbar-nav ul.dropdown-menu:before {
