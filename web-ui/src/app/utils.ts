@@ -39,3 +39,7 @@ export function amAgo(timestamp: number): string {
 
     return diff.toFixed(0) + units[i].unit + ' ago';
 }
+
+export function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

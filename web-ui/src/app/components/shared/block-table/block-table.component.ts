@@ -24,7 +24,7 @@ export class BlockTableComponent implements OnInit, OnDestroy {
   private latestBlockHeight = 0;
   private subscription$: Subscription;
 
-  limit = 20;
+  limit = 10;
 
   truncate = truncate;
   amAgo = amAgo;

@@ -11,7 +11,7 @@
   <div class="col-xs-12 col-sm-6 pl-0">
     <div class="dex-monitor_stat total-volume">
       <p class="main-label uppercase">Total Volume</p>
-      <h4 class="usd-amount" *ngIf="volume.volumeUSD">$ {{volume.volumeUSD.toFixed(2)}} USD</h4>
+      <h4 class="usd-amount" *ngIf="volume.volumeUSD">$ {{numberWithCommas(volume.volumeUSD.toFixed(2))}} USD</h4>
       <p class="btc-amount" *ngIf="volume.volumeBTC">{{volume.volumeBTC.toFixed(8)}} BTC</p>
       <ul>
         <li class="{{selectedTab == 1 ? 'active' : ''}}" (click)="selectTab(1)">24 Hours</li>

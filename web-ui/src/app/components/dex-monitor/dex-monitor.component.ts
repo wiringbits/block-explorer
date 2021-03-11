@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Prices } from '../../models/xsn';
 import { NodesInfo, TradesNumber, Volume } from '../../models/orderbook';
@@ -6,7 +6,7 @@ import { NodesInfo, TradesNumber, Volume } from '../../models/orderbook';
 import { XSNService } from '../../services/xsn.service';
 import { OrderBookService } from '../../services/orderbook.service';
 
-import { FormGroup, Validators, FormControl } from '@angular/forms';
+import { numberWithCommas } from '../../utils';
 
 @Component({
   selector: 'app-dex-monitor',
@@ -22,6 +22,9 @@ export class DexMonitorComponent implements OnInit {
   nodesInfo: NodesInfo = new NodesInfo();
   tradesNumber: TradesNumber = new TradesNumber();
   volume: Volume = new Volume();
+  interval: any;
+
+  numberWithCommas = numberWithCommas;
 
   constructor(
     private xsnService: XSNService,
@@ -33,6 +36,11 @@ export class DexMonitorComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.interval = setInterval(() => this.loadData(), 10000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
   }
 
   loadData() {

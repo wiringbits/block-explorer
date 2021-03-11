@@ -23,7 +23,8 @@ export class AddressDetailsComponent implements OnInit {
   address: Balance;
   addressString: string;
   addressLabel = addressLabels;
-  tposContract: TposContract = null;
+  tposContracts: Array<TposContract>;
+  selectedTpos: number;
 
   // pagination
   limit = 30;
@@ -34,7 +35,9 @@ export class AddressDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private addressesService: AddressesService,
-    private errorService: ErrorService) { }
+    private errorService: ErrorService) { 
+      this.selectedTpos = 0;
+    }
 
   ngOnInit() {
     const height = this.getScreenSize();
@@ -64,8 +67,12 @@ export class AddressDetailsComponent implements OnInit {
   }
 
   private onTposContractsReceived(response: WrappedResult<TposContract>) {
-    this.tposContract = response.data[0];
-    console.log(this.tposContract);
+    this.tposContracts = response.data;
+    console.log(this.tposContracts);
+  }
+
+  selectTpos(index) {
+    this.selectedTpos = index;
   }
 
   @HostListener('window:resize', ['$event'])

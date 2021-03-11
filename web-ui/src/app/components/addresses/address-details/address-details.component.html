@@ -50,14 +50,14 @@
             </div>
           </div>
 
-          <div class="col-xs-6" *ngIf="tposContract">
+          <div class="col-xs-6" *ngIf="tposContracts">
             <div class="table-responsive">
               <table class="table table-borderless">
                 <thead>
                   <tr>
                     <th class="col-xs-5">
                       <h4 class="text-primary">
-                        {{'label.tposDetails' | translate}} <small *ngIf="tposContract" class="text-highlight">({{'label.enabled' | translate | uppercase}})</small>
+                        {{'label.tposDetails' | translate}} <small *ngIf="tposContracts.length > 0" class="text-highlight">({{'label.enabled' | translate | uppercase}})</small>
                       </h4>  
                     </th>
                     <th class="col-xs-7"></th>
@@ -67,32 +67,40 @@
                 <tbody>
                   <tr>
                     <td class="text-label">{{'label.isStakingCoinsTrustlessly' | translate}}</td>
-                    <td>{{(addressString == tposContract.merchant ? 'label.yesMerchantOfTheStakedCoins' : 'label.yesOwnerOfTheStakedCoins') | translate}}</td>
+                    <td>{{(addressString == tposContracts[0].merchant ? 'label.yesMerchantOfTheStakedCoins' : 'label.yesOwnerOfTheStakedCoins') | translate}}</td>
+                  </tr>
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].merchant">
+                    <td class="text-label">{{'label.contractsFound' | translate}}</td>
+                    <td>
+                      <ul class="merchant-select">
+                        <li *ngFor="let item of tposContracts; let i = index" class="{{selectedTpos == i ? 'active' : ''}}" (click)="selectTpos(i)">{{ i + 1}}</li>
+                      </ul>
+                    </td>
                   </tr>
                   <tr>
                     <td class="text-label">{{'label.contractState' | translate}}</td>
-                    <td>{{tposContract ? tposContract.state : ''}}</td>
+                    <td>{{tposContracts ? tposContracts[selectedTpos].state : ''}}</td>
                   </tr>
-                  <tr *ngIf="tposContract && addressString == tposContract.merchant">
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].merchant">
                     <td class="text-label">{{'label.ownerAddress' | translate}}</td>
                     <td>
-                      <a class="text-highlight" routerLink="/addresses/{{tposContract.owner}}">{{tposContract.owner}}</a>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContracts[selectedTpos].owner}}">{{tposContracts[selectedTpos].owner}}</a>
                     </td>
                   </tr>
-                  <tr *ngIf="tposContract && addressString == tposContract.owner">
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].owner">
                     <td class="text-label">{{'label.merchantAddress' | translate}}</td>
                     <td>
-                      <a class="text-highlight" routerLink="/addresses/{{tposContract.merchant}}">{{tposContract.merchant}}</a>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContracts[0].merchant}}">{{tposContracts[0].merchant}}</a>
                     </td>
                   </tr>
                   <tr>
                     <td class="text-label">{{'label.merchantCommission' | translate}}</td>
-                    <td>{{tposContract ? tposContract.merchantCommission : ''}}</td>
+                    <td>{{tposContracts ? tposContracts[selectedTpos].merchantCommission : ''}}</td>
                   </tr>
                   <tr>
                     <td class="text-label">{{'label.contractTxid' | translate}}</td>
                     <td>
-                      <a *ngIf="tposContract" class="text-highlight" routerLink="/transactions/{{tposContract.txid}}">{{tposContract.txid}}</a>
+                      <a *ngIf="tposContracts" class="text-highlight" routerLink="/transactions/{{tposContracts[selectedTpos].txid}}">{{tposContracts[selectedTpos].txid}}</a>
                     </td>
                   </tr>
                 </tbody>

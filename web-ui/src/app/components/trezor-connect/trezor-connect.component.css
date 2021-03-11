@@ -115,6 +115,10 @@
   width: 100%;
 }
 
+.tab-content-send .sub-label {
+  width: 30%;
+}
+
 .custom-form-row {
   display: flex;
   justify-content: space-between;

@@ -286,6 +286,7 @@ export class AppComponent implements OnInit {
 
       'label.isStakingCoinsTrustlessly': 'Is this address staking coins trustlessly?',
       'label.contractState': 'Contract state',
+      'label.contractsFound': 'Contracts found',
       'label.contractTxid': 'Contract txid',
 
       'label.yes': 'Yes',
