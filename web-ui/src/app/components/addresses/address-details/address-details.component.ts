@@ -3,6 +3,7 @@ import { tap } from 'rxjs/operators';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Balance } from '../../../models/balance';
+import { TransactionsService } from '../../../services/transactions.service';
 import { AddressesService } from '../../../services/addresses.service';
 import { ErrorService } from '../../../services/error.service';
 import { LightWalletTransaction } from '../../../models/light-wallet-transaction';
@@ -12,6 +13,8 @@ import { addressLabels } from '../../../config';
 import { TposContract } from '../../../models/tposcontract';
 import { WrappedResult } from '../../../models/wrapped-result';
 import { Transaction } from '../../../models/transaction';
+
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-address-details',
@@ -25,29 +28,81 @@ export class AddressDetailsComponent implements OnInit {
   addressLabel = addressLabels;
   tposContracts: Array<TposContract>;
   selectedTpos: number;
+  isLoading: boolean;
 
   // pagination
-  limit = 30;
+  limit = 10;
   transactions: Transaction[] = [];
   items: LightWalletTransaction[] = [];
+
+  private subscription$: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private addressesService: AddressesService,
+    private transactionsService: TransactionsService,
     private errorService: ErrorService) { 
       this.selectedTpos = 0;
+      this.addressString = null;
     }
 
   ngOnInit() {
     const height = this.getScreenSize();
-    this.limit = getNumberOfRowsForScreen(height);
+    // this.limit = getNumberOfRowsForScreen(height);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.reload();
       }
     });
     this.reload();
+    this.updateTransactions();
+  }
+
+  ngOnChanges(changes: any) {
+    if (changes.address.currentValue != changes.address.previousValue) {
+      this.transactions = [];
+      this.updateTransactions();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.subscription$ != null) {
+      this.subscription$.unsubscribe();
+    }
+  }
+
+  private updateTransactions() {
+    let lastSeenTxId = '';
+    if (this.transactions.length > 0) {
+      lastSeenTxId = this.transactions[this.transactions.length - 1].id;
+    }
+    this.isLoading = true;
+
+    if (this.addressString) {
+      this.addressesService
+        .getTransactions(this.addressString, this.limit, lastSeenTxId)
+        .subscribe(
+          response => this.onTransactionRetrieved(response.data),
+          response => this.onError(response)
+        );
+    } else {
+      this.transactionsService
+        .getList(lastSeenTxId, this.limit)
+        .subscribe(
+          response => this.onTransactionRetrieved(response.data),
+          response => this.onError(response)
+        );
+    }
+  }
+
+  private onTransactionRetrieved(response: Transaction[]) {
+    this.isLoading = false;
+    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
+    this.transactions = this.transactions.concat(response)/*.filter(item => item["received"] > 0) */.sort(function (a, b) {
+      if (a.height > b.height) return -1;
+      else return 1;
+    });
   }
 
   reload() {

@@ -17,9 +17,12 @@ export class BlockListComponent implements OnInit {
     stats: ServerStats = new ServerStats();
     blocks: Block[] = [];
     limit = 20;
+    lastSeenHash: string;
 
     constructor(private tickerService: TickerService, private blocksService: BlocksService,
-        private errorService: ErrorService) { }
+        private errorService: ErrorService) {
+        this.lastSeenHash = '';
+    }
 
     ngOnInit() {
         this.tickerService
@@ -44,6 +47,10 @@ export class BlockListComponent implements OnInit {
         if (this.blocks.length > 0) {
             lastSeenHash = this.blocks[this.blocks.length - 1].hash;
         }
+
+        let tmp = this.blocks.map(item => item.hash);
+
+        console.log(tmp, lastSeenHash);
 
         this.blocksService
             .getLatest(this.limit, lastSeenHash)

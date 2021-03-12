@@ -31,10 +31,10 @@
             </td>
             <td class="text-primary">{{extractedBy(item)}}</td>
             <td class="text-primary">{{item.difficulty | number:'1.2-2'}}</td>
-            <td class="text-primary">{{item.transactions.length}}</td>
+            <td class="text-primary">{{item.transactions.length > 0 ? item.transactions.length : item.transactions}}</td>
             <td class="text-primary pl-0">
-              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
-              ({{amAgo(item.time)}})
+              {{item.medianTime * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
+              ({{amAgo(item.medianTime)}})
             </td>
           </tr>
         </tbody>

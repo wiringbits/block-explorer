@@ -25,7 +25,7 @@
           {{'label.showMore' | translate | uppercase}}
         </a>
       </div>
-      <app-transaction-table [hideBlockHash]="true" [allowInfiniteScroll]="false" ></app-transaction-table>
+      <app-transaction-table [hideBlockHash]="true" [allowInfiniteScroll]="false" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-table>
     </div>
   </div>
 </div>

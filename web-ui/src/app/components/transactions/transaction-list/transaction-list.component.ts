@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { TransactionsService } from '../../../services/transactions.service';
+import { ErrorService } from '../../../services/error.service';
 import { Prices, ServerStats } from '../../../models/ticker';
 import { TickerService } from '../../../services/ticker.service';
+import { Transaction } from '../../../models/transaction';
 
 @Component({
   selector: 'app-transaction-list',
@@ -14,10 +17,14 @@ export class TransactionListComponent implements OnInit {
   stats: ServerStats = new ServerStats();
   address: string;
   limit = 20;
+  isLoading: boolean;
+  transactions: Transaction[] = [];
 
-  constructor(private tickerService: TickerService) { }
+  constructor(private tickerService: TickerService,
+    private transactionsService: TransactionsService, private errorService: ErrorService) { }
 
   ngOnInit() {
+    this.updateTransactions();
     this.tickerService
       .getPrices()
       .subscribe(
@@ -31,5 +38,33 @@ export class TransactionListComponent implements OnInit {
         response => this.ticker = this.stats = response,
         response => console.log(response)
       );
+  }
+
+  private updateTransactions() {
+    let lastSeenTxId = '';
+    if (this.transactions.length > 0) {
+      lastSeenTxId = this.transactions[this.transactions.length - 1].id;
+    }
+    this.isLoading = true;
+
+    this.transactionsService
+      .getList(lastSeenTxId, this.limit)
+      .subscribe(
+        response => this.onTransactionRetrieved(response.data),
+        response => this.onError(response)
+      );
+  }
+
+  private onTransactionRetrieved(response: Transaction[]) {
+    this.isLoading = false;
+    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
+    this.transactions = this.transactions.concat(response).filter(item => item["received"] > 0).sort(function (a, b) {
+      if (a.height > b.height) return -1;
+      else return 1;
+    });
+  }
+
+  private onError(response: any) {
+    this.errorService.renderServerErrors(null, response);
   }
 }
