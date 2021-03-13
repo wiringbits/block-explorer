@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Prices, ServerStats } from '../../models/ticker';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
 import { XSNService } from '../../services/xsn.service';
-import { RewardsSummary, NodeStats } from '../../models/xsn';
+import { RewardsSummary, NodeStats, Prices } from '../../models/xsn';
 
 @Component({
   selector: 'app-calculator',
@@ -16,34 +16,45 @@ export class CalculatorComponent implements OnInit {
   stats: NodeStats = new NodeStats();
   rewardsSummary: RewardsSummary = new RewardsSummary();
   serverStats: ServerStats = new ServerStats();
-  holdAmount = 17531;
+  holdAmount = null;
 
   requiredForMasternode = 15000;
 
-  masternodeCount = 1;
-  xsnStaking = 2531;
+  masternodeCount = 0;
+  xsnStaking = 0;
+
+  interval: any;
 
   constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
+    this.loadData();
+    this.interval = setInterval(() => this.loadData(), 10000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+    this.interval = null;
+  }
+
+  loadData() {
     this.tickerService
       .get()
       .subscribe(
-        response => this.serverStats = response,
-        response => this.onError(response)
-      );
-
-    this.tickerService
-      .getPrices()
-      .subscribe(
-        response => this.prices = response,
+        response => {
+          this.serverStats = response;
+          this.onChangeAmount();
+        },
         response => this.onError(response)
       );
       
     this.xsnService
       .getRewardsSummary()
       .subscribe(
-        response => this.rewardsSummary = response,
+        response => {
+          this.rewardsSummary = response;
+          this.onChangeAmount();
+        },
         response => this.onError(response)
       );
 
@@ -52,6 +63,17 @@ export class CalculatorComponent implements OnInit {
       .subscribe(
         response => {
           this.stats = response;
+          this.onChangeAmount();
+        },
+        response => this.onError(response)
+      );
+
+    this.xsnService
+      .getPrices()
+      .subscribe(
+        response => {
+          this.prices = response;
+          this.onChangeAmount();
         },
         response => this.onError(response)
       );
@@ -62,7 +84,12 @@ export class CalculatorComponent implements OnInit {
   }
 
   onChangeAmount() {
-    this.masternodeCount = Math.floor(this.holdAmount / this.requiredForMasternode);
-    this.xsnStaking = this.holdAmount % this.requiredForMasternode;
+    if (this.rewardsSummary.stakingROI > this.rewardsSummary.masternodesROI) {
+      this.masternodeCount = 0;
+      this.xsnStaking = this.holdAmount || 0;
+    } else {
+      this.masternodeCount = Math.floor(this.holdAmount / this.requiredForMasternode);
+      this.xsnStaking = this.holdAmount % this.requiredForMasternode || 0;
+    }
   }
 }

@@ -6,7 +6,7 @@
                     {{'label.masternodes' | translate}}:
                 </div>
                 <div class="calculator-stat-data">
-                    {{stats.masternodes}}
+                    {{stats && stats.masternodes}}
                 </div>
             </div>
 
@@ -34,8 +34,8 @@
                     {{'label.coinsStaking' | translate}}:
                 </div>
                 <div class="calculator-stat-data">
-                    {{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
-                    <small>({{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                    {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
+                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
                 </div>
             </div>
 
@@ -103,18 +103,18 @@
 
                         <p class="sub-label">{{'label.daily' | translate}}:</p>
                         <p>14.5347 XSN</p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{rewardsSummary && prices && (rewardsSummary.stakingROI * prices.usd).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.stakingROI * prices.btc).toFixed(8)}} BTC</p>
 
                         <p class="sub-label">{{'label.monthly' | translate}}:</p>
                         <p>473.3261 XSN</p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{(rewardsSummary.stakingROI * prices.usd * 30).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.stakingROI * prices.btc * 30).toFixed(8)}} BTC</p>
 
                         <p class="sub-label">{{'label.yearly' | translate}}:</p>
                         <p>5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{(rewardsSummary.stakingROI * prices.usd * 30 * 12).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.stakingROI * prices.btc * 30 * 12).toFixed(8)}} BTC</p>
 
                         <!-- {{'label.waitingTimePerReward' | translate}} -->
                     </div>
@@ -123,18 +123,18 @@
 
                         <p class="sub-label">{{'label.daily' | translate}}:</p>
                         <p>14.5347 XSN</p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{(rewardsSummary.masternodesROI * prices.usd).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.masternodesROI * prices.btc).toFixed(8)}} BTC</p>
 
                         <p class="sub-label">{{'label.monthly' | translate}}:</p>
                         <p>473.3261 XSN</p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{(rewardsSummary.masternodesROI * prices.usd * 30).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.masternodesROI * prices.btc * 30).toFixed(8)}} BTC</p>
 
                         <p class="sub-label">{{'label.yearly' | translate}}:</p>
                         <p>5 755.3261 XSN <small class="text-label">(ROI: 64.42%)</small></p>
-                        <p>$ 0.0000</p>
-                        <p>0.00000000 BTC</p>
+                        <p>$ {{(rewardsSummary.masternodesROI * prices.usd * 30 * 12).toFixed(4)}}</p>
+                        <p>{{(rewardsSummary.masternodesROI * prices.btc * 30 * 12).toFixed(8)}} BTC</p>
                     </div>
                 </div>
             </tab>

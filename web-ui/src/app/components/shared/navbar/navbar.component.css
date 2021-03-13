@@ -57,6 +57,7 @@
 
 .navbar-nav>li>.navbar-tab.main-tab:hover {
   color: #286090;
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
 }
 
 .navbar-nav>li.active>.navbar-tab {
@@ -104,13 +105,11 @@
 }
 
 .navbar-nav ul.dropdown-menu li:hover {
-  /* color: #286090; */
-  background: #323442 0% 0% no-repeat padding-box;
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
 }
 
 .navbar-nav ul.dropdown-menu li.active a {
-  /* color: #286090; */
-  background: #323442 0% 0% no-repeat padding-box;
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
   color: white;
 }
 

@@ -7,11 +7,11 @@
 	</div>
 	<div class="col-xs-6">
 		<ul class="nav transaction-tab-bar">
-			<li class="nav-item {{isSelected('details') ? 'active' : ''}}">
-				<a class="nav-link" (click)="selectView('details')">{{'label.details' | translate | uppercase}}</a>
+			<li class="nav-item {{isSelected('details') ? 'active' : ''}}" (click)="selectView('details')">
+				<a class="nav-link">{{'label.details' | translate | uppercase}}</a>
 			</li>
-			<li class="nav-item {{isSelected('raw') ? 'active' : ''}}">
-				<a class="nav-link" (click)="selectView('raw')">{{'label.raw' | translate | uppercase}}</a>
+			<li class="nav-item {{isSelected('raw') ? 'active' : ''}}" (click)="selectView('raw')">
+				<a class="nav-link" >{{'label.raw' | translate | uppercase}}</a>
 			</li>
 		</ul>
 	</div>
