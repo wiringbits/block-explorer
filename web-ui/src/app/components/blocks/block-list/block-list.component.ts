@@ -18,6 +18,7 @@ export class BlockListComponent implements OnInit {
     blocks: Block[] = [];
     limit = 20;
     lastSeenHash: string;
+    isLoading: Boolean = false;
 
     constructor(private tickerService: TickerService, private blocksService: BlocksService,
         private errorService: ErrorService) {
@@ -43,6 +44,7 @@ export class BlockListComponent implements OnInit {
     }
 
     private updateBlocks() {
+        this.isLoading = true;
         let lastSeenHash = '';
         if (this.blocks.length > 0) {
             lastSeenHash = this.blocks[this.blocks.length - 1].hash;
@@ -65,6 +67,7 @@ export class BlockListComponent implements OnInit {
     }
 
     private onBlockRetrieved(response: Block[]) {
+        this.isLoading = false;
         // this.latestBlockHeight = this.blocks.reduce((max, block) => Math.max(block.height, max), 0);
         this.blocks = this.blocks.concat(response).sort(function (a, b) {
             if (a.height > b.height) return -1;

@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { NgxSpinnerService } from "ngx-spinner";
 
 import { truncate, amAgo } from '../../../utils';
 import { TransactionsService } from '../../../services/transactions.service';
@@ -27,19 +26,27 @@ export class TransactionTableComponent implements OnInit {
   @Output()
   updateTransactions: EventEmitter<any> = new EventEmitter();
 
+  public lottieConfig: Object;
+
   limit = 10;
 
   truncate = truncate;
   amAgo = amAgo;
 
-  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService, private spinner: NgxSpinnerService) { }
+  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService) {
+    this.lottieConfig = {
+      path: 'assets/loader.json',
+      renderer: 'canvas',
+      autoplay: true,
+      loop: true
+    };
+  }
 
   ngOnInit() {
     // this.updateTransactions.emit();
   }
 
   getTransactions() {
-    console.log(this.allowInfiniteScroll);
     if (this.allowInfiniteScroll == false) {
       return;
     }

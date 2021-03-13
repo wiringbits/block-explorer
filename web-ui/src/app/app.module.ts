@@ -9,9 +9,8 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
 import { NgHttpLoaderModule } from 'ng-http-loader';
-import { NgxSpinnerModule } from "ngx-spinner";
+import { LottieAnimationViewModule } from 'ng-lottie';
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -56,7 +55,7 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     TabsModule.forRoot(),
     AlertModule.forRoot(),
     ReactiveFormsModule,
-    NgxSpinnerModule
+    LottieAnimationViewModule.forRoot()
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

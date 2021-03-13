@@ -332,3 +332,8 @@ a.disabled {
 .fs-14 {
   font-size: 14px!important;
 }
+
+.loading {
+  width: 100%;
+  text-align: center;
+}

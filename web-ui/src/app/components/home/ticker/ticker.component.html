@@ -42,11 +42,11 @@
         </span>
 
         <span *ngIf="ticker != null">
-          {{lastBlock.height}}
+          {{lastBlock && lastBlock.height}}
         </span>
 
         <span *ngIf="ticker != null" class="text-label sub-label">
-          Last {{amAgo(lastBlock.medianTime)}}
+          Last {{amAgo(lastBlock && lastBlock.medianTime)}}
         </span>
       </div>
     </div>
@@ -110,7 +110,7 @@
           </span>
   
           <span *ngIf="ticker != null && ticker.masternodes != null">
-            {{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
+            {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
             <small>({{rewardsSummary.rewardedAddressesSumLast72Hours / ticker.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
@@ -145,7 +145,7 @@
           </span>
   
           <span *ngIf="ticker != null && ticker.masternodes != null">
-            $ {{prices.usd.toFixed(3)}}
+            $ {{prices && prices.usd && prices.usd.toFixed(3)}}
           </span>
         </div>
       </div>

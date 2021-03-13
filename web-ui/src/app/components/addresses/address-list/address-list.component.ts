@@ -26,10 +26,19 @@ export class AddressListComponent implements OnInit {
   items: Balance[] = [];
 
   addressLabel = addressLabels;
+  public lottieConfig: Object;
+  isLoading: Boolean = false;
 
   constructor(
     private balancesService: BalancesService,
-    private tickerService: TickerService) { }
+    private tickerService: TickerService) {
+      this.lottieConfig = {
+        path: 'assets/loader.json',
+        renderer: 'canvas',
+        autoplay: true,
+        loop: true
+      };
+    }
 
   ngOnInit() {
     const height = this.getScreenSize();
@@ -48,6 +57,8 @@ export class AddressListComponent implements OnInit {
     //   return;
     // }
 
+    this.isLoading = true;
+
     let lastSeenAddress = '';
     if (this.items.length > 0) {
       lastSeenAddress = this.items[this.items.length - 1].address;
@@ -55,7 +66,10 @@ export class AddressListComponent implements OnInit {
 
     this.balancesService
       .getHighest(this.limit, lastSeenAddress).pipe(
-        tap(response => this.items.push(...response.data)))
+        tap(response => {
+          this.items.push(...response.data);
+          this.isLoading = false;
+        }))
       .subscribe();
   }
 

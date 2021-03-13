@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { MomentModule } from 'ngx-moment';
 import { TabsModule, AlertModule } from 'ngx-bootstrap';
+import { LottieAnimationViewModule } from 'ng-lottie';
 import { PipesModule } from '../../pipes/pipes.module';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { AddressesRoutingModule } from './addresses-routing.module';
@@ -25,7 +26,8 @@ import { AddressListComponent } from './address-list/address-list.component';
         MomentModule,
         TabsModule,
         AlertModule,
-        InfiniteScrollModule
+        InfiniteScrollModule,
+        LottieAnimationViewModule.forRoot()
     ],
     declarations: [
         AddressesComponent,

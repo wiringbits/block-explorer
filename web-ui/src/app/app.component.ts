@@ -244,6 +244,7 @@ export class AppComponent implements OnInit {
       'label.masternode': 'Masternode',
       'label.amount': 'Amount',
       'label.blockReward': 'Block reward',
+      'label.estRewardTime': 'Est. reward time',
 
       'label.txHash': 'TX Hash',
       'label.type': 'Type',

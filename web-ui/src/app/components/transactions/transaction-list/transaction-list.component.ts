@@ -46,7 +46,6 @@ export class TransactionListComponent implements OnInit {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;
     }
     this.isLoading = true;
-
     this.transactionsService
       .getList(lastSeenTxId, this.limit)
       .subscribe(

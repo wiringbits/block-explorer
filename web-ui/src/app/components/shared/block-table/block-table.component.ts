@@ -18,11 +18,14 @@ export class BlockTableComponent implements OnInit, OnDestroy {
   @Input()
   hideBlockHash: boolean;
   @Input()
+  isLoading: boolean = false;
+  @Input()
   blocks: Block[];
   @Output() updateBlocks: any = new EventEmitter();
 
   private latestBlockHeight = 0;
   private subscription$: Subscription;
+  public lottieConfig: Object;
 
   limit = 10;
 
@@ -33,7 +36,14 @@ export class BlockTableComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private blocksService: BlocksService,
-    private errorService: ErrorService) { }
+    private errorService: ErrorService) {
+      this.lottieConfig = {
+        path: 'assets/loader.json',
+        renderer: 'canvas',
+        autoplay: true,
+        loop: true
+      };
+    }
 
   ngOnInit() {
   }

@@ -46,20 +46,15 @@
             </td>
           </tr>
         </tbody>
-        <!-- <div *ngIf="isLoading">
-          <circle-progress
-            [percent]="percent"
-            [radius]="100"
-            [outerStrokeWidth]="16"
-            [innerStrokeWidth]="8"
-            [outerStrokeColor]="'#01D9DE18'"
-            [innerStrokeColor]="'#C7E596'"
-            [animation]="true"
-            [animationDuration]="300"
-          ></circle-progress>
-        </div> -->
-        
       </table>
+      <div *ngIf="isLoading" class="loading">
+        <lottie-animation-view
+          [options]="lottieConfig"
+          [width]="200"
+          [height]="200"
+        >
+        </lottie-animation-view>
+      </div>
     </div>
   </div>
 </div>
