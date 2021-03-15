@@ -245,6 +245,9 @@ export class AppComponent implements OnInit {
       'label.amount': 'Amount',
       'label.blockReward': 'Block reward',
       'label.estRewardTime': 'Est. reward time',
+      'label.masternodesTVL': 'Masternodes TVL',
+      'label.stakingTVL': 'Staking TVL',
+      'label.totalCoinsMN+StakingTVL': 'Total coins MN+Staking TVL',
 
       'label.txHash': 'TX Hash',
       'label.type': 'Type',

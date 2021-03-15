@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TickerService } from '../../../services/ticker.service';
 import { XSNService } from '../../../services/xsn.service';
 import { ServerStats } from '../../../models/ticker';
-import { RewardsSummary, NodeStats } from '../../../models/xsn';
+import { RewardsSummary, NodeStats, Prices } from '../../../models/xsn';
 import { Config } from '../../../config';
 
 @Component({
@@ -14,6 +14,7 @@ import { Config } from '../../../config';
 export class NodeTickerComponent implements OnInit {
 
   stats: ServerStats = new ServerStats();
+  prices: Prices = new Prices();
   nodeStats: NodeStats = new NodeStats();
   rewardsSummary: RewardsSummary = new RewardsSummary();
   masternodesProtocols: Array<any> = [];
@@ -33,6 +34,15 @@ export class NodeTickerComponent implements OnInit {
       .getRewardsSummary()
       .subscribe(
         response => this.rewardsSummary = response,
+        response => this.onError(response)
+      );
+
+    this.xsnService
+      .getPrices()
+      .subscribe(
+        response => {
+          this.prices = response;
+        },
         response => this.onError(response)
       );
 
