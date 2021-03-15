@@ -84,6 +84,9 @@ export class CalculatorComponent implements OnInit {
   }
 
   onChangeAmount() {
+    if (this.holdAmount > 99999999) {
+      this.holdAmount = 99999999;
+    }
     if (this.rewardsSummary.stakingROI > this.rewardsSummary.masternodesROI) {
       this.masternodeCount = 0;
       this.xsnStaking = this.holdAmount || 0;
