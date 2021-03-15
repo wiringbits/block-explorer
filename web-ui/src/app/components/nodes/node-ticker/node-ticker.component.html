@@ -104,8 +104,8 @@
           </span>
 
           <span *ngIf="nodeStats != null && nodeStats.masternodes != null">
-            {{(nodeStats.masternodes / 60).toFixed(2)}} hours <br/>
-            <small>({{(nodeStats.masternodes / 60 / 24).toFixed(2)}} days)</small>
+            {{(nodeStats.enabledMasternodes / 60).toFixed(2)}} hours <br/>
+            <small>({{(nodeStats.enabledMasternodes / 60 / 24).toFixed(2)}} days)</small>
           </span>
         </div>
       </div>

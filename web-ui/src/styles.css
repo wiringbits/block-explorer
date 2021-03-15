@@ -223,63 +223,6 @@ td.right-align {
   }
 }
 
-/* ngx-pagination customization */
-
-pagination-controls /deep/ .ngx-pagination {
-  padding: 0;
-  margin-left: -20px;
-  margin-right: -20px;
-}
-
-pagination-controls /deep/ .ngx-pagination .current,
-pagination-controls /deep/ .ngx-pagination li{
-  min-width: 20px;
-  margin: 0 2px;
-}
-
-pagination-controls /deep/ .ngx-pagination a {
-  color: #989DCC;
-}
-
-pagination-controls /deep/ .ngx-pagination a:hover {
-  color: #286090;
-  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
-}
-
-pagination-controls /deep/ .ngx-pagination .current {
-  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
-  color: #FFFFFF;
-  padding: 0;
-  text-align: center;
-}
-
-pagination-controls /deep/ .ngx-pagination .current::after {
-  height: 2px;
-  display: block;
-  background: #01D9DE 0% 0% no-repeat padding-box;
-  content: " ";
-}
-
-pagination-controls /deep/ .ngx-pagination .pagination-previous a::before, 
-pagination-controls /deep/ .ngx-pagination .pagination-previous.disabled::before {
-  content: '\276E';
-}
-
-pagination-controls /deep/ .ngx-pagination .pagination-next a::after, 
-pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
-  content: '\276F';
-}
-
-pagination-controls /deep/ .ngx-pagination .pagination-previous a::before,
-pagination-controls /deep/ .ngx-pagination .pagination-next a::after {
-  color: #01D9DE;
-}
-
-pagination-controls /deep/ .ngx-pagination .pagination-previous.disabled::before,
-pagination-controls /deep/ .ngx-pagination .pagination-next.disabled::after {
-  color: #989DCC;
-}
-
 .pr-0 {
   padding-right: 0!important;
 }
