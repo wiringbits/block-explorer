@@ -50,7 +50,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6" *ngIf="tposContracts">
+          <div class="col-xs-6" *ngIf="tposContracts && tposContracts.length > 0 && tposContracts[0].merchant">
             <div class="table-responsive">
               <table class="table table-borderless">
                 <thead>

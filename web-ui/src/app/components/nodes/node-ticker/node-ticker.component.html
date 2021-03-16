@@ -96,6 +96,21 @@
 
       <div class="col-xs-6 col-lg-3">
         <div class="lbl-bottom">
+          {{'label.masternodesTVL' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+          
+          <span *ngIf="nodeStats != null">
+            $ {{(nodeStats.masternodes * 15000 * prices.usd).toFixed(0)}} <br/>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
           {{'label.estRewardTime' | translate }}
         </div>
         <div class="data">
@@ -110,7 +125,7 @@
         </div>
       </div>
 
-      <div class="col-xs-6 col-lg-3">
+      <!-- <div class="col-xs-6 col-lg-3">
         <div class="lbl-bottom">
           {{'label.totalCoinsMNStaking' | translate }}
         </div>
@@ -124,22 +139,9 @@
             <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
-      </div>
+      </div> -->
 
-      <div class="col-xs-6 col-lg-3">
-        <div class="lbl-bottom">
-          {{'label.masternodesTVL' | translate }}
-        </div>
-        <div class="data">
-          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
-            {{'message.unavailable' | translate}}
-          </span>
-          
-          <span *ngIf="nodeStats != null">
-            $ {{(nodeStats.masternodes * 15000 * prices.usd).toFixed(0)}} <br/>
-          </span>
-        </div>
-      </div>
+      
     </div>
   </div>
 
@@ -238,7 +240,7 @@
         </div>
       </div>
 
-      <div class="col-xs-6 col-lg-3">
+      <!-- <div class="col-xs-6 col-lg-3">
         <div class="lbl-bottom">
           {{'label.totalCoinsMN+StakingTVL' | translate }}
         </div>
@@ -249,6 +251,21 @@
           
           <span *ngIf="nodeStats != null">
             $ {{((nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) * prices.usd).toFixed(0)}}
+          </span>
+        </div>
+      </div> -->
+
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.stakingTVL' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+          
+          <span *ngIf="nodeStats != null">
+            $ {{(rewardsSummary.rewardedAddressesSumLast72Hours * prices.usd).toFixed(0)}}
           </span>
         </div>
       </div>
@@ -264,7 +281,7 @@
   
           <span *ngIf="nodeStats != null">
             {{rewardsSummary.coinsTrustlesslyStaking.toFixed(0)}} XSN <br/>
-            <small>({{rewardsSummary.coinsTrustlesslyStaking / rewardsSummary.rewardedAddressesSumLast72Hours | number: '1.2-2' | percent}} of total coins staking)</small> <br/>
+            <small>({{rewardsSummary.coinsTrustlesslyStaking / rewardsSummary.rewardedAddressesSumLast72Hours | number: '1.2-2' | percent}} of coins staking)</small> <br/>
             <small>({{rewardsSummary.coinsTrustlesslyStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
@@ -272,15 +289,16 @@
 
       <div class="col-xs-6 col-lg-3">
         <div class="lbl-bottom">
-          {{'label.stakingTVL' | translate }}
+          {{'label.totalCoinsMNStaking' | translate }}
         </div>
         <div class="data">
-          <span *ngIf="nodeStats == null || nodeStats.masternodes == null">
+          <span *ngIf="nodeStats == null || nodeStats.masternodesProtocols == null">
             {{'message.unavailable' | translate}}
           </span>
           
           <span *ngIf="nodeStats != null">
-            $ {{(rewardsSummary.rewardedAddressesSumLast72Hours * prices.usd).toFixed(0)}}
+            {{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours).toFixed(0)}} XSN <br/>
+            <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
       </div>
