@@ -10,6 +10,7 @@ import { FooterComponent } from './footer/footer.component';
 import { BlockTableComponent } from './block-table/block-table.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TransactionTableComponent } from './transaction-table/transaction-table.component';
+import { TransactionTablev2Component } from './transaction-tablev2/transaction-tablev2.component';
 import { PipesModule } from '../../pipes/pipes.module';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
@@ -34,14 +35,16 @@ import { LottieAnimationViewModule } from 'ng-lottie';
         FinderComponent,
         FooterComponent,
         BlockTableComponent,
-        TransactionTableComponent
+        TransactionTableComponent,
+        TransactionTablev2Component
     ],
     exports: [
         NavbarComponent,
         FinderComponent,
         FooterComponent,
         BlockTableComponent,
-        TransactionTableComponent
+        TransactionTableComponent,
+        TransactionTablev2Component
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

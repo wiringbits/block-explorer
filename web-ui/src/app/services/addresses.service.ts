@@ -41,7 +41,7 @@ export class AddressesService {
     return this.http.get<PaginatedResult<Transaction>>(url);
   }
 
-  getTransactionsV2(
+  getTransactionsV2 (
     address: string,
     limit: number = 10,
     lastSeenTxid: string = '',

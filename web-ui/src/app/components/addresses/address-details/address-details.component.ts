@@ -32,7 +32,7 @@ export class AddressDetailsComponent implements OnInit {
 
   // pagination
   limit = 10;
-  transactions: Transaction[] = [];
+  transactions: LightWalletTransaction[] = [];
   items: LightWalletTransaction[] = [];
 
   private subscription$: Subscription;
@@ -81,7 +81,7 @@ export class AddressDetailsComponent implements OnInit {
 
     if (this.addressString) {
       this.addressesService
-        .getTransactions(this.addressString, this.limit, lastSeenTxId)
+        .getTransactionsV2(this.addressString, this.limit, lastSeenTxId)
         .subscribe(
           response => this.onTransactionRetrieved(response.data),
           response => this.onError(response)
@@ -96,13 +96,15 @@ export class AddressDetailsComponent implements OnInit {
     }
   }
 
-  private onTransactionRetrieved(response: Transaction[]) {
+  private onTransactionRetrieved(response: LightWalletTransaction[]) {
     this.isLoading = false;
     // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
-    this.transactions = this.transactions.concat(response)/*.filter(item => item["received"] > 0) */.sort(function (a, b) {
-      if (a.height > b.height) return -1;
-      else return 1;
-    });
+    this.transactions = this.transactions.concat(response)
+    // .sort(function (a, b) {
+    //   if (a.height > b.height) return -1;
+    //   else return 1;
+    // });
+    
   }
 
   reload() {

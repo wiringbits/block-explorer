@@ -298,7 +298,8 @@
           
           <span *ngIf="nodeStats != null">
             {{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours).toFixed(0)}} XSN <br/>
-            <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+            <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small><br>
+            <small>($ {{((nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) * prices.usd).toFixed(0)}} TVL)</small>
           </span>
         </div>
       </div>
