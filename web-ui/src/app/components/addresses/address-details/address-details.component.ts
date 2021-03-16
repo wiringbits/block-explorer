@@ -87,12 +87,12 @@ export class AddressDetailsComponent implements OnInit {
           response => this.onError(response)
         );
     } else {
-      this.transactionsService
-        .getList(lastSeenTxId, this.limit)
-        .subscribe(
-          response => this.onTransactionRetrieved(response.data),
-          response => this.onError(response)
-        );
+      // this.transactionsService
+      //   .getList(lastSeenTxId, this.limit)
+      //   .subscribe(
+      //     response => this.onTransactionRetrieved(response.data),
+      //     response => this.onError(response)
+      //   );
     }
   }
 
