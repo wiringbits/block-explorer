@@ -9,7 +9,7 @@
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
                 <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
                  -->
-          <th class="col-xs-2">{{'label.active' | translate | uppercase}}</th>
+          <th class="col-xs-2 pl-0 pr-0">{{'label.active' | translate | uppercase}}</th>
           <th class="col-xs-2">{{'label.lastSeen' | translate | uppercase}}</th>
           <th class="col-xs-3 right-align">{{'label.payee' | translate | uppercase}}</th>
         </tr>
@@ -23,7 +23,7 @@
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
                 <td>{{item.status}}</td>
                 -->
-          <td class="text-primary">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
+          <td class="text-primary pl-0 pr-0">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
           <td class="text-primary">{{amAgo(item.lastSeen)}}</td>
           <td class="right-align">
             <a class="text-highlight" routerLink="/addresses/{{item.payee}}">{{truncate(item.payee, 8, 5)}}</a>

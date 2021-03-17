@@ -61,7 +61,7 @@ export class TransactionTablev2Component implements OnInit {
     return false;
   }
 
-  getAmount(tx: LightWalletTransaction) {
+  getFee(tx: LightWalletTransaction) {
     const received = tx
       .outputs
       .map(output => output.value)
@@ -70,7 +70,7 @@ export class TransactionTablev2Component implements OnInit {
     return received;
   }
 
-  getFee(tx: LightWalletTransaction): string {
+  getAmount(tx: LightWalletTransaction): string {
     const spent = tx
       .inputs
       .map(input => input.value)
