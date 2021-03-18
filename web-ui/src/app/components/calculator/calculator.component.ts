@@ -22,6 +22,8 @@ export class CalculatorComponent implements OnInit {
 
   masternodeCount = 0;
   xsnStaking = 0;
+  mnstaking = 0;
+  stakingcoin = 0;
 
   interval: any;
 
@@ -87,7 +89,9 @@ export class CalculatorComponent implements OnInit {
     if (this.holdAmount > 99999999) {
       this.holdAmount = 99999999;
     }
-    if (this.rewardsSummary.stakingROI > this.rewardsSummary.masternodesROI) {
+    this.stakingcoin = this.rewardsSummary.stakingROI * this.holdAmount;
+    this.mnstaking = Math.floor(this.holdAmount / this.requiredForMasternode) * this.requiredForMasternode * this.rewardsSummary.masternodesROI + (this.holdAmount % this.requiredForMasternode) * this.rewardsSummary.stakingROI;
+    if (this.stakingcoin > this.mnstaking) {
       this.masternodeCount = 0;
       this.xsnStaking = this.holdAmount || 0;
     } else {

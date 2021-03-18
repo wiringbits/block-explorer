@@ -56,7 +56,6 @@ export class AddressDetailsComponent implements OnInit {
       }
     });
     this.reload();
-    this.updateTransactions();
   }
 
   ngOnChanges(changes: any) {
@@ -117,6 +116,7 @@ export class AddressDetailsComponent implements OnInit {
       response => this.onTposContractsReceived(response),
       response => this.onError(response)
     );
+    this.updateTransactions();
   }
 
   private onAddressRetrieved(response: Balance) {
