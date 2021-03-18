@@ -58,13 +58,6 @@ export class AddressDetailsComponent implements OnInit {
     this.reload();
   }
 
-  ngOnChanges(changes: any) {
-    if (changes.address.currentValue != changes.address.previousValue) {
-      this.transactions = [];
-      this.updateTransactions();
-    }
-  }
-
   ngOnDestroy() {
     if (this.subscription$ != null) {
       this.subscription$.unsubscribe();
@@ -107,6 +100,7 @@ export class AddressDetailsComponent implements OnInit {
   }
 
   reload() {
+    this.transactions = [];
     this.addressString = this.route.snapshot.paramMap.get('id');
     this.addressesService.get(this.addressString).subscribe(
       response => this.onAddressRetrieved(response),
