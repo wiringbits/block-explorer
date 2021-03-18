@@ -3,7 +3,7 @@
     <table class="table table-borderless table-striped">
       <thead>
         <tr class="row">
-          <th class="col-xs-1">#</th>
+          <th class="col-xs-1 pr-0">#</th>
           <th class="col-xs-2">{{'label.ip' | translate | uppercase}}</th>
           <th class="col-xs-2">{{'label.protocol' | translate | uppercase}}</th>
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
@@ -17,7 +17,7 @@
 
       <tbody>
         <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'masternodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
-          <td class="text-primary">{{(currentPage - 1) * pageSize + index + 1}}</td>
+          <td class="text-primary pr-0">{{(currentPage - 1) * pageSize + index + 1}}</td>
           <td class="text-primary pr-0">{{item.ip}}</td>
           <td class="text-primary">{{item.protocol}}</td>
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
