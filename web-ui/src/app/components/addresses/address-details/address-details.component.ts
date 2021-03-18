@@ -58,6 +58,13 @@ export class AddressDetailsComponent implements OnInit {
     this.reload();
   }
 
+  ngOnChanges(changes: any) {
+    if (changes.address.currentValue != changes.address.previousValue) {
+      this.transactions = [];
+      this.updateTransactions();
+    }
+  }
+
   ngOnDestroy() {
     if (this.subscription$ != null) {
       this.subscription$.unsubscribe();
