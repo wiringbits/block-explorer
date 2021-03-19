@@ -107,6 +107,7 @@ export class AddressDetailsComponent implements OnInit {
   }
 
   reload() {
+    this.selectedTpos = 0;
     this.transactions = [];
     this.addressString = this.route.snapshot.paramMap.get('id');
     this.addressesService.get(this.addressString).subscribe(

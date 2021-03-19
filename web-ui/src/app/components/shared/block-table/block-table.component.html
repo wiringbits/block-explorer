@@ -19,10 +19,10 @@
             <th class="col-xs-2 pl-0">{{'label.blocktime' | translate | uppercase}}</th>
           </tr>
         </thead>
-
+        <!-- [ngClass]="{ 'block-table': isBlockRecent(item) }" -->
         <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getBlocks(true)"
           [scrollWindow]="true">
-          <tr *ngFor="let item of blocks" [ngClass]="{ 'block-table': isBlockRecent(item) }">
+          <tr *ngFor="let item of blocks" >
             <td class="pr-0">
               <a class="text-highlight" routerLink="/blocks/{{item.hash}}">{{item.height}}</a>
             </td>
