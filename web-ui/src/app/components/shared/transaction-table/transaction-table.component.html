@@ -15,10 +15,10 @@
             <th class="col-2">{{'label.txHash' | translate | uppercase}}</th>
             <th class="col-2" *ngIf="!hideBlockHash">{{'label.type' | translate | uppercase}}</th>
             <th class="col-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th>
-            <th class="col-2 right-align">{{'label.amount' | translate | uppercase}}</th>
+            <th class="col-2 right-align pl-0 pr-1">{{'label.amount' | translate | uppercase}}</th>
             <th class="col-2 right-align" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
             <th class="col-1 right-align" *ngIf="!hideBlockHash">{{'label.height' | translate | uppercase}}</th>
-            <th class="col-2 right-align">{{'label.time' | translate | uppercase}}</th>
+            <th class="col-2 right-align pl-0">{{'label.time' | translate | uppercase}}</th>
           </tr>
         </thead>
 
@@ -35,13 +35,13 @@
             <td class="text-primary" *ngIf="!hideBlockHash">
               <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
             </td>
-            <td class="text-primary right-align">{{getAmount(item) | explorerCurrency}}</td>
+            <td class="text-primary right-align pl-0 pr-1" style="min-width: 150px;">{{getAmount(item) | explorerCurrency}}</td>
             <td class="text-primary right-align" *ngIf="!hideBlockHash">{{getFee(item) | explorerCurrency}}</td>
             <td class="right-align" *ngIf="!hideBlockHash">
               <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
             </td>
-            <td class="text-primary right-align">
-              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
+            <td class="text-primary right-align pl-0" style="min-width: 240px;">
+              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}
               ({{amAgo(item.time)}})
             </td>
           </tr>

@@ -11,11 +11,11 @@
       <table class="table table-borderless table-striped">
         <thead>
           <tr class="row">
-            <th class="col-xs-1 pr-0">{{'label.height' | translate | uppercase}}</th>
+            <th class="col-xs-1 pr-0" style="min-width: 85px;">{{'label.height' | translate | uppercase}}</th>
             <th class="col-xs-3" *ngIf="!hideBlockHash">{{'label.blockhash' | translate | uppercase}}</th>
-            <th class="col-xs-2">{{'label.extractedBy' | translate | uppercase}}</th>
-            <th class="col-xs-2">{{'label.difficulty' | translate | uppercase}}</th>
-            <th class="col-xs-2">{{'label.transactions' | translate | uppercase}}</th>
+            <th class="col-xs-2 pr-0">{{'label.extractedBy' | translate | uppercase}}</th>
+            <th class="col-xs-1 pr-1 pl-1" style="min-width: 100px;">{{'label.difficulty' | translate | uppercase}}</th>
+            <th class="col-xs-1 pl-0 pr-0" style="min-width: 100px;">{{'label.transactions' | translate | uppercase}}</th>
             <th class="col-xs-2 pl-0">{{'label.blocktime' | translate | uppercase}}</th>
           </tr>
         </thead>
@@ -29,11 +29,11 @@
             <td *ngIf="!hideBlockHash">
               <a class="text-highlight" routerLink="/blocks/{{item.hash}}">{{truncate(item.hash, 12, 8) | uppercase}}</a>
             </td>
-            <td class="text-primary">{{extractedBy(item)}}</td>
-            <td class="text-primary">{{item.difficulty | number:'1.2-2'}}</td>
-            <td class="text-primary">{{item.transactions.length > 0 ? item.transactions.length : item.transactions}}</td>
-            <td class="text-primary pl-0">
-              {{item.medianTime * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
+            <td class="text-primary pr-0">{{extractedBy(item)}}</td>
+            <td class="text-primary pr-1 pl-1">{{item.difficulty | number:'1.2-2'}}</td>
+            <td class="text-primary pl-0 pr-0">{{item.transactions.length > 0 ? item.transactions.length : item.transactions}}</td>
+            <td class="text-primary pl-0" style="min-width: 220px;">
+              {{item.medianTime * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} 
               ({{amAgo(item.medianTime)}})
             </td>
           </tr>
