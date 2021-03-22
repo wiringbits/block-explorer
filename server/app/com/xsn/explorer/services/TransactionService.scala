@@ -89,7 +89,8 @@ class TransactionService @Inject() (
   def get(
       limit: Limit,
       lastSeenTxidString: Option[String],
-      orderingConditionString: String
+      orderingConditionString: String,
+      includeZeroTransactions: Boolean
   ): FutureApplicationResult[WrappedResult[List[TransactionInfo]]] = {
     val result = for {
       _ <- paginatedQueryValidator
@@ -105,7 +106,7 @@ class TransactionService @Inject() (
         .toFutureOr
 
       r <- transactionFutureDataHandler
-        .get(limit, lastSeenTxid, orderingCondition)
+        .get(limit, lastSeenTxid, orderingCondition, includeZeroTransactions)
         .toFutureOr
     } yield WrappedResult(r)
 

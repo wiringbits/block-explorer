@@ -20,13 +20,14 @@ class TransactionPostgresDAO @Inject() (
     addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO
 ) {
 
-  /** NOTE: Ensure the connection has an open transaction.
-    */
+  /**
+   * NOTE: Ensure the connection has an open transaction.
+   */
   def upsert(index: Int, transaction: Transaction.HasIO)(implicit
       conn: Connection
   ): Option[Transaction.HasIO] = {
     for {
-      partialTx <- upsertTransaction(index, transaction.transaction)
+      partialTx <- upsertTransaction(index, transaction)
       _ <- transactionOutputDAO.batchInsertOutputs(transaction.outputs)
       _ <- transactionInputDAO.batchInsertInputs(
         transaction.inputs.map(transaction.id -> _)
@@ -49,8 +50,7 @@ class TransactionPostgresDAO @Inject() (
       conn: Connection
   ): Option[List[Transaction]] = {
     for {
-      r <- batchInsert(transactions.map(_.transaction))
-
+      r <- batchInsert(transactions)
       outputs = transactions.flatMap(_.outputs)
       _ <- transactionOutputDAO.batchInsertOutputs(outputs)
 
@@ -109,28 +109,30 @@ class TransactionPostgresDAO @Inject() (
   }
 
   private def batchInsert(
-      transactions: List[Transaction]
+      transactions: List[Transaction.HasIO]
   )(implicit conn: Connection): Option[List[Transaction]] = {
     transactions match {
-      case Nil => Some(transactions)
+      case Nil => Some(transactions.map(_.transaction))
       case _ =>
-        val params = transactions.zipWithIndex.map {
-          case (transaction, index) =>
-            List(
-              'txid -> transaction.id.toBytesBE.toArray: NamedParameter,
-              'blockhash -> transaction.blockhash.toBytesBE.toArray: NamedParameter,
-              'time -> transaction.time: NamedParameter,
-              'size -> transaction.size.int: NamedParameter,
-              'index -> index: NamedParameter
-            )
+        val params = transactions.zipWithIndex.map { case (withIO, index) =>
+          val transaction = withIO.transaction
+          List(
+            'txid -> transaction.id.toBytesBE.toArray: NamedParameter,
+            'blockhash -> transaction.blockhash.toBytesBE.toArray: NamedParameter,
+            'time -> transaction.time: NamedParameter,
+            'size -> transaction.size.int: NamedParameter,
+            'index -> index: NamedParameter,
+            'sent -> withIO.sent: NamedParameter,
+            'received -> withIO.received: NamedParameter
+          )
         }
 
         val batch = BatchSql(
           """
             |INSERT INTO transactions
-            |  (txid, blockhash, time, size, index)
+            |  (txid, blockhash, time, size, index, sent, received)
             |VALUES
-            |  ({txid}, {blockhash}, {time}, {size}, {index})
+            |  ({txid}, {blockhash}, {time}, {size}, {index}, {sent}, {received})
           """.stripMargin,
           params.head,
           params.tail: _*
@@ -138,15 +140,16 @@ class TransactionPostgresDAO @Inject() (
 
         val success = batch.execute().forall(_ == 1)
         if (success) {
-          Some(transactions)
+          Some(transactions.map(_.transaction))
         } else {
           None
         }
     }
   }
 
-  /** NOTE: Ensure the connection has an open transaction.
-    */
+  /**
+   * NOTE: Ensure the connection has an open transaction.
+   */
   def deleteBy(
       blockhash: Blockhash
   )(implicit conn: Connection): List[Transaction.HasIO] = {
@@ -196,8 +199,9 @@ class TransactionPostgresDAO @Inject() (
       } // this should not happen
   }
 
-  /** Get the transactions by the given address (sorted by time).
-    */
+  /**
+   * Get the transactions by the given address (sorted by time).
+   */
   def getBy(
       address: Address,
       limit: Limit,
@@ -259,11 +263,12 @@ class TransactionPostgresDAO @Inject() (
 
   }
 
-  /** Get the transactions by the given address (sorted by time).
-    *
-    * - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are retrieved.
-    * - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are retrieved.
-    */
+  /**
+   * Get the transactions by the given address (sorted by time).
+   *
+   * - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are retrieved.
+   * - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are retrieved.
+   */
   def getBy(
       address: Address,
       lastSeenTxid: TransactionId,
@@ -276,7 +281,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     val transactions = SQL(
@@ -321,7 +326,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     SQL(
@@ -417,7 +422,7 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransactionWithValues.*)
   }
 
-  def get(limit: Limit, orderingCondition: OrderingCondition)(implicit
+  def get(limit: Limit, orderingCondition: OrderingCondition, includeZeroTransactions: Boolean)(implicit
       conn: Connection
   ): List[TransactionInfo] = {
 
@@ -426,14 +431,15 @@ class TransactionPostgresDAO @Inject() (
     SQL(
       s"""
         |WITH TXS AS (
-        |   SELECT txid, blockhash, time, size
-        |   FROM transactions
+        |   SELECT txid, blockhash, time, size, sent, received
+        |   FROM transactions t
+        |   WHERE $includeZeroTransactions 
+        |     OR sent > 0 
+        |     OR received > 0
         |   ORDER BY time $order, txid
         |   LIMIT {limit}
         |)
-        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height, t.sent, t.received
         |FROM TXS t JOIN blocks blk USING (blockhash)
       """.stripMargin
     ).on(
@@ -444,19 +450,19 @@ class TransactionPostgresDAO @Inject() (
   def get(
       lastSeenTxid: TransactionId,
       limit: Limit,
-      orderingCondition: OrderingCondition
+      orderingCondition: OrderingCondition,
+      includeZeroTransactions: Boolean
   )(implicit
       conn: Connection
   ): List[TransactionInfo] = {
-
     val order = toSQL(orderingCondition)
     val timeComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
     val indexComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => ">"
-      case OrderingCondition.AscendingOrder  => "<"
+      case OrderingCondition.AscendingOrder => "<"
     }
 
     SQL(
@@ -467,16 +473,20 @@ class TransactionPostgresDAO @Inject() (
         |  WHERE txid = {lastSeenTxid}
         |),
         |TXS AS (
-        |  SELECT txid, blockhash, time, size, index
-        |  FROM CTE CROSS JOIN transactions
-        |  WHERE time $timeComparator lastSeenTime
-        |  OR (time = lastSeenTime AND index $indexComparator lastSeenIndex)
+        |  SELECT txid, blockhash, time, size, sent, received
+        |  FROM CTE CROSS JOIN transactions t
+        |  WHERE (
+        |    time $timeComparator lastSeenTime
+        |      OR (time = lastSeenTime AND index $indexComparator lastSeenIndex)
+        |    ) AND (
+        |      $includeZeroTransactions 
+        |        OR sent > 0 
+        |        OR received > 0
+        |    )
         |  ORDER BY time $order, txid
         |  LIMIT {limit}
         |)
-        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid) AS sent,
-        |       (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid) AS received
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height, t.sent, t.received
         |FROM TXS t JOIN blocks blk USING (blockhash)
       """.stripMargin
     ).on(
@@ -546,20 +556,22 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  def upsertTransaction(index: Int, transaction: Transaction)(implicit
+  def upsertTransaction(index: Int, transaction: Transaction.HasIO)(implicit
       conn: Connection
   ): Option[Transaction] = {
     SQL(
       """
         |INSERT INTO transactions
-        |  (txid, blockhash, time, size, index)
+        |  (txid, blockhash, time, size, index, sent, received)
         |VALUES
-        |  ({txid}, {blockhash}, {time}, {size}, {index})
+        |  ({txid}, {blockhash}, {time}, {size}, {index}, {sent}, {received})
         |ON CONFLICT (txid) DO UPDATE
         |  SET blockhash = EXCLUDED.blockhash,
         |      time = EXCLUDED.time,
         |      size = EXCLUDED.size,
-        |      index = EXCLUDED.index
+        |      index = EXCLUDED.index,
+        |      sent = EXCLUDED.sent,
+        |      received = EXCLUDED.received
         |RETURNING txid, blockhash, time, size
       """.stripMargin
     ).on(
@@ -567,12 +579,14 @@ class TransactionPostgresDAO @Inject() (
       'blockhash -> transaction.blockhash.toBytesBE.toArray,
       'time -> transaction.time,
       'size -> transaction.size.int,
-      'index -> index
+      'index -> index,
+      'sent -> transaction.sent,
+      'received -> transaction.received
     ).as(parseTransaction.singleOpt)
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
-    case OrderingCondition.AscendingOrder  => "ASC"
+    case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
   }
 }

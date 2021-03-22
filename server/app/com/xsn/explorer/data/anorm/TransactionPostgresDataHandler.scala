@@ -4,10 +4,7 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.TransactionBlockingDataHandler
-import com.xsn.explorer.data.anorm.dao.{
-  TransactionOutputPostgresDAO,
-  TransactionPostgresDAO
-}
+import com.xsn.explorer.data.anorm.dao.{TransactionOutputPostgresDAO, TransactionPostgresDAO}
 import com.xsn.explorer.errors.TransactionError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
@@ -28,17 +25,16 @@ class TransactionPostgresDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): ApplicationResult[List[Transaction.HasIO]] = withConnection {
-    implicit conn =>
-      val transactions = lastSeenTxid
-        .map {
-          transactionPostgresDAO.getBy(address, _, limit, orderingCondition)
-        }
-        .getOrElse {
-          transactionPostgresDAO.getBy(address, limit, orderingCondition)
-        }
+  ): ApplicationResult[List[Transaction.HasIO]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map {
+        transactionPostgresDAO.getBy(address, _, limit, orderingCondition)
+      }
+      .getOrElse {
+        transactionPostgresDAO.getBy(address, limit, orderingCondition)
+      }
 
-      Good(transactions)
+    Good(transactions)
   }
 
   def getByAddress(
@@ -46,30 +42,28 @@ class TransactionPostgresDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): ApplicationResult[List[TransactionInfo]] = withConnection {
-    implicit conn =>
-      val transactions = lastSeenTxid
-        .map {
-          transactionPostgresDAO.getByAddress(
-            address,
-            _,
-            limit,
-            orderingCondition
-          )
-        }
-        .getOrElse {
-          transactionPostgresDAO.getByAddress(address, limit, orderingCondition)
-        }
+  ): ApplicationResult[List[TransactionInfo]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map {
+        transactionPostgresDAO.getByAddress(
+          address,
+          _,
+          limit,
+          orderingCondition
+        )
+      }
+      .getOrElse {
+        transactionPostgresDAO.getByAddress(address, limit, orderingCondition)
+      }
 
-      Good(transactions)
+    Good(transactions)
   }
 
   override def getUnspentOutputs(
       address: Address
-  ): ApplicationResult[List[Transaction.Output]] = withConnection {
-    implicit conn =>
-      val result = transactionOutputDAO.getUnspentOutputs(address)
-      Good(result)
+  ): ApplicationResult[List[Transaction.Output]] = withConnection { implicit conn =>
+    val result = transactionOutputDAO.getUnspentOutputs(address)
+    Good(result)
   }
 
   override def getOutput(
@@ -83,43 +77,41 @@ class TransactionPostgresDataHandler @Inject() (
   override def get(
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition
-  ): ApplicationResult[List[TransactionInfo]] = withConnection {
-    implicit conn =>
-      val transactions = lastSeenTxid
-        .map { transactionPostgresDAO.get(_, limit, orderingCondition) }
-        .getOrElse { transactionPostgresDAO.get(limit, orderingCondition) }
+      orderingCondition: OrderingCondition,
+      includeZeroTransactions: Boolean
+  ): ApplicationResult[List[TransactionInfo]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map { transactionPostgresDAO.get(_, limit, orderingCondition, includeZeroTransactions) }
+      .getOrElse { transactionPostgresDAO.get(limit, orderingCondition, includeZeroTransactions) }
 
-      Good(transactions)
+    Good(transactions)
   }
 
   override def getByBlockhash(
       blockhash: Blockhash,
       limit: Limit,
       lastSeenTxid: Option[TransactionId]
-  ): ApplicationResult[List[TransactionWithValues]] = withConnection {
-    implicit conn =>
-      val transactions = lastSeenTxid
-        .map { transactionPostgresDAO.getByBlockhash(blockhash, _, limit) }
-        .getOrElse { transactionPostgresDAO.getByBlockhash(blockhash, limit) }
+  ): ApplicationResult[List[TransactionWithValues]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map { transactionPostgresDAO.getByBlockhash(blockhash, _, limit) }
+      .getOrElse { transactionPostgresDAO.getByBlockhash(blockhash, limit) }
 
-      Good(transactions)
+    Good(transactions)
   }
 
   override def getTransactionsWithIOBy(
       blockhash: Blockhash,
       limit: Limit,
       lastSeenTxid: Option[TransactionId]
-  ): ApplicationResult[List[Transaction.HasIO]] = withConnection {
-    implicit conn =>
-      val transactions = lastSeenTxid
-        .map {
-          transactionPostgresDAO.getTransactionsWithIOBy(blockhash, _, limit)
-        }
-        .getOrElse {
-          transactionPostgresDAO.getTransactionsWithIOBy(blockhash, limit)
-        }
+  ): ApplicationResult[List[Transaction.HasIO]] = withConnection { implicit conn =>
+    val transactions = lastSeenTxid
+      .map {
+        transactionPostgresDAO.getTransactionsWithIOBy(blockhash, _, limit)
+      }
+      .getOrElse {
+        transactionPostgresDAO.getTransactionsWithIOBy(blockhash, limit)
+      }
 
-      Good(transactions)
+    Good(transactions)
   }
 }

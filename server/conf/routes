@@ -6,7 +6,7 @@
 GET   /health                controllers.HealthController.check()
 # GET   /maintenance           controllers.MaintenanceController.run(query: String ?= "")
 
-GET   /transactions              controllers.TransactionsController.getTransactions(limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc")
+GET   /transactions              controllers.TransactionsController.getTransactions(limit: Int ?= 10, lastSeenTxid: Option[String], order: String ?= "desc", includeZeroTransactions: Boolean ?= true)
 GET   /transactions/:txid        controllers.TransactionsController.getTransaction(txid: String)
 GET   /transactions/:txid/raw    controllers.TransactionsController.getRawTransaction(txid: String)
 POST  /transactions              controllers.TransactionsController.sendRawTransaction()

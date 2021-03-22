@@ -33,6 +33,81 @@ class TransactionSpec extends WordSpec {
     }
   }
 
+  "sent" should {
+    "sum outputs values" in {
+      val tx = Transaction(
+        id = DataGenerator.randomTransactionId,
+        blockhash = DataGenerator.randomBlockhash,
+        size = Size(20),
+        time = 100L
+      )
+
+      val outputs = DataGenerator.randomOutputs(2)
+      val withIO = Transaction.HasIO(
+        tx,
+        inputs = List.empty,
+        outputs = outputs.map(_.copy(txid = tx.id))
+      )
+
+      withIO.sent mustBe outputs.map(_.value).sum
+    }
+
+    "return zero when there are no outputs" in {
+      val tx = Transaction(
+        id = DataGenerator.randomTransactionId,
+        blockhash = DataGenerator.randomBlockhash,
+        size = Size(20),
+        time = 100L
+      )
+
+      val withIO = Transaction.HasIO(
+        tx,
+        inputs = List.empty,
+        outputs = List.empty
+      )
+
+      withIO.sent mustBe BigDecimal(0)
+    }
+  }
+
+  "received" should {
+    "sum the inputs values" in {
+      val tx = Transaction(
+        id = DataGenerator.randomTransactionId,
+        blockhash = DataGenerator.randomBlockhash,
+        size = Size(20),
+        time = 100L
+      )
+
+      val outputs = DataGenerator.randomOutputs(2)
+      val inputs = DataGenerator.randomInputs(outputs)
+      val withIO = Transaction.HasIO(
+        tx,
+        inputs = inputs,
+        outputs = List.empty
+      )
+
+      withIO.received mustBe inputs.map(_.value).sum
+    }
+
+    "return zero when there are no inputs" in {
+      val tx = Transaction(
+        id = DataGenerator.randomTransactionId,
+        blockhash = DataGenerator.randomBlockhash,
+        size = Size(20),
+        time = 100L
+      )
+
+      val withIO = Transaction.HasIO(
+        tx,
+        inputs = List.empty,
+        outputs = List.empty
+      )
+
+      withIO.received mustBe BigDecimal(0)
+    }
+  }
+
   "fromRPC" should {
     "discard outputs without address" in {
       val address = DataGenerator.randomAddress

@@ -32,7 +32,8 @@ trait TransactionDataHandler[F[_]] {
   def get(
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition
+      orderingCondition: OrderingCondition,
+      includeZeroTransactions: Boolean
   ): F[List[TransactionInfo]]
 
   def getByBlockhash(
@@ -48,5 +49,4 @@ trait TransactionDataHandler[F[_]] {
   ): F[List[Transaction.HasIO]]
 }
 
-trait TransactionBlockingDataHandler
-    extends TransactionDataHandler[ApplicationResult]
+trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]
