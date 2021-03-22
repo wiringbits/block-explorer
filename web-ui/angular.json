@@ -21,10 +21,12 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "node_modules/bootstrap-slider/dist/css/bootstrap-slider.min.css"
             ],
             "scripts": ["node_modules/jquery/dist/jquery.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.js"]
+              "node_modules/bootstrap/dist/js/bootstrap.js",
+              "node_modules/bootstrap-slider/dist/bootstrap-slider.min.js"]
           },
           "configurations": {
             "production": {

@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { NgxBootstrapSliderModule } from 'ngx-bootstrap-slider';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -55,7 +56,8 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     TabsModule.forRoot(),
     AlertModule.forRoot(),
     ReactiveFormsModule,
-    LottieAnimationViewModule.forRoot()
+    LottieAnimationViewModule.forRoot(),
+    NgxBootstrapSliderModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

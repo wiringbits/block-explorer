@@ -27,6 +27,9 @@ export class CalculatorComponent implements OnInit {
 
   interval: any;
 
+  // hydra node
+  xsnPriceLog = 0;
+
   constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
@@ -98,5 +101,10 @@ export class CalculatorComponent implements OnInit {
       this.masternodeCount = Math.floor(this.holdAmount / this.requiredForMasternode);
       this.xsnStaking = this.holdAmount % this.requiredForMasternode || 0;
     }
+  }
+
+  xsnPriceChange() {
+    // xsnPriceChange handler
+    console.log(this.xsnPriceLog);
   }
 }

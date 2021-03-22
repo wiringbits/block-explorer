@@ -90,6 +90,14 @@
 
     <div class="col-sm-12 col-md-8 col-md-pull-4 calculator-panel">
         <tabset>
+            <tab heading="HYDRA NODE">
+                <div>
+                    <div class="col-xs-12 col-md-6">
+                        <h5>{{'label.blockRewards' | translate}}</h5>
+                        <mv-slider [(value)]="xsnPriceLog" [min]="1" [max]="100" [enabled]="enabled" (change)="xsnPriceChange()"></mv-slider>
+                    </div>
+                </div>
+            </tab>
             <tab heading="BLOCK REWARDS">
                 <div>
                     <div class="col-xs-12 fs-14 calculator-label">
@@ -147,7 +155,7 @@
                     </div>
                 </div>
             </tab>
-            <tab heading="HYDRA NODE" [disabled]="true">
+            <tab heading="HYDRA NODE">
             </tab>
         </tabset>
     </div>
