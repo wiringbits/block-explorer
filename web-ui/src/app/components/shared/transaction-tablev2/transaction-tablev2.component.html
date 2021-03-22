@@ -37,7 +37,7 @@
               <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
             </td> -->
             <td>
-              <a class="text-highlight" routerLink="/transactions/{{item.id}}">{{truncate(item.blockhash, 8, 5) | uppercase}}</a>
+              <a class="text-highlight" routerLink="/transactions/{{item.blockhash}}">{{truncate(item.blockhash, 8, 5) | uppercase}}</a>
             </td>
             <td class="text-primary right-align">{{getAmount(item) | explorerCurrency}}</td>
             <!-- <td class="text-primary right-align" *ngIf="!hideBlockHash">{{getFee(item) | explorerCurrency}}</td> -->
@@ -45,7 +45,7 @@
               <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
             </td> -->
             <td class="text-primary right-align">
-              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}} <br />
+              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}
               ({{amAgo(item.time)}})
             </td>
           </tr>
