@@ -4,12 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{
-  Count,
-  Limit,
-  Offset,
-  PaginatedQuery
-}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
@@ -246,7 +241,7 @@ class BlockPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     val headers = SQL(
@@ -327,7 +322,8 @@ class BlockPostgresDAO @Inject() (
       s"""
         |SELECT blk.*, COALESCE(tx.count, 0) transactions 
         |FROM (
-        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty, tpos_contract,
+        |          median_time
         |   FROM blocks
         |   ORDER BY height $order
         |   LIMIT {limit}
@@ -354,7 +350,7 @@ class BlockPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     SQL(
@@ -366,7 +362,8 @@ class BlockPostgresDAO @Inject() (
         |     FROM blocks
         |     WHERE blockhash = {lastSeenHash}
         |   )
-        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty, tpos_contract,
+        |          median_time
         |   FROM CTE CROSS JOIN blocks b
         |   WHERE b.height $comparator lastSeenHeight
         |   ORDER BY height $order
@@ -393,7 +390,8 @@ class BlockPostgresDAO @Inject() (
       """
         |SELECT blk.*, COALESCE(tx.count, 0) transactions 
         |FROM (
-        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty 
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty, tpos_contract,
+        |          median_time
         |   FROM blocks 
         |   WHERE blockhash = {blockhash}
         |) blk 
@@ -414,7 +412,8 @@ class BlockPostgresDAO @Inject() (
       """
         |SELECT blk.*, COALESCE(tx.count, 0) transactions 
         |FROM (
-        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty 
+        |   SELECT blockhash, previous_blockhash, next_blockhash, merkle_root, height, time, difficulty, tpos_contract,
+        |          median_time
         |   FROM blocks 
         |   WHERE height = {height}
         |) blk 
@@ -441,7 +440,7 @@ class BlockPostgresDAO @Inject() (
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
-    case OrderingCondition.AscendingOrder  => "ASC"
+    case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
   }
 }
