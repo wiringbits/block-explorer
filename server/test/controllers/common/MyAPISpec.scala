@@ -4,9 +4,10 @@ import com.alexitc.playsonify.test.PlayAPISpec
 import com.xsn.explorer.modules.{
   CurrencySynchronizerModule,
   DatabaseMigrationsModule,
-  PollerSynchronizerModule,
   MasternodeSynchronizerModule,
-  MerchantnodeSynchronizerModule
+  MerchantnodeSynchronizerModule,
+  NodeStatsSynchronizerModule,
+  PollerSynchronizerModule
 }
 import org.slf4j.LoggerFactory
 import play.api.db.{DBApi, Database, Databases}
@@ -32,21 +33,24 @@ trait MyAPISpec extends PlayAPISpec {
     )
   }
 
-  /** A dummy [[Database]] and [[DBApi]] just to allow a play application
-    * to start without connecting to a real database from application.conf.
-    */
+  /**
+   * A dummy [[Database]] and [[DBApi]] just to allow a play application
+   * to start without connecting to a real database from application.conf.
+   */
   private val dummyDB = Databases.inMemory()
+
   private val dummyDBApi = new DBApi {
     override def databases(): Seq[Database] = List(dummyDB)
     override def database(name: String): Database = dummyDB
     override def shutdown(): Unit = dummyDB.shutdown()
   }
 
-  /** Loads configuration disabling evolutions on default database.
-    *
-    * This allows to not write a custom application.conf for testing
-    * and ensure play evolutions are disabled.
-    */
+  /**
+   * Loads configuration disabling evolutions on default database.
+   *
+   * This allows to not write a custom application.conf for testing
+   * and ensure play evolutions are disabled.
+   */
   private def loadConfigWithoutEvolutions(env: Environment): Configuration = {
     val map = Map("play.evolutions.db.default.enabled" -> false)
 
@@ -61,6 +65,7 @@ trait MyAPISpec extends PlayAPISpec {
       .disable(classOf[CurrencySynchronizerModule])
       .disable(classOf[MasternodeSynchronizerModule])
       .disable(classOf[MerchantnodeSynchronizerModule])
+      .disable(classOf[NodeStatsSynchronizerModule])
       .overrides(bind[Database].to(dummyDB))
       .overrides(bind[DBApi].to(dummyDBApi))
 }

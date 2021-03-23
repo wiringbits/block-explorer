@@ -3,10 +3,7 @@ package com.xsn.explorer.data.async
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.Limit
-import com.xsn.explorer.data.{
-  TransactionBlockingDataHandler,
-  TransactionDataHandler
-}
+import com.xsn.explorer.data.{TransactionBlockingDataHandler, TransactionDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
@@ -80,11 +77,12 @@ class TransactionFutureDataHandler @Inject() (
   override def get(
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition
+      orderingCondition: OrderingCondition,
+      includeZeroValueTransactions: Boolean
   ): FutureApplicationResult[List[TransactionInfo]] =
     retryableFutureDataHandler.retrying {
       Future {
-        blockingDataHandler.get(limit, lastSeenTxid, orderingCondition)
+        blockingDataHandler.get(limit, lastSeenTxid, orderingCondition, includeZeroValueTransactions)
       }
     }
 

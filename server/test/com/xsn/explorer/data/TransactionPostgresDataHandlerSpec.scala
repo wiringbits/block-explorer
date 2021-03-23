@@ -18,14 +18,11 @@ import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.EitherValues._
 
-class TransactionPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   import DataGenerator._
 
-  private val emptyFilterFactory = () =>
-    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
@@ -166,13 +163,12 @@ class TransactionPostgresDataHandlerSpec
     )
 
     val transactions =
-      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
 
     val block = randomBlock(blockhash = blockhash)
@@ -285,13 +281,12 @@ class TransactionPostgresDataHandlerSpec
     )
 
     val transactions =
-      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
 
     val block = randomBlock(blockhash = blockhash)
@@ -400,15 +395,24 @@ class TransactionPostgresDataHandlerSpec
       )
     )
 
-    val transactions =
-      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+    val emptyTransactions = List.fill(2)(randomTransactionId).zip(List(320L, 325L)).map { case (txid, time) =>
+      Transaction.HasIO(
+        Transaction(txid, blockhash, time, Size(1000)),
+        List.empty,
+        List.empty
+      )
+    }
+
+    val nonEmptyTransactions =
+      List.fill(4)(randomTransactionId).zip(List(322L, 321L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
+
+    val transactions = emptyTransactions ::: nonEmptyTransactions
 
     val block = randomBlock(blockhash = blockhash)
       .copy(transactions = transactions.map(_.id))
@@ -426,53 +430,53 @@ class TransactionPostgresDataHandlerSpec
 
     "return the last element without last seen tx" in {
       prepare()
-      val expected = TransactionInfo(
-        dummyTransaction.id,
-        dummyTransaction.blockhash,
-        dummyTransaction.time,
-        dummyTransaction.size,
-        BigDecimal(300),
-        BigDecimal(300),
-        Height(0)
-      )
-      val result =
-        dataHandler.get(Limit(1), None, OrderingCondition.DescendingOrder).get
+      val result = dataHandler.get(Limit(2), None, OrderingCondition.DescendingOrder, true).get
 
-      result.head.id mustEqual expected.id
-      result.head.blockhash mustEqual expected.blockhash
+      result.head.id mustEqual dummyTransaction.id
+      result.head.blockhash mustEqual dummyTransaction.blockhash
+
+      result(1).id mustEqual sorted.head.id
+      result(1).blockhash mustEqual sorted.head.blockhash
+    }
+
+    "ignore empty transactions without last seen tx" in {
+      prepare()
+      val result = dataHandler.get(Limit(2), None, OrderingCondition.DescendingOrder, false).get
+
+      result.head.id mustEqual dummyTransaction.id
+      result.head.blockhash mustEqual dummyTransaction.blockhash
+
+      result(1).id mustEqual sorted(1).id
+      result(1).blockhash mustEqual sorted(1).blockhash
     }
 
     "return the next elements given the last seen tx" in {
       prepare()
 
       val lastSeenTxid = dummyTransaction.id
+      val expected = sorted.head
 
-      val txWithIO = sorted.head
-      val expected = TransactionInfo(
-        txWithIO.id,
-        txWithIO.blockhash,
-        txWithIO.time,
-        txWithIO.size,
-        BigDecimal(0),
-        BigDecimal(0),
-        Height(0)
-      )
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder, true).get
 
-      val result = dataHandler
-        .get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder)
-        .get
+      result.head.id mustEqual expected.id
+      result.head.blockhash mustEqual expected.blockhash
+    }
+
+    "ignore empty transactions given the last seen tx" in {
+      prepare()
+
+      val lastSeenTxid = dummyTransaction.id
+      val expected = sorted(1)
+
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder, false).get
 
       result.head.id mustEqual expected.id
       result.head.blockhash mustEqual expected.blockhash
     }
 
     "return no elements on unknown lastSeenTransaction" in {
-      val lastSeenTxid = createTransactionId(
-        "00041e4fe89466faa734d6207a7ef6115fa1dd33f7156b006ffff6bb85a79eb8"
-      )
-      val result = dataHandler
-        .get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder)
-        .get
+      val lastSeenTxid = randomTransactionId
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder, true).get
 
       result must be(empty)
     }
