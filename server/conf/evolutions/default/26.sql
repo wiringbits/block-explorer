@@ -4,4 +4,4 @@
 ALTER TABLE transactions ADD COLUMN sent AMOUNT_TYPE NULL;
 ALTER TABLE transactions ADD COLUMN received AMOUNT_TYPE NULL;
 
-CREATE INDEX transactions_sent_index ON transactions(sent + received);
+CREATE INDEX transactions_sent_plus_received_index ON transactions((sent + received));
