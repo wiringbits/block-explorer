@@ -21,10 +21,10 @@ class TransactionsController @Inject() (
       limit: Int,
       lastSeenTxid: Option[String],
       orderingCondition: String,
-      includeZeroTransactions: Boolean
+      includeZeroValueTransactions: Boolean
   ) = public { _ =>
     transactionService
-      .get(Limit(limit), lastSeenTxid, orderingCondition, includeZeroTransactions)
+      .get(Limit(limit), lastSeenTxid, orderingCondition, includeZeroValueTransactions)
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))

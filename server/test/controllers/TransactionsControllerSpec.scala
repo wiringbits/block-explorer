@@ -78,7 +78,7 @@ class TransactionsControllerSpec extends MyAPISpec {
         limit: Limit,
         lastSeenTxid: Option[TransactionId],
         orderingCondition: OrderingCondition,
-        ignoreZeroTransactions: Boolean
+        includeZeroValueTransactions: Boolean
     ): ApplicationResult[List[TransactionInfo]] = {
       if (lastSeenTxid == None) {
         Good(transactionList)

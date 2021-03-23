@@ -78,11 +78,11 @@ class TransactionFutureDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition,
-      includeZeroTransactions: Boolean
+      includeZeroValueTransactions: Boolean
   ): FutureApplicationResult[List[TransactionInfo]] =
     retryableFutureDataHandler.retrying {
       Future {
-        blockingDataHandler.get(limit, lastSeenTxid, orderingCondition, includeZeroTransactions)
+        blockingDataHandler.get(limit, lastSeenTxid, orderingCondition, includeZeroValueTransactions)
       }
     }
 

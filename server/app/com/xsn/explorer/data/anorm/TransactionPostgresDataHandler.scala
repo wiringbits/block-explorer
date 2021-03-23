@@ -78,11 +78,11 @@ class TransactionPostgresDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition,
-      includeZeroTransactions: Boolean
+      includeZeroValueTransactions: Boolean
   ): ApplicationResult[List[TransactionInfo]] = withConnection { implicit conn =>
     val transactions = lastSeenTxid
-      .map { transactionPostgresDAO.get(_, limit, orderingCondition, includeZeroTransactions) }
-      .getOrElse { transactionPostgresDAO.get(limit, orderingCondition, includeZeroTransactions) }
+      .map { transactionPostgresDAO.get(_, limit, orderingCondition, includeZeroValueTransactions) }
+      .getOrElse { transactionPostgresDAO.get(limit, orderingCondition, includeZeroValueTransactions) }
 
     Good(transactions)
   }

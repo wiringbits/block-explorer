@@ -33,7 +33,7 @@ trait TransactionDataHandler[F[_]] {
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition,
-      includeZeroTransactions: Boolean
+      includeZeroValueTransactions: Boolean
   ): F[List[TransactionInfo]]
 
   def getByBlockhash(

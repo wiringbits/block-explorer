@@ -422,7 +422,7 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransactionWithValues.*)
   }
 
-  def get(limit: Limit, orderingCondition: OrderingCondition, includeZeroTransactions: Boolean)(implicit
+  def get(limit: Limit, orderingCondition: OrderingCondition, includeZeroValueTransactions: Boolean)(implicit
       conn: Connection
   ): List[TransactionInfo] = {
 
@@ -433,9 +433,8 @@ class TransactionPostgresDAO @Inject() (
         |WITH TXS AS (
         |   SELECT txid, blockhash, time, size, sent, received
         |   FROM transactions t
-        |   WHERE $includeZeroTransactions 
-        |     OR sent > 0 
-        |     OR received > 0
+        |   WHERE $includeZeroValueTransactions 
+        |     OR sent + received > 0
         |   ORDER BY time $order, txid
         |   LIMIT {limit}
         |)
@@ -451,7 +450,7 @@ class TransactionPostgresDAO @Inject() (
       lastSeenTxid: TransactionId,
       limit: Limit,
       orderingCondition: OrderingCondition,
-      includeZeroTransactions: Boolean
+      includeZeroValueTransactions: Boolean
   )(implicit
       conn: Connection
   ): List[TransactionInfo] = {
@@ -479,9 +478,8 @@ class TransactionPostgresDAO @Inject() (
         |    time $timeComparator lastSeenTime
         |      OR (time = lastSeenTime AND index $indexComparator lastSeenIndex)
         |    ) AND (
-        |      $includeZeroTransactions 
-        |        OR sent > 0 
-        |        OR received > 0
+        |      $includeZeroValueTransactions 
+        |        OR sent + received > 0
         |    )
         |  ORDER BY time $order, txid
         |  LIMIT {limit}
