@@ -315,7 +315,21 @@ export class AppComponent implements OnInit {
       'label.days': 'days',
       'label.waitingTimePerReward': 'Waiting time per reward (est.)',
       'label.requiredForMasternode': 'Required for Masternode',
-      'label.rewardPerBlock': 'Reward per block'
+      'label.rewardPerBlock': 'Reward per block',
+
+      'label.xsnPrice': 'XSN Price',
+      'label.totalMasternodes': 'Total Masternodes',
+      'label.yourMasternodes': 'Your Masternodes',
+      'label.orderbookRewards': 'Orderbook Rewards',
+      'label.dailyTradingVolume': 'Daily Trading Volume',
+      'label.mnsHostingOrderbook': 'MNs Hosting Orderbook',
+      'label.enableOrderbookHosting': 'Enable orderbook hosting on your MNs (extra cost):',
+      'label.calculatedBlockRewards': 'Calculated Block Rewards',
+      'label.calculatedOrderbookHostingRewards': 'Calculated Orderbook Hosting Rewards',
+      'label.masternodeHostingCost': 'Masternode Hosting Cost',
+      'label.totalRewardsEST': 'Total rewards (est)',
+      'label.daysUntilFreeMasternodeEarned': 'Days Until Free Masternode Earned',
+      'label.roi': 'ROI'
     };
   }
 }

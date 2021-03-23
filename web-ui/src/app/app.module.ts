@@ -6,12 +6,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { NgxBootstrapSliderModule } from 'ngx-bootstrap-slider';
+// import { NgxBootstrapSliderModule } from 'ngx-bootstrap-slider';
 import { TranslateModule } from '@ngx-translate/core';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgHttpLoaderModule } from 'ng-http-loader';
 import { LottieAnimationViewModule } from 'ng-lottie';
+import { SliderModule } from '@syncfusion/ej2-angular-inputs';
+import { UiSwitchModule } from 'ngx-ui-switch';
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -57,7 +59,8 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     AlertModule.forRoot(),
     ReactiveFormsModule,
     LottieAnimationViewModule.forRoot(),
-    NgxBootstrapSliderModule
+    SliderModule,
+    UiSwitchModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

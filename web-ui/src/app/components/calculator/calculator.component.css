@@ -173,3 +173,123 @@
     font-weight: 300;
     border: none;
 }
+
+.e-control-wrapper.e-slider-container.e-horizontal .e-slider {
+    height: 16px;
+    top: 0;
+}
+
+.e-control-wrapper.e-slider-container .e-slider .e-handle {
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    top: calc(50% - 8px);
+    width: 16px;
+    height: 16px;
+}
+
+.e-control.e-slider .e-slider-track {
+    height: 6px;
+    top: calc(50% - 3px);
+    background: var(--unnamed-color-01d9de) 0% 0% no-repeat padding-box;
+    background: #01D9DE 0% 0% no-repeat padding-box;
+    border-radius: 6px;
+    opacity: 0.13;
+}
+
+.e-control.e-slider .e-range {
+    background: #01D9DE 0% 0% no-repeat padding-box;
+    opacity: 1;
+    height: 6px;
+    top: calc(50% - 3px);
+    border-radius: 6px;
+}
+
+.slider-row {
+    margin-bottom: 42px;
+    padding-top: 18px;
+}
+
+.slider-row h5 {
+    margin-top: 0;
+}
+
+.slider-block {
+    display: flex;
+    height: 16px;
+    margin-bottom: 16px;
+}
+
+.switch-block {
+    display: flex;
+    justify-content: space-between;
+}
+
+::ng-deep .switch-wrapper .switch {
+    height: 16px;
+    min-width: 32px;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+::ng-deep .switch-wrapper .switch small {
+    height: 16px;
+    width: 16px;
+}
+
+::ng-deep .switch-wrapper .switch.checked small {
+    right: 0;
+}
+
+::ng-deep .switch-wrapper .switch small {
+    right: calc(100% - 16px);
+}
+
+.slider-block .slider-label {
+    min-width: 150px;
+    color: #989DCC;
+    font-size: 12px;
+}
+
+.slider-block .slider-wrapper {
+    width: 226px;
+}
+
+.slider-block .slider-value {
+    margin-left: 22px;
+    font-size: 12px;
+    color: white;
+}
+
+.result-pane {
+    background-color: #181b2c;
+    min-height: 526px;
+    /* border: 1px solid #707070; */
+    padding-top: 20px;
+    text-align: center;
+}
+
+.result-pane .result-pane-title {
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.result-pane .price-label {
+    font-size: 18px;
+}
+
+.result-pane .value-block {
+    display: flex;
+    flex-direction: column;
+    padding-top: 13.5px;
+    padding-bottom: 16.5px;
+}
+
+.result-pane .value-block.roi {
+    border-top: 1px solid #0F1223;
+    border-bottom: 1px solid #0F1223;
+}
+
+::ng-deep .switch:focus {
+    outline: none;
+}

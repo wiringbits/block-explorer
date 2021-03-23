@@ -4,6 +4,15 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700;1,900&display=swap");
 
+@import '../node_modules/@syncfusion/ej2-angular-inputs/styles/material.css';
+
+@import '../node_modules/@syncfusion/ej2-base/styles/material.css';
+
+@import '../node_modules/@syncfusion/ej2-buttons/styles/material.css';
+
+@import '../node_modules/@syncfusion/ej2-popups/styles/material.css';
+
+
 html {
   margin: 0px;
   height: 100%;
@@ -245,6 +254,10 @@ td.right-align {
 
 .mr-0 {
   margin-right: 0!important;
+}
+
+.mb-0 {
+  margin-bottom: 0!important;
 }
 
 .mb-16 {
