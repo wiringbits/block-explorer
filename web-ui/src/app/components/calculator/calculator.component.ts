@@ -38,6 +38,13 @@ export class CalculatorComponent implements OnInit {
   dayMonthYear = "month";
   orderbookHostingEnabled = true; // Used to calculate orderbook rewards, included in total rewards calculation
   orderbookMNs = 1500;
+  blockRewards = 0;
+  orderbookRewards = 0;
+  mnHostingCost = 0;
+  mnCollateralValue = 0;
+  totalRewards = 0;
+  roi = null;
+  daysUntilFreeMasternode = null;
 
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
@@ -150,51 +157,13 @@ export class CalculatorComponent implements OnInit {
     this.ownedNodes = Math.round(this.ownedNodesLog < 50 ? this.ownedNodesLog / 2 : (((this.ownedNodesLog - 50) * 1.5) + 25));
   }
 
-  get blockRewards () {
-    return (this.ownedNodes / this.masternodeCountLog) * (1440 * 9) * this.xsnPrice * this.dayMonthYearMultiplier;
-  }
-
-  get blockRewardsString () {
-    return this.toFinString(this.blockRewards);
-  }
-
-  get orderbookRewards () {
-      return Math.max(0.225, (0.45 - (0.000225 * this.tradingVolume))) * (this.tradingVolume * 0.0025 * 1000000) * (this.ownedNodes / this.orderbookMNs) * this.dayMonthYearMultiplier;
-  }
-
-  get orderbookRewardsString() {
-      return this.toFinString(this.orderbookRewards);
-  }
-
-  get mnHostingCost() {
-      return this.ownedNodes * (this.orderbookHostingEnabled ? 2.5 : 0.15) * this.dayMonthYearMultiplier
-  }
-
-  get mnHostingCostString() {
-      return this.toFinString(this.mnHostingCost);
-  }
-
-  get mnCollateralValue () {
-      return this.xsnPrice * this.ownedNodes * 15000
-  }
-
-  get mnCollateralValueString () {
-      return this.toFinString(this.mnCollateralValue)
-  }
-
-  get totalRewards() {
-      return this.blockRewards + (this.orderbookHostingEnabled ? this.orderbookRewards : 0) - this.mnHostingCost
-  }
-
-  get totalRewardsString() {
-      return this.toFinString(this.totalRewards)
-  }
-
-  get roi() {
-      return ((((this.mnCollateralValue + this.totalRewards) / this.mnCollateralValue) - 1) * 100).toFixed(2)
-  }
-
-  get daysUntilFreeMasternode() {
-      return ((15000 * this.xsnPrice) / (this.totalRewards / this.dayMonthYearMultiplier)).toFixed(1) + ' days'
+  calculateHydraResult() {
+    this.blockRewards = (this.ownedNodes / this.masternodeCountLog) * (1440 * 9) * this.xsnPrice * this.dayMonthYearMultiplier;
+    this.orderbookRewards = Math.max(0.225, (0.45 - (0.000225 * this.tradingVolume))) * (this.tradingVolume * 0.0025 * 1000000) * (this.ownedNodes / this.orderbookMNs) * this.dayMonthYearMultiplier;
+    this.mnHostingCost = this.ownedNodes * (this.orderbookHostingEnabled ? 2.5 : 0.15) * this.dayMonthYearMultiplier;
+    this.mnCollateralValue = this.xsnPrice * this.ownedNodes * 15000;
+    this.totalRewards = this.blockRewards + (this.orderbookHostingEnabled ? this.orderbookRewards : 0) - this.mnHostingCost;
+    this.roi = ((((this.mnCollateralValue + this.totalRewards) / this.mnCollateralValue) - 1) * 100).toFixed(2);
+    this.daysUntilFreeMasternode = ((15000 * this.xsnPrice) / (this.totalRewards / this.dayMonthYearMultiplier)).toFixed(1) + ' days';
   }
 }
