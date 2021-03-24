@@ -33,7 +33,7 @@ class TransactionSpec extends WordSpec {
     }
   }
 
-  "sent" should {
+  "received" should {
     "sum outputs values" in {
       val tx = Transaction(
         id = DataGenerator.randomTransactionId,
@@ -49,7 +49,7 @@ class TransactionSpec extends WordSpec {
         outputs = outputs.map(_.copy(txid = tx.id))
       )
 
-      withIO.sent mustBe outputs.map(_.value).sum
+      withIO.received mustBe outputs.map(_.value).sum
     }
 
     "return zero when there are no outputs" in {
@@ -66,11 +66,11 @@ class TransactionSpec extends WordSpec {
         outputs = List.empty
       )
 
-      withIO.sent mustBe BigDecimal(0)
+      withIO.received mustBe BigDecimal(0)
     }
   }
 
-  "received" should {
+  "sent" should {
     "sum the inputs values" in {
       val tx = Transaction(
         id = DataGenerator.randomTransactionId,
@@ -87,7 +87,7 @@ class TransactionSpec extends WordSpec {
         outputs = List.empty
       )
 
-      withIO.received mustBe inputs.map(_.value).sum
+      withIO.sent mustBe inputs.map(_.value).sum
     }
 
     "return zero when there are no inputs" in {
@@ -104,7 +104,7 @@ class TransactionSpec extends WordSpec {
         outputs = List.empty
       )
 
-      withIO.received mustBe BigDecimal(0)
+      withIO.sent mustBe BigDecimal(0)
     }
   }
 
