@@ -2,12 +2,9 @@ package com.xsn.explorer.migrations
 
 import anorm.{SQL, SqlParser}
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
-import com.xsn.explorer.models.TransactionWithValues
-import com.xsn.explorer.models.values.Height
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
