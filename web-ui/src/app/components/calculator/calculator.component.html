@@ -194,7 +194,7 @@
                                 <div class="slider-wrapper">
                                     <ejs-slider [value]='mnHostingCost' [min]='0' [max]='100' [type]='range'></ejs-slider>
                                 </div>
-                                <span class="slider-value">$ {{mnHostingCostString}}</span>
+                                <span class="slider-value">$ {{mnHostingCost}}</span>
                             </div>
                         </div>
                     </div>
@@ -312,74 +312,19 @@
                                     <span class="calculator-label">
                                         {{'label.roi' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ roi * 365 | explorerAmount:2 }} / year</span>
+                                    <span class="price-label">$ {{ (roi * 365) | explorerAmount:2 }} / year</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.daysUntilFreeMasternodeEarned' | translate}}:
                                     </span>
-                                    <span class="price-label">{{ daysUntilFreeMasternode / 365 | explorerAmount:1 }} years</span>
+                                    <span class="price-label">{{ (daysUntilFreeMasternode / 365) | explorerAmount:1 }} years</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </tab>
-            <!-- <tab heading="BLOCK REWARDS">
-                <div>
-                    <div class="col-xs-12 fs-14 calculator-label">
-                        {{'label.xsnAmountHold' | translate}}
-                    </div>
-        
-                    <div class="col-xs-12">
-                        <div class="calculator-hold-amount text-highlight">
-                            <span class="glyphicon glyphicon-tasks"></span>
-                            <input type="number" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" (ngModelChange)="onChangeAmount()" />
-                        </div>
-                    </div>
-        
-                    <div class="col-xs-12 fs-14 calculator-optimal-setup">
-                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span>{{masternodeCount}} {{'label.masternodeAnd' | translate}} {{xsnStaking}} {{'label.xsnStaking' | translate}}
-                    </div>
-        
-                    <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.stakingAllCoins' | translate}}</h4>
-
-                        <p class="sub-label">{{'label.daily' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount / 365).toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 365).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 365).toFixed(4)}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 365).toFixed(8)}} BTC</p>
-
-                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount / 12).toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 12).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 12).toFixed(4)}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 12).toFixed(8)}} BTC</p>
-
-                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount).toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd).toFixed(4)}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc).toFixed(8)}} BTC</p>
-                    </div>
-                    <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.masternodeStakingRemaining' | translate}}</h4>
-
-                        <p class="sub-label">{{'label.daily' | translate}}:</p>
-                        <p>{{(mnstaking / 365).toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 365).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd / 365).toFixed(4)}}</p>
-                        <p>{{(mnstaking * prices.btc / 365).toFixed(8)}} BTC</p>
-
-                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
-                        <p>{{(mnstaking / 12).toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 12).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd / 12).toFixed(4)}}</p>
-                        <p>{{(mnstaking * prices.btc / 12).toFixed(8)}} BTC</p>
-
-                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
-                        <p>{{mnstaking.toFixed(4)}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd).toFixed(4)}}</p>
-                        <p>{{(mnstaking * prices.btc).toFixed(8)}} BTC</p>
-                    </div>
-                </div>
-            </tab> -->
         </tabset>
     </div>
 </div>
