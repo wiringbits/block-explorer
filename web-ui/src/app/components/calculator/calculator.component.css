@@ -220,7 +220,16 @@
 
 .switch-block {
     display: flex;
-    justify-content: space-between;
+}
+
+.switch-block .switch-wrapper {
+    margin-left: 110px;
+}
+
+@media screen and (min-width: 1200px) {
+    .switch-block .switch-wrapper {
+        margin-left: 50px;
+    }
 }
 
 ::ng-deep .switch-wrapper .switch {
@@ -251,7 +260,8 @@
 }
 
 .slider-block .slider-wrapper {
-    width: 226px;
+    max-width: 226px;
+    width: 50%;
 }
 
 .slider-block .slider-value {

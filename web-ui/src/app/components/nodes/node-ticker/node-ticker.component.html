@@ -11,7 +11,7 @@
           </span>
   
           <span *ngIf="nodeStats != null && nodeStats.masternodes != null">
-            {{nodeStats.masternodes}}
+            {{nodeStats.masternodes | explorerAmount}}
           </span>
         </div>
       </div>
@@ -26,7 +26,7 @@
           </span>
   
           <span *ngIf="nodeStats != null && nodeStats.enabledMasternodes != null">
-            {{nodeStats.enabledMasternodes}} <small>({{nodeStats.enabledMasternodes / nodeStats.masternodes | percent}})</small>
+            {{nodeStats.enabledMasternodes | explorerAmount}} <small>({{nodeStats.enabledMasternodes / nodeStats.masternodes | percent}})</small>
           </span>
         </div>
       </div>
@@ -41,7 +41,7 @@
           </span>
   
           <span *ngIf="nodeStats != null">
-            {{nodeStats.masternodes * 15000}} XSN <br/>
+            {{nodeStats.masternodes * 15000 | explorerAmount}} XSN <br/>
             <small>({{nodeStats.masternodes * 15000 / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
@@ -88,7 +88,7 @@
   
           <span *ngIf="nodeStats != null && nodeStats.masternodesProtocols != null">
             <div *ngFor="let item of masternodesProtocols">
-              {{item.key}}: {{item.value}} <small>({{item.value / nodeStats.masternodes | percent}})</small>
+              {{item.key}}: {{item.value | explorerAmount}} <small>({{item.value / nodeStats.masternodes | percent}})</small>
             </div>
           </span>
         </div>
@@ -104,7 +104,7 @@
           </span>
           
           <span *ngIf="nodeStats != null">
-            $ {{(nodeStats.masternodes * 15000 * prices.usd).toFixed(0)}} <br/>
+            $ {{(nodeStats.masternodes * 15000 * prices.usd).toFixed(0) | explorerAmount}} <br/>
           </span>
         </div>
       </div>
@@ -187,7 +187,7 @@
           </span>
   
           <span *ngIf="rewardsSummary != null">
-            {{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0)}} XSN <br/>
+            {{rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) | explorerAmount}} XSN <br/>
             <small>({{rewardsSummary.rewardedAddressesSumLast72Hours / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
         </div>
@@ -265,7 +265,7 @@
           </span>
           
           <span *ngIf="nodeStats != null">
-            $ {{(rewardsSummary.rewardedAddressesSumLast72Hours * prices.usd).toFixed(0)}}
+            $ {{(rewardsSummary.rewardedAddressesSumLast72Hours * prices.usd).toFixed(0) | explorerAmount}}
           </span>
         </div>
       </div>
@@ -280,7 +280,7 @@
           </span>
   
           <span *ngIf="nodeStats != null">
-            {{rewardsSummary.coinsTrustlesslyStaking.toFixed(0)}} XSN <br/>
+            {{rewardsSummary.coinsTrustlesslyStaking.toFixed(0) | explorerAmount}} XSN <br/>
             <small>({{rewardsSummary.coinsTrustlesslyStaking / rewardsSummary.rewardedAddressesSumLast72Hours | number: '1.2-2' | percent}} of coins staking)</small> <br/>
             <small>({{rewardsSummary.coinsTrustlesslyStaking / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
           </span>
@@ -297,9 +297,9 @@
           </span>
           
           <span *ngIf="nodeStats != null">
-            {{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours).toFixed(0)}} XSN <br/>
+            {{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours).toFixed(0) | explorerAmount}} XSN <br/>
             <small>({{(nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) / stats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small><br>
-            <small>($ {{((nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) * prices.usd).toFixed(0)}} TVL)</small>
+            <small>($ {{((nodeStats.masternodes * 15000 + rewardsSummary.rewardedAddressesSumLast72Hours) * prices.usd).toFixed(0) | explorerAmount}} TVL)</small>
           </span>
         </div>
       </div>

@@ -45,6 +45,7 @@ export class CalculatorComponent implements OnInit {
   totalRewards = 0;
   roi = null;
   daysUntilFreeMasternode = null;
+  dayMonthYearMultiplier = 1;
 
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
@@ -142,19 +143,18 @@ export class CalculatorComponent implements OnInit {
     } else{
       this.xsnPrice = Math.round(Math.exp(Math.log(1) + ((Math.log(500) - Math.log(1)) / 100) * this.xsnPriceLog));
     }
-  }
-
-  get dayMonthYearMultiplier() {
-    return (this.dayMonthYear === 'day' ? 1 : this.dayMonthYear === 'month' ? 30 : 365);
+    this.calculateHydraResult();
   }
 
   tradingVolumeLogChange() {
     const val = Math.round(this.tradingVolumeLog < 50 ? (this.tradingVolumeLog * 20) / 2 : (((this.tradingVolumeLog - 50) * 100 * 3.9) + 500));
     this.tradingVolume = val > 1000 ? Math.round(val / 500) * 500 : val;
+    this.calculateHydraResult();
   }
 
   ownedNodesLogChange() {
     this.ownedNodes = Math.round(this.ownedNodesLog < 50 ? this.ownedNodesLog / 2 : (((this.ownedNodesLog - 50) * 1.5) + 25));
+    this.calculateHydraResult();
   }
 
   calculateHydraResult() {
@@ -163,7 +163,7 @@ export class CalculatorComponent implements OnInit {
     this.mnHostingCost = this.ownedNodes * (this.orderbookHostingEnabled ? 2.5 : 0.15) * this.dayMonthYearMultiplier;
     this.mnCollateralValue = this.xsnPrice * this.ownedNodes * 15000;
     this.totalRewards = this.blockRewards + (this.orderbookHostingEnabled ? this.orderbookRewards : 0) - this.mnHostingCost;
-    this.roi = ((((this.mnCollateralValue + this.totalRewards) / this.mnCollateralValue) - 1) * 100).toFixed(2);
-    this.daysUntilFreeMasternode = ((15000 * this.xsnPrice) / (this.totalRewards / this.dayMonthYearMultiplier)).toFixed(1) + ' days';
+    this.roi = this.mnCollateralValue > 0 ? (((this.mnCollateralValue + this.totalRewards) / this.mnCollateralValue) - 1) * 100 : 0;
+    this.daysUntilFreeMasternode = this.totalRewards > 0 ? (15000 * this.xsnPrice) / (this.totalRewards / this.dayMonthYearMultiplier) : 0;
   }
 }

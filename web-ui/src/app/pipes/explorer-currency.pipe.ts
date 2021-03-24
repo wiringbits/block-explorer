@@ -13,6 +13,6 @@ export class ExplorerCurrencyPipe implements PipeTransform {
       currencyNumber = parseFloat(currency);
     }
 
-    return `${ currencyNumber.toFixed(8) } ${ Config.currentCurrency }`;
+    return `${ currencyNumber.toLocaleString(undefined, { maximumFractionDigits: 8 }) } ${ Config.currentCurrency }`;
   }
 }

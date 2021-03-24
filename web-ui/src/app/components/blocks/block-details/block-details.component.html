@@ -38,11 +38,11 @@
             </tr>
             <tr>
               <td class="text-label">{{'label.confirmations' | translate}}</td>
-              <td>{{blockDetails.block.confirmations}}</td>
+              <td>{{blockDetails.block.confirmations | explorerAmount}}</td>
             </tr>
             <tr>
               <td class="text-label">{{'label.size' | translate}}</td>
-              <td>{{blockDetails.block.size}} bytes</td>
+              <td>{{blockDetails.block.size | explorerAmount}} bytes</td>
             </tr>
             <tr>
               <td class="text-label">{{'label.version' | translate}}</td>
