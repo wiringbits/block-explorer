@@ -1,6 +1,6 @@
 package com.xsn.explorer.migrations
 
-import anorm.SQL
+import anorm.{SQL, SqlParser}
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
@@ -31,8 +31,9 @@ class MigrationRunner @Inject() (
     targetBlock.map { targetBlock =>
       logger.info(s"Migrating transactions sent/received amounts from block 0 to block ${targetBlock.height}")
 
+      val startingBlock = db.getStartingBlock()
       val startingState = Future.successful(Good(())).toFutureOr
-      val finalState = (0 to targetBlock.height.int).foldLeft(startingState) { case (state, height) =>
+      val finalState = (startingBlock to targetBlock.height.int).foldLeft(startingState) { case (state, height) =>
         for {
           _ <- state
           block <- blockDataHandler.getBlock(Height(height)).toFutureOr
@@ -86,6 +87,23 @@ object MigrationRunner {
         }
 
         Good(())
+      }
+    }
+
+    def getStartingBlock(): Int = {
+      database.withConnection { implicit conn =>
+        SQL(
+          """
+            |SELECT
+            |  max(height)
+            |FROM transactions
+            |INNER JOIN blocks USING(blockhash)
+            |WHERE sent IS NOT NULL
+            |  AND height < 1590000 
+            |""".stripMargin
+        )
+          .as(SqlParser.scalar[Int].singleOpt)
+          .getOrElse(0)
       }
     }
   }
