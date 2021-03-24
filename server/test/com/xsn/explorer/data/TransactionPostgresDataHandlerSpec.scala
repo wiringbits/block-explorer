@@ -1,5 +1,6 @@
 package com.xsn.explorer.data
 
+import _root_.anorm.SQL
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
@@ -450,6 +451,31 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       result(1).blockhash mustEqual sorted(1).blockhash
     }
 
+    "return sent and received amount even when they are null on transactions table without last seen tx" in {
+      prepare()
+
+      database.withConnection { implicit connection =>
+        SQL(
+          s"""
+             |UPDATE transactions
+             |SET sent = null, received = null
+      """.stripMargin
+        ).execute
+      }
+
+      val result = dataHandler.get(Limit(2), None, OrderingCondition.DescendingOrder, true).get
+
+      result.head.id mustEqual dummyTransaction.id
+      result.head.blockhash mustEqual dummyTransaction.blockhash
+      result.head.received mustEqual dummyTransaction.received
+      result.head.sent mustEqual dummyTransaction.sent
+
+      result(1).id mustEqual sorted.head.id
+      result(1).blockhash mustEqual sorted.head.blockhash
+      result(1).received mustEqual sorted.head.received
+      result(1).sent mustEqual sorted.head.sent
+    }
+
     "return the next elements given the last seen tx" in {
       prepare()
 
@@ -472,6 +498,29 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       result.head.id mustEqual expected.id
       result.head.blockhash mustEqual expected.blockhash
+    }
+
+    "return sent and received amount even when they are null on transactions table given the last seen tx" in {
+      prepare()
+
+      database.withConnection { implicit connection =>
+        SQL(
+          s"""
+             |UPDATE transactions
+             |SET sent = null, received = null
+      """.stripMargin
+        ).execute
+      }
+
+      val lastSeenTxid = dummyTransaction.id
+      val expected = sorted.head
+
+      val result = dataHandler.get(Limit(1), Option(lastSeenTxid), OrderingCondition.DescendingOrder, true).get
+
+      result.head.id mustEqual expected.id
+      result.head.blockhash mustEqual expected.blockhash
+      result.head.received mustEqual expected.received
+      result.head.sent mustEqual expected.sent
     }
 
     "return no elements on unknown lastSeenTransaction" in {
