@@ -29,17 +29,25 @@ class MigrationRunner @Inject() (
     val targetBlock = blockDataHandler.getLatestBlock().toFutureOr
 
     targetBlock.map { targetBlock =>
-      logger.info(s"Migrating transactions sent/received amounts from block 0 to block ${targetBlock.height}")
-
       val startingBlock = db.getStartingBlock()
       val startingState = Future.successful(Good(())).toFutureOr
-      val finalState = (startingBlock to targetBlock.height.int).foldLeft(startingState) { case (state, height) =>
+
+      logger.info(
+        s"Migrating transactions sent/received amounts from block $startingBlock to block ${targetBlock.height}"
+      )
+
+      val rangeSize = 10000
+      val blockRanges = (startingBlock until targetBlock.height.int by rangeSize).map { start =>
+        val end = start + rangeSize - 1
+
+        (start, end)
+      }
+
+      val finalState = blockRanges.foldLeft(startingState) { case (state, (start, end)) =>
         for {
           _ <- state
-          block <- blockDataHandler.getBlock(Height(height)).toFutureOr
-          transactions <- transactionsDataHandler.getByBlockhash(block.hash, Limit(Integer.MAX_VALUE), None).toFutureOr
-          _ <- db.updateTransactions(transactions).toFutureOr
-          _ = logProgress(height, targetBlock.height.int)
+          _ <- db.updateBlocksTransactions(start, end).toFutureOr
+          _ = logProgress(end, targetBlock.height.int)
         } yield ()
       }
 
@@ -70,21 +78,22 @@ object MigrationRunner {
       dbEC: DatabaseExecutionContext
   ) extends AnormPostgresDataHandler {
 
-    def updateTransactions(transactions: List[TransactionWithValues]) = Future {
+    def updateBlocksTransactions(start: Int, end: Int) = Future {
       withConnection { implicit conn =>
-        transactions.foreach { transaction =>
-          SQL(
-            """
-              |UPDATE transactions
-              |SET sent = {sent}::AMOUNT_TYPE, received = {received}::AMOUNT_TYPE
-              |WHERE txid = {txid}
+        SQL(
+          """
+              |UPDATE transactions AS t 
+              |SET sent = (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid),
+              |    received = (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid)
+              |FROM blocks AS b
+              |WHERE t.blockhash = b.blockhash
+              |  AND b.height >= {start}
+              |  AND b.height <= {end}
       """.stripMargin
-          ).on(
-            'txid -> transaction.id.toBytesBE.toArray,
-            'sent -> transaction.sent,
-            'received -> transaction.received
-          ).execute
-        }
+        ).on(
+          'start -> start,
+          'end -> end
+        ).execute
 
         Good(())
       }
