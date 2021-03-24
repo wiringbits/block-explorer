@@ -1,6 +1,6 @@
 package com.xsn.explorer.migrations
 
-import anorm.{SQL, SqlParser}
+import anorm.SQL
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
