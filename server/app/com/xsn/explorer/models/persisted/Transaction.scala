@@ -81,8 +81,8 @@ object Transaction {
     def time: Long = transaction.time
     def blockhash: Blockhash = transaction.blockhash
     def size: Size = transaction.size
-    def sent: BigDecimal = outputs.map(_.value).sum
-    def received: BigDecimal = inputs.map(_.value).sum
+    def sent: BigDecimal = inputs.map(_.value).sum
+    def received: BigDecimal = outputs.map(_.value).sum
   }
 
   /**

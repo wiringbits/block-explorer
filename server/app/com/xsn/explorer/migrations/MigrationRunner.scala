@@ -26,7 +26,7 @@ class MigrationRunner @Inject() (
     val targetBlock = blockDataHandler.getLatestBlock().toFutureOr
 
     targetBlock.map { targetBlock =>
-      val startingBlock = db.getStartingBlock()
+      val startingBlock = 0
       val startingState = Future.successful(Good(())).toFutureOr
 
       logger.info(
@@ -35,7 +35,7 @@ class MigrationRunner @Inject() (
 
       val rangeSize = 10000
       val blockRanges = (startingBlock until targetBlock.height.int by rangeSize).map { start =>
-        val end = start + rangeSize - 1
+        val end = start + rangeSize
 
         (start, end)
       }
@@ -80,8 +80,8 @@ object MigrationRunner {
         SQL(
           """
               |UPDATE transactions AS t 
-              |SET sent = (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid),
-              |    received = (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid)
+              |SET sent = (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid),
+              |    received = (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid)
               |FROM blocks AS b
               |WHERE t.blockhash = b.blockhash
               |  AND b.height >= {start}
@@ -93,23 +93,6 @@ object MigrationRunner {
         ).execute
 
         Good(())
-      }
-    }
-
-    def getStartingBlock(): Int = {
-      database.withConnection { implicit conn =>
-        SQL(
-          """
-            |SELECT
-            |  max(height)
-            |FROM transactions
-            |INNER JOIN blocks USING(blockhash)
-            |WHERE sent IS NOT NULL
-            |  AND height < 1590000 
-            |""".stripMargin
-        )
-          .as(SqlParser.scalar[Int].singleOpt)
-          .getOrElse(0)
       }
     }
   }
