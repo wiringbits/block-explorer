@@ -16,7 +16,7 @@ trait TransactionDataHandler[F[_]] {
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): F[List[Transaction.HasIO]]
+  ): F[List[TransactionInfo.HasIO]]
 
   def getByAddress(
       address: Address,

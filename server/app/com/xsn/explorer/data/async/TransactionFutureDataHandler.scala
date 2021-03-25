@@ -24,7 +24,7 @@ class TransactionFutureDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): FutureApplicationResult[List[Transaction.HasIO]] =
+  ): FutureApplicationResult[List[TransactionInfo.HasIO]] =
     retryableFutureDataHandler.retrying {
       Future {
 

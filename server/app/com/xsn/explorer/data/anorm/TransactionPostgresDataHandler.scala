@@ -25,7 +25,7 @@ class TransactionPostgresDataHandler @Inject() (
       limit: Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): ApplicationResult[List[Transaction.HasIO]] = withConnection { implicit conn =>
+  ): ApplicationResult[List[TransactionInfo.HasIO]] = withConnection { implicit conn =>
     val transactions = lastSeenTxid
       .map {
         transactionPostgresDAO.getBy(address, _, limit, orderingCondition)

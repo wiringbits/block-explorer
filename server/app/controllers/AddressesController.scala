@@ -2,13 +2,8 @@ package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
-import com.xsn.explorer.models.LightWalletTransaction
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.services.{
-  AddressService,
-  TPoSContractService,
-  TransactionService
-}
+import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
@@ -20,8 +15,6 @@ class AddressesController @Inject() (
     tposContractService: TPoSContractService,
     cc: MyJsonControllerComponents
 ) extends MyJsonController(cc) {
-
-  import AddressesController._
 
   def getBy(address: String) = public { _ =>
     addressService
@@ -73,8 +66,9 @@ class AddressesController @Inject() (
         .toFuture
     }
 
-  /** Format to keep compatibility with the previous approach using the RPC api.
-    */
+  /**
+   * Format to keep compatibility with the previous approach using the RPC api.
+   */
   implicit private val writes: Writes[Transaction.Output] = Writes { obj =>
     val address = obj.addresses.headOption
       .map(_.string)
@@ -114,28 +108,4 @@ class AddressesController @Inject() (
       }
       .toFuture
   }
-}
-
-object AddressesController {
-
-  implicit val inputWrites: Writes[LightWalletTransaction.Input] =
-    Json.writes[LightWalletTransaction.Input]
-  implicit val outputWrites: Writes[LightWalletTransaction.Output] =
-    (obj: LightWalletTransaction.Output) => {
-      val address = obj.addresses.headOption
-        .map(_.string)
-        .map(JsString.apply)
-        .getOrElse(JsNull)
-
-      Json.obj(
-        "index" -> obj.index,
-        "value" -> obj.value,
-        "address" -> address,
-        "addresses" -> obj.addresses
-      )
-    }
-
-  implicit val lightWalletTransactionWrites: Writes[LightWalletTransaction] =
-    Json.writes[LightWalletTransaction]
-
 }

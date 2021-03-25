@@ -199,8 +199,8 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
       }
 
       def matchOnlyData(
-          expected: Transaction.HasIO,
-          actual: Transaction.HasIO
+          expected: TransactionInfo.HasIO,
+          actual: TransactionInfo.HasIO
       ) = {
         actual.copy(
           inputs = List.empty,
@@ -213,7 +213,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       s"[$tag] return the first elements" in {
         prepare()
-        val expected = sorted.head
+        val expected = TransactionInfo.HasIO(
+          TransactionInfo(
+            sorted.head.id,
+            sorted.head.blockhash,
+            sorted.head.time,
+            sorted.head.size,
+            sorted.head.sent,
+            sorted.head.received,
+            block.height
+          ),
+          sorted.head.inputs,
+          sorted.head.outputs
+        )
         val result = dataHandler.getBy(address, Limit(1), None, condition).get
 
         matchOnlyData(expected, result.head)
@@ -223,7 +235,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         prepare()
 
         val lastSeenTxid = sorted.head.id
-        val expected = sorted(1)
+        val expected = TransactionInfo.HasIO(
+          TransactionInfo(
+            sorted(1).id,
+            sorted(1).blockhash,
+            sorted(1).time,
+            sorted(1).size,
+            sorted(1).sent,
+            sorted(1).received,
+            block.height
+          ),
+          sorted(1).inputs,
+          sorted(1).outputs
+        )
         val result = dataHandler
           .getBy(address, Limit(1), Option(lastSeenTxid), condition)
           .get
@@ -234,7 +258,19 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
         prepare()
 
         val lastSeenTxid = sorted(2).id
-        val expected = sorted(3)
+        val expected = TransactionInfo.HasIO(
+          TransactionInfo(
+            sorted(3).id,
+            sorted(3).blockhash,
+            sorted(3).time,
+            sorted(3).size,
+            sorted(3).sent,
+            sorted(3).received,
+            block.height
+          ),
+          sorted(3).inputs,
+          sorted(3).outputs
+        )
         val result = dataHandler
           .getBy(address, Limit(1), Option(lastSeenTxid), condition)
           .get

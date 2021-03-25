@@ -4,15 +4,8 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination
-import com.xsn.explorer.data.{
-  BalanceBlockingDataHandler,
-  TransactionBlockingDataHandler
-}
-import com.xsn.explorer.helpers.{
-  BalanceDummyDataHandler,
-  DataHelper,
-  TransactionDummyDataHandler
-}
+import com.xsn.explorer.data.{BalanceBlockingDataHandler, TransactionBlockingDataHandler}
+import com.xsn.explorer.helpers.{BalanceDummyDataHandler, DataHelper, TransactionDummyDataHandler}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.{Balance, Transaction}
 import com.xsn.explorer.models.values.{Address, _}
@@ -76,6 +69,32 @@ class AddressesControllerSpec extends MyAPISpec {
     Height(1000)
   )
 
+  val addressTransactionWithIO = TransactionInfo.HasIO(
+    addressTransaction,
+    List(
+      Transaction.Input(
+        fromTxid = createTransactionId(
+          "ea837f2011974b6a1a2fa077dc33684932c514a4ec6febc10e1a19ebe1336539"
+        ),
+        fromOutputIndex = 0,
+        index = 0,
+        value = BigDecimal("1400000005000").fromSatoshis,
+        address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp")
+      )
+    ),
+    List(
+      Transaction.Output(
+        address = createAddress("XeNEPsgeWqNbrEGEN5vqv4wYcC3qQrqNyp"),
+        index = 0,
+        value = BigDecimal("1500000000000").fromSatoshis,
+        script = HexString
+          .from("76a914285b6f1ccacea0059ff5393cb4eb2f0569e2b3e988ac")
+          .get,
+        txid = addressTransaction.id
+      )
+    )
+  )
+
   private val customTransactionDataHandler = new TransactionDummyDataHandler {
 
     override def getUnspentOutputs(
@@ -96,9 +115,19 @@ class AddressesControllerSpec extends MyAPISpec {
     ): ApplicationResult[List[TransactionInfo]] = {
       Good(List(addressTransaction))
     }
+
+    override def getBy(
+        address: Address,
+        limit: pagination.Limit,
+        lastSeenTxid: Option[TransactionId],
+        orderingCondition: OrderingCondition
+    ): ApplicationResult[List[TransactionInfo.HasIO]] = {
+      Good(List(addressTransactionWithIO))
+    }
   }
 
   private val customBalanceDataHandler = new BalanceDummyDataHandler {
+
     override def getBy(address: Address): ApplicationResult[Balance] = {
       if (address == addressWithBalance) {
         Good(addressBalance)
@@ -192,6 +221,47 @@ class AddressesControllerSpec extends MyAPISpec {
       (item \ "height").as[Int] mustEqual addressTransaction.height.int
       (item \ "sent").as[BigDecimal] mustEqual addressTransaction.sent
       (item \ "received").as[BigDecimal] mustEqual addressTransaction.received
+    }
+  }
+
+  "GET /v2/addresses/:address/transactions" should {
+    def url(address: String, limit: Int) = s"/v2/addresses/$address/transactions?limit=$limit"
+
+    "return the transactions where the address was involved" in {
+      val limit = 5
+      val response = GET(url(addressForTransactions.string, limit))
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+      val data = (json \ "data").as[List[JsValue]]
+      data.size mustEqual 1
+
+      val item = data.head
+      (item \ "id").as[String] mustEqual addressTransactionWithIO.id.string
+      (item \ "blockhash").as[String] mustEqual addressTransactionWithIO.blockhash.string
+      (item \ "time").as[Long] mustEqual addressTransactionWithIO.time
+      (item \ "size").as[Int] mustEqual addressTransactionWithIO.size.int
+      (item \ "height").as[Int] mustEqual addressTransactionWithIO.height.int
+      (item \ "sent").as[BigDecimal] mustEqual addressTransactionWithIO.sent
+      (item \ "received").as[BigDecimal] mustEqual addressTransactionWithIO.received
+      (item \ "fee").as[BigDecimal] mustEqual addressTransactionWithIO.fee
+
+      val inputsData = (item \ "inputs").as[List[JsValue]]
+      inputsData.size mustBe 1
+
+      val input = inputsData.head
+      (input \ "index").as[Int] mustEqual addressTransactionWithIO.inputs.head.index
+      (input \ "txid").as[String] mustEqual addressTransactionWithIO.inputs.head.fromTxid.string
+      (input \ "value").as[BigDecimal] mustEqual addressTransactionWithIO.inputs.head.value
+
+      val outputsData = (item \ "outputs").as[List[JsValue]]
+      outputsData.size mustBe 1
+
+      val output = outputsData.head
+      (output \ "address").as[String] mustEqual addressTransactionWithIO.outputs.head.addresses.head.string
+      (output \ "addresses").as[List[String]] mustEqual addressTransactionWithIO.outputs.head.addresses.map(_.string)
+      (output \ "index").as[Int] mustEqual addressTransactionWithIO.outputs.head.index
+      (output \ "value").as[BigDecimal] mustEqual addressTransactionWithIO.outputs.head.value
     }
   }
 }
