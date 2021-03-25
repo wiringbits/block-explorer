@@ -29,7 +29,7 @@ class TransactionService @Inject() (
       limit: Limit,
       lastSeenTxidString: Option[String],
       orderingConditionString: String
-  ): FutureApplicationResult[WrappedResult[List[LightWalletTransaction]]] = {
+  ): FutureApplicationResult[WrappedResult[List[TransactionInfo.HasIO]]] = {
 
     val result = for {
       address <- addressValidator.validate(addressString).toFutureOr
@@ -48,11 +48,7 @@ class TransactionService @Inject() (
       transactions <- transactionFutureDataHandler
         .getBy(address, limit, lastSeenTxid, orderingCondition)
         .toFutureOr
-    } yield {
-      val lightTxs = transactions.map(toLightWalletTransaction)
-
-      WrappedResult(lightTxs)
-    }
+    } yield WrappedResult(transactions)
 
     result.toFuture
   }

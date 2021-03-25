@@ -208,13 +208,15 @@ class TransactionPostgresDAO @Inject() (
       orderingCondition: OrderingCondition
   )(implicit
       conn: Connection
-  ): List[Transaction.HasIO] = {
+  ): List[TransactionInfo.HasIO] = {
     val order = toSQL(orderingCondition)
 
     val transactions = SQL(
       s"""
-        |SELECT t.txid, t.blockhash, t.time, t.size
-        |FROM transactions t JOIN address_transaction_details USING (txid)
+        |SELECT t.txid, t.blockhash, t.time, t.size, b.height, t.sent, t.received
+        |FROM transactions t
+        |JOIN address_transaction_details USING (txid)
+        |JOIN blocks b USING(blockhash)
         |WHERE address = {address}
         |ORDER BY time $order, txid
         |LIMIT {limit}
@@ -222,14 +224,13 @@ class TransactionPostgresDAO @Inject() (
     ).on(
       'address -> address.string,
       'limit -> limit.int
-    ).as(parseTransaction.*)
+    ).as(parseTransactionInfo.*)
 
-    for {
-      tx <- transactions
-    } yield {
-      val inputs = transactionInputDAO.getInputs(tx.id, address)
-      val outputs = transactionOutputDAO.getOutputs(tx.id, address)
-      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
+    transactions.map { transaction =>
+      val inputs = transactionInputDAO.getInputs(transaction.id, address)
+      val outputs = transactionOutputDAO.getOutputs(transaction.id, address)
+
+      TransactionInfo.HasIO(transaction, inputs = inputs, outputs = outputs)
     }
   }
 
@@ -276,7 +277,7 @@ class TransactionPostgresDAO @Inject() (
       orderingCondition: OrderingCondition
   )(implicit
       conn: Connection
-  ): List[Transaction.HasIO] = {
+  ): List[TransactionInfo.HasIO] = {
 
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
@@ -291,9 +292,10 @@ class TransactionPostgresDAO @Inject() (
         |  FROM transactions
         |  WHERE txid = {lastSeenTxid}
         |)
-        |SELECT t.txid, t.blockhash, t.time, t.size
+        |SELECT t.txid, t.blockhash, t.time, t.size, b.height, t.sent, t.received
         |FROM CTE CROSS JOIN transactions t
         |         JOIN address_transaction_details USING (txid)
+        |         JOIN blocks b USING(blockhash)
         |WHERE address = {address} AND
         |      (t.time $comparator lastSeenTime OR (t.time = lastSeenTime AND t.txid > {lastSeenTxid}))
         |ORDER BY time $order, txid
@@ -303,14 +305,13 @@ class TransactionPostgresDAO @Inject() (
       'address -> address.string,
       'limit -> limit.int,
       'lastSeenTxid -> lastSeenTxid.toBytesBE.toArray
-    ).as(parseTransaction.*)
+    ).as(parseTransactionInfo.*)
 
-    for {
-      tx <- transactions
-    } yield {
-      val inputs = transactionInputDAO.getInputs(tx.id, address)
-      val outputs = transactionOutputDAO.getOutputs(tx.id, address)
-      Transaction.HasIO(tx, inputs = inputs, outputs = outputs)
+    transactions.map { transaction =>
+      val inputs = transactionInputDAO.getInputs(transaction.id, address)
+      val outputs = transactionOutputDAO.getOutputs(transaction.id, address)
+
+      TransactionInfo.HasIO(transaction, inputs = inputs, outputs = outputs)
     }
   }
 
