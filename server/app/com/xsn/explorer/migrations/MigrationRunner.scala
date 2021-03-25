@@ -1,17 +1,13 @@
 package com.xsn.explorer.migrations
 
-import anorm.SQL
-import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import javax.inject.Inject
-import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
 import play.api.db.Database
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext
 
 @com.github.ghik.silencer.silent
 class MigrationRunner @Inject() (
@@ -22,39 +18,7 @@ class MigrationRunner @Inject() (
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def run() = {
-    val targetBlock = blockDataHandler.getLatestBlock().toFutureOr
-
-    targetBlock.map { targetBlock =>
-      val startingBlock = 0
-      val startingState = Future.successful(Good(())).toFutureOr
-
-      logger.info(
-        s"Migrating transactions sent/received amounts from block $startingBlock to block ${targetBlock.height}"
-      )
-
-      val rangeSize = 10000
-      val blockRanges = (startingBlock until targetBlock.height.int by rangeSize).map { start =>
-        val end = start + rangeSize
-
-        (start, end)
-      }
-
-      val finalState = blockRanges.foldLeft(startingState) { case (state, (start, end)) =>
-        for {
-          _ <- state
-          _ <- db.updateBlocksTransactions(start, end).toFutureOr
-          _ = logProgress(end, targetBlock.height.int)
-        } yield ()
-      }
-
-      finalState.toFuture.onComplete {
-        case Success(Good(_)) => logger.info("transactions successfully migrated")
-        case Success(Bad(error)) => logger.info(s"transactions migration failed due to ${error.toString}")
-        case Failure(error) => logger.info(s"transactions migration failed due to ${error.toString}")
-      }
-    }
-  }
+  def run() = {}
 
   private def logProgress(migratedHeight: Int, targetHeight: Int) = {
     val percentage: Int = 100 * migratedHeight / targetHeight
@@ -73,27 +37,5 @@ object MigrationRunner {
   @com.github.ghik.silencer.silent
   class DatabaseOperations @Inject() (override val database: Database)(implicit
       dbEC: DatabaseExecutionContext
-  ) extends AnormPostgresDataHandler {
-
-    def updateBlocksTransactions(start: Int, end: Int) = Future {
-      withConnection { implicit conn =>
-        SQL(
-          """
-              |UPDATE transactions AS t 
-              |SET sent = (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid),
-              |    received = (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid)
-              |FROM blocks AS b
-              |WHERE t.blockhash = b.blockhash
-              |  AND b.height >= {start}
-              |  AND b.height <= {end}
-      """.stripMargin
-        ).on(
-          'start -> start,
-          'end -> end
-        ).execute
-
-        Good(())
-      }
-    }
-  }
+  ) extends AnormPostgresDataHandler {}
 }

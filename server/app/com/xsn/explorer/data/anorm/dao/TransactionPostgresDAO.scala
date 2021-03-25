@@ -439,9 +439,7 @@ class TransactionPostgresDAO @Inject() (
         |   ORDER BY time $order, txid
         |   LIMIT {limit}
         |)
-        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
-        |       COALESCE(t.sent, (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid)) as sent,
-        |       COALESCE(t.received, (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid)) as received
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height, t.sent, t.received
         |FROM TXS t JOIN blocks blk USING (blockhash)
       """.stripMargin
     ).on(
@@ -487,9 +485,7 @@ class TransactionPostgresDAO @Inject() (
         |  ORDER BY time $order, txid
         |  LIMIT {limit}
         |)
-        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height,
-        |       COALESCE(t.sent, (SELECT COALESCE(SUM(value), 0) FROM transaction_inputs WHERE txid = t.txid)) as sent,
-        |       COALESCE(t.received, (SELECT COALESCE(SUM(value), 0) FROM transaction_outputs WHERE txid = t.txid)) as received
+        |SELECT t.txid, t.blockhash, t.time, t.size, blk.height, t.sent, t.received
         |FROM TXS t JOIN blocks blk USING (blockhash)
       """.stripMargin
     ).on(
