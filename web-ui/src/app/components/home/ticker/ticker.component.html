@@ -10,7 +10,7 @@
           {{'message.unavailable' | translate}}
         </span>
         <span *ngIf="ticker != null && ticker.totalSupply != null">
-          {{ticker.totalSupply | explorerAmount}} {{config.currentCurrency}}
+          {{ticker.totalSupply | explorerAmount:0}} {{config.currentCurrency}}
           <span class="glyphicon glyphicon-question-sign help" [title]="'message.totalSupply' | translate"></span>
         </span>
       </div>
@@ -24,7 +24,7 @@
         </span>
 
         <span *ngIf="ticker != null && ticker.circulatingSupply != null">
-          {{ticker.circulatingSupply | explorerAmount}} {{config.currentCurrency}}
+          {{ticker.circulatingSupply | explorerAmount:0}} {{config.currentCurrency}}
           <span class="glyphicon glyphicon-question-sign help" [title]="'message.circulatingSupply' | translate"></span>
         </span>
       </div>

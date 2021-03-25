@@ -125,6 +125,22 @@
         </div>
       </div>
 
+      <div class="col-xs-6 col-lg-3">
+        <div class="lbl-bottom">
+          {{'label.firstRewardWait' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="nodeStats == null || nodeStats.masternodesProtocols == null">
+            {{'message.unavailable' | translate}}
+          </span>
+
+          <span *ngIf="nodeStats != null && nodeStats.masternodes != null">
+            {{(nodeStats.enabledMasternodes * 2.6 / 60).toFixed(2)}} hours <br/>
+            <small>({{(nodeStats.enabledMasternodes * 2.6 / 60 / 24).toFixed(2)}} days)</small>
+          </span>
+        </div>
+      </div>
+
       <!-- <div class="col-xs-6 col-lg-3">
         <div class="lbl-bottom">
           {{'label.totalCoinsMNStaking' | translate }}

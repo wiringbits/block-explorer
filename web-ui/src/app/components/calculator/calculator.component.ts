@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { SliderComponent } from '@syncfusion/ej2-angular-inputs';
 import { ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
 import { XSNService } from '../../services/xsn.service';
@@ -36,7 +37,7 @@ export class CalculatorComponent implements OnInit {
   ownedNodes = 0;
   masternodeCountLog = 2700;
   dayMonthYear = "month";
-  orderbookHostingEnabled = true; // Used to calculate orderbook rewards, included in total rewards calculation
+  orderbookHostingEnabled = false; // Used to calculate orderbook rewards, included in total rewards calculation
   orderbookMNs = 1500;
   blockRewards = 0;
   orderbookRewards = 0;
@@ -51,11 +52,16 @@ export class CalculatorComponent implements OnInit {
   public rangevalue: Number[] = [30,70];
   public range: string = 'MinRange';
 
+  @ViewChild('slider')
+  public mnSlider: SliderComponent;
+
   constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
     this.loadData();
     this.interval = setInterval(() => this.loadData(), 10000);
+    this.mnSlider.enabled = false;
+    this.mnSlider.dataBind();
   }
 
   ngOnDestroy() {
@@ -154,6 +160,11 @@ export class CalculatorComponent implements OnInit {
 
   ownedNodesLogChange() {
     this.ownedNodes = Math.round(this.ownedNodesLog < 50 ? this.ownedNodesLog / 2 : (((this.ownedNodesLog - 50) * 1.5) + 25));
+    this.calculateHydraResult();
+  }
+
+  orderbookHostingEnabledChange() {
+    console.log(this.orderbookHostingEnabled);
     this.calculateHydraResult();
   }
 

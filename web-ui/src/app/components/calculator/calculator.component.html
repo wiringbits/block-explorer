@@ -92,7 +92,7 @@
         <tabset>
             <tab heading="BLOCK REWARDS">
                 <div>
-                    <div class="col-xs-12 fs-14 calculator-label">
+                    <div class="col-xs-12 calculator-label">
                         {{'label.xsnAmountHold' | translate}}
                     </div>
         
@@ -103,12 +103,12 @@
                         </div>
                     </div>
         
-                    <div class="col-xs-12 fs-14 calculator-optimal-setup">
+                    <div class="col-xs-12 fs-16 calculator-optimal-setup">
                         <span class="text-label">{{'label.optimalSetup' | translate}}: </span>{{masternodeCount}} {{'label.masternodeAnd' | translate}} {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
                     </div>
         
                     <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.stakingAllCoins' | translate}}</h4>
+                        <h4 class="main-label fs-16">{{'label.stakingAllCoins' | translate}}</h4>
 
                         <p class="sub-label">{{'label.daily' | translate}}:</p>
                         <p>{{(rewardsSummary.stakingROI * holdAmount / 365) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 365).toFixed(2)}}%)</small></p>
@@ -128,7 +128,7 @@
                         <!-- {{'label.waitingTimePerReward' | translate}} -->
                     </div>
                     <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.masternodeStakingRemaining' | translate}}</h4>
+                        <h4 class="main-label fs-16">{{'label.masternodeStakingRemaining' | translate}}</h4>
 
                         <p class="sub-label">{{'label.daily' | translate}}:</p>
                         <p>{{(mnstaking / 365) | explorerAmount:4:true }} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 365).toFixed(2)}}%)</small></p>
@@ -179,7 +179,7 @@
                             <div class="slider-block switch-block">
                                 <span class="slider-label">{{'label.enableOrderbookHosting' | translate}}</span>
                                 <div class="switch-wrapper">
-                                    <ui-switch size="small" [(ngModel)]="orderbookHostingEnabled" color="#01D9DE"></ui-switch>
+                                    <ui-switch size="small" [(ngModel)]="orderbookHostingEnabled" (change)="orderbookHostingEnabledChange($event)" color="#01D9DE"></ui-switch>
                                 </div>
                             </div>
                             <div class="slider-block">
@@ -192,9 +192,9 @@
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.mnsHostingOrderbook' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider [value]='mnHostingCost' [min]='0' [max]='100' [type]='range'></ejs-slider>
+                                    <ejs-slider #mnSlider [enabled]="false" [value]='mnHostingCost' [min]='0' [max]='100' [type]='range' ></ejs-slider>
                                 </div>
-                                <span class="slider-value">$ {{mnHostingCost}}</span>
+                                <span class="slider-value">$ {{mnHostingCost | explorerAmount:1}}</span>
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 .transaction-table-wrapper {
     padding: 0;
-    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #282D3C;
 }
 
 ul.merchant-select {
@@ -41,4 +42,9 @@ ul.merchant-select li.active {
 
 ul.merchant-select li:hover {
     color: #286090;
+}
+
+.block-tab-content {
+    padding-top: 10px;
+    border-top: 1px solid #282D3C;
 }
