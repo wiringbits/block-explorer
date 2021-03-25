@@ -92,7 +92,7 @@ export class TrezorConnectComponent implements OnInit {
         'showOnTrezor': false
       };
     });
-    const response = await TrezorConnect.getAddress({ bundle: bundle });
+    const response: any = await TrezorConnect.getAddress({ bundle: bundle });
 
     if (response.success) {
       this.showAllButton = false;
@@ -178,7 +178,7 @@ export class TrezorConnectComponent implements OnInit {
         outputs: outputs,
         refTxs: txs,
         coin: 'Stakenet'
-      }).then(async (result) => {
+      }).then(async (result: any) => {
         if (result.payload.error) {
           this.notificationService.error(result);
         } else {
@@ -220,12 +220,13 @@ export class TrezorConnectComponent implements OnInit {
     }
 
     const firstOutPoint = generatedInputs.inputs[0].prev_hash + ':' + generatedInputs.inputs[0].prev_index;
-    const messageSigned = await TrezorConnect.signMessage({
+    const messageSigned: any = await TrezorConnect.signMessage({
       path: tposAddress.path,
-      message: firstOutPoint
+      message: firstOutPoint,
+      coin: 'Stakenet'
     });
 
-    if (messageSigned.payload.error) {
+    if (!messageSigned.success) {
       this.notificationService.error(messageSigned.payload.error);
       return;
     }
@@ -272,7 +273,7 @@ export class TrezorConnectComponent implements OnInit {
         coin: 'Stakenet'
       };
 
-      const trezorResult = await this.signTrezorTransaction(tposTransaction);
+      const trezorResult: any = await this.signTrezorTransaction(tposTransaction);
       if (trezorResult.payload.error) {
         this.notificationService.error(trezorResult.payload.error);
       } else {
@@ -317,7 +318,7 @@ export class TrezorConnectComponent implements OnInit {
   }
 
   private async getTrezorAddress(path: string): Promise<TrezorAddress> {
-    const result = await TrezorConnect.getAddress({ path: path, coin: 'Stakenet', showOnTrezor: false });
+    const result: any = await TrezorConnect.getAddress({ path: path, coin: 'Stakenet', showOnTrezor: false });
     return result.payload;
   }
 
