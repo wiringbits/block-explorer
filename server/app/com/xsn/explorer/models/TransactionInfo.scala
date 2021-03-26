@@ -13,7 +13,7 @@ case class TransactionInfo(
     received: BigDecimal,
     height: Height
 ) {
-  def fee: BigDecimal = sent - received
+  def fee: BigDecimal = (sent - received).max(BigDecimal(0))
 }
 
 object TransactionInfo {
