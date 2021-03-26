@@ -17,8 +17,8 @@
             <!-- <th class="col-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th> -->
             <th class="col-2">{{'label.blockHash' | translate | uppercase}}</th>
             <th class="col-2 right-align">{{'label.amount' | translate | uppercase}}</th>
-            <!-- <th class="col-2 right-align" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th> -->
-            <!-- <th class="col-1 right-align" *ngIf="!hideBlockHash">{{'label.height' | translate | uppercase}}</th> -->
+            <th class="col-2 right-align" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
+            <th class="col-1 right-align" *ngIf="!hideBlockHash">{{'label.height' | translate | uppercase}}</th>
             <th class="col-2 right-align">{{'label.time' | translate | uppercase}}</th>
           </tr>
         </thead>
@@ -40,10 +40,10 @@
               <a class="text-highlight" routerLink="/blocks/{{item.blockhash}}">{{truncate(item.blockhash, 8, 5) | uppercase}}</a>
             </td>
             <td class="text-primary right-align">{{getAmount(item) | explorerCurrency}}</td>
-            <!-- <td class="text-primary right-align" *ngIf="!hideBlockHash">{{getFee(item) | explorerCurrency}}</td> -->
-            <!-- <td class="right-align" *ngIf="!hideBlockHash">
+            <td class="text-primary right-align" *ngIf="!hideBlockHash">{{item.fee | explorerCurrency}}</td>
+            <td class="right-align" *ngIf="!hideBlockHash">
               <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
-            </td> -->
+            </td>
             <td class="text-primary right-align">
               {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}
               ({{amAgo(item.time)}})

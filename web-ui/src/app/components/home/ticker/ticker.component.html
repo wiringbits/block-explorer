@@ -42,7 +42,7 @@
         </span>
 
         <span *ngIf="ticker != null">
-          {{lastBlock && lastBlock.height}}
+          {{lastBlock && lastBlock.height | explorerAmount}}
         </span>
 
         <span *ngIf="ticker != null" class="text-label sub-label">

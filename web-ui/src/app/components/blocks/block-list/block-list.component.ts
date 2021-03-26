@@ -50,12 +50,8 @@ export class BlockListComponent implements OnInit {
             lastSeenHash = this.blocks[this.blocks.length - 1].hash;
         }
 
-        let tmp = this.blocks.map(item => item.hash);
-
-        console.log(tmp, lastSeenHash);
-
         this.blocksService
-            .getLatest(this.limit, lastSeenHash)
+            .getLatestV2(this.limit, lastSeenHash)
             .subscribe(
                 response => this.onBlockRetrieved(response),
                 response => this.onError(response)

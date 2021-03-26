@@ -16,7 +16,7 @@ export class HomeComponent implements OnInit {
   blocks: Block[] = [];
   transactions: Transaction[] = [];
   address: string;
-  limit = 20;
+  limit = 10;
   isLoading: Boolean = false;
 
   constructor(private blocksService: BlocksService, private transactionsService: TransactionsService,
@@ -69,7 +69,7 @@ export class HomeComponent implements OnInit {
   private onTransactionRetrieved(response: Transaction[]) {
     this.isLoading = false;
     // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
-    this.transactions = this.transactions.concat(response).filter(item => item["received"] > 0).sort(function (a, b) {
+    this.transactions = this.transactions.concat(response).sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
     });
