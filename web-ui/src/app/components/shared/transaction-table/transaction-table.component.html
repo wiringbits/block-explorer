@@ -31,7 +31,7 @@
             <td>
               <a class="text-highlight" routerLink="/transactions/{{item.id}}">{{truncate(item.id, 8, 5) | uppercase}}</a>
             </td>
-            <td class="text-primary" *ngIf="!hideBlockHash">Reward: Masternode</td>
+            <td class="text-primary" *ngIf="!hideBlockHash">Transaction</td>
             <td class="text-primary" *ngIf="!hideBlockHash">
               <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
             </td>

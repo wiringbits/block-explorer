@@ -12,13 +12,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 66px;
-  border-bottom: 1px solid #181b2b;
+  border-bottom: 1px solid #282D3C;
 }
 
 .page-header .page-title {
   font-size: 20px;
-  line-height: 24px;
+  line-height: 28px;
   font-weight: 500;
   color: white;
 }
@@ -78,7 +77,7 @@
 }
 
 .tab-pane > div {
-  padding-left: 5px;
+  /* padding-left: 5px; */
 }
 
 .add-btn {
@@ -87,7 +86,7 @@
 
 .add-address {
   padding-bottom: 31px;
-  border-bottom: 1px solid #181b2b;
+  border-bottom: 1px solid #282D3C;
 }
 
 .add-address .select-wrapper {
@@ -134,7 +133,7 @@
 
 .custom-form {
   padding-bottom: 31px;
-  border-bottom: 1px solid #181b2b;
+  border-bottom: 1px solid #282D3C;
 }
 
 .main-label {
