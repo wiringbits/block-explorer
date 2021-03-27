@@ -23,6 +23,8 @@ const IP_ADDRESS_REGEX = '^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$';
 export class FinderComponent implements OnInit {
 
   form: FormGroup;
+  errors = [];
+  errorString = "";
 
   constructor(
     private formBuilder: FormBuilder,
@@ -52,6 +54,9 @@ export class FinderComponent implements OnInit {
       return;
     }
 
+    this.errors = [];
+    this.errorString = "";
+
     const searchField = this.form.get('searchField').value;
 
     if (new RegExp(ADDRESS_REGEX).test(searchField)) {
@@ -59,21 +64,25 @@ export class FinderComponent implements OnInit {
       this.addressesService.get(searchField)
         .subscribe(
           response => this.navigatorService.addressDetails(searchField),
-          response => this.onNothingFound()
+          error => this.errorDisplay(error)
         );
     } else if (new RegExp(BLOCK_REGEX).test(searchField)) {
       // block or transaction
       this.transactionsService.get(searchField)
         .subscribe(
           response => this.navigatorService.transactionDetails(searchField),
-          response => this.lookForBlock(searchField)
+          error => {
+            this.errorDisplay(error)
+            this.lookForBlock(searchField)
+          }
         );
     } else if (new RegExp(IP_ADDRESS_REGEX).test(searchField)) {
       // masternode
       this.masternodesService.getByIP(searchField)
         .subscribe(
           response => this.navigatorService.masternodeDetails(searchField),
-          response => this.onNothingFound()
+          // response => this.navigatorService.transactionDetails(response.txid),
+          error => this.errorDisplay(error)
         );
     } else if (new RegExp(BLOCK_NUMBER_REGEX).test(searchField)) {
       this.lookForBlock(searchField);
@@ -84,12 +93,19 @@ export class FinderComponent implements OnInit {
     this.blocksService.get(query)
       .subscribe(
         response => this.navigatorService.blockDetails(query),
-        response => this.onNothingFound()
+        error => this.errorDisplay(error)
       );
   }
 
   private onNothingFound() {
     this.translateService.get('error.nothingFound')
       .subscribe(msg => this.errorService.setFieldError(this.form, 'searchField', msg));
+  }
+
+  private errorDisplay(err) {
+    console.log(err);
+    this.errors.push(err.error.errors[0].message);
+    this.errorString = this.errors.join("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+    // this.errorService.setFieldError(this.form, 'searchField', msg)
   }
 }

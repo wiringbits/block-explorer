@@ -18,8 +18,8 @@
       </div>
     </div>
 
-    <div >
-      <span class="text-danger">{{ (errorService.hasWrongValue(form, 'searchField') ? errorService.getFieldError(form, 'searchField') : "") | translate }}</span>
+    <div>
+      <span class="text-danger" [innerHTML]="errorService.hasWrongValue(form, 'searchField') ? (errorService.getFieldError(form, 'searchField') | translate) : errorString"></span>
     </div>
 
   </form>

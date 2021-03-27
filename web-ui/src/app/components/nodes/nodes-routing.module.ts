@@ -10,7 +10,7 @@ const routes: Routes = [
         component: NodesComponent,
         children: [
             {
-                path: ':id',
+                path: ':ip',
                 component: MasternodeDetailsComponent
             },
             {

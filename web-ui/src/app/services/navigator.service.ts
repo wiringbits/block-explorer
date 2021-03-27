@@ -24,6 +24,6 @@ export class NavigatorService {
   }
 
   masternodeDetails(ipAddress: string) {
-    this.go(`/masternodes/${ipAddress}`);
+    this.go(`/nodes/${ipAddress}`);
   }
 }

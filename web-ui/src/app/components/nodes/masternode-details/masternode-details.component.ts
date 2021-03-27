@@ -16,6 +16,7 @@ export class MasternodeDetailsComponent implements OnInit {
 
   Math: Math = Math;
   masternode: Masternode;
+  ip = "";
 
   constructor(
     private route: ActivatedRoute,
@@ -24,7 +25,10 @@ export class MasternodeDetailsComponent implements OnInit {
     private errorService: ErrorService) { }
 
   ngOnInit() {
-    this.route.params.forEach(params => this.onIP(params['ip']));
+    this.route.params.forEach(params => {
+      this.onIP(params['ip'])
+      this.ip = params['ip']
+    });
   }
 
   private onIP(ip: string) {
