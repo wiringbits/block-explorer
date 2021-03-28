@@ -53,6 +53,10 @@ select.second-position {
   color: black;
 }
 
+.red-text {
+  color: red;
+}
+
 .trezor-span {
   grid-column: 2 / span 2;
   font-size: 20px;
