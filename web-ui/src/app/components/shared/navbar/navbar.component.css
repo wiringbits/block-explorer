@@ -93,9 +93,9 @@
   height: 48px;
 }
 
-.navbar-nav ul.dropdown-menu li:first-child {
+/* .navbar-nav ul.dropdown-menu li:first-child {
   margin-top: 10px;
-}
+} */
 
 .navbar-nav ul.dropdown-menu li a {
   height: 48px;

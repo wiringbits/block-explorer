@@ -26,6 +26,9 @@ export class CalculatorComponent implements OnInit {
   mnstaking = 0;
   stakingcoin = 0;
 
+  stakingWaitTime = "";
+  mnWaitTime = "";
+
   interval: any;
 
   // hydra node
@@ -115,12 +118,67 @@ export class CalculatorComponent implements OnInit {
     console.log(response);
   }
 
+  private yearToTime(num: number) {
+    let date = {
+      'Y': 0,
+      'M': 0,
+      'd': 0,
+      'h': 0,
+      'm': 0,
+      's': 0
+    }
+    if (num >= 1) {
+      date['Y'] = Math.floor(num);
+    }
+    num = (num % 1) * 365;
+    if (num / 30 > 0) {
+      date['M'] = Math.floor(num / 30);
+    }
+    num = num % 30;
+    if (num >= 1) {
+      date['d'] = Math.floor(num);
+    }
+    num = (num % 1) * 24;
+    if (num >= 1) {
+      date['h'] = Math.floor(num);
+    }
+    num = (num % 1) * 60;
+    if (num >= 1) {
+      date['m'] = Math.floor(num);
+    }
+    num = (num % 1) * 60;
+    if (num > 0) {
+      date['s'] = Math.ceil(num);
+    }
+    return date;
+  }
+
   onChangeAmount() {
+    this.stakingWaitTime = "";
+    this.mnWaitTime = "";
     if (this.holdAmount > 99999999) {
       this.holdAmount = 99999999;
     }
     this.stakingcoin = this.rewardsSummary.stakingROI * this.holdAmount;
     this.mnstaking = Math.floor(this.holdAmount / this.requiredForMasternode) * this.requiredForMasternode * this.rewardsSummary.masternodesROI + (this.holdAmount % this.requiredForMasternode) * this.rewardsSummary.stakingROI;
+    if (this.rewardsSummary && this.holdAmount) {
+      let val = 9 / (this.rewardsSummary.stakingROI * this.holdAmount);
+      let date = this.yearToTime(val);
+      for (let key in date) {
+        if (date[key] > 0) {
+          this.stakingWaitTime += date[key] + key /* + (date[key] > 1 ? 's' : '') */ + ' ';
+        }
+      }
+    }
+    if (this.mnstaking) {
+      let val = 9 / this.mnstaking;
+      let date = this.yearToTime(val);
+      for (let key in date) {
+        if (date[key] > 0) {
+          this.mnWaitTime += date[key] + key /* + (date[key] > 1 ? 's' : '') */ + ' ';
+        }
+      }
+    }
     if (this.stakingcoin > this.mnstaking) {
       this.masternodeCount = 0;
       this.xsnStaking = this.holdAmount || 0;

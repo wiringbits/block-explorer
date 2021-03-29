@@ -125,6 +125,9 @@
                         <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd) | explorerAmount:4:true}}</p>
                         <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc) | explorerAmount:8:true}} BTC</p>
 
+                        <p class="sub-label">{{'label.avgRewardWaitTime' | translate}}:</p>
+                        <p>{{stakingWaitTime}}</p>
+
                         <!-- {{'label.waitingTimePerReward' | translate}} -->
                     </div>
                     <div class="col-xs-6 calculator-comparison-table">
@@ -144,6 +147,9 @@
                         <p>{{mnstaking | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%)</small></p>
                         <p>$ {{(mnstaking * prices.usd) | explorerAmount:4:true}}</p>
                         <p>{{(mnstaking * prices.btc) | explorerAmount:8:true}} BTC</p>
+
+                        <p class="sub-label">{{'label.avgRewardWaitTime' | translate}}:</p>
+                        <p>{{mnWaitTime}}</p>
                     </div>
                 </div>
             </tab>

@@ -80,9 +80,9 @@
 .calculator-label {
   font-size: 12px;
   color: #989DCC;
-  font-weight: 300;
+  font-weight: 400;
   margin-bottom: 5px;
-  letter-spacing: 0.9px;
+  /* letter-spacing: 0.9px; */
 }
 
 .calculator-hold-amount {
@@ -120,9 +120,10 @@
 }
 
 .calculator-comparison-table .main-label {
-    color: #01D9DE;
+    color: white;
     font-size: 20px;
     line-height: 24px;
+    text-transform: uppercase;
 }
 
 .calculator-comparison-table p {
@@ -137,7 +138,7 @@
     font-size: 12px;
     line-height: 24px;
     margin-top: 28px;
-    letter-spacing: 0.9px;
+    /* letter-spacing: 0.9px; */
 }
 
 .calculator-stats-container {
@@ -210,6 +211,8 @@
 
 .slider-row h5 {
     margin-top: 0;
+    text-transform: uppercase;
+    margin-bottom: 30px;
 }
 
 .slider-block {
