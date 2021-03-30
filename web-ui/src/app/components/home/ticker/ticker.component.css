@@ -46,3 +46,9 @@ div.lbl-bottom {
 .height-data>span.sub-label {
   font-size: 12px;
 }
+
+@media (max-width: 500px) {
+  .height-data>span {
+    font-size: 24px;
+  }
+}

@@ -53,7 +53,7 @@ body {
 .tab-content {
   background-color: #0F1223;
   border-radius: 8px;
-  margin-bottom: 86px;
+  /* margin-bottom: 86px; */
 
   display: flex;
   flex-direction: row;
@@ -317,4 +317,45 @@ a.disabled {
 .loading {
   width: 100%;
   text-align: center;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 1396px) {
+  
+}
+
+@media (max-width: 1395px) {
+  .table>thead>tr>th, .table>tbody>tr>td {
+    font-size: 12px;
+  }
+
+  div.data {
+    font-size: 15px!important;
+  }
+}
+
+@media (max-width: 1200px) {
+  div.data {
+    font-size: 18px!important;
+  }
+}
+
+@media (max-width: 500px) {
+  div.data {
+    font-size: 15px!important;
+  }
+
+  .page-title {
+    font-size: 18px;
+    margin-left: 0;
+  }
+
+  .show-more {
+    font-size: 12px;
+  }
 }

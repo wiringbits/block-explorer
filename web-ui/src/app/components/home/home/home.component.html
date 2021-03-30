@@ -1,30 +1,35 @@
 <div class="row">
   <app-ticker class="col-xs-12" [lastBlock]="blocks[0]"></app-ticker>
 
-  <div class="home-table-container col-xs-12 col-md-6">
+  <div class="home-table-container col-xs-12 col-lg-6">
     <div class="tab-content">
-      <div class="page-title col-sm-3 col-xs-12">
-        {{'label.blocks' | translate}}
-      </div>
-      <div class="col-sm-9 col-xs-12">
-        <a class="show-more text-primary" routerLink="/blocks">
-            {{'label.showMore' | translate | uppercase}}
-        </a>
+      <div class="col-xs-12 table-header">
+        <div class="page-title">
+          {{'label.blocks' | translate}}
+        </div>
+        <div class="">
+          <a class="show-more text-primary" routerLink="/blocks">
+              {{'label.showMore' | translate | uppercase}}
+          </a>
+        </div>
       </div>
       <app-block-table [hideBlockHash]="true" [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
     </div>
   </div>
 
-  <div class="home-table-container col-xs-12 col-md-6">
+  <div class="home-table-container col-xs-12 col-lg-6">
     <div class="tab-content">
-      <div class="page-title col-sm-3 col-xs-12">
-        {{'label.transactions' | translate}}
+      <div class="col-xs-12 table-header">
+        <div class="page-title">
+          {{'label.transactions' | translate}}
+        </div>
+        <div class="">
+          <a class="show-more text-primary" routerLink="/transactions">
+            {{'label.showMore' | translate | uppercase}}
+          </a>
+        </div>
       </div>
-      <div class="col-sm-9 col-xs-12">
-        <a class="show-more text-primary" routerLink="/transactions">
-          {{'label.showMore' | translate | uppercase}}
-        </a>
-      </div>
+      
       <app-transaction-table [hideBlockHash]="true" [allowInfiniteScroll]="false" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-table>
     </div>
   </div>
