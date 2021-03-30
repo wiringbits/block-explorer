@@ -73,6 +73,7 @@
 
       <tab heading="TPOS">
         <label class="first-position"> {{ 'label.createContract' | translate }}</label>
+        <label class="first-position red-text"> {{ 'label.tposContractNotice' | translate }}</label>
 
         <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
           autocomplete="off">
@@ -86,18 +87,6 @@
               <span
                 *ngIf="tposContractFormControl.get('merchantAddress').invalid && tposContractFormControl.get('merchantAddress').touched"
                 class="text-danger">Merchant address is required</span>
-            </div>
-          </div>
-          <div class="row">
-
-            <div class="form-group col-md-6 col-xs-8">
-              <label for="AmountXSN">{{ 'label.amount' | translate }}</label>
-              <input class="form-control" (change)="precise(amountXSN)" #amountXSN type="number" min="0"
-                step="0.00000001" placeholder="Enter amount in xsn" formControlName="contractAmount"
-                name="contractAmount">
-              <span
-                *ngIf="tposContractFormControl.get('contractAmount').invalid && tposContractFormControl.get('contractAmount').touched"
-                class="text-danger">Amount is required</span>
             </div>
           </div>
 
