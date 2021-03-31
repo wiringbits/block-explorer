@@ -255,8 +255,8 @@
           <thead>
             <tr>
               <th class="col-xs-1">#</th>
-              <th class="col-xs-4">{{'label.transaction' | translate | uppercase}}</th>
-              <th class="col-xs-3">{{'label.date' | translate | uppercase}}</th>
+              <th class="col-xs-4 pl-0 pr-0">{{'label.transaction' | translate | uppercase}}</th>
+              <th class="col-xs-3 pl-1 pr-0">{{'label.date' | translate | uppercase}}</th>
               <th class="col-xs-2">{{'label.value' | translate | uppercase}}</th>
               <th class="col-xs-2">{{'label.size' | translate | uppercase}}</th>
             </tr>
@@ -266,11 +266,11 @@
             [scrollWindow]="true">
             <tr *ngFor="let index = index; let item of transactions">
               <td>{{index + 1}}</td>
-              <td>
+              <td class="pl-0 pr-0" style="min-width: 270px;">
                 <a class="text-highlight" routerLink="/transactions/{{item.id}}">{{item.id | slice:0:35}}...</a>
               </td>
-              <td>{{item.time * 1000 | explorerDatetime}}</td>
-              <td>{{item.sent | explorerCurrency}}</td>
+              <td class="pl-1 pr-0" style="min-width: 170px;">{{item.time * 1000 | explorerDatetime}}</td>
+              <td class="pr-0">{{item.sent | explorerCurrency}}</td>
               <td>{{item.size}} bytes</td>
             </tr>
           </tbody>

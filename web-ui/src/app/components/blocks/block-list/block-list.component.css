@@ -5,11 +5,9 @@
 }
 
 .blocks-info {
-    float: right;
     background-color: #1C202E;
     border-radius: 20px;
     display: flex;
-    flex-direction: row;
     align-items: center;
     padding: 2px 6px;
     font-size: 12px;

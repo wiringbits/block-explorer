@@ -91,7 +91,7 @@
 
 .add-address .select-wrapper {
   max-width: 490px;
-  width: 100%;
+  width: 80%;
 }
 
 .add-address .select-wrapper select {
@@ -156,4 +156,36 @@
 .tab-content-tpos .custom-form-row > .sub-label {
   padding-bottom: 20px;
   width: 30%;
+}
+
+@media (max-width: 574px) {
+  .add-address .select-wrapper {
+    width: 70%;
+  }
+
+  .ballance-label {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 500px) {
+  .page-header {
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+  }
+
+  .page-header .page-title {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .add-address .select-wrapper {
+    width: 100%;
+  }
+
+  .add-btn {
+    margin: 10px auto;
+    float: right;
+  }
 }

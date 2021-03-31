@@ -53,7 +53,7 @@ body {
 .tab-content {
   background-color: #0F1223;
   border-radius: 8px;
-  /* margin-bottom: 86px; */
+  margin-bottom: 30px;
 
   display: flex;
   flex-direction: row;
@@ -213,6 +213,18 @@ td.right-align {
   padding-right: 0;
 }
 
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.block-header .page-title {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 @media (max-width:991px) {
 
   .no-left,
@@ -342,6 +354,18 @@ a.disabled {
 @media (max-width: 1200px) {
   div.data {
     font-size: 18px!important;
+  }
+}
+
+@media (max-width: 600px) {
+  .blocks-info {
+    flex-direction: column;
+  }
+
+  .blocks-info>div {
+      min-width: 110px;
+      display: flex;
+      justify-content: space-between;
   }
 }
 

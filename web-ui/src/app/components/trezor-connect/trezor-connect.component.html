@@ -168,27 +168,28 @@
             </div>
           </div>
 
-          
-          <table class="table table-responsive table-borderless">
-            <thead>
-              <tr>
-                <th>{{ 'label.ownerAddress' | translate | uppercase }}</th>
-                <th>{{ 'label.merchantAddress' | translate | uppercase }}</th>
-                <th>{{ 'label.merchantCommission' | translate | uppercase }}</th>
-                <th>{{ 'label.state' | translate | uppercase }}</th>
-                <th>{{ 'label.transaction' | translate | uppercase }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of tposContracts">
-                <td><a routerLink="/addresses/{{item.owner}}">{{item.owner}}</a></td>
-                <td><a routerLink="/addresses/{{item.merchant}}">{{item.merchant}}</a></td>
-                <td>{{item.merchantCommission}} %</td>
-                <td>{{item.state}}</td>
-                <td><a routerLink="/transactions/{{item.txid}}">{{item.txid}}</a></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th class="pr-1 pl-1" style="min-width: 120px;">{{ 'label.ownerAddress' | translate | uppercase }}</th>
+                  <th class="pr-1 pl-1" style="min-width: 100px;">{{ 'label.merchantAddress' | translate | uppercase }}</th>
+                  <th class="pr-1 pl-1" style="min-width: 100px;">{{ 'label.merchantCommission' | translate | uppercase }}</th>
+                  <th class="pr-1 pl-1" style="min-width: 50px;">{{ 'label.state' | translate | uppercase }}</th>
+                  <th class="pr-1 pl-1" style="min-width: 100px;">{{ 'label.transaction' | translate | uppercase }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of tposContracts">
+                  <td class="pr-1 pl-1"><a routerLink="/addresses/{{item.owner}}">{{item.owner}}</a></td>
+                  <td class="pr-1 pl-1"><a routerLink="/addresses/{{item.merchant}}">{{item.merchant}}</a></td>
+                  <td class="pr-1 pl-1">{{item.merchantCommission}} %</td>
+                  <td class="pr-1 pl-1" style="min-width: 50px;">{{item.state}}</td>
+                  <td class="pr-1 pl-1"><a routerLink="/transactions/{{item.txid}}">{{item.txid}}</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </tab>
     </tabset>

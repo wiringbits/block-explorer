@@ -18,12 +18,14 @@
       <tbody>
         <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'masternodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
           <td class="text-primary pr-0" style="min-width: 40px;">{{(currentPage - 1) * pageSize + index + 1}}</td>
-          <td class="text-primary pl-1 pr-1" style="min-width: 135px;">{{item.ip}}</td>
-          <td class="text-primary pl-0">{{item.protocol}}</td>
+          <td class="text-primary pl-1 pr-1" style="min-width: 135px;">
+            <a class="text-highlight" routerLink="/nodes/{{item.ip}}">{{item.ip}}</a>
+          </td>
+          <td class="text-primary pl-0" style="min-width: 70px;">{{item.protocol}}</td>
           <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
                 <td>{{item.status}}</td>
                 -->
-          <td class="text-primary pl-0 pr-0" style="min-width: 75px;">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
+          <td class="text-primary pl-0 pr-0" style="min-width: 80px;">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
           <td class="text-primary pl-1 pr-0" style="min-width: 70px;">{{amAgo(item.lastSeen)}}</td>
           <td class="right-align pl-0" style="min-width: 175px;">
             <a class="text-highlight" routerLink="/addresses/{{item.payee}}">{{truncate(item.payee, 8, 5)}}</a>

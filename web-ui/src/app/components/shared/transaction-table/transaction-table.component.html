@@ -11,12 +11,12 @@
       <table class="table table-borderless table-striped">
         <thead>
           <tr class="row">
-            <th class="col-1">{{'label.height' | translate | uppercase}}</th>
-            <th class="col-2">{{'label.txHash' | translate | uppercase}}</th>
-            <th class="col-2" *ngIf="!hideBlockHash">{{'label.type' | translate | uppercase}}</th>
-            <th class="col-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th>
+            <th class="col-1 pr-1">{{'label.height' | translate | uppercase}}</th>
+            <th class="col-2 pl-1">{{'label.txHash' | translate | uppercase}}</th>
+            <th class="col-2 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.type' | translate | uppercase}}</th>
+            <th class="col-1 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th>
             <th class="col-2 right-align pl-0 pr-1">{{'label.amount' | translate | uppercase}}</th>
-            <th class="col-2 right-align" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
+            <th class="col-2 right-align pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
             <!-- <th class="col-1 right-align" *ngIf="!hideBlockHash">{{'label.height' | translate | uppercase}}</th> -->
             <th class="col-2 right-align pl-0">{{'label.time' | translate | uppercase}}</th>
           </tr>
@@ -25,18 +25,18 @@
         <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getTransactions()"
           [scrollWindow]="true">
           <tr *ngFor="let item of transactions">
-            <td>
+            <td class="pr-0" style="min-width: 70px;">
               <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
             </td>
-            <td>
+            <td class="pr-0 pl-1" style="min-width: 125px;">
               <a class="text-highlight" routerLink="/transactions/{{item.id}}">{{truncate(item.id, 8, 5) | uppercase}}</a>
             </td>
-            <td class="text-primary" *ngIf="!hideBlockHash">Transaction</td>
-            <td class="text-primary" *ngIf="!hideBlockHash">
+            <td class="text-primary pl-1 pr-1" style="min-width: 80px;" *ngIf="!hideBlockHash">Transaction</td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">
               <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
             </td>
             <td class="text-primary right-align pl-0 pr-1" style="min-width: 150px;">{{getAmount(item) | explorerCurrency}}</td>
-            <td class="text-primary right-align" *ngIf="!hideBlockHash">{{getFee(item) | explorerCurrency}}</td>
+            <td class="text-primary right-align pl-1 pr-1" style="min-width: 140px;" *ngIf="!hideBlockHash">{{getFee(item) | explorerCurrency}}</td>
             <!-- <td class="right-align" *ngIf="!hideBlockHash">
               <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
             </td> -->
