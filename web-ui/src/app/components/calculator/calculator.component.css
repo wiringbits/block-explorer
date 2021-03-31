@@ -229,12 +229,6 @@
     margin-left: 110px;
 }
 
-@media screen and (min-width: 1200px) {
-    .switch-block .switch-wrapper {
-        margin-left: 50px;
-    }
-}
-
 ::ng-deep .switch-wrapper .switch {
     height: 16px;
     min-width: 32px;
@@ -305,4 +299,31 @@
 
 ::ng-deep .switch:focus {
     outline: none;
+}
+
+@media screen and (min-width: 1200px) {
+    .switch-block .switch-wrapper {
+        margin-left: 50px;
+    }
+}
+
+@media (max-width: 992px) {
+    .calculator-stats {
+        padding: 0!important;
+    }
+}
+
+@media (max-width: 640px) {
+    .calculator-comparison-table .main-label {
+        font-size: 14px!important;
+        height: 60px;
+    }
+
+    .calculator-comparison-table p {
+        font-size: 14px!important;
+    }
+
+    .calculator-comparison-table .sub-label {
+        font-size: 11px!important;
+    }
 }

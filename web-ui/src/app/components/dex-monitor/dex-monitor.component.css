@@ -179,3 +179,33 @@
 .dex-monitor .dex-monitor_stat__small.trade {
   background: url("../../../assets/trade.png") 90% 50% no-repeat, linear-gradient(319deg, rgba(1, 217, 222, 0.14) 0%, #0f1223 30%) 0% 0% no-repeat;
 }
+
+@media (max-width: 768px) {
+  .dex-stat-block {
+    padding: 0!important;
+  }
+
+  .dex-stat-block + .dex-stat-block {
+    margin-top: 27px;
+  }
+
+  .dex-monitor .dex-monitor_stat__small + .dex-monitor_stat__small {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 620px) {
+  .dex-monitor .dex-monitor_stat__small-group {
+    flex-wrap: wrap;
+  }
+
+  .dex-monitor .dex-monitor_stat__small {
+    width: 100%;
+    flex: unset;
+  }
+
+  .dex-monitor .dex-monitor_stat__small + .dex-monitor_stat__small {
+    margin-left: 0;
+    margin-top: 27px;
+  }
+}

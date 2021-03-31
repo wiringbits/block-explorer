@@ -8,7 +8,7 @@
     </select>
   </div>
 
-  <div class="col-xs-12 col-sm-6 pl-0">
+  <div class="col-xs-12 col-sm-6 pl-0 dex-stat-block">
     <div class="dex-monitor_stat total-volume">
       <p class="main-label uppercase">Total Volume</p>
       <h4 class="usd-amount" *ngIf="volume">$ {{numberWithCommas(volume.volumeUSD.toFixed(2))}} USD</h4>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="col-xs-12 col-sm-6 pr-0">
+  <div class="col-xs-12 col-sm-6 pr-0 dex-stat-block">
     <div class="burned-amount dex-monitor_stat">
       <p class="main-label uppercase">Burned Amount</p>
       <h4 class="usd-amount">$ 0.00 USD</h4>
