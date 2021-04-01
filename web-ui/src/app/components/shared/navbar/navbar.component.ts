@@ -21,6 +21,7 @@ export class NavbarComponent implements OnInit {
   public tabs: Tab[] = [];
 
   public currentUrl = null;
+  showNavbar = false;
 
   constructor(private router: Router) {
   }
@@ -33,5 +34,9 @@ export class NavbarComponent implements OnInit {
     const segments = this.router.url.split('/');
     if (isSubmenu && segments[1] == "") return false;
     return path.indexOf(segments[1]) > -1;
+  }
+
+  navbarToggle() {
+    this.showNavbar = !this.showNavbar;
   }
 }

@@ -29,7 +29,7 @@ export class ExplorerAmountPipe implements PipeTransform {
       return '0';
     }
     
-    return fillZero ? `${ this.zeroFill(currencyNumber.toLocaleString(undefined, { maximumFractionDigits: digit }), digit) } ` : `${ currencyNumber.toLocaleString(undefined, { maximumFractionDigits: digit }) } `;
+    return fillZero ? `${ this.zeroFill(currencyNumber.toLocaleString(undefined, { maximumFractionDigits: digit }), digit) }` : `${ currencyNumber.toLocaleString(undefined, { maximumFractionDigits: digit }) }`;
   }
 
 }

@@ -145,7 +145,23 @@
   flex: auto;
 }
 
+.navbar-toggler {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .navbar-toggler {
+    display: block;
+    background: transparent;
+    outline: none;
+    border: 1px solid #01D9DE;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    color: #01D9DE;
+    float: right;
+  }
+
   .top-nav {
     display: flex;
     flex-wrap: wrap;
@@ -168,11 +184,28 @@
   .navbar-dropdown button {
     width: 100%;
     text-align: left;
+    height: 40px!important;
+  }
+
+  .navbar-nav {
+    display: none;
+    opacity: 0;
+    transition: all 3s;
+  }
+
+  .navbar-nav.show {
+    display: block;
+    opacity: 1;
+    transition: all 3s;
   }
 
   .navbar-nav ul.dropdown-menu {
     width: 100%;
-    margin-top: 50px;
+    margin-top: 40px;
+  }
+
+  .navbar-nav ul.dropdown-menu li {
+    height: 40px;
   }
 }
 

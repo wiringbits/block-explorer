@@ -169,6 +169,8 @@ export class CalculatorComponent implements OnInit {
           this.stakingWaitTime += date[key] + key /* + (date[key] > 1 ? 's' : '') */ + ' ';
         }
       }
+    } else {
+      this.stakingWaitTime = "0h 0m 0s";
     }
     if (this.mnstaking) {
       let val = 9 / this.mnstaking;
@@ -178,6 +180,8 @@ export class CalculatorComponent implements OnInit {
           this.mnWaitTime += date[key] + key /* + (date[key] > 1 ? 's' : '') */ + ' ';
         }
       }
+    } else {
+      this.mnWaitTime = "0h 0m 0s";
     }
     if (this.stakingcoin > this.mnstaking) {
       this.masternodeCount = 0;

@@ -121,7 +121,7 @@
 
 .calculator-comparison-table .main-label {
     color: white;
-    font-size: 20px;
+    font-size: 14px;
     line-height: 24px;
     text-transform: uppercase;
 }
@@ -167,7 +167,7 @@
 
 .calculator-balance-input {
     background-color: transparent !important;
-    color: #01D9DE;
+    color: #989DCC;
     outline: none;
     box-shadow: none;
     font-size: 24px;
@@ -315,7 +315,6 @@
 
 @media (max-width: 640px) {
     .calculator-comparison-table .main-label {
-        font-size: 14px!important;
         height: 60px;
     }
 

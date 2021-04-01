@@ -9,14 +9,17 @@
           <a routerLink="/" class="title pr-0 pl-0">
             <span class="navbar-brand pr-0 pl-0"><span class="navbar-brand-bold">XSN</span> Block Explorer</span>
           </a>
+          <button class="btn navbar-toggler" type="button" (click)="navbarToggle()">
+            <span class="glyphicon glyphicon-menu-hamburger"></span>
+          </button>
         </div>
       </div>
   
       <app-finder class="search-box"></app-finder>
     </div>
 
-    <div class="col-lg-12 col-md-12 col-sm-12 navbar-tabbar">
-      <ul class="nav navbar-nav">
+    <div class="col-xs-12 navbar-tabbar">
+      <ul class="nav navbar-nav {{showNavbar ? 'show' : ''}}">
         <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.selector, false)}">
           <div *ngIf="tab.hasChildren; else elseBlock" class="btn-group dropdown navbar-dropdown" triggers="mouseover" #dp="bs-dropdown" [autoClose]="false" dropdown>
             <button class="btn dropdown-toggle" (click)="dp.show()" type="button" aria-controls="dropdown-nested" dropdownToggle (mouseleave)="dp.hide()">{{tab.label | translate |
