@@ -11,10 +11,13 @@ case class BlockInfo(
     height: Height,
     time: Long,
     difficulty: BigDecimal,
-    transactions: Int
+    transactions: Int,
+    tposContract: Option[TransactionId],
+    medianTime: Long
 )
 
 object BlockInfoCodec {
+
   val completeWrites: Writes[BlockInfo] = (obj: BlockInfo) => {
     Json.obj(
       "hash" -> obj.hash,
@@ -24,7 +27,9 @@ object BlockInfoCodec {
       "height" -> obj.height,
       "time" -> obj.time,
       "difficulty" -> obj.difficulty,
-      "transactions" -> obj.transactions
+      "transactions" -> obj.transactions,
+      "tposContract" -> obj.tposContract,
+      "medianTime" -> obj.medianTime
     )
   }
 }

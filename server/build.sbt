@@ -55,8 +55,8 @@ libraryDependencies ++= Seq(
   "com.alexitc" %% "playsonify-play-test" % playsonifyVersion % Test
 )
 
-libraryDependencies += "com.google.inject" % "guice" % "5.0.1"
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.6"
+libraryDependencies += "com.google.inject" % "guice" % "4.2.3"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.7"
 libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.10"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19"
 
@@ -75,12 +75,12 @@ libraryDependencies += "com.google.guava" % "guava" % "30.1-jre"
 
 libraryDependencies += "com.sendgrid" % "sendgrid-java" % "4.0.1"
 
-libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.12"
-libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.12"
+libraryDependencies += "io.kamon" %% "kamon-bundle" % "2.1.14"
+libraryDependencies += "io.kamon" %% "kamon-apm-reporter" % "2.1.14"
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala" % "1.16.29" % Test
-libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.16.29" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala" % "1.16.33" % Test
+libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.16.33" % Test
 
 libraryDependencies ++= Seq(
   "com.spotify" % "docker-client" % "8.16.0" % "test",

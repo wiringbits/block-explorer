@@ -131,6 +131,7 @@ export class AppComponent implements OnInit {
       'label.path': 'Path',
       'label.generatedTransaction': 'Generated transaction id',
       'label.createContract': 'Create TPoS contract',
+      'label.tposContractNotice': 'For now, this only works on Trezor T, once the contract gets created, send the amount you desire to stake to the contract Staking address, refresh the page after some minutes if you do not see such address',
 
 
       'label.address': 'Address',

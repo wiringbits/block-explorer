@@ -32,6 +32,7 @@ export class TransactionsService {
     const body = {
       hex: hex
     };
+    console.log('Pushing transaction', hex);
 
     return this.http.post<any>(url, body, httpOptions).toPromise();
   }

@@ -1,6 +1,7 @@
 package com.xsn.explorer.migrations
 
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
@@ -9,9 +10,11 @@ import play.api.db.Database
 import scala.concurrent.ExecutionContext
 
 @com.github.ghik.silencer.silent
-class MigrationRunner @Inject() (db: MigrationRunner.DatabaseOperations)(
-    implicit ec: ExecutionContext
-) {
+class MigrationRunner @Inject() (
+    transactionsDataHandler: TransactionFutureDataHandler,
+    blockDataHandler: BlockFutureDataHandler,
+    db: MigrationRunner.DatabaseOperations
+)(implicit ec: ExecutionContext) {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -23,7 +26,7 @@ class MigrationRunner @Inject() (db: MigrationRunner.DatabaseOperations)(
 
     if (percentage != 0 && percentage != previousPercentage) {
       logger.info(
-        s"migrated block at height ${migratedHeight}, ${percentage}% done"
+        s"migrated block at height $migratedHeight, $percentage% done"
       )
     }
   }

@@ -6,12 +6,7 @@ import com.alexitc.playsonify.models.pagination.Limit
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{
-  DataHelper,
-  FileBasedXSNService,
-  TransactionDummyDataHandler,
-  TransactionLoader
-}
+import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
@@ -29,9 +24,11 @@ class TransactionsControllerSpec extends MyAPISpec {
   private val coinbaseTx = TransactionLoader.get(
     "024aba1d535cfe5dd3ea465d46a828a57b00e1df012d7a2d158e0f7484173f7c"
   )
+
   private val nonCoinbaseTx = TransactionLoader.get(
     "0834641a7d30d8a2d2b451617599670445ee94ed7736e146c13be260c576c641"
   )
+
   private val severalInputsTx =
     TransactionLoader.get(
       "a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb"
@@ -69,6 +66,7 @@ class TransactionsControllerSpec extends MyAPISpec {
   private val customXSNService = new FileBasedXSNService
 
   private val transactionDataHandler = new TransactionDummyDataHandler {
+
     override def getOutput(
         txid: TransactionId,
         index: Int
@@ -79,7 +77,8 @@ class TransactionsControllerSpec extends MyAPISpec {
     override def get(
         limit: Limit,
         lastSeenTxid: Option[TransactionId],
-        orderingCondition: OrderingCondition
+        orderingCondition: OrderingCondition,
+        includeZeroValueTransactions: Boolean
     ): ApplicationResult[List[TransactionInfo]] = {
       if (lastSeenTxid == None) {
         Good(transactionList)

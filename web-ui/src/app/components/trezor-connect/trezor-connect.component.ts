@@ -80,7 +80,6 @@ export class TrezorConnectComponent implements OnInit {
   createFormGroup(): FormGroup {
     return new FormGroup({
       merchantAddress: new FormControl('', [Validators.required]),
-      contractAmount: new FormControl('', [Validators.required]),
       commissionPercent: new FormControl('', [Validators.required])
     });
   }
@@ -92,7 +91,7 @@ export class TrezorConnectComponent implements OnInit {
         'showOnTrezor': false
       };
     });
-    const response = await TrezorConnect.getAddress({ bundle: bundle });
+    const response: any = await TrezorConnect.getAddress({ bundle: bundle });
 
     if (response.success) {
       this.showAllButton = false;
@@ -178,7 +177,8 @@ export class TrezorConnectComponent implements OnInit {
         outputs: outputs,
         refTxs: txs,
         coin: 'Stakenet'
-      }).then(async (result) => {
+      }).then(async (result: any) => {
+        console.log('signTrezorTransaction', result);
         if (result.payload.error) {
           this.notificationService.error(result);
         } else {
@@ -189,14 +189,19 @@ export class TrezorConnectComponent implements OnInit {
   }
 
 
+  /**
+   * Right now this only creates the TPoS contract transaction by sending 1 XSN to the staking address.
+   *
+   * Once the contract transaction gets confirmed, its important to send the coins to stake to the
+   * staking address.
+   */
   async sendTPOS() {
     if (!this.validateTposForm()) {
       return;
     }
 
     const contractForm = this.tposContractFormControl.getRawValue();
-    const fee = TransactionFees[0].amount; // 1000 satoshis
-    const contractAmount = contractForm.contractAmount;
+    const fee = 1000; // 1000 satoshis
     const collateral = convertToSatoshis(1); // The collateral is one xsn
     const generatedInputs = this.generateInputs(collateral + fee);
 
@@ -204,7 +209,11 @@ export class TrezorConnectComponent implements OnInit {
       this.notificationService.error(generatedInputs.error);
       return;
     }
+    console.log('sendTPOS -> generatedInputs', generatedInputs);
 
+    // TODO: Check that the address has no history because reusing addresses has caused
+    // the contract to be invalid (don't know why), otherwise, generate another address.
+    //
     // A new legacy address is required for each new tpos contract.
     const tposAddress = await this.generateNextAddress(44);
     if (tposAddress === undefined) {
@@ -220,12 +229,13 @@ export class TrezorConnectComponent implements OnInit {
     }
 
     const firstOutPoint = generatedInputs.inputs[0].prev_hash + ':' + generatedInputs.inputs[0].prev_index;
-    const messageSigned = await TrezorConnect.signMessage({
+    const messageSigned: any = await TrezorConnect.signMessage({
       path: tposAddress.path,
-      message: firstOutPoint
+      message: firstOutPoint,
+      coin: 'Stakenet'
     });
 
-    if (messageSigned.payload.error) {
+    if (!messageSigned.success) {
       this.notificationService.error(messageSigned.payload.error);
       return;
     }
@@ -256,12 +266,10 @@ export class TrezorConnectComponent implements OnInit {
       op_return_data: contract.tposContractEncoded,
       script_type: 'PAYTOOPRETURN',
     };
-
     outputs.push(tposContract);
+    console.log('sendTPOS -> contract output', tposContract);
 
-    const hashTransactions = generatedInputs.inputs.map((x) => {
-      return x.prev_hash;
-    });
+    const hashTransactions = generatedInputs.inputs.map((x) => x.prev_hash);
 
     // push the transaction to explorer
     this.getRefTransactions(hashTransactions).subscribe(async txs => {
@@ -272,7 +280,9 @@ export class TrezorConnectComponent implements OnInit {
         coin: 'Stakenet'
       };
 
-      const trezorResult = await this.signTrezorTransaction(tposTransaction);
+      console.log('sendTPOS -> tposTransaction', tposTransaction);
+      const trezorResult: any = await this.signTrezorTransaction(tposTransaction);
+
       if (trezorResult.payload.error) {
         this.notificationService.error(trezorResult.payload.error);
       } else {
@@ -283,10 +293,8 @@ export class TrezorConnectComponent implements OnInit {
         generatedInputs.inputs.forEach(input => {
           this.removeUTXO(input.prev_hash, input.prev_index);
         });
-        this.signTransaction(tposAddress.address, contractAmount, fee);
       }
     });
-
   }
 
   verifyAddress(trezorAddress: TrezorAddress): void {
@@ -317,7 +325,7 @@ export class TrezorConnectComponent implements OnInit {
   }
 
   private async getTrezorAddress(path: string): Promise<TrezorAddress> {
-    const result = await TrezorConnect.getAddress({ path: path, coin: 'Stakenet', showOnTrezor: false });
+    const result: any = await TrezorConnect.getAddress({ path: path, coin: 'Stakenet', showOnTrezor: false });
     return result.payload;
   }
 
@@ -337,10 +345,10 @@ export class TrezorConnectComponent implements OnInit {
     const selectedUtxos = selectUtxos(this.utxos, satoshis);
     if (selectedUtxos.utxos.length === 0) {
       return {
-        error: 'No utoxs'
+        error: 'Not enough coins, note that TPoS contracts need to be cancelled manually to free the 1 XSN collateral'
       };
     }
-    const change = selectedUtxos.total - satoshis;
+    const change = selectedUtxos.satoshis - satoshis;
     const inputs = selectedUtxos.utxos.map(utxo => toTrezorInput(this.trezorAddresses, utxo));
     const addressToChange = selectedUtxos.utxos[selectedUtxos.utxos.length - 1].address;
 
@@ -357,7 +365,7 @@ export class TrezorConnectComponent implements OnInit {
     );
   }
 
-  precise(elem) {
+  precise(elem: { value: string; }) {
     elem.value = Number(elem.value).toFixed(8);
   }
 

@@ -1,4 +1,9 @@
+import { TposContract } from '../models/tpos-contract';
 import { UTXO } from '../models/utxo';
+
+export class WrapedUTxOs {
+  constructor(public satoshis: number, public utxos: UTXO[]) { }
+}
 
 export class TrezorAddress {
   constructor(
@@ -79,8 +84,29 @@ export const toTrezorReferenceTransaction = (raw: any) => {
   };
 };
 
-export const selectUtxos = (available: UTXO[], satoshis: number) => {
-  const response = available.reduce((acc, utxo) => {
+/**
+ * Select enough UTxOs to cover the amount of satoshis, ignoring any UTxO involved in a TPoS contract.
+ *
+ * The use case for this function is to get the UTxOs to spend in order to send a transaction with
+ * the given satoshis (fee already included).
+ *
+ * The given tposContracts are not being included to avoid closing them by accident.
+ *
+ * @param available the available UTxOs
+ * @param satoshis the target amount of satoshis
+ * @param tposContracts the contracts to avoid in the UTxO selection
+ * @returns the necessary UTXoS to cover the given satoshis, the UTxO list being empty when
+ *          there aren't enough UTxOs.
+ */
+export const selectUtxos = (available: UTXO[], satoshis: number, tposContracts: TposContract[] = []): WrapedUTxOs => {
+  // make sure to ignore the tpos contact collaterals to avoid closing them by accident
+  const filteredUtxos = available.filter(utxo => {
+    return tposContracts.findIndex(contract => {
+      return contract.txid === utxo.txid && contract.index === utxo.outputIndex;
+    }) < 0;
+  });
+
+  const response = filteredUtxos.reduce((acc, utxo) => {
     if (acc.total >= satoshis) {
       return acc;
     } else {
@@ -92,9 +118,9 @@ export const selectUtxos = (available: UTXO[], satoshis: number) => {
   }, { total: 0, utxos: [] });
 
   if (response.total < satoshis) {
-    return { total: 0, utxos: [] };
+    return new WrapedUTxOs(0, []);
   } else {
-    return response;
+    return new WrapedUTxOs(response.total, response.utxos);
   }
 };
 

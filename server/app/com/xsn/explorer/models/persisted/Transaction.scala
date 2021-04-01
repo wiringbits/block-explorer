@@ -13,8 +13,9 @@ case class Transaction(
 
 object Transaction {
 
-  /** The coins where generated on the given output index of the given txid (from).
-    */
+  /**
+   * The coins where generated on the given output index of the given txid (from).
+   */
   case class Input(
       fromTxid: TransactionId,
       fromOutputIndex: Int,
@@ -80,12 +81,15 @@ object Transaction {
     def time: Long = transaction.time
     def blockhash: Blockhash = transaction.blockhash
     def size: Size = transaction.size
+    def sent: BigDecimal = inputs.map(_.value).sum
+    def received: BigDecimal = outputs.map(_.value).sum
   }
 
-  /** Transform a rpc transaction to a persisted transaction.
-    *
-    * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
-    */
+  /**
+   * Transform a rpc transaction to a persisted transaction.
+   *
+   * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
+   */
   def fromRPC(
       tx: rpc.Transaction[TransactionVIN.HasValues]
   ): (HasIO, Boolean) = {
@@ -123,16 +127,15 @@ object Transaction {
     (HasIO(transaction, inputs, outputs), seemsTPoSContract(tx))
   }
 
-  /** A transaction can have at most one contract
-    */
+  /**
+   * A transaction can have at most one contract
+   */
   private def seemsTPoSContract(
       tx: rpc.Transaction[rpc.TransactionVIN.HasValues]
   ): Boolean = {
     val collateralMaybe = tx.vout.find(_.value == 1)
     val zeroAmount = tx.vout.find(_.value == 0)
-    val hasOpReturn = zeroAmount.exists(t =>
-      t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN"))
-    )
+    val hasOpReturn = zeroAmount.exists(t => t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN")))
 
     collateralMaybe.isDefined && zeroAmount.isDefined && hasOpReturn
   }

@@ -15,7 +15,7 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
       limit: pagination.Limit,
       lastSeenTxid: Option[TransactionId],
       orderingCondition: OrderingCondition
-  ): ApplicationResult[List[Transaction.HasIO]] = ???
+  ): ApplicationResult[List[TransactionInfo.HasIO]] = ???
 
   override def getByAddress(
       address: Address,
@@ -36,7 +36,8 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
   override def get(
       limit: pagination.Limit,
       lastSeenTxid: Option[TransactionId],
-      orderingCondition: OrderingCondition
+      orderingCondition: OrderingCondition,
+      includeZeroTransactions: Boolean
   ): ApplicationResult[List[TransactionInfo]] = ???
 
   override def getByBlockhash(

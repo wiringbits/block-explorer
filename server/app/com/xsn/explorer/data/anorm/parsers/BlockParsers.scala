@@ -137,7 +137,9 @@ object BlockParsers {
     parseHeight ~
     parseTime ~
     parseDifficulty ~
-    parseTransactions).map {
+    parseTransactions ~
+    parseTposContract.? ~
+    parseMedianTime).map {
 
     case hash ~
         nextBlockhash ~
@@ -146,7 +148,9 @@ object BlockParsers {
         height ~
         time ~
         difficulty ~
-        transactions =>
+        transactions ~
+        tposContract ~
+        medianTime =>
       BlockInfo(
         hash = hash,
         previousBlockhash = previousBlockhash,
@@ -155,7 +159,9 @@ object BlockParsers {
         height = height,
         time = time,
         difficulty = difficulty,
-        transactions = transactions
+        transactions = transactions,
+        tposContract = tposContract,
+        medianTime = medianTime
       )
   }
 }
