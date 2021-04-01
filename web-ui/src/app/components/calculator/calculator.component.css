@@ -175,6 +175,11 @@
     border: none;
 }
 
+.calculator-balance-input::placeholder {
+    font-size: 24px;
+    font-weight: 300;
+}
+
 .e-control-wrapper.e-slider-container.e-horizontal .e-slider {
     height: 16px;
     top: 0;
