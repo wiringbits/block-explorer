@@ -331,6 +331,8 @@ export class AppComponent implements OnInit {
       'label.masternodeHostingCost': 'Masternode Hosting Cost',
       'label.totalRewardsEST': 'Total rewards (est)',
       'label.daysUntilFreeMasternodeEarned': 'Days Until Free Masternode Earned',
+      'label.monthsUntilFreeMasternodeEarned': 'Months Until Free Masternode Earned',
+      'label.yearsUntilFreeMasternodeEarned': 'Years Until Free Masternode Earned',
       'label.roi': 'ROI'
     };
   }
