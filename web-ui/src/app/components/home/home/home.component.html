@@ -13,7 +13,7 @@
           </a>
         </div>
       </div>
-      <app-block-table [hideBlockHash]="true" [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
+      <app-block-table [hideBlockHash]="true" [isLoading]="isBlockLoading" [loadingType]="2" [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
     </div>
   </div>
 
@@ -23,14 +23,14 @@
         <div class="page-title">
           {{'label.transactions' | translate}}
         </div>
-        <div class="">
+        <div>
           <a class="show-more text-primary" routerLink="/transactions">
             {{'label.showMore' | translate | uppercase}}
           </a>
         </div>
       </div>
       
-      <app-transaction-table [hideBlockHash]="true" [allowInfiniteScroll]="false" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-table>
+      <app-transaction-table [hideBlockHash]="true" [isLoading]="isTransactionLoading" [loadingType]="2" [allowInfiniteScroll]="false" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-table>
     </div>
   </div>
 </div>

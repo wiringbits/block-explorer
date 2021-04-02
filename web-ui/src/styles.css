@@ -383,3 +383,40 @@ a.disabled {
     font-size: 12px;
   }
 }
+
+table.isLoading th {
+  width: 100%;
+}
+
+table.isLoading td {
+  position: relative;
+  overflow: hidden;
+  /* height: 50px; */
+}
+
+table.isLoading td div {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  width: 100%;
+}
+
+table.isLoading td div::after {
+  content: " ";
+  height: 100%;
+  width: 100%;
+  left: 0%;
+  top: 0%;
+  position: absolute;
+  border-radius: 10px;
+  background-image: linear-gradient(90deg, #d8d8d801, #d8d8d8, #d8d8d801);
+  animation-name: example;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes example {
+  from {transform: translateX(-100%); }
+  to {transform: translateX(100%);}
+}
+ 

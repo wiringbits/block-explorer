@@ -48,3 +48,9 @@ ul.merchant-select li:hover {
     padding-top: 10px;
     border-top: 1px solid #282D3C;
 }
+
+.address-detail-block h4 {
+    margin-left: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}

@@ -23,12 +23,15 @@ export class TransactionTableComponent implements OnInit {
   transactions: Array<Transaction>;
   @Input()
   isLoading: boolean = false;
+  @Input()
+  loadingType: number = 1;
   @Output()
   updateTransactions: EventEmitter<any> = new EventEmitter();
 
   public lottieConfig: Object;
 
   limit = 10;
+  emptyArray = new Array(10);
 
   truncate = truncate;
   amAgo = amAgo;
@@ -40,10 +43,10 @@ export class TransactionTableComponent implements OnInit {
       autoplay: true,
       loop: true
     };
+    this.emptyArray = Array(10).fill(4); // [4,4,4,4,4]
   }
 
   ngOnInit() {
-    // this.updateTransactions.emit();
   }
 
   getTransactions() {

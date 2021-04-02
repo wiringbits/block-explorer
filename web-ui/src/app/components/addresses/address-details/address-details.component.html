@@ -14,20 +14,12 @@
 
       <div *ngIf="address != null">
         <div class="row">
-          <div class="col-xs-6 pl-0">
+          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 address-detail-block">
+            <h4 class="text-primary">
+              {{'label.summary' | translate}}
+            </h4>
             <div class="table-responsive">
               <table class="table table-borderless">
-                <thead>
-                  <tr>
-                    <th class="col-xs-3">
-                      <h4 class="text-primary">
-                        {{'label.summary' | translate}}
-                      </h4>
-                    </th>
-                    <th class="col-xs-9"></th>
-                  </tr>
-                </thead>
-
                 <tbody>
                   <tr>
                     <td class="text-label">{{'label.address' | translate}}</td>

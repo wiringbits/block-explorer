@@ -17,7 +17,8 @@ export class HomeComponent implements OnInit {
   transactions: Transaction[] = [];
   address: string;
   limit = 10;
-  isLoading: Boolean = false;
+  isTransactionLoading: Boolean = false;
+  isBlockLoading: Boolean = false;
 
   constructor(private blocksService: BlocksService, private transactionsService: TransactionsService,
     private errorService: ErrorService) { }
@@ -40,6 +41,7 @@ export class HomeComponent implements OnInit {
       return;
     }
     let lastSeenHash = '';
+    this.isBlockLoading = true;
     if (this.blocks.length > 0) {
       lastSeenHash = this.blocks[this.blocks.length - 1].hash;
     }
@@ -57,7 +59,7 @@ export class HomeComponent implements OnInit {
     if (this.transactions.length > 0) {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;
     }
-    this.isLoading = true;
+    this.isTransactionLoading = true;
     this.transactionsService
       .getList(lastSeenTxId, this.limit)
       .subscribe(
@@ -67,8 +69,7 @@ export class HomeComponent implements OnInit {
   }
 
   private onTransactionRetrieved(response: Transaction[]) {
-    this.isLoading = false;
-    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
+    this.isTransactionLoading = false;
     this.transactions = this.transactions.concat(response).sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
@@ -76,7 +77,7 @@ export class HomeComponent implements OnInit {
   }
 
   private onBlockRetrieved(response: Block[]) {
-    // this.latestBlockHeight = this.blocks.reduce((max, block) => Math.max(block.height, max), 0);
+    this.isBlockLoading = false;
     this.blocks = this.blocks.concat(response).sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
