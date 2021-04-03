@@ -6,9 +6,21 @@ import { Component, OnInit } from '@angular/core';
     styleUrls: ['./node-list.component.css']
 })
 export class NodeListComponent implements OnInit {
-
-    constructor() { }
+    isMasternodeUpdating = false;
+    lottieConfig = null;
+    constructor() {
+        this.lottieConfig = {
+            path: 'assets/Updating.json',
+            renderer: 'canvas',
+            autoplay: true,
+            loop: true
+          };
+    }
 
     ngOnInit() {
+    }
+
+    updateMasternode(event) {
+        this.isMasternodeUpdating = event;
     }
 }

@@ -1,21 +1,31 @@
 <div class="row">
-    <app-node-ticker class="col-xs-12"></app-node-ticker>
-  
-    <div class="node-table-container col-xs-12 col-lg-6">
-      <div class="tab-content">
-        <div class="page-title col-xs-12">
+  <app-node-ticker class="col-xs-12"></app-node-ticker>
+
+  <div class="node-table-container col-xs-12 col-lg-6">
+    <div class="tab-content">
+      <div class="page-title-block col-xs-12">
+        <div class="page-title">
           {{'label.masternodes' | translate}}
         </div>
-        <app-masternodes></app-masternodes>
-      </div>
-    </div>
-  
-    <div class="node-table-container col-xs-12 col-lg-6">
-      <div class="tab-content">
-        <div class="page-title col-xs-12">
-          {{'label.tposNodes' | translate}}
+        <div *ngIf="isMasternodeUpdating">
+          <lottie-animation-view
+            [options]="lottieConfig"
+            [width]="50"
+            [height]="50"
+          >
+          </lottie-animation-view>
         </div>
-        <app-tposnodes></app-tposnodes>
       </div>
+      <app-masternodes (update)="updateMasternode(event)"></app-masternodes>
     </div>
   </div>
+
+  <div class="node-table-container col-xs-12 col-lg-6">
+    <div class="tab-content">
+      <div class="page-title col-xs-12">
+        {{'label.tposNodes' | translate}}
+      </div>
+      <app-tposnodes></app-tposnodes>
+    </div>
+  </div>
+</div>

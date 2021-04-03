@@ -44,7 +44,8 @@ import { LottieAnimationViewModule } from 'ng-lottie';
         FooterComponent,
         BlockTableComponent,
         TransactionTableComponent,
-        TransactionTablev2Component
+        TransactionTablev2Component,
+        LottieAnimationViewModule
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

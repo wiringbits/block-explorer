@@ -1,6 +1,6 @@
 
 import { map, tap } from 'rxjs/operators';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -25,16 +25,31 @@ export class MasternodesComponent implements OnInit {
   currentPage = 1;
   pageSize = 10;
   asyncItems: Observable<Masternode[]>;
+  interval = null;
+  @Output() update: any = new EventEmitter();
 
   amAgo = amAgo;
   truncate = truncate;
 
   constructor(
     private masternodesService: MasternodesService,
-    private errorService: ErrorService) { }
+    private errorService: ErrorService) {
+      
+    }
 
   ngOnInit() {
     this.getPage(this.currentPage);
+    this.interval = setInterval(() => this.loadData(), 10000);
+  }
+
+  loadData() {
+    this.update.emit(true);
+    this.getPage(this.currentPage)
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+    this.interval = null;
   }
 
   getPage(page: number) {
@@ -49,5 +64,6 @@ export class MasternodesComponent implements OnInit {
           if (a.lastSeen > b.lastSeen) return -1;
           return 1;
         })));
+    this.update.emit(false);
   }
 }

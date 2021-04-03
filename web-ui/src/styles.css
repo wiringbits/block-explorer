@@ -419,4 +419,8 @@ table.isLoading td div::after {
   from {transform: translateX(-100%); }
   to {transform: translateX(100%);}
 }
- 
+
+.page-title-block {
+  display: flex;
+  align-items: center;
+}

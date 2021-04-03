@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Block } from '../../../models/block';
 import { Transaction } from '../../../models/transaction';
 import { BlocksService } from '../../../services/blocks.service';
@@ -19,13 +19,38 @@ export class HomeComponent implements OnInit {
   limit = 10;
   isTransactionLoading: Boolean = false;
   isBlockLoading: Boolean = false;
+  interval = null;
+  isBlockUpdating: Boolean = false;
+  isTransactionUpdating: Boolean = false;
+  public lottieConfig: Object;
 
   constructor(private blocksService: BlocksService, private transactionsService: TransactionsService,
-    private errorService: ErrorService) { }
+    private errorService: ErrorService) {
+      this.lottieConfig = {
+        path: 'assets/Updating.json',
+        renderer: 'canvas',
+        autoplay: true,
+        loop: true
+      };
+    }
 
   ngOnInit() {
+    this.isBlockLoading = true;
+    this.isTransactionLoading = true;
+    this.loadData();
+    this.interval = setInterval(() => this.loadData(true), 10000);
+  }
+
+  loadData(updating = false) {
+    this.isBlockUpdating = updating;
+    this.isTransactionUpdating = updating;
     this.updateBlocks();
     this.updateTransactions();
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+    this.interval = null;
   }
 
   selectView(view: string) {
@@ -41,11 +66,9 @@ export class HomeComponent implements OnInit {
       return;
     }
     let lastSeenHash = '';
-    this.isBlockLoading = true;
     if (this.blocks.length > 0) {
       lastSeenHash = this.blocks[this.blocks.length - 1].hash;
     }
-
     this.blocksService
       .getLatest(this.limit, lastSeenHash)
       .subscribe(
@@ -59,7 +82,6 @@ export class HomeComponent implements OnInit {
     if (this.transactions.length > 0) {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;
     }
-    this.isTransactionLoading = true;
     this.transactionsService
       .getList(lastSeenTxId, this.limit)
       .subscribe(
@@ -70,18 +92,20 @@ export class HomeComponent implements OnInit {
 
   private onTransactionRetrieved(response: Transaction[]) {
     this.isTransactionLoading = false;
-    this.transactions = this.transactions.concat(response).sort(function (a, b) {
+    this.isTransactionUpdating = false;
+    this.transactions = Object.assign([], response.sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
-    });
+    }));
   }
 
   private onBlockRetrieved(response: Block[]) {
     this.isBlockLoading = false;
-    this.blocks = this.blocks.concat(response).sort(function (a, b) {
+    this.isBlockUpdating = false;
+    this.blocks = Object.assign([], response.sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
-    });
+    }));
   }
 
   private onError(response: any) {
