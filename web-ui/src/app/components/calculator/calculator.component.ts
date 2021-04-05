@@ -160,7 +160,11 @@ export class CalculatorComponent implements OnInit {
       this.holdAmount = 99999999;
     }
     this.stakingcoin = this.rewardsSummary.stakingROI * this.holdAmount;
-    this.mnstaking = Math.floor(this.holdAmount / this.requiredForMasternode) * this.requiredForMasternode * this.rewardsSummary.masternodesROI + (this.holdAmount % this.requiredForMasternode) * this.rewardsSummary.stakingROI;
+    if (this.holdAmount >= 15000) {
+      this.mnstaking = Math.floor(this.holdAmount / this.requiredForMasternode) * this.requiredForMasternode * this.rewardsSummary.masternodesROI + (this.holdAmount % this.requiredForMasternode) * this.rewardsSummary.stakingROI;
+    } else {
+      this.mnstaking = null;
+    }
     if (this.rewardsSummary && this.holdAmount) {
       let val = 9 / (this.rewardsSummary.stakingROI * this.holdAmount);
       let date = this.yearToTime(val);

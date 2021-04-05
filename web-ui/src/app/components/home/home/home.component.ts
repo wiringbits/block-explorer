@@ -70,7 +70,7 @@ export class HomeComponent implements OnInit {
       lastSeenHash = this.blocks[this.blocks.length - 1].hash;
     }
     this.blocksService
-      .getLatest(this.limit, lastSeenHash)
+      .getLatest(this.limit, null)
       .subscribe(
         response => this.onBlockRetrieved(response),
         response => this.onError(response)
@@ -83,7 +83,7 @@ export class HomeComponent implements OnInit {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;
     }
     this.transactionsService
-      .getList(lastSeenTxId, this.limit)
+      .getList(null, this.limit)
       .subscribe(
         response => this.onTransactionRetrieved(response.data),
         response => this.onError(response)
@@ -102,10 +102,7 @@ export class HomeComponent implements OnInit {
   private onBlockRetrieved(response: Block[]) {
     this.isBlockLoading = false;
     this.isBlockUpdating = false;
-    this.blocks = Object.assign([], response.sort(function (a, b) {
-      if (a.height > b.height) return -1;
-      else return 1;
-    }));
+    this.blocks = Object.assign([], response);
   }
 
   private onError(response: any) {

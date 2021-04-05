@@ -18,7 +18,7 @@ export class TransactionsService {
 
   constructor(private http: HttpClient) { }
 
-  getList(lastSeenTxId: string, limit: number = 10, orderBy: string = 'asc', includeZeroValueTransactions: Boolean = false): Observable<PaginatedResult<Transaction>> {
+  getList(lastSeenTxId: string, limit: number = 10, orderBy: string = 'height', includeZeroValueTransactions: Boolean = false): Observable<PaginatedResult<Transaction>> {
     let url = `${this.baseUrl}?limit=${limit}&orderBy=${orderBy}&includeZeroValueTransactions=${includeZeroValueTransactions}`;
     if (lastSeenTxId) {
       url += `&lastSeenTxid=${lastSeenTxId}`;

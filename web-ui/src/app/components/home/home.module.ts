@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { TooltipModule } from 'ng2-tooltip-directive';
 
 import { HomeComponent } from './home/home.component';
 import { HomeRoutingModule } from './home-routing.module';
@@ -25,7 +26,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
         MomentModule,
         TabsModule,
         AlertModule,
-        InfiniteScrollModule
+        InfiniteScrollModule,
+        TooltipModule
     ],
     declarations: [
         HomeComponent,

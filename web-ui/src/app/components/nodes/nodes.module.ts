@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TooltipModule } from 'ng2-tooltip-directive';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
@@ -30,7 +31,8 @@ import { NodeTickerComponent } from './node-ticker/node-ticker.component';
         TabsModule,
         AlertModule,
         InfiniteScrollModule,
-        NgxPaginationModule
+        NgxPaginationModule,
+        TooltipModule
     ],
     declarations: [
         NodesComponent,
@@ -39,6 +41,9 @@ import { NodeTickerComponent } from './node-ticker/node-ticker.component';
         NodeListComponent,
         NodeTickerComponent,
         MasternodeDetailsComponent
+    ],
+    exports: [
+        TooltipModule
     ]
 })
 

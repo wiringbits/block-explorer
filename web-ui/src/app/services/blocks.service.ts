@@ -47,7 +47,7 @@ export class BlocksService {
 
   getLatest(limit: number = 10, lastSeenHash: string = ''): Observable<Block[]> {
     let url = `${this.baseUrl}?limit=${limit}&orderBy=height`;
-    if (lastSeenHash !== '') {
+    if (lastSeenHash) {
       url += `&lastSeenHash=${lastSeenHash}`;
     }
     return this.http.get<Block[]>(url);
@@ -55,7 +55,7 @@ export class BlocksService {
 
   getLatestV2(limit: number = 10, lastSeenHash: string = ''): Observable<Block[]> {
     let url = `${this.baseUrlV2}?limit=${limit}&orderBy=height`;
-    if (lastSeenHash !== '') {
+    if (lastSeenHash) {
       url += `&lastSeenHash=${lastSeenHash}`;
     }
     return this.http.get<Block[]>(url);

@@ -44,7 +44,7 @@
                     {{'label.masternodeROI' | translate}}:
                 </div>
                 <div class="calculator-stat-data">
-                    {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}% <small>Year</small>
+                    {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}% <small>Yearly</small>
                 </div>
             </div>
 
@@ -53,7 +53,7 @@
                     {{'label.stakingROI' | translate}}:
                 </div>
                 <div class="calculator-stat-data">
-                    {{(rewardsSummary.stakingROI * 100).toFixed(2)}}% <small>Year</small>
+                    {{(rewardsSummary.stakingROI * 100).toFixed(2)}}% <small>Yearly</small>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
                     </div>
         
                     <div class="col-xs-12 calculator-optimal-setup">
-                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span>{{masternodeCount}} {{'label.masternodeAnd' | translate}} {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
+                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
                     </div>
         
                     <div class="col-xs-6 calculator-comparison-table">
