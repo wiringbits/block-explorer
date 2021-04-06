@@ -1,5 +1,7 @@
 package com.xsn.explorer.data
 
+import java.time.Instant
+
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{
@@ -11,7 +13,7 @@ import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.DataGenerator.randomTransaction
 import com.xsn.explorer.helpers.DataHandlerObjects.createLedgerDataHandler
-import com.xsn.explorer.helpers.{BlockLoader, DataGenerator, DataHelper}
+import com.xsn.explorer.helpers.{BlockLoader, DataGenerator}
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.{Address, Height}
 import com.xsn.explorer.models.{
@@ -26,7 +28,6 @@ import com.xsn.explorer.models.{
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
-import java.time.Instant
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
@@ -57,39 +58,10 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       result.isGood mustEqual true
     }
 
-    "exclude hidden_addresses from the circulating supply" in {
-      val hiddenAddress =
-        DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt")
-      val circulatingSupply =
-        dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
-
-      database.withConnection { implicit conn =>
-        _root_.anorm
-          .SQL(
-            s"""
-            |INSERT INTO hidden_addresses (address)
-            |VALUES ('${hiddenAddress.string}')
-          """.stripMargin
-          )
-          .execute()
-      }
-
-      val balance = Balance(
-        hiddenAddress,
-        received = BigDecimal(1000),
-        spent = BigDecimal(500)
-      )
-      setAvailableCoins(balance.available)
-      balanceDataHandler.upsert(balance).isGood mustEqual true
-
-      val result = dataHandler.getStatistics().get
-      result.circulatingSupply.getOrElse(0) mustEqual circulatingSupply
-    }
-
-    "exclude the burn address from the total supply" in {
+    "exclude the burn address from the circulating supply" in {
       val burnAddress = Address.from(StatisticsPostgresDAO.BurnAddress).get
 
-      val totalSupply = dataHandler.getStatistics().get.totalSupply.getOrElse(0)
+      val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
 
       val balance = Balance(
         burnAddress,
@@ -100,7 +72,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       balanceDataHandler.upsert(balance).isGood mustEqual true
 
       val result = dataHandler.getStatistics().get
-      result.totalSupply.getOrElse(0) mustEqual totalSupply
+      result.circulatingSupply.getOrElse(0) mustEqual circulatingSupply
     }
   }
 
