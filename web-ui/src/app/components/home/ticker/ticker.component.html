@@ -24,8 +24,9 @@
         </span>
 
         <span *ngIf="ticker != null && ticker.circulatingSupply != null">
-          {{ticker.circulatingSupply | explorerAmount:0}} {{config.currentCurrency}}
-          <span class="glyphicon glyphicon-question-sign help" [tooltip]="'message.circulatingSupply' | translate"></span>
+          {{ticker.circulatingSupply | explorerAmount:0}} {{config.currentCurrency}} 
+          <span class="glyphicon glyphicon-question-sign help" [tooltip]="'message.circulatingSupply' | translate"></span> <br/>
+          <small>{{(ticker.totalSupply - ticker.circulatingSupply) | explorerAmount:0}} XSN burned ({{ (ticker.totalSupply - ticker.circulatingSupply) / ticker.totalSupply | number: '1.2-2' | percent}} of Total Supply)</small>
         </span>
       </div>
     </div>

@@ -102,6 +102,10 @@
                             <input type="number" placeholder="0.000" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" (ngModelChange)="onChangeAmount()" />
                         </div>
                     </div>
+
+                    <div class="col-xs-12 holdamount-slider">
+                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='99999999' [type]='range' (change)='onChangeAmount()'></ejs-slider>
+                    </div>
         
                     <div class="col-xs-12 calculator-optimal-setup">
                         <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}

@@ -424,3 +424,7 @@ table.isLoading td div::after {
   display: flex;
   align-items: center;
 }
+
+.white--text {
+  color: white;
+}

@@ -99,6 +99,11 @@
     justify-content: flex-start;
 }
 
+.holdamount-slider {
+    padding-top: 20px;
+    height: 25px;
+}
+
 .calculator-hold-amount-text {
     margin-left: 10px;
 }

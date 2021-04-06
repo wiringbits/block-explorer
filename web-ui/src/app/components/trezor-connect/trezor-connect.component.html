@@ -102,6 +102,9 @@
         <div class="tab-content-tpos">
           <h4 class="tab-title"> {{ 'label.createContract' | translate }}</h4>
           <div class="row custom-form">
+            <div class="col-xs-12 col-sm-8">
+              <p class="white--text">For now, this only works on Trezor T, once the contract gets created, send the amount you desire to stake to the contract Staking address, refresh the page after some minutes if you do not see such address</p>
+            </div>
             <div class="col-xs-12">
               <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
                 autocomplete="off">
