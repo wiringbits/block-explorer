@@ -8,8 +8,8 @@
   
 	<div class="col-xs-12 block-tab-content">
     <div class="text-primary">
-      <div [hidden]="address != null">
-        <alert>{{'message.addressNotFound' | translate}}</alert>
+      <div [hidden]="address != null" class="not-found">
+        <p>{{'message.addressNotFound' | translate}}</p>
       </div>
 
       <div *ngIf="address != null">

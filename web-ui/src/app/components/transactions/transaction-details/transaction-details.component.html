@@ -1,7 +1,8 @@
 <div class="text-primary">
-  <div [hidden]="transaction != null">
-    <alert>{{'message.transactionNotFound' | translate}}</alert>
+  <div [hidden]="transaction != null" class="not-found">
+    <p>{{'message.transactionNotFound' | translate}}</p>
   </div>
+  
   <div *ngIf="transaction != null">
     <div class="row">
       <div class="col-xs-12">

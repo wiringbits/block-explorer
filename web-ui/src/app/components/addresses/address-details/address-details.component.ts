@@ -1,6 +1,6 @@
 
 import { tap } from 'rxjs/operators';
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Balance } from '../../../models/balance';
 import { TransactionsService } from '../../../services/transactions.service';
@@ -29,6 +29,8 @@ export class AddressDetailsComponent implements OnInit {
   tposContracts: Array<TposContract>;
   selectedTpos: number;
   isLoading: boolean;
+  addressLoaded: boolean;
+  interval = null;
 
   // pagination
   limit = 10;
@@ -56,8 +58,9 @@ export class AddressDetailsComponent implements OnInit {
       }
     });
     this.reload();
+    this.interval = setInterval(() => this.reload(), 10000);
   }
-
+  
   ngOnChanges(changes: any) {
     if (changes.address.currentValue != changes.address.previousValue) {
       this.transactions = [];
@@ -69,6 +72,9 @@ export class AddressDetailsComponent implements OnInit {
     if (this.subscription$ != null) {
       this.subscription$.unsubscribe();
     }
+
+    clearInterval(this.interval);
+    this.interval = null;
   }
 
   private updateTransactions() {
@@ -99,14 +105,15 @@ export class AddressDetailsComponent implements OnInit {
     this.isLoading = false;
     // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
     this.transactions = this.transactions.concat(response)
-    // .sort(function (a, b) {
-    //   if (a.height > b.height) return -1;
-    //   else return 1;
-    // });
-    
+    // this.transactions = Object.assign([], response)
+      // .sort(function (a, b) {
+      //   if (a.height > b.height) return -1;
+      //   else return 1;
+      // });
   }
 
   reload() {
+    this.addressLoaded = false;
     this.selectedTpos = 0;
     this.transactions = [];
     this.addressString = this.route.snapshot.paramMap.get('id');
@@ -122,12 +129,13 @@ export class AddressDetailsComponent implements OnInit {
   }
 
   private onAddressRetrieved(response: Balance) {
+    console.log(response);
     this.address = response;
+    this.addressLoaded = true;
   }
 
   private onTposContractsReceived(response: WrappedResult<TposContract>) {
     this.tposContracts = response.data;
-    console.log(this.tposContracts);
   }
 
   selectTpos(index) {

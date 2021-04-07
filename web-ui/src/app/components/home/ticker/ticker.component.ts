@@ -22,6 +22,7 @@ export class TickerComponent implements OnInit {
   prices: Prices = new Prices();
   rewardsSummary: RewardsSummary = new RewardsSummary();
   config = Config;
+  interval = null;
 
   amAgo = amAgo;
   numberWithCommas = numberWithCommas;
@@ -29,12 +30,21 @@ export class TickerComponent implements OnInit {
   constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
+    this.interval = setInterval(() => this.reload(), 10000);
+    this.reload();
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+    this.interval = null;
+  }
+
+  public reload() {
     this.tickerService
       .get()
       .subscribe(
         response => {
-          this.ticker = response;
-          console.log(this.ticker);
+          this.ticker = Object.assign({}, response);
         },
         response => this.onError(response)
       );
@@ -42,21 +52,21 @@ export class TickerComponent implements OnInit {
     this.tickerService
       .getNodeStats()
       .subscribe(
-        response => this.nodeStats = response,
+        response => this.nodeStats = Object.assign({}, response),
         response => this.onError(response)
       );
 
     this.tickerService
       .getPrices()
       .subscribe(
-        response => this.prices = response,
+        response => this.prices = Object.assign({}, response),
         response => this.onError(response)
       );
 
     this.xsnService
       .getRewardsSummary()
       .subscribe(
-        response => this.rewardsSummary = response,
+        response => this.rewardsSummary = Object.assign({}, response),
         response => this.onError(response)
       );
   }

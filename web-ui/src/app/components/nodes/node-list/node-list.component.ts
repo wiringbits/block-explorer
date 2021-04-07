@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NodeListComponent implements OnInit {
     isMasternodeUpdating = false;
+    isTPosNodesUpdating = false;
     lottieConfig = null;
     constructor() {
         this.lottieConfig = {
@@ -22,5 +23,9 @@ export class NodeListComponent implements OnInit {
 
     updateMasternode(event) {
         this.isMasternodeUpdating = event;
+    }
+
+    updateTPosNodes(event) {
+        this.isTPosNodesUpdating = event;
     }
 }

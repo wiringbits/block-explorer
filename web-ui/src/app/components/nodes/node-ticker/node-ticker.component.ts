@@ -19,21 +19,33 @@ export class NodeTickerComponent implements OnInit {
   rewardsSummary: RewardsSummary = new RewardsSummary();
   masternodesProtocols: Array<any> = [];
   config = Config;
+  interval = null;
 
   constructor(private tickerService: TickerService, private xsnService: XSNService) { }
 
   ngOnInit() {
+    this.interval = setInterval(() => this.reload(), 10000);
+    this.reload();
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+    this.interval = null;
+  }
+
+  reload() {
+    this.masternodesProtocols = [];
     this.tickerService
       .get()
       .subscribe(
-        response => this.stats = response,
+        response => this.stats = Object.assign({}, response),
         response => this.onError(response)
       );
 
     this.xsnService
       .getRewardsSummary()
       .subscribe(
-        response => this.rewardsSummary = response,
+        response => this.rewardsSummary = Object.assign({}, response),
         response => this.onError(response)
       );
 
@@ -41,17 +53,16 @@ export class NodeTickerComponent implements OnInit {
       .getPrices()
       .subscribe(
         response => {
-          this.prices = response;
+          this.prices = Object.assign({}, response);
         },
         response => this.onError(response)
       );
-
 
     this.xsnService
       .getNodeStats()
       .subscribe(
         response => {
-          this.nodeStats = response;
+          this.nodeStats = Object.assign({}, response);
           for (let key in this.nodeStats["masternodesProtocols"]) {
             this.masternodesProtocols.push({"key": key, "value": this.nodeStats["masternodesProtocols"][key]})
           }
@@ -62,8 +73,6 @@ export class NodeTickerComponent implements OnInit {
         },
         response => this.onError(response)
       );
-
-      
   }
 
   reverseObject(object) {

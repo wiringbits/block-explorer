@@ -1,7 +1,7 @@
 <div>
 
-  <div [hidden]="blockDetails != null">
-    <alert>{{'message.blockNotFound' | translate}}</alert>
+  <div [hidden]="blockDetails != null" class="not-found">
+    <p>{{'message.blockNotFound' | translate}}</p>
   </div>
 
   <div *ngIf="blockDetails != null" class="row block-details-content text-primary">
@@ -242,8 +242,8 @@
 
     <!-- transactions -->
     <!-- still no transactions -->
-    <div *ngIf="transactions == null" class="col-xs-12">
-      <alert>{{'message.transactionsNotAvailable' | translate}}</alert>
+    <div *ngIf="transactions == null" class="col-xs-12 not-found">
+      <p>{{'message.transactionsNotAvailable' | translate}}</p>
     </div>
 
     <!-- paginated transactions -->
