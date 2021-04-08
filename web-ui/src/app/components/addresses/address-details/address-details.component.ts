@@ -29,6 +29,7 @@ export class AddressDetailsComponent implements OnInit {
   tposContracts: Array<TposContract>;
   selectedTpos: number;
   isLoading: boolean;
+  loadingType = 2;
   addressLoaded: boolean;
   interval = null;
 
@@ -58,7 +59,7 @@ export class AddressDetailsComponent implements OnInit {
       }
     });
     this.reload();
-    this.interval = setInterval(() => this.reload(), 10000);
+    // this.interval = setInterval(() => this.reload(), 10000);
   }
   
   ngOnChanges(changes: any) {
@@ -73,7 +74,7 @@ export class AddressDetailsComponent implements OnInit {
       this.subscription$.unsubscribe();
     }
 
-    clearInterval(this.interval);
+    // clearInterval(this.interval);
     this.interval = null;
   }
 
@@ -103,6 +104,7 @@ export class AddressDetailsComponent implements OnInit {
 
   private onTransactionRetrieved(response: LightWalletTransaction[]) {
     this.isLoading = false;
+    this.loadingType = 1;
     // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
     this.transactions = this.transactions.concat(response)
     // this.transactions = Object.assign([], response)

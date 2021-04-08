@@ -24,8 +24,12 @@ export class TransactionTablev2Component implements OnInit {
   transactions: Array<LightWalletTransaction>;
   @Input()
   isLoading: boolean = false;
+  @Input()
+  loadingType: number = 1;
   @Output()
   updateTransactions: EventEmitter<any> = new EventEmitter();
+
+  emptyArray = new Array(10);
 
   public lottieConfig: Object;
 
@@ -41,6 +45,7 @@ export class TransactionTablev2Component implements OnInit {
       autoplay: true,
       loop: true
     };
+    this.emptyArray = Array(10).fill(4);
   }
 
   ngOnInit() {

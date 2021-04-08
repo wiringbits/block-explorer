@@ -16,6 +16,6 @@
         </div>
     </div>
     <div class="col-md-12 transaction-table-wrapper">
-        <app-transaction-table [isLoading]="isLoading" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()"></app-transaction-table>
+        <app-transaction-table [isLoading]="isLoading" [loadingType]="loadingType" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()"></app-transaction-table>
     </div>
 </div>

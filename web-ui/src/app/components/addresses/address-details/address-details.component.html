@@ -104,7 +104,7 @@
         <h3 class="col-xs-12">{{'label.transactinoLabel' | translate}}</h3>
         
         <div class="row transaction-table-wrapper">
-          <app-transaction-tablev2 class="col-xs-12 pl-0 pr-0" address={{addressString}} [isLoading]="isLoading" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-tablev2>
+          <app-transaction-tablev2 class="col-xs-12 pl-0 pr-0" address={{addressString}} [isLoading]="isLoading" [loadingType]="loadingType" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-tablev2>
         </div>
       </div>
     </div>
