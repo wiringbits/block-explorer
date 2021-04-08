@@ -92,6 +92,9 @@
         <tabset>
             <tab heading="BLOCK REWARDS">
                 <div>
+                    <div class="col-xs-12">
+                        <p class="white--text">The BLOCK REWARDS calculator will compute the rewards for staking and running a Masternode, while only earning from the Stakenet blockchain block rewards. If you wish to also take into account the upcoming Stakenet DEX rewards, please use the DEX HOST calculator.</p>
+                    </div>
                     <div class="col-xs-12 calculator-label">
                         {{'label.xsnAmountHold' | translate}}
                     </div>
@@ -103,7 +106,7 @@
                         </div>
                     </div>
 
-                    <div class="col-xs-12 holdamount-slider">
+                    <div class="col-xs-12 col-sm-10 col-md-8 col-md-offset-2 col-sm-offset-1 holdamount-slider">
                         <ejs-slider [(value)]='holdAmount' [min]='0' [max]='99999999' [type]='range' (change)='onChangeAmount()'></ejs-slider>
                     </div>
         
@@ -111,57 +114,71 @@
                         <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
                     </div>
         
-                    <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.stakingAllCoins' | translate}}</h4>
-
-                        <p class="sub-label">{{'label.daily' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount / 365) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 365).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 365) | explorerAmount:4:true}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 12).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 12) | explorerAmount:4:true}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%)</small></p>
-                        <p>$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd) | explorerAmount:4:true}}</p>
-                        <p>{{(rewardsSummary.stakingROI * holdAmount * prices.btc) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.avgRewardWaitTime' | translate}}:</p>
-                        <p>{{stakingWaitTime}}</p>
-
-                        <!-- {{'label.waitingTimePerReward' | translate}} -->
+                    <div class="col-xs-12 col-sm-6 calculator-comparison-table">
+                        <div class="result-pane">
+                            <h5 class="result-pane-title">{{ 'label.stakingAllCoins' | translate | uppercase }}</h5>
+                            <div class="value-block">
+                                <span class="calculator-label">
+                                    {{'label.daily' | translate}}:
+                                </span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount / 365) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 365).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 365) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.monthly' | translate}}:</span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 12).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 12) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.yearly' | translate}}:</span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.avgRewardWaitTime' | translate}}:</span>
+                                <p class="price-label">{{stakingWaitTime}}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-xs-6 calculator-comparison-table">
-                        <h4 class="main-label">{{'label.masternodeStakingRemaining' | translate}}</h4>
-
-                        <p class="sub-label">{{'label.daily' | translate}}:</p>
-                        <p>{{(mnstaking / 365) | explorerAmount:4:true }} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 365).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd / 365) | explorerAmount:4:true}}</p>
-                        <p>{{(mnstaking * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.monthly' | translate}}:</p>
-                        <p>{{(mnstaking / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 12).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd / 12) | explorerAmount:4:true}}</p>
-                        <p>{{(mnstaking * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.yearly' | translate}}:</p>
-                        <p>{{mnstaking | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%)</small></p>
-                        <p>$ {{(mnstaking * prices.usd) | explorerAmount:4:true}}</p>
-                        <p>{{(mnstaking * prices.btc) | explorerAmount:8:true}} BTC</p>
-
-                        <p class="sub-label">{{'label.avgRewardWaitTime' | translate}}:</p>
-                        <p>{{mnWaitTime}}</p>
+                    <div class="col-xs-12 col-sm-6 calculator-comparison-table">
+                        <div class="result-pane">
+                            <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5>
+                            <div class="value-block">
+                                <span class="calculator-label">
+                                    {{'label.daily' | translate}}:
+                                </span>
+                                <p class="price-label">{{(mnstaking / 365) | explorerAmount:4:true }} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 365).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd / 365) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.monthly' | translate}}:</span>
+                                <p class="price-label">{{(mnstaking / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 12).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd / 12) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.yearly' | translate}}:</span>
+                                <p class="price-label">{{mnstaking | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.avgRewardWaitTime' | translate}}:</span>
+                                <p class="price-label">{{mnWaitTime}}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </tab>
-            <tab heading="HYDRA NODE">
+            <tab heading="DEX HOST">
                 <div>
                     <div class="row mr-0 ml-0 slider-row">
                         <div class="col-xs-12 col-lg-6">
-                            <h5>{{'label.blockRewards' | translate}}</h5>
+                            <h5>{{'label.blockRewardsEstimation' | translate}}</h5>
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.xsnPrice' | translate}}</span>
                                 <div class="slider-wrapper">
@@ -185,9 +202,9 @@
                             </div>
                         </div>
                         <div class="col-xs-12 col-lg-6">
-                            <h5>{{'label.orderbookRewards' | translate}}</h5>
+                            <h5>{{'label.dexHostEstimation' | translate}}</h5>
                             <div class="slider-block switch-block">
-                                <span class="slider-label">{{'label.enableOrderbookHosting' | translate}}</span>
+                                <span class="slider-label">{{'label.enableDexHosting' | translate}}</span>
                                 <div class="switch-wrapper">
                                     <ui-switch size="small" [(ngModel)]="orderbookHostingEnabled" (change)="orderbookHostingEnabledChange($event)" color="#01D9DE"></ui-switch>
                                 </div>
@@ -200,7 +217,7 @@
                                 <span class="slider-value">$ {{tradingVolume | explorerAmount:2:true }}</span>
                             </div>
                             <div class="slider-block">
-                                <span class="slider-label">{{'label.mnsHostingOrderbook' | translate}}</span>
+                                <span class="slider-label">{{'label.mnsHostingDEX' | translate}}</span>
                                 <div class="slider-wrapper">
                                     <ejs-slider #mnSlider [enabled]="false" [value]='mnHostingCost' [min]='0' [max]='100' [type]='range' ></ejs-slider>
                                 </div>

@@ -120,10 +120,6 @@
     padding-bottom: 60px;
 }
 
-.calculator-comparison-table + .calculator-comparison-table {
-    border-left: 1px solid #090D1C;
-}
-
 .calculator-comparison-table .main-label {
     color: white;
     font-size: 14px;

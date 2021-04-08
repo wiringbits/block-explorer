@@ -4,7 +4,7 @@ import { tap } from 'rxjs/operators';
 import { BlockDetails } from '../../../models/block';
 import { Transaction } from '../../../models/transaction';
 import { BlocksService } from '../../../services/blocks.service';
-import { getNumberOfRowsForScreen } from '../../../utils';
+import { getNumberOfRowsForScreen, amAgo } from '../../../utils';
 
 @Component({
   selector: 'app-block-details',
@@ -19,6 +19,8 @@ export class BlockDetailsComponent implements OnInit {
   // pagination
   limit = 30;
   transactions: Transaction[] = [];
+
+  amAgo = amAgo;
 
   constructor(private blocksService: BlocksService) { }
 
