@@ -145,7 +145,10 @@
                     </div>
                     <div class="col-xs-12 col-sm-6 calculator-comparison-table">
                         <div class="result-pane">
-                            <h5 class="result-pane-title"><span *ngIf="holdAmount && holdAmount >=15000 && mnstaking ">{{holdAmount / requiredForMasternode | explorerAmount:0 }} {{'label.masternodeAnd' | translate | uppercase}} </span> {{(holdAmount % requiredForMasternode || 0) | explorerAmount}} {{'label.xsnStaking' | translate | uppercase}}</h5>
+                            <h5 class="result-pane-title">
+                                <span>{{(holdAmount >= 15000 ? (holdAmount / requiredForMasternode) : 0) | explorerAmount:0 }} {{'label.masternodeAnd' | translate | uppercase}} </span> 
+                                {{ holdAmount >= 15000 ? (holdAmount % requiredForMasternode || 0) : 0 | explorerAmount}} {{'label.stakingAllCoins' | translate | uppercase}}
+                            </h5>
                             <!-- <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5> -->
                             <div class="value-block">
                                 <span class="calculator-label">
