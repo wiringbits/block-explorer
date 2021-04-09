@@ -93,7 +93,7 @@
             <tab heading="BLOCK REWARDS">
                 <div>
                     <div class="col-xs-12">
-                        <p class="white--text">The BLOCK REWARDS calculator will compute the rewards for staking and running a Masternode, while only earning from the Stakenet blockchain block rewards. If you wish to also take into account the upcoming Stakenet DEX rewards, please use the DEX HOST calculator.</p>
+                        <p class="white--text">The BLOCK REWARDS calculator will calculate the rewards for staking or running a Masternode earned from the XSN blockchain. In the case of a Masternode, if you want to take into account the rewards you could earn from the Stakenet DEX, then please use the DEX HOST calculator.</p>
                     </div>
                     <div class="col-xs-12 calculator-label">
                         {{'label.xsnAmountHold' | translate}}
@@ -102,16 +102,16 @@
                     <div class="col-xs-12">
                         <div class="calculator-hold-amount text-highlight">
                             <span class="glyphicon glyphicon-tasks"></span>
-                            <input type="number" placeholder="0.000" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" (ngModelChange)="onChangeAmount()" />
+                            <input type="number" placeholder="0.000" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" [value]="holdAmount" max='100000000' (ngModelChange)="onChangeAmount()" />
                         </div>
                     </div>
 
                     <div class="col-xs-12 col-sm-10 col-md-8 col-md-offset-2 col-sm-offset-1 holdamount-slider">
-                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='99999999' [type]='range' (change)='onChangeAmount()'></ejs-slider>
+                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='100000000' [type]='range' (change)='onChangeAmount()'></ejs-slider>
                     </div>
         
                     <div class="col-xs-12 calculator-optimal-setup">
-                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
+                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 && masternodeCount ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
                     </div>
         
                     <div class="col-xs-12 col-sm-6 calculator-comparison-table">
@@ -145,7 +145,8 @@
                     </div>
                     <div class="col-xs-12 col-sm-6 calculator-comparison-table">
                         <div class="result-pane">
-                            <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5>
+                            <h5 class="result-pane-title"><span *ngIf="holdAmount && holdAmount >=15000 && mnstaking ">{{holdAmount / requiredForMasternode | explorerAmount:0 }} {{'label.masternodeAnd' | translate | uppercase}} </span> {{(holdAmount % requiredForMasternode || 0) | explorerAmount}} {{'label.xsnStaking' | translate | uppercase}}</h5>
+                            <!-- <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5> -->
                             <div class="value-block">
                                 <span class="calculator-label">
                                     {{'label.daily' | translate}}:

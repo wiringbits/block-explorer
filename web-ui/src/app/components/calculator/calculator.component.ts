@@ -156,8 +156,8 @@ export class CalculatorComponent implements OnInit {
   onChangeAmount() {
     this.stakingWaitTime = "";
     this.mnWaitTime = "";
-    if (this.holdAmount > 99999999) {
-      this.holdAmount = 99999999;
+    if (this.holdAmount > 100000000) {
+      this.holdAmount = 100000000;
     }
     this.stakingcoin = this.rewardsSummary.stakingROI * this.holdAmount;
     if (this.holdAmount >= 15000) {
