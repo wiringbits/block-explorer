@@ -406,7 +406,7 @@ table.isLoading tr:nth-child(even) td div::after {
   top: 0%;
   position: absolute;
   border-radius: 10px;
-  backface-visibility: hidden;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
   background-image: linear-gradient(90deg, #23263A, #23263Aff, #23263A);
   animation-name: example;
   animation-duration: 2s;
@@ -421,7 +421,6 @@ table.isLoading tr:nth-child(odd) td div::after {
   top: 0%;
   position: absolute;
   border-radius: 10px;
-  backface-visibility: hidden;
   background-image: linear-gradient(90deg, #2A2C3A, #2A2C3Aff, #2A2C3A);
   animation-name: example;
   animation-duration: 2s;
