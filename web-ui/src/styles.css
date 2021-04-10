@@ -384,10 +384,6 @@ a.disabled {
   }
 }
 
-table.isLoading th {
-  width: 100%;
-}
-
 table.isLoading td {
   position: relative;
   overflow: hidden;
