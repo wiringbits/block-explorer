@@ -3,16 +3,13 @@ import { tap } from 'rxjs/operators';
 import { Component, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Balance } from '../../../models/balance';
-import { TransactionsService } from '../../../services/transactions.service';
 import { AddressesService } from '../../../services/addresses.service';
 import { ErrorService } from '../../../services/error.service';
 import { LightWalletTransaction } from '../../../models/light-wallet-transaction';
 
-import { getNumberOfRowsForScreen } from '../../../utils';
 import { addressLabels } from '../../../config';
 import { TposContract } from '../../../models/tposcontract';
 import { WrappedResult } from '../../../models/wrapped-result';
-import { Transaction } from '../../../models/transaction';
 
 import { Subscription } from 'rxjs';
 
@@ -44,7 +41,6 @@ export class AddressDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private addressesService: AddressesService,
-    private transactionsService: TransactionsService,
     private errorService: ErrorService) { 
       this.selectedTpos = 0;
       this.addressString = null;
