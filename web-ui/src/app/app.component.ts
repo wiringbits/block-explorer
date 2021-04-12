@@ -150,7 +150,7 @@ export class AppComponent implements OnInit {
 
       // messages
       'message.unavailable': '-',
-      'message.serverUnavailable': 'The server unavailable, please try again in a minute',
+      'message.serverUnavailable': 'The server is unavailable, please try again in a minute',
       'message.unknownErrors': 'Unknown error, please try again in a minute',
       'message.transactionNotFound': 'Transaction not found',
       'message.addressNotFound': 'Address not found',

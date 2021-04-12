@@ -8,6 +8,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
 import { TickerService } from '../../services/ticker.service';
 import { Observable } from 'rxjs';
+import { ExplorerAmountPipe } from '../../pipes/explorer-amount.pipe';
 
 describe('CalculatorComponent', () => {
   let component: CalculatorComponent;
@@ -21,7 +22,7 @@ describe('CalculatorComponent', () => {
     tickerServiceSpy.getPrices.and.returnValue(Observable.create());
 
     TestBed.configureTestingModule({
-      declarations: [CalculatorComponent],
+      declarations: [CalculatorComponent, ExplorerAmountPipe, ],
       imports: [
         TranslateModule.forRoot(),
         RouterTestingModule

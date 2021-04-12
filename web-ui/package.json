@@ -7,7 +7,7 @@
     "serve": "ng serve",
     "start": "node server.js",
     "build": "ng build",
-    "test": "ng test",
+    "test": "ng test --no-watch --no-progress --browsers=ChromeHeadlessCI",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "prod": "ng build --prod"
