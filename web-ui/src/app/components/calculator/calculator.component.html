@@ -35,7 +35,7 @@
                 </div>
                 <div class="calculator-stat-data">
                     {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) | explorerAmount}} XSN <br/>
-                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
                 </div>
             </div>
 
