@@ -41,7 +41,7 @@ export class TransactionListComponent implements OnInit {
       );
   }
 
-  private updateTransactions() {
+  updateTransactions() {
     let lastSeenTxId = '';
     if (this.transactions.length > 0) {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;

@@ -44,7 +44,7 @@ export class BlockListComponent implements OnInit {
         this.updateBlocks();
     }
 
-    private updateBlocks() {
+    updateBlocks() {
         this.isLoading = true;
         let lastSeenHash = '';
         if (this.blocks.length > 0) {

@@ -61,7 +61,7 @@ export class HomeComponent implements OnInit {
     return this.currentView === view;
   }
 
-  private updateBlocks(isInfiniteScroll = false) {
+  updateBlocks(isInfiniteScroll = false) {
     if (isInfiniteScroll) {
       return;
     }
@@ -77,7 +77,7 @@ export class HomeComponent implements OnInit {
       );
   }
 
-  private updateTransactions() {
+  updateTransactions() {
     let lastSeenTxId = '';
     if (this.transactions.length > 0) {
       lastSeenTxId = this.transactions[this.transactions.length - 1].id;

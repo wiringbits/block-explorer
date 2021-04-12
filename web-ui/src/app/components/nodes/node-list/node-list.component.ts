@@ -21,11 +21,11 @@ export class NodeListComponent implements OnInit {
     ngOnInit() {
     }
 
-    updateMasternode(event) {
-        this.isMasternodeUpdating = event;
+    updateMasternode(value) {
+        this.isMasternodeUpdating = value;
     }
 
-    updateTPosNodes(event) {
-        this.isTPosNodesUpdating = event;
+    updateTPosNodes(value) {
+        this.isTPosNodesUpdating = value;
     }
 }
