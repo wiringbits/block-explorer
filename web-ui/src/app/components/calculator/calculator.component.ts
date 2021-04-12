@@ -50,6 +50,7 @@ export class CalculatorComponent implements OnInit {
   roi = null;
   daysUntilFreeMasternode = null;
   dayMonthYearMultiplier = 1;
+  loadedData = false;
 
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
@@ -112,6 +113,8 @@ export class CalculatorComponent implements OnInit {
         },
         response => this.onError(response)
       );
+    
+    this.loadedData = true;
   }
 
   private onError(response: any) {

@@ -1,5 +1,5 @@
 <div class="row text-primary mr-0 ml-0">
-    <div class="col-sm-12 col-md-4 col-md-push-8 calculator-stats">
+    <div class="col-sm-12 col-md-4 col-md-push-8 calculator-stats" *ngIf="loadedData">
         <div class="tab-content calculator-stats-container">
             <div class="col-xs-6 calculator-stat-item">
                 <div class="calculator-label">
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <div class="col-sm-12 col-md-8 col-md-pull-4 calculator-panel">
+    <div class="col-sm-12 col-md-8 col-md-pull-4 calculator-panel" *ngIf="loadedData">
         <tabset>
             <tab heading="BLOCK REWARDS">
                 <div>
