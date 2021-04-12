@@ -66,6 +66,14 @@ server {
     proxy_pass http://10.136.12.87:9000;
   }
 
+  location /api/weth/prices {
+    proxy_cache my_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+
+    rewrite ^/api/weth/prices /prices/weth break;
+    proxy_pass http://10.136.12.87:9000;
+  }
+
   location /api/usdt/prices {
     proxy_cache my_cache;
     add_header X-Cache-Status $upstream_cache_status;
