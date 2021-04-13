@@ -5,6 +5,7 @@ import { BlockListComponent } from './block-list.component';
 
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
 import { TickerService } from '../../../services/ticker.service';
+import { BlocksService } from '../../../services/blocks.service';
 import { Observable } from 'rxjs';
 
 describe('BlockListComponent', () => {
@@ -12,10 +13,13 @@ describe('BlockListComponent', () => {
     let fixture: ComponentFixture<BlockListComponent>;
 
     const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get', 'getPrices']);
+    const blocksServiceSpy: jasmine.SpyObj<BlocksService> = jasmine.createSpyObj('BlocksService', ['getLatestV2']);
 
     beforeEach(async(() => {
         tickerServiceSpy.get.and.returnValue(Observable.create());
         tickerServiceSpy.getPrices.and.returnValue(Observable.create());
+
+        blocksServiceSpy.getLatestV2.and.returnValue(Observable.create());
 
         TestBed.configureTestingModule({
             declarations: [
@@ -26,7 +30,8 @@ describe('BlockListComponent', () => {
             ],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
-                { provide: TickerService, useValue: tickerServiceSpy }
+                { provide: TickerService, useValue: tickerServiceSpy },
+                { provide: BlocksService, useValue: blocksServiceSpy }
             ]
         })
             .compileComponents();

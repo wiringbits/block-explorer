@@ -8,9 +8,13 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { HomeComponent } from './home.component';
 
+import { BlocksService } from '../../../services/blocks.service';
+
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
+
+  const blocksServiceSpy: jasmine.SpyObj<BlocksService> = jasmine.createSpyObj('BlocksService', ['getLatest']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -22,7 +26,8 @@ describe('HomeComponent', () => {
         TabsModule.forRoot()
       ],
       providers: [
-        { provide: APP_BASE_HREF, useValue: '/' }
+        { provide: APP_BASE_HREF, useValue: '/' },
+        { provide: BlocksService, useValue: blocksServiceSpy }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     });
