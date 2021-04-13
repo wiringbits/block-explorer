@@ -6,7 +6,7 @@ import { ExplorerDatetimePipe } from '../../../pipes/explorer-datetime.pipe';
 
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { MomentModule } from 'ngx-moment';
 import { BlocksService } from '../../../services/blocks.service';
 import { ErrorService } from '../../../services/error.service';
 import { Observable } from 'rxjs';
@@ -73,7 +73,8 @@ describe('BlockDetailsComponent', () => {
       ],
       imports: [
         RouterTestingModule,
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
+        MomentModule
       ],
       providers: [
         { provide: BlocksService, useValue: blocksServiceSpy },
