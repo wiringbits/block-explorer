@@ -6,6 +6,7 @@ import { BlockListComponent } from './block-list.component';
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
 import { TickerService } from '../../../services/ticker.service';
 import { BlocksService } from '../../../services/blocks.service';
+import { ErrorService } from '../../../services/error.service';
 import { Observable } from 'rxjs';
 
 describe('BlockListComponent', () => {
@@ -14,6 +15,7 @@ describe('BlockListComponent', () => {
 
     const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get', 'getPrices']);
     const blocksServiceSpy: jasmine.SpyObj<BlocksService> = jasmine.createSpyObj('BlocksService', ['getLatestV2']);
+    const errorServiceSpy: jasmine.SpyObj<ErrorService> = jasmine.createSpyObj('ErrorService', ['renderServerErrors']);
 
     beforeEach(async(() => {
         tickerServiceSpy.get.and.returnValue(Observable.create());
@@ -31,7 +33,8 @@ describe('BlockListComponent', () => {
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 { provide: TickerService, useValue: tickerServiceSpy },
-                { provide: BlocksService, useValue: blocksServiceSpy }
+                { provide: BlocksService, useValue: blocksServiceSpy },
+                { provide: ErrorService, useValue: errorServiceSpy }
             ]
         })
             .compileComponents();

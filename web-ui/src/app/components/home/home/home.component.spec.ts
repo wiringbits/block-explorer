@@ -9,12 +9,16 @@ import { TranslateModule } from '@ngx-translate/core';
 import { HomeComponent } from './home.component';
 
 import { BlocksService } from '../../../services/blocks.service';
+import { TransactionsService } from '../../../services/transactions.service';
+import { ErrorService } from '../../../services/error.service';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
 
   const blocksServiceSpy: jasmine.SpyObj<BlocksService> = jasmine.createSpyObj('BlocksService', ['getLatest']);
+  const transactionsServiceSpy: jasmine.SpyObj<TransactionsService> = jasmine.createSpyObj('TransactionsService', ['getList']);
+  const errorServiceSpy: jasmine.SpyObj<ErrorService> = jasmine.createSpyObj('ErrorService', ['renderServerErrors']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -27,7 +31,9 @@ describe('HomeComponent', () => {
       ],
       providers: [
         { provide: APP_BASE_HREF, useValue: '/' },
-        { provide: BlocksService, useValue: blocksServiceSpy }
+        { provide: BlocksService, useValue: blocksServiceSpy },
+        { provide: TransactionsService, useValue: transactionsServiceSpy },
+        { provide: ErrorService, useValue: errorServiceSpy }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     });

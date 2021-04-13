@@ -7,6 +7,7 @@ import { ExplorerAmountPipe } from '../../../pipes/explorer-amount.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { TickerService } from '../../../services/ticker.service';
+import { XSNService } from '../../../services/xsn.service';
 import { Observable } from 'rxjs';
 
 describe('TickerComponent', () => {
@@ -14,11 +15,13 @@ describe('TickerComponent', () => {
   let fixture: ComponentFixture<TickerComponent>;
 
   const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get', 'getPrices', 'getNodeStats']);
-
+  const xsnServiceSpy: jasmine.SpyObj<XSNService> = jasmine.createSpyObj('XSNService', ['getRewardsSummary']);
+  
   beforeEach(async(() => {
     tickerServiceSpy.get.and.returnValue(Observable.create());
     tickerServiceSpy.getNodeStats.and.returnValue(Observable.create());
     tickerServiceSpy.getPrices.and.returnValue(Observable.create());
+    xsnServiceSpy.getRewardsSummary.and.returnValue(Observable.create());
 
     TestBed.configureTestingModule({
       declarations: [
@@ -31,7 +34,8 @@ describe('TickerComponent', () => {
         TooltipModule
       ],
       providers: [
-        { provide: TickerService, useValue: tickerServiceSpy }
+        { provide: TickerService, useValue: tickerServiceSpy },
+        { provide: XSNService, useValue: xsnServiceSpy }
       ]
     })
       .compileComponents();
