@@ -9,6 +9,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { APP_BASE_HREF, LocationStrategy, PathLocationStrategy, Location } from '@angular/common';
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -22,7 +23,8 @@ describe('NavbarComponent', () => {
       imports: [
         TranslateModule.forRoot(),
         RouterModule,
-        RouterTestingModule
+        RouterTestingModule,
+        BsDropdownModule
       ],
       providers: [
         { provide: APP_BASE_HREF, useValue: '/' },

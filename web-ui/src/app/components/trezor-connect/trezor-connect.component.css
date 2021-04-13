@@ -158,6 +158,10 @@
   width: 30%;
 }
 
+.red-text {
+  color: red;
+}
+
 @media (max-width: 574px) {
   .add-address .select-wrapper {
     width: 70%;

@@ -7,6 +7,7 @@ import { ExplorerAmountPipe } from '../../../pipes/explorer-amount.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { TickerService } from '../../../services/ticker.service';
+import { XSNService } from '../../../services/xsn.service';
 import { Observable } from 'rxjs';
 
 describe('NodeTickerComponent', () => {
@@ -29,7 +30,8 @@ describe('NodeTickerComponent', () => {
         TranslateModule.forRoot()
       ],
       providers: [
-        { provide: TickerService, useValue: tickerServiceSpy }
+        { provide: TickerService, useValue: tickerServiceSpy },
+        XSNService
       ]
     })
       .compileComponents();

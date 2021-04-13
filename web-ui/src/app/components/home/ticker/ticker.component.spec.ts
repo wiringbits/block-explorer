@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TooltipModule } from 'ng2-tooltip-directive';
 import { TickerComponent } from './ticker.component';
 import { ExplorerCurrencyPipe } from '../../../pipes/explorer-currency.pipe';
 import { ExplorerAmountPipe } from '../../../pipes/explorer-amount.pipe';
@@ -27,7 +27,8 @@ describe('TickerComponent', () => {
         ExplorerAmountPipe
       ],
       imports: [
-        TranslateModule.forRoot()
+        TranslateModule.forRoot(),
+        TooltipModule
       ],
       providers: [
         { provide: TickerService, useValue: tickerServiceSpy }

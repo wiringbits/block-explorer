@@ -107,7 +107,7 @@
                     </div>
 
                     <div class="col-xs-12 col-sm-10 col-md-8 col-md-offset-2 col-sm-offset-1 holdamount-slider">
-                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='100000000' [type]='range' (change)='onChangeAmount()'></ejs-slider>
+                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='1000000' [type]='range' (change)='onChangeAmount()'></ejs-slider>
                     </div>
         
                     <div class="col-xs-12 calculator-optimal-setup">
@@ -116,7 +116,7 @@
         
                     <div class="col-xs-12 col-sm-6 calculator-comparison-table">
                         <div class="result-pane">
-                            <h5 class="result-pane-title">{{ 'label.stakingAllCoins' | translate | uppercase }}</h5>
+                            <h5 class="result-pane-title">{{ holdAmount | explorerAmount }} {{ 'label.stakingAllCoins' | translate | uppercase }}</h5>
                             <div class="value-block">
                                 <span class="calculator-label">
                                     {{'label.daily' | translate}}:
@@ -182,7 +182,7 @@
                 <div>
                     <div class="row mr-0 ml-0 slider-row">
                         <div class="col-xs-12 mb-16">
-                            <p>This calculator lets you project the future potential earnings of your Masternode(s). You can learn about the Hydra network Masternode fee breakdown here. Adjust the sliders below to calculate the value of your Masternode(s), as well as the yearly return from them.
+                            <p>This calculator lets you project the future potential earnings of your Masternode(s). You can learn about the Hydra network Masternode fee breakdown <a href="https://medium.com/stakenet/hydra-dex-network-upgrade-proposal-4b00a3a3fb8">here</a>. Adjust the sliders below to calculate the value of your Masternode(s), as well as the yearly return from them.
                             </p>
                         </div>
                         <div class="col-xs-12 col-lg-6">

@@ -103,7 +103,7 @@
           <h4 class="tab-title"> {{ 'label.createContract' | translate }}</h4>
           <div class="row custom-form">
             <div class="col-xs-12 col-sm-8">
-              <p class="white--text">For now, this only works on Trezor T, once the contract gets created, send the amount you desire to stake to the contract Staking address, refresh the page after some minutes if you do not see such address</p>
+              <p class="white--text">{{ 'label.tposContractNotice' | translate }}</p>
             </div>
             <div class="col-xs-12">
               <form [formGroup]="tposContractFormControl" name="tposContractFormControl" (keyup.enter)="sendTPOS()" novalidate
@@ -118,19 +118,6 @@
                       <!-- <span
                         *ngIf="tposContractFormControl.get('merchantAddress').invalid && tposContractFormControl.get('merchantAddress').touched"
                         class="text-danger">Merchant address is required</span> -->
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="form-group custom-form-row col-sm-8 col-xs-12">
-                    <span class="sub-label">{{ 'label.amount' | translate }}</span>
-                    <div>
-                      <input class="form-control" (change)="precise(amountXSN)" #amountXSN type="number" min="0"
-                        step="0.00000001" placeholder="Enter amount in xsn" formControlName="contractAmount"
-                        name="contractAmount">
-                      <!-- <span
-                        *ngIf="tposContractFormControl.get('contractAmount').invalid && tposContractFormControl.get('contractAmount').touched"
-                        class="text-danger">Amount is required</span> -->
                     </div>
                   </div>
                 </div>
