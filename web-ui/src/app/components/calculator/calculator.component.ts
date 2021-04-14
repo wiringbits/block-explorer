@@ -64,9 +64,11 @@ export class CalculatorComponent implements OnInit {
   ngOnInit() {
     this.loadData();
     this.interval = setInterval(() => this.loadData(), 10000);
-    this.mnSlider.enabled = false;
-    this.mnSlider.dataBind();
   }
+
+  // ngAfterViewInit() {
+  //   this.mnSlider.dataBind();
+  // }
 
   ngOnDestroy() {
     clearInterval(this.interval);

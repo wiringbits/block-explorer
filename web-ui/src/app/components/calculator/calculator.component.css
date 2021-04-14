@@ -307,6 +307,10 @@
     outline: none;
 }
 
+.total-reward {
+    color: #01D9DE!important;
+}
+
 @media screen and (min-width: 1200px) {
     .switch-block .switch-wrapper {
         margin-left: 50px;

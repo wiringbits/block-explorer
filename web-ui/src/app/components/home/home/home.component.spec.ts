@@ -11,6 +11,7 @@ import { HomeComponent } from './home.component';
 import { BlocksService } from '../../../services/blocks.service';
 import { TransactionsService } from '../../../services/transactions.service';
 import { ErrorService } from '../../../services/error.service';
+import { Observable } from 'rxjs';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -21,6 +22,9 @@ describe('HomeComponent', () => {
   const errorServiceSpy: jasmine.SpyObj<ErrorService> = jasmine.createSpyObj('ErrorService', ['renderServerErrors']);
 
   beforeEach(async(() => {
+    blocksServiceSpy.getLatest.and.returnValue(Observable.create());
+    transactionsServiceSpy.getList.and.returnValue(Observable.create());
+    
     TestBed.configureTestingModule({
       declarations: [
         HomeComponent

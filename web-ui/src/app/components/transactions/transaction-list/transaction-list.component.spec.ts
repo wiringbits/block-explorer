@@ -8,6 +8,7 @@ import { NO_ERRORS_SCHEMA, } from '@angular/core';
 import { TransactionsService } from '../../../services/transactions.service';
 import { ErrorService } from '../../../services/error.service';
 import { TickerService } from '../../../services/ticker.service';
+import { Observable } from 'rxjs';
 
 describe('TransactionListComponent', () => {
     let component: TransactionListComponent;
@@ -18,6 +19,10 @@ describe('TransactionListComponent', () => {
     const errorServiceSpy: jasmine.SpyObj<ErrorService> = jasmine.createSpyObj('ErrorService', ['renderServerErrors']);
 
     beforeEach(async(() => {
+        tickerServiceSpy.getPrices.and.returnValue(Observable.create());
+        tickerServiceSpy.get.and.returnValue(Observable.create());
+        transactionsServiceSpy.getList.and.returnValue(Observable.create());
+
         TestBed.configureTestingModule({
             declarations: [
                 TransactionListComponent

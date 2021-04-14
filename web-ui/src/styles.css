@@ -252,6 +252,10 @@ td.right-align {
   padding-left: 0!important;
 }
 
+.pt-0 {
+  padding-top: 0!important;
+}
+
 .pr-1 {
   padding-right: 4px!important;
 }
