@@ -14,7 +14,7 @@
 
       <div *ngIf="address != null">
         <div class="row">
-          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 address-detail-block">
+          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 pr-0 address-detail-block">
             <h4 class="text-primary">
               {{'label.summary' | translate}}
             </h4>
@@ -42,7 +42,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6" *ngIf="tposContracts && tposContracts.length > 0 && tposContracts[0].merchant">
+          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 pr-0" *ngIf="tposContracts && tposContracts.length > 0 && tposContracts[0].merchant">
             <div class="table-responsive">
               <table class="table table-borderless">
                 <thead>

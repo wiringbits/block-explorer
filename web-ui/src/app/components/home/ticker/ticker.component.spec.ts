@@ -14,13 +14,13 @@ describe('TickerComponent', () => {
   let component: TickerComponent;
   let fixture: ComponentFixture<TickerComponent>;
 
-  const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get', 'getPrices', 'getNodeStats']);
-  const xsnServiceSpy: jasmine.SpyObj<XSNService> = jasmine.createSpyObj('XSNService', ['getRewardsSummary']);
+  const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['get']);
+  const xsnServiceSpy: jasmine.SpyObj<XSNService> = jasmine.createSpyObj('XSNService', ['getRewardsSummary', 'getPrices', 'getNodeStats']);
   
   beforeEach(async(() => {
     tickerServiceSpy.get.and.returnValue(Observable.create());
-    tickerServiceSpy.getNodeStats.and.returnValue(Observable.create());
-    tickerServiceSpy.getPrices.and.returnValue(Observable.create());
+    xsnServiceSpy.getNodeStats.and.returnValue(Observable.create());
+    xsnServiceSpy.getPrices.and.returnValue(Observable.create());
     xsnServiceSpy.getRewardsSummary.and.returnValue(Observable.create());
 
     TestBed.configureTestingModule({

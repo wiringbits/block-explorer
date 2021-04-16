@@ -197,7 +197,7 @@
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.totalMasternodes' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider [value]='masternodeCountLog' [min]='0' [max]='3000' [type]='range'></ejs-slider>
+                                    <ejs-slider [(value)]='masternodeCountLog' [min]='0' [max]='3000' [type]='range'></ejs-slider>
                                 </div>
                                 <span class="slider-value">{{masternodeCountLog | explorerAmount}}</span>
                             </div>
@@ -222,14 +222,14 @@
                                 <div class="slider-wrapper">
                                     <ejs-slider [(value)]='tradingVolumeLog' [min]='0' [max]='100' [type]='range' (change)='tradingVolumeLogChange($event)'></ejs-slider>
                                 </div>
-                                <span class="slider-value">$ {{tradingVolume | explorerAmount:2:true }}</span>
+                                <span class="slider-value">$ {{tradingVolumeString }}</span>
                             </div>
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.mnsHostingDEX' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider #mnSlider [enabled]="false" [value]='mnHostingCost' [min]='0' [max]='100' [type]='range' ></ejs-slider>
+                                    <ejs-slider [(value)]='orderbookMNs' [min]='0' [max]='5000' [step]="100" [type]='range' (change)='orderbookMNsChange($event)' ></ejs-slider>
                                 </div>
-                                <span class="slider-value">$ {{mnHostingCost | explorerAmount:1}}</span>
+                                <span class="slider-value">{{orderbookMNs | explorerAmount:1}}</span>
                             </div>
                         </div>
                     </div>

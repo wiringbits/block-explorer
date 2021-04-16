@@ -44,6 +44,7 @@ export class CalculatorComponent implements OnInit {
   orderbookMNs = 1500;
   blockRewards = 0;
   orderbookRewards = 0;
+  orderbookRewardsString = "";
   mnHostingCost = 0;
   mnCollateralValue = 0;
   totalRewards = 0;
@@ -51,6 +52,7 @@ export class CalculatorComponent implements OnInit {
   daysUntilFreeMasternode = null;
   dayMonthYearMultiplier = 1;
   loadedData = false;
+  tradingVolumeString = null;
 
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
@@ -223,9 +225,14 @@ export class CalculatorComponent implements OnInit {
     this.calculateHydraResult();
   }
 
+  orderbookMNsChange() {
+    this.calculateHydraResult();
+  }
+
   tradingVolumeLogChange() {
     const val = Math.round(this.tradingVolumeLog < 50 ? (this.tradingVolumeLog * 20) / 2 : (((this.tradingVolumeLog - 50) * 100 * 3.9) + 500));
     this.tradingVolume = val > 1000 ? Math.round(val / 500) * 500 : val;
+    this.tradingVolumeString = this.tradingVolume < 1000 ? (this.tradingVolume + 'M') : ((this.tradingVolume / 1000).toFixed(2) + "B");
     this.calculateHydraResult();
   }
 
@@ -242,6 +249,7 @@ export class CalculatorComponent implements OnInit {
   calculateHydraResult() {
     this.blockRewards = (this.ownedNodes / this.masternodeCountLog) * (1440 * 9) * this.xsnPrice * this.dayMonthYearMultiplier;
     this.orderbookRewards = Math.max(0.225, (0.45 - (0.000225 * this.tradingVolume))) * (this.tradingVolume * 0.0025 * 1000000) * (this.ownedNodes / this.orderbookMNs) * this.dayMonthYearMultiplier;
+    this.orderbookRewardsString = this.toFinString(this.orderbookRewards);
     this.mnHostingCost = this.ownedNodes * (this.orderbookHostingEnabled ? 2.5 : 0.15) * this.dayMonthYearMultiplier;
     this.mnCollateralValue = this.xsnPrice * this.ownedNodes * 15000;
     this.totalRewards = this.blockRewards + (this.orderbookHostingEnabled ? this.orderbookRewards : 0) - this.mnHostingCost;

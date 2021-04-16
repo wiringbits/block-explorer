@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { TickerService } from '../../../services/ticker.service';
 import { XSNService } from '../../../services/xsn.service';
-import { NodeStats, Prices, ServerStats } from '../../../models/ticker';
-import { RewardsSummary } from '../../../models/xsn';
+import { ServerStats } from '../../../models/ticker';
+import { RewardsSummary, NodeStats, Prices } from '../../../models/xsn';
 import { Config } from '../../../config';
 import { amAgo, numberWithCommas } from '../../../utils';
 
@@ -49,14 +49,14 @@ export class TickerComponent implements OnInit {
         response => this.onError(response)
       );
 
-    this.tickerService
+    this.xsnService
       .getNodeStats()
       .subscribe(
         response => this.nodeStats = Object.assign({}, response),
         response => this.onError(response)
       );
 
-    this.tickerService
+    this.xsnService
       .getPrices()
       .subscribe(
         response => this.prices = Object.assign({}, response),

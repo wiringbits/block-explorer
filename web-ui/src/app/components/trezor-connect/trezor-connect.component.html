@@ -92,7 +92,7 @@
             </div>
           </div>
           <br>
-          <span class="main-label">{{'label.generatedTransaction' | translate}}: </span>
+          <span class="main-label" *ngIf="txid">{{'label.generatedTransaction' | translate}}: </span>
           <br>
           <a routerLink="/transactions/{{ txid }}">{{ txid }}</a>
         </div>
