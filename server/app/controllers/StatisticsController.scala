@@ -19,7 +19,7 @@ class StatisticsController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=300")
       }
       .toFuture
   }
@@ -30,7 +30,7 @@ class StatisticsController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=300")
       }
       .toFuture
   }
@@ -51,7 +51,7 @@ class StatisticsController @Inject() (
         ("stakingROI" -> Json.toJson(roi.staking)) +
         ("coinsTrustlesslyStaking" -> Json.toJson(coinsTrustlesslyStaking))
 
-      Ok(result).withHeaders("Cache-Control" -> "public, max-age=3600")
+      Ok(result).withHeaders("Cache-Control" -> "public, max-age=300")
     }
 
     response.toFuture
@@ -65,10 +65,10 @@ class StatisticsController @Inject() (
         prices.map { prices =>
           (prices \ currency)
             .asOpt[BigDecimal]
-            .map(price => Ok(Json.obj(currency -> price)))
+            .map(price => Ok(Json.obj(currency -> price)).withHeaders("Cache-Control" -> "public, max-age=300"))
             .getOrElse(NotFound)
         }
-      case None => prices.map(Ok(_))
+      case None => prices.map(Ok(_).withHeaders("Cache-Control" -> "public, max-age=300"))
     }
 
     result.future
