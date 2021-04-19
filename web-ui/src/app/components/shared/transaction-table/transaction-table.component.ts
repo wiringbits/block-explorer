@@ -1,10 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 import { truncate, amAgo } from '../../../utils';
-import { TransactionsService } from '../../../services/transactions.service';
 import { Transaction } from '../../../models/transaction';
-import { AddressesService } from '../../../services/addresses.service';
-import { ErrorService } from '../../../services/error.service';
 
 @Component({
   selector: 'app-transaction-table',
@@ -36,7 +33,7 @@ export class TransactionTableComponent implements OnInit {
   truncate = truncate;
   amAgo = amAgo;
 
-  constructor(private errorService: ErrorService, private transactionsService: TransactionsService, private addressesService: AddressesService) {
+  constructor() {
     this.lottieConfig = {
       path: 'assets/loader.json',
       renderer: 'canvas',

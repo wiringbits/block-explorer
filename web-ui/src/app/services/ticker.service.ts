@@ -14,6 +14,7 @@ const httpOptions = {
 export class TickerService {
 
   private baseUrl = environment.api.url;
+  isUpdating: Boolean = false;
 
   constructor(private http: HttpClient) { }
 
@@ -30,5 +31,10 @@ export class TickerService {
   getPrices(): Observable<Prices> {
     const url = this.baseUrl + '/prices';
     return this.http.get<Prices>(url);
+  }
+
+  setUpdating(value: Boolean = true) {
+    this.isUpdating = value;
+    return this.isUpdating;
   }
 }

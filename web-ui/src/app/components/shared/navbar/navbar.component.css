@@ -29,6 +29,8 @@
 .navbar-tabbar {
   margin-top: 30px;
   padding: 0 15px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .navbar-nav>li.active {
@@ -148,6 +150,10 @@
   display: none;
 }
 
+.page-loading {
+  min-height: 50px;
+}
+
 @media (max-width: 768px) {
   .navbar-toggler {
     display: block;
@@ -210,6 +216,8 @@
 
   .navbar-tabbar {
     margin-top: 0;
+    display: unset;
+    justify-content: unset;
   }
 }
 

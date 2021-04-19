@@ -32,16 +32,16 @@ export class CalculatorComponent implements OnInit {
   interval: any;
 
   // hydra node
-  xsnPriceLog = 0;
-  xsnPrice = 0;
-  tradingVolumeLog = 0;
+  xsnPriceLog = 1;
+  xsnPrice = 1;
+  tradingVolumeLog = 1;
   tradingVolume = 0;
-  ownedNodesLog = 0;
-  ownedNodes = 0;
-  masternodeCountLog = 2700;
+  ownedNodesLog = 1;
+  ownedNodes = 1;
+  masternodeCountLog = 2300;
   dayMonthYear = "month";
   orderbookHostingEnabled = false; // Used to calculate orderbook rewards, included in total rewards calculation
-  orderbookMNs = 1500;
+  orderbookMNs = 1000;
   blockRewards = 0;
   orderbookRewards = 0;
   orderbookRewardsString = "";
@@ -52,7 +52,7 @@ export class CalculatorComponent implements OnInit {
   daysUntilFreeMasternode = null;
   dayMonthYearMultiplier = 1;
   loadedData = false;
-  tradingVolumeString = null;
+  tradingVolumeString = "10M";
 
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
@@ -117,6 +117,8 @@ export class CalculatorComponent implements OnInit {
         },
         response => this.onError(response)
       );
+
+    this.calculateHydraResult();
     
     this.loadedData = true;
   }
@@ -226,6 +228,10 @@ export class CalculatorComponent implements OnInit {
   }
 
   orderbookMNsChange() {
+    this.calculateHydraResult();
+  }
+
+  masternodeCountLogChange() {
     this.calculateHydraResult();
   }
 

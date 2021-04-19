@@ -4,6 +4,7 @@ import { Transaction } from '../../../models/transaction';
 import { BlocksService } from '../../../services/blocks.service';
 import { TransactionsService } from '../../../services/transactions.service';
 import { ErrorService } from '../../../services/error.service';
+import { TickerService } from '../../../services/ticker.service';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +26,7 @@ export class HomeComponent implements OnInit {
   public lottieConfig: Object;
 
   constructor(private blocksService: BlocksService, private transactionsService: TransactionsService,
-    private errorService: ErrorService) {
+    private errorService: ErrorService, private tickerService: TickerService) {
       this.lottieConfig = {
         path: 'assets/Updating.json',
         renderer: 'canvas',
@@ -44,6 +45,9 @@ export class HomeComponent implements OnInit {
   loadData(updating = false) {
     this.isBlockUpdating = updating;
     this.isTransactionUpdating = updating;
+    if (updating) {
+      this.tickerService.setUpdating();
+    }
     this.updateBlocks();
     this.updateTransactions();
   }
@@ -93,6 +97,7 @@ export class HomeComponent implements OnInit {
   private onTransactionRetrieved(response: Transaction[]) {
     this.isTransactionLoading = false;
     this.isTransactionUpdating = false;
+    this.tickerService.setUpdating(false);
     this.transactions = Object.assign([], response.sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;

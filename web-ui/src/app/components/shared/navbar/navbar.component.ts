@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { TickerService } from '../../../services/ticker.service';
 
 class Tab {
   label: string;
@@ -22,8 +23,15 @@ export class NavbarComponent implements OnInit {
 
   public currentUrl = null;
   showNavbar = false;
+  public lottieConfig: Object;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private tickerService: TickerService) {
+    this.lottieConfig = {
+      path: 'assets/Updating.json',
+      renderer: 'canvas',
+      autoplay: true,
+      loop: true
+    };
   }
 
   ngOnInit() {
