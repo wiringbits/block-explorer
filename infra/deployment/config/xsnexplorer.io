@@ -1,3 +1,9 @@
+
+# upstream xsn {
+#   server 10.136.160.52:9000;
+#   keepalive 120;
+# }
+
 server {
   listen 80 default_server;
 
@@ -16,6 +22,14 @@ server {
   index index.html;
 
   server_name xsnexplorer.io;
+
+  client_body_buffer_size 128k;
+  proxy_connect_timeout 60;
+  proxy_send_timeout 180s;
+  proxy_read_timeout 180s;
+  proxy_buffer_size 64k;
+  proxy_busy_buffers_size 128k;
+  proxy_buffers 64 16k;
 
   # the backend api
   location /api/ltc {
@@ -54,6 +68,8 @@ server {
     proxy_cache my_cache;
     add_header X-Cache-Status $upstream_cache_status;
 
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
     rewrite ^/api/xsn/(.*) /$1 break;
     proxy_pass http://10.136.160.52:9000;
   }
@@ -101,6 +117,9 @@ server {
 
   location /api {
     rewrite ^/api/(.*) /$1 break;
+
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
     proxy_pass http://10.136.160.52:9000;
   }
 

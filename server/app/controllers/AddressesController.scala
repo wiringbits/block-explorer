@@ -22,7 +22,7 @@ class AddressesController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=120")
       }
       .toFuture
   }
@@ -104,7 +104,7 @@ class AddressesController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=120")
       }
       .toFuture
   }

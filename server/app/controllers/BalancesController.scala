@@ -18,7 +18,7 @@ class BalancesController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=300")
       }
       .toFuture
   }
