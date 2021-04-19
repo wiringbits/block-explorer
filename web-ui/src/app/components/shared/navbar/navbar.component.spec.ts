@@ -11,6 +11,7 @@ import { APP_BASE_HREF, LocationStrategy, PathLocationStrategy, Location } from 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TickerService } from '../../../services/ticker.service';
+import { TooltipModule } from 'ng2-tooltip-directive';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -25,7 +26,8 @@ describe('NavbarComponent', () => {
         TranslateModule.forRoot(),
         RouterModule,
         RouterTestingModule,
-        BsDropdownModule
+        BsDropdownModule,
+        TooltipModule
       ],
       providers: [
         { provide: APP_BASE_HREF, useValue: '/' },
