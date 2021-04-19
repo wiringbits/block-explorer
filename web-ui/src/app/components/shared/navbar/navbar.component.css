@@ -152,6 +152,7 @@
 
 .page-loading {
   min-height: 50px;
+  z-index: 5;
 }
 
 @media (max-width: 768px) {
@@ -218,6 +219,13 @@
     margin-top: 0;
     display: unset;
     justify-content: unset;
+    position: relative;
+  }
+
+  .page-updating {
+    position: absolute;
+    bottom: -5px;
+    right: 0;
   }
 }
 

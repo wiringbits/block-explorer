@@ -38,13 +38,15 @@
           </ng-template>
         </li>
       </ul>
-      <div *ngIf="tickerService.isUpdating" class="page-updating">
-        <lottie-animation-view
-          [options]="lottieConfig"
-          [width]="50"
-          [height]="50"
-        >
-        </lottie-animation-view>
+      <div *ngIf="tickerService.isUpdating" class="page-updating" >
+        <span [tooltip]="'Refreshing data'">
+          <lottie-animation-view
+            [options]="lottieConfig"
+            [width]="50"
+            [height]="50"
+          >
+          </lottie-animation-view>
+        </span>
       </div>
     </div>
   </div>

@@ -10,6 +10,7 @@ import { APP_BASE_HREF, LocationStrategy, PathLocationStrategy, Location } from 
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { TickerService } from '../../../services/ticker.service';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -29,6 +30,7 @@ describe('NavbarComponent', () => {
       providers: [
         { provide: APP_BASE_HREF, useValue: '/' },
         { provide: LocationStrategy, useClass: PathLocationStrategy },
+        { provide: TickerService, useValue: 'isUpdating' },
         Location
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]

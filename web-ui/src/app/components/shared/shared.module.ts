@@ -13,6 +13,7 @@ import { TransactionTableComponent } from './transaction-table/transaction-table
 import { TransactionTablev2Component } from './transaction-tablev2/transaction-tablev2.component';
 import { PipesModule } from '../../pipes/pipes.module';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { TooltipModule } from 'ng2-tooltip-directive';
 
 import { LottieAnimationViewModule } from 'ng-lottie';
 
@@ -28,7 +29,8 @@ import { LottieAnimationViewModule } from 'ng-lottie';
         MomentModule,
         InfiniteScrollModule,
         BsDropdownModule.forRoot(),
-        LottieAnimationViewModule.forRoot()
+        LottieAnimationViewModule.forRoot(),
+        TooltipModule
     ],
     declarations: [
         NavbarComponent,
