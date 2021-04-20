@@ -40,7 +40,7 @@ export class CalculatorComponent implements OnInit {
   ownedNodes = 1;
   masternodeCountLog = 2300;
   dayMonthYear = "month";
-  orderbookHostingEnabled = false; // Used to calculate orderbook rewards, included in total rewards calculation
+  orderbookHostingEnabled = true; // Used to calculate orderbook rewards, included in total rewards calculation
   orderbookMNs = 1000;
   blockRewards = 0;
   orderbookRewards = 0;
@@ -247,8 +247,8 @@ export class CalculatorComponent implements OnInit {
     this.calculateHydraResult();
   }
 
-  orderbookHostingEnabledChange() {
-    console.log(this.orderbookHostingEnabled);
+  orderbookHostingEnabledChange(value) {
+    this.orderbookHostingEnabled = value;
     this.calculateHydraResult();
   }
 
@@ -256,9 +256,9 @@ export class CalculatorComponent implements OnInit {
     this.blockRewards = (this.ownedNodes / this.masternodeCountLog) * (1440 * 9) * this.xsnPrice * this.dayMonthYearMultiplier;
     this.orderbookRewards = Math.max(0.225, (0.45 - (0.000225 * this.tradingVolume))) * (this.tradingVolume * 0.0025 * 1000000) * (this.ownedNodes / this.orderbookMNs) * this.dayMonthYearMultiplier;
     this.orderbookRewardsString = this.toFinString(this.orderbookRewards);
-    this.mnHostingCost = this.ownedNodes * (this.orderbookHostingEnabled ? 2.5 : 0.15) * this.dayMonthYearMultiplier;
+    this.mnHostingCost = this.ownedNodes * (this.orderbookHostingEnabled == true ? 2.5 : 0.15) * this.dayMonthYearMultiplier;
     this.mnCollateralValue = this.xsnPrice * this.ownedNodes * 15000;
-    this.totalRewards = this.blockRewards + (this.orderbookHostingEnabled ? this.orderbookRewards : 0) - this.mnHostingCost;
+    this.totalRewards = this.blockRewards + (this.orderbookHostingEnabled == true ? this.orderbookRewards : 0) - this.mnHostingCost;
     this.roi = this.mnCollateralValue > 0 ? (((this.mnCollateralValue + this.totalRewards) / this.mnCollateralValue) - 1) * 100 : 0;
     this.daysUntilFreeMasternode = this.totalRewards > 0 ? (15000 * this.xsnPrice) / (this.totalRewards / this.dayMonthYearMultiplier) : 0;
   }

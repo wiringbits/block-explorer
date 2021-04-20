@@ -190,14 +190,14 @@
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.xsnPrice' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider [(value)]='xsnPriceLog' [min]='1' [max]='100' [type]='range' (change)='xsnPriceLogChange($event)'></ejs-slider>
+                                    <ejs-slider [(value)]='xsnPriceLog' [min]='1' [max]='100' [step]="1" [type]='range' (change)='xsnPriceLogChange($event)'></ejs-slider>
                                 </div>
                                 <span class="slider-value">$ {{toFinString(xsnPrice)}}</span>
                             </div>
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.totalMasternodes' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider [(value)]='masternodeCountLog' [min]='2300' [max]='3000' [type]='range' (change)='masternodeCountLogChange($event)'></ejs-slider>
+                                    <ejs-slider [(value)]='masternodeCountLog' [min]='2300' [max]='4000' [type]='range' (change)='masternodeCountLogChange($event)'></ejs-slider>
                                 </div>
                                 <span class="slider-value">{{masternodeCountLog | explorerAmount}}</span>
                             </div>
@@ -227,7 +227,7 @@
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.mnsHostingDEX' | translate}}</span>
                                 <div class="slider-wrapper">
-                                    <ejs-slider [(value)]='orderbookMNs' [min]='1000' [max]='5000' [step]="100" [type]='range' (change)='orderbookMNsChange($event)' ></ejs-slider>
+                                    <ejs-slider [(value)]='orderbookMNs' [min]='1000' [max]='4000' [step]="100" [type]='range' (change)='orderbookMNsChange($event)' ></ejs-slider>
                                 </div>
                                 <span class="slider-value">{{orderbookMNs | explorerAmount:1}}</span>
                             </div>
@@ -241,25 +241,25 @@
                                     <span class="calculator-label">
                                         {{'label.calculatedBlockRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ blockRewards | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ blockRewards | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.calculatedOrderbookHostingRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ orderbookRewards | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ orderbookRewards | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.masternodeHostingCost' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ mnHostingCost | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ mnHostingCost | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.totalRewardsEST' | translate}}:
                                     </span>
-                                    <span class="price-label total-reward">$ {{ totalRewards | explorerAmount }}</span>
+                                    <span class="price-label total-reward">$ {{ totalRewards | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block roi">
                                     <span class="calculator-label">
@@ -282,25 +282,25 @@
                                     <span class="calculator-label">
                                         {{'label.calculatedBlockRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ blockRewards * 30 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ blockRewards * 30 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.calculatedOrderbookHostingRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ orderbookRewards * 30 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ orderbookRewards * 30 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.masternodeHostingCost' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ mnHostingCost * 30 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ mnHostingCost * 30 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.totalRewardsEST' | translate}}:
                                     </span>
-                                    <span class="price-label total-reward">$ {{ totalRewards * 30 | explorerAmount }}</span>
+                                    <span class="price-label total-reward">$ {{ totalRewards * 30 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block roi">
                                     <span class="calculator-label">
@@ -323,25 +323,25 @@
                                     <span class="calculator-label">
                                         {{'label.calculatedBlockRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ blockRewards * 365 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ blockRewards * 365 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.calculatedOrderbookHostingRewards' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ orderbookRewards * 365 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ orderbookRewards * 365 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.masternodeHostingCost' | translate}}:
                                     </span>
-                                    <span class="price-label">$ {{ mnHostingCost * 365 | explorerAmount }}</span>
+                                    <span class="price-label">$ {{ mnHostingCost * 365 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block">
                                     <span class="calculator-label">
                                         {{'label.totalRewardsEST' | translate}}:
                                     </span>
-                                    <span class="price-label total-reward">$ {{ totalRewards * 365 | explorerAmount }}</span>
+                                    <span class="price-label total-reward">$ {{ totalRewards * 365 | explorerAmount:2 }}</span>
                                 </div>
                                 <div class="value-block roi">
                                     <span class="calculator-label">

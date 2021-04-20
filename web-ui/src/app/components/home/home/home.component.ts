@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
     this.isTransactionUpdating = updating;
     if (updating) {
       this.tickerService.setUpdating();
+      setTimeout(() => this.tickerService.setUpdating(false), 3000)
     }
     this.updateBlocks();
     this.updateTransactions();
@@ -97,7 +98,7 @@ export class HomeComponent implements OnInit {
   private onTransactionRetrieved(response: Transaction[]) {
     this.isTransactionLoading = false;
     this.isTransactionUpdating = false;
-    this.tickerService.setUpdating(false);
+    
     this.transactions = Object.assign([], response.sort(function (a, b) {
       if (a.height > b.height) return -1;
       else return 1;
