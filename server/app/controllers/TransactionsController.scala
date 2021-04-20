@@ -39,7 +39,7 @@ class TransactionsController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
   }
@@ -50,7 +50,7 @@ class TransactionsController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
   }
@@ -68,7 +68,7 @@ class TransactionsController @Inject() (
         if (cacheable) {
           response.withHeaders("Cache-Control" -> "public, max-age=31536000")
         } else {
-          response.withHeaders("Cache-Control" -> "no-store")
+          response.withHeaders("Cache-Control" -> "public, max-age=60")
         }
       }
       .toFuture
@@ -84,7 +84,7 @@ class TransactionsController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
   }

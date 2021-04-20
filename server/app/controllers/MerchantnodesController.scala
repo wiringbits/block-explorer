@@ -6,7 +6,7 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.services.MerchantnodeService
 import controllers.common.{Codecs, MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
-import play.api.libs.json.{Json}
+import play.api.libs.json.Json
 
 class MerchantnodesController @Inject() (
     merchantnodeService: MerchantnodeService,
@@ -24,7 +24,7 @@ class MerchantnodesController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=300")
       }
       .toFuture
   }
@@ -35,7 +35,7 @@ class MerchantnodesController @Inject() (
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
-        response.withHeaders("Cache-Control" -> "public, max-age=60")
+        response.withHeaders("Cache-Control" -> "public, max-age=300")
       }
       .toFuture
   }
