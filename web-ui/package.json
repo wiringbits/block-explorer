@@ -31,7 +31,6 @@
     "connect-history-api-fallback": "^1.6.0",
     "core-js": "^2.5.4",
     "express": "^4.16.4",
-    "jquery": "^3.5.1",
     "lottie-web": "^5.7.6",
     "moment": "^2.22.2",
     "ng-circle-progress": "^1.5.1",
