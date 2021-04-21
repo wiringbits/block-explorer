@@ -46,8 +46,8 @@ export class HomeComponent implements OnInit {
     this.isBlockUpdating = updating;
     this.isTransactionUpdating = updating;
     if (updating) {
-      this.tickerService.setUpdating();
-      setTimeout(() => this.tickerService.setUpdating(false), 3000)
+      this.tickerService.isUpdatingObserver.next(true);
+      setTimeout(() => this.tickerService.isUpdatingObserver.next(false), 3000)
     }
     this.updateBlocks();
     this.updateTransactions();

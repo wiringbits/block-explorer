@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject  } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
@@ -15,8 +15,11 @@ export class TickerService {
 
   private baseUrl = environment.api.url;
   isUpdating: Boolean = false;
+  isUpdatingObserver: Subject<boolean> = new Subject<boolean>();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.isUpdatingObserver.subscribe(value => this.isUpdating = value);
+  }
 
   get(): Observable<ServerStats> {
     const url = this.baseUrl + '/stats';

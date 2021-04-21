@@ -1,5 +1,6 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AnimationItem } from 'lottie-web';
 import { TickerService } from '../../../services/ticker.service';
 
 class Tab {
@@ -16,7 +17,7 @@ class Tab {
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements AfterViewInit {
 
   @Input()
   public tabs: Tab[] = [];
@@ -24,17 +25,40 @@ export class NavbarComponent implements OnInit {
   public currentUrl = null;
   showNavbar = false;
   public lottieConfig: Object;
+  private anim: any;
+  tooltipMessage = null;
 
   constructor(private router: Router, private tickerService: TickerService) {
     this.lottieConfig = {
       path: 'assets/Updating.json',
       renderer: 'canvas',
-      autoplay: true,
+      autoplay: false,
       loop: true
     };
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this.tickerService.isUpdatingObserver.subscribe(value => {
+      if (value) {
+        this.play();
+        this.tooltipMessage = "Refreshing...";
+      } else {
+        this.stop();
+        this.tooltipMessage = null;
+      }
+    });
+  }
+
+  handleAnimation(anim: any) {
+    this.anim = anim;
+  }
+
+  stop() {
+    this.anim.stop();
+  }
+
+  play() {
+    this.anim.play();
   }
 
   /* tabs */

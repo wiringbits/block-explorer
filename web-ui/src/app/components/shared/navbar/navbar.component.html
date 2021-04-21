@@ -38,12 +38,13 @@
           </ng-template>
         </li>
       </ul>
-      <div *ngIf="tickerService.isUpdating" class="page-updating" >
-        <span [tooltip]="'Refreshing data'">
+      <div class="page-updating" >
+        <span [tooltip]="tooltipMessage" [display]="tooltipMessage != null">
           <lottie-animation-view
             [options]="lottieConfig"
             [width]="50"
             [height]="50"
+            (animCreated)="handleAnimation($event)"
           >
           </lottie-animation-view>
         </span>
