@@ -146,7 +146,7 @@
                     <div class="col-xs-12 col-sm-6 calculator-comparison-table">
                         <div class="result-pane">
                             <h5 class="result-pane-title">
-                                <span>{{(holdAmount >= 15000 ? (holdAmount / requiredForMasternode) : 0) | explorerAmount:0 }} {{'label.masternodeAnd' | translate | uppercase}} </span> 
+                                <span>{{(holdAmount >= 15000 ? ((holdAmount - holdAmount % requiredForMasternode) / requiredForMasternode) : 0) | number:'1.0-0' }} {{'label.masternodeAnd' | translate | uppercase}} </span> 
                                 {{ holdAmount >= 15000 ? (holdAmount % requiredForMasternode || 0) : 0 | explorerAmount}} {{'label.stakingAllCoins' | translate | uppercase}}
                             </h5>
                             <!-- <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5> -->
