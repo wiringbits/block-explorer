@@ -13,11 +13,12 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TickerService } from '../../../services/ticker.service';
 import { TooltipModule } from 'ng2-tooltip-directive';
 import { Observable } from 'rxjs';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
-  const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['isUpdatingObserver', 'isUpdating']);
+  // const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['isUpdatingObserver']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -29,12 +30,13 @@ describe('NavbarComponent', () => {
         RouterModule,
         RouterTestingModule,
         BsDropdownModule,
-        TooltipModule
+        TooltipModule,
+        HttpClientModule
       ],
       providers: [
         { provide: APP_BASE_HREF, useValue: '/' },
         { provide: LocationStrategy, useClass: PathLocationStrategy },
-        { provide: TickerService, useValue: tickerServiceSpy },
+        TickerService,
         Location
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
