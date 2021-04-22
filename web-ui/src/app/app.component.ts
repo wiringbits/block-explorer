@@ -337,7 +337,14 @@ export class AppComponent implements OnInit {
       'label.daysUntilFreeMasternodeEarned': 'Days Until Free Masternode Earned',
       'label.monthsUntilFreeMasternodeEarned': 'Months Until Free Masternode Earned',
       'label.yearsUntilFreeMasternodeEarned': 'Years Until Free Masternode Earned',
-      'label.roi': 'ROI'
+      'label.roi': 'ROI',
+
+      'help.xsnPrice': 'Estimated XSN Price.',
+      'help.totalMasternodes': 'The estimated total amount of Masternodes within the Stakenet network.',
+      'help.yourMasternodes': 'Number of Masternodes you own.',
+      'help.enableDexHosting': 'Host the DEX on your Masternodes to earn the DEX fees.',
+      'help.dailyTradingVolume': 'The estimated DEX daily trading volume.',
+      'help.mnsHostingDEX': 'The estimated amount of Masternodes hosting the DEX.'
     };
   }
 }

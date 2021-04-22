@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
-
+import { HttpClientModule } from '@angular/common/http';
 import { NodeListComponent } from './node-list.component';
+import { TickerService } from '../../../services/ticker.service';
 
 import { NO_ERRORS_SCHEMA, } from '@angular/core';
 
@@ -15,10 +16,12 @@ describe('NodeListComponent', () => {
                 NodeListComponent
             ],
             imports: [
-                TranslateModule.forRoot()
+                TranslateModule.forRoot(),
+                HttpClientModule
             ],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
+                TickerService
             ]
         })
             .compileComponents();

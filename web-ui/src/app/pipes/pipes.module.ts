@@ -12,9 +12,7 @@ import { ExplorerDatetimePipe } from './explorer-datetime.pipe';
     imports: [
         CommonModule,
         FormsModule,
-        CommonModule,
         ReactiveFormsModule,
-        RouterModule,
         TranslateModule,
         MomentModule
     ],

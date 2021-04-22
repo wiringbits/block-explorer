@@ -241,6 +241,7 @@
     margin: 0;
     padding: 0;
     border: none;
+    display: block;
 }
 
 ::ng-deep .switch-wrapper .switch small {
@@ -260,6 +261,7 @@
     min-width: 150px;
     color: #989DCC;
     font-size: 12px;
+    display: inherit;
 }
 
 .slider-block .slider-wrapper {
@@ -310,6 +312,13 @@
 
 .total-reward {
     color: #01D9DE!important;
+}
+
+span.help {
+    color: #01D9DE;
+    cursor: help;
+    font-size: 16px;
+    margin-left: 5px;
 }
 
 @media screen and (min-width: 1200px) {

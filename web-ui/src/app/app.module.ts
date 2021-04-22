@@ -14,6 +14,7 @@ import { NgHttpLoaderModule } from 'ng-http-loader';
 import { LottieAnimationViewModule } from 'ng-lottie';
 import { SliderModule } from '@syncfusion/ej2-angular-inputs';
 import { UiSwitchModule } from 'ngx-ui-switch';
+import { TooltipModule } from 'ng2-tooltip-directive';
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -60,7 +61,8 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     ReactiveFormsModule,
     LottieAnimationViewModule.forRoot(),
     SliderModule,
-    UiSwitchModule
+    UiSwitchModule,
+    TooltipModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

@@ -5,7 +5,7 @@ import { NodesInfo, TradesNumber, Volume } from '../../models/orderbook';
 
 import { XSNService } from '../../services/xsn.service';
 import { OrderBookService } from '../../services/orderbook.service';
-
+import { TickerService } from '../../services/ticker.service';
 import { numberWithCommas } from '../../utils';
 
 @Component({
@@ -28,7 +28,8 @@ export class DexMonitorComponent implements OnInit {
 
   constructor(
     private xsnService: XSNService,
-    private orderBookService: OrderBookService
+    private orderBookService: OrderBookService,
+    private tickerService: TickerService
   ) {
     this.tradingPair = "BTC_USDT";
     this.selectedTab = 1;
@@ -44,6 +45,8 @@ export class DexMonitorComponent implements OnInit {
   }
 
   loadData() {
+    this.tickerService.isUpdatingObserver.next(true);
+    setTimeout(() => this.tickerService.isUpdatingObserver.next(false), 3000)
     this.xsnService
       .getPrices()
       .subscribe(
