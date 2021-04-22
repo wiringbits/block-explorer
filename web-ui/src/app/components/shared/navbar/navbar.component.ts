@@ -1,6 +1,5 @@
 import { Component, Input, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AnimationItem } from 'lottie-web';
 import { TickerService } from '../../../services/ticker.service';
 
 class Tab {

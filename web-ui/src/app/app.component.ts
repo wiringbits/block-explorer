@@ -76,13 +76,13 @@ export class AppComponent implements OnInit {
       },{
         label: 'Calculator',
         path: '/calculator',
-        mainTab: false,
+        mainTab: true,
         hasChildren: false,
         selector: '/tools'
       },{
         label: 'DEX Monitor',
         path: '/dex-monitor',
-        mainTab: false,
+        mainTab: true,
         hasChildren: false,
         selector: '/tools'
       },{
@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
         path: '/',
         mainTab: false,
         hasChildren: false,
-        selector: ''
+        selector: '/tools'
       }]
     }
   ]
