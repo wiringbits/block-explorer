@@ -82,7 +82,7 @@ export class AppComponent implements OnInit {
       },{
         label: 'DEX Monitor',
         path: '/dex-monitor',
-        mainTab: true,
+        mainTab: false,
         hasChildren: false,
         selector: '/tools'
       },{

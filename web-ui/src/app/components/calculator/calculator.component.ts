@@ -118,7 +118,7 @@ export class CalculatorComponent implements OnInit {
         response => this.onError(response)
       );
 
-    this.calculateHydraResult();
+    this.tradingVolumeLogChange();
     
     this.loadedData = true;
   }
