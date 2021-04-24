@@ -574,7 +574,7 @@ class BlocksControllerSpec extends MyAPISpec {
       matchBlockHeader(blockheader, json)
 
       val cacheHeader = header("Cache-Control", response)
-      cacheHeader.value mustEqual "no-store"
+      cacheHeader.value mustEqual "public, max-age=60"
     }
 
     "return the blockHeader for the given blockhash no filter" in {
@@ -626,7 +626,7 @@ class BlocksControllerSpec extends MyAPISpec {
       matchBlockHeader(blockheader, json)
 
       val cacheHeader = header("Cache-Control", response)
-      cacheHeader.value mustEqual "no-store"
+      cacheHeader.value mustEqual "public, max-age=60"
     }
 
   }
