@@ -54,6 +54,10 @@ export class CalculatorComponent implements OnInit {
   loadedData = false;
   tradingVolumeString = "10M";
 
+  xsnPriceInputMode = false;
+  totalMasternodeInputMode = false;
+  yourMasternodesInputMode = false;
+
   public value: number = 30;
   public rangevalue: Number[] = [30,70];
   public range: string = 'MinRange';
@@ -221,8 +225,17 @@ export class CalculatorComponent implements OnInit {
       this.xsnPrice = 1000;
     } else if (this.xsnPriceLog > 98) {
       this.xsnPrice = 500;
-    } else{
+    } else {
       this.xsnPrice = Math.round(Math.exp(Math.log(1) + ((Math.log(500) - Math.log(1)) / 100) * this.xsnPriceLog));
+    }
+    this.calculateHydraResult();
+  }
+
+  xsnPriceInput() {
+    if (this.xsnPrice == 1000) {
+      this.xsnPriceLog = 100;
+    } else {
+      this.xsnPriceLog = Math.round((100 * Math.log(this.xsnPrice)) / ((2 * Math.log(2)) + (3 * Math.log(5))));
     }
     this.calculateHydraResult();
   }

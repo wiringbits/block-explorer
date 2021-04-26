@@ -266,7 +266,11 @@
 
 .slider-block .slider-wrapper {
     max-width: 226px;
-    width: 50%;
+    width: 40%;
+}
+
+.slider-block input {
+    height: 25px;
 }
 
 .slider-block .slider-value {
@@ -321,6 +325,10 @@ span.help {
     margin-left: 5px;
 }
 
+.e-control-wrapper.e-slider-container.e-horizontal {
+    height: 16px;
+}
+
 @media screen and (min-width: 1200px) {
     .switch-block .switch-wrapper {
         margin-left: 50px;
@@ -330,6 +338,10 @@ span.help {
 @media (max-width: 992px) {
     .calculator-stats {
         padding: 0!important;
+    }
+
+    .result-pane {
+        margin-bottom: 20px;
     }
 }
 
@@ -344,5 +356,46 @@ span.help {
 
     .calculator-comparison-table .sub-label {
         font-size: 11px!important;
+    }
+}
+
+@media (max-width: 525px) {
+    .slider-row h5 {
+        margin-bottom: 15px;
+    }
+
+    .slider-block {
+        flex-wrap: wrap;
+        height: 32px;
+    }
+
+    .slider-block .slider-label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .switch-block .switch-wrapper {
+        margin-left: 0;
+        height: 16px;
+    }
+
+    .slider-block .slider-wrapper {
+        width: 80%;
+        height: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .slider-block {
+        height: 50px;
+    }
+
+    .slider-block .slider-wrapper {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .slider-block .slider-value {
+        margin-left: 0;
     }
 }
