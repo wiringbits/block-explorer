@@ -1,94 +1,5 @@
 <div class="row text-primary mr-0 ml-0">
-    <div class="col-sm-12 col-md-4 col-md-push-8 calculator-stats" *ngIf="loadedData">
-        <div class="tab-content calculator-stats-container">
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.masternodes' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{stats && stats.masternodes | explorerAmount}}
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.tposNodes' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{stats.tposnodes | explorerAmount}}
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.coinsInMasternodes' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{stats.masternodes * 15000 | explorerAmount}} XSN <br/>
-                    <small>({{stats.masternodes * 15000 / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.coinsStaking' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours | explorerAmount:0 }} XSN <br/>
-                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.masternodeROI' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{(rewardsSummary.masternodesROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.stakingROI' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{(rewardsSummary.stakingROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.requiredForMasternode' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    {{requiredForMasternode | explorerAmount}} XSN <br>
-                    $ {{(prices.usd * requiredForMasternode) | explorerAmount:3 }} <br>
-                    {{(prices.btc * requiredForMasternode) | explorerAmount}} BTC
-                </div>
-            </div>
-
-            <div class="col-xs-6 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.price' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    $ {{prices.usd | explorerAmount:3 }}
-                </div>
-            </div>
-
-            <div class="col-xs-12 calculator-stat-item">
-                <div class="calculator-label">
-                    {{'label.rewardPerBlock' | translate}}:
-                </div>
-                <div class="calculator-stat-data">
-                    9 XSN
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-12 col-md-8 col-md-pull-4 calculator-panel" *ngIf="loadedData">
+    <div class="col-sm-12 col-md-8 calculator-panel" *ngIf="loadedData">
         <tabset>
             <tab heading="BLOCK REWARDS">
                 <div>
@@ -193,21 +104,24 @@
                                 <div class="slider-wrapper">
                                     <ejs-slider [(value)]='xsnPriceLog' [min]='1' [max]='100' [step]="1" [type]='range' (change)='xsnPriceLogChange($event)'></ejs-slider>
                                 </div>
-                                <span class="slider-value">$ {{toFinString(xsnPrice)}}</span>
+                                <span class="slider-value" (click)="xsnPriceInputMode = true" *ngIf="!xsnPriceInputMode">$ {{toFinString(xsnPrice)}}</span>
+                                <input type="number" *ngIf="xsnPriceInputMode" min="1" max="1000" [(ngModel)]="xsnPrice" (ngModelChange)="xsnPriceInput()" (blur)="xsnPriceInputMode = false" />
                             </div>
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.totalMasternodes' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.totalMasternodes' | translate"></span></span>
                                 <div class="slider-wrapper">
                                     <ejs-slider [(value)]='masternodeCountLog' [min]='2300' [max]='4000' [type]='range' (change)='masternodeCountLogChange($event)'></ejs-slider>
                                 </div>
-                                <span class="slider-value">{{masternodeCountLog | explorerAmount}}</span>
+                                <span class="slider-value" (click)="totalMasternodeInputMode = true" *ngIf="!totalMasternodeInputMode">{{masternodeCountLog | explorerAmount}}</span>
+                                <input type="number" *ngIf="totalMasternodeInputMode" [(ngModel)]="masternodeCountLog" (blur)="totalMasternodeInputMode = false" />
                             </div>
                             <div class="slider-block">
                                 <span class="slider-label">{{'label.yourMasternodes' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.yourMasternodes' | translate"></span></span>
                                 <div class="slider-wrapper">
                                     <ejs-slider [(value)]='ownedNodesLog' [min]='1' [max]='100' [type]='range' (change)='ownedNodesLogChange($event)'></ejs-slider>
                                 </div>
-                                <span class="slider-value">{{ownedNodes}}</span>
+                                <span class="slider-value" (click)="yourMasternodesInputMode = true" *ngIf="!yourMasternodesInputMode">{{ownedNodes}}</span>
+                                <input type="number" *ngIf="yourMasternodesInputMode" [(ngModel)]="ownedNodes" (blur)="yourMasternodesInputMode = false" />
                             </div>
                         </div>
                         <div class="col-xs-12 col-lg-6">
@@ -362,5 +276,94 @@
                 </div>
             </tab>
         </tabset>
+    </div>
+
+    <div class="col-sm-12 col-md-4 calculator-stats" *ngIf="loadedData">
+        <div class="tab-content calculator-stats-container">
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.masternodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats && stats.masternodes | explorerAmount}}
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.tposNodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats.tposnodes | explorerAmount}}
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.coinsInMasternodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats.masternodes * 15000 | explorerAmount}} XSN <br/>
+                    <small>({{stats.masternodes * 15000 / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.coinsStaking' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours | explorerAmount:0 }} XSN <br/>
+                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.masternodeROI' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{(rewardsSummary.masternodesROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.stakingROI' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{(rewardsSummary.stakingROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.requiredForMasternode' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{requiredForMasternode | explorerAmount}} XSN <br>
+                    $ {{(prices.usd * requiredForMasternode) | explorerAmount:3 }} <br>
+                    {{(prices.btc * requiredForMasternode) | explorerAmount}} BTC
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.price' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    $ {{prices.usd | explorerAmount:3 }}
+                </div>
+            </div>
+
+            <div class="col-xs-12 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.rewardPerBlock' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    9 XSN
+                </div>
+            </div>
+        </div>
     </div>
 </div>

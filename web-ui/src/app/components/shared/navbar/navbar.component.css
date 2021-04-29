@@ -169,7 +169,8 @@
     width: 30px;
     height: 30px;
     color: #01D9DE;
-    float: right;
+    margin-left: auto;
+    margin-top: 10px;
   }
 
   .top-nav {
