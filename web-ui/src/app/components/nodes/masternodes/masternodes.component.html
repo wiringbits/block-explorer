@@ -11,7 +11,7 @@
                  -->
           <th class="col-xs-2 pl-0 pr-0">{{'label.active' | translate | uppercase}}</th>
           <th class="col-xs-2 pl-1 pr-0">{{'label.lastSeen' | translate | uppercase}}</th>
-          <th class="col-xs-3 right-align">{{'label.payee' | translate | uppercase}}</th>
+          <th class="pl-1 col-xs-3">{{'label.payee' | translate | uppercase}}</th>
         </tr>
       </thead>
 
@@ -27,7 +27,7 @@
                 -->
           <td class="text-primary pl-0 pr-0" style="min-width: 80px;">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
           <td class="text-primary pl-1 pr-0" style="min-width: 70px;">{{amAgo(item.lastSeen)}}</td>
-          <td class="right-align pl-0" style="min-width: 175px;">
+          <td class="pl-1" style="min-width: 175px;">
             <a class="text-highlight" routerLink="/addresses/{{item.payee}}">{{truncate(item.payee, 8, 5)}}</a>
           </td>
         </tr>

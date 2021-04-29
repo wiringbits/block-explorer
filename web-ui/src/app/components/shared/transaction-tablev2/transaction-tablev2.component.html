@@ -17,9 +17,9 @@
             <!-- <th class="col-2 pr-1 pl-1">{{'label.blockHash' | translate | uppercase}}</th> -->
             <th class="col-2 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.type' | translate | uppercase}}</th>
             <th class="col-1 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th>
-            <th class="col-2 right-align pl-1 pr-1">{{'label.amount' | translate | uppercase}}</th>
-            <th class="col-2 right-align pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
-            <th class="col-2 right-align pl-0">{{'label.time' | translate | uppercase}}</th>
+            <th class="col-2 pl-1 pr-1">{{'label.amount' | translate | uppercase}}</th>
+            <th class="col-2 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
+            <th class="col-2 pl-0">{{'label.time' | translate | uppercase}}</th>
           </tr>
         </thead>
 
@@ -31,9 +31,9 @@
             <!-- <td class="pr-1 pl-1" style="min-width: 125px;"><div>&nbsp;</div></td> -->
             <td class="pl-1 pr-1" style="min-width: 80px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
             <td class="pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
-            <td class="text-primary right-align pl-1 pr-1" style="min-width: 65px;"><div>&nbsp;</div></td>
-            <td class="text-primary right-align pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
-            <td class="text-primary right-align pl-0" style="min-width: 240px;"><div>&nbsp;</div></td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 65px;"><div>&nbsp;</div></td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
+            <td class="text-primary pl-0" style="min-width: 240px;"><div>&nbsp;</div></td>
           </tr>
         </tbody>
 
@@ -54,9 +54,9 @@
             <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">
               <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
             </td>
-            <td class="text-primary right-align pl-1 pr-1" style="min-width: 65px;">{{getAmount(item) | explorerCurrency}}</td>
-            <td class="text-primary right-align pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">{{item.fee | explorerCurrency}}</td>
-            <td class="text-primary right-align pl-0" style="min-width: 240px;">
+            <td class="text-primary pl-1 pr-1" style="min-width: 65px;">{{getAmount(item) | explorerCurrency}}</td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">{{item.fee | explorerCurrency}}</td>
+            <td class="text-primary pl-0" style="min-width: 240px;">
               {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}
               ({{amAgo(item.time)}})
             </td>
