@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { SliderComponent } from '@syncfusion/ej2-angular-inputs';
 import { ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
@@ -34,14 +34,24 @@ export class CalculatorComponent implements OnInit {
   // hydra node
   xsnPriceLog = 1;
   xsnPrice = 1;
+  xsnPriceInputValue = null;
+
   tradingVolumeLog = 1;
   tradingVolume = 0;
+  tradingVolumeValue = null;
+
   ownedNodesLog = 1;
   ownedNodes = 1;
+  ownedNodesValue = null;
+
   masternodeCountLog = 2300;
+  masternodeCountValue = null;
+
   dayMonthYear = "month";
   orderbookHostingEnabled = true; // Used to calculate orderbook rewards, included in total rewards calculation
   orderbookMNs = 1000;
+  orderbookMNsValue = null;
+
   blockRewards = 0;
   orderbookRewards = 0;
   orderbookRewardsString = "";
@@ -71,10 +81,6 @@ export class CalculatorComponent implements OnInit {
     this.loadData();
     this.interval = setInterval(() => this.loadData(), 10000);
   }
-
-  // ngAfterViewInit() {
-  //   this.mnSlider.dataBind();
-  // }
 
   ngOnDestroy() {
     clearInterval(this.interval);
@@ -232,6 +238,7 @@ export class CalculatorComponent implements OnInit {
   }
 
   xsnPriceInput() {
+    this.xsnPrice = this.xsnPriceInputValue ? this.xsnPriceInputValue : 0;
     if (this.xsnPrice == 1000) {
       this.xsnPriceLog = 100;
     } else {
@@ -240,7 +247,28 @@ export class CalculatorComponent implements OnInit {
     this.calculateHydraResult();
   }
 
+  ownedNodesInput() {
+    this.ownedNodes = this.ownedNodesValue ? this.ownedNodesValue : 0;
+    this.ownedNodesLog = Math.round(this.ownedNodes < 25 ? this.ownedNodes * 2 : (((this.ownedNodes - 25) * (2/3)) + 50));
+    this.calculateHydraResult();
+  }
+
+  masternodeCountInput() {
+    this.masternodeCountLog = this.masternodeCountValue ? this.masternodeCountValue : 0;
+    this.calculateHydraResult();
+  }
+
   orderbookMNsChange() {
+    this.calculateHydraResult();
+  }
+
+  orderbookMNsInput() {
+    if (this.orderbookMNsValue) {
+      this.orderbookMNsValue = Math.ceil(this.orderbookMNsValue / 100) * 100;
+      this.orderbookMNs = this.orderbookMNsValue;
+    } else {
+      this.orderbookMNs = 0;
+    }
     this.calculateHydraResult();
   }
 
@@ -258,6 +286,14 @@ export class CalculatorComponent implements OnInit {
   ownedNodesLogChange() {
     this.ownedNodes = Math.round(this.ownedNodesLog < 50 ? this.ownedNodesLog / 2 : (((this.ownedNodesLog - 50) * 1.5) + 25));
     this.calculateHydraResult();
+  }
+
+  tradingVolumeInput() {
+    if (this.tradingVolumeValue) {
+      this.tradingVolume = this.tradingVolumeValue;
+      this.tradingVolumeLog = Math.round(this.tradingVolume < 500 ? this.tradingVolume / 10 : (((this.tradingVolume - 500) / 390) + 50));
+      this.calculateHydraResult();
+    }
   }
 
   orderbookHostingEnabledChange(value) {

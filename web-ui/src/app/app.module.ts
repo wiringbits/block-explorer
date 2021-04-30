@@ -15,6 +15,7 @@ import { LottieAnimationViewModule } from 'ng-lottie';
 import { SliderModule } from '@syncfusion/ej2-angular-inputs';
 import { UiSwitchModule } from 'ngx-ui-switch';
 import { TooltipModule } from 'ng2-tooltip-directive';
+import { PopoverModule } from 'ngx-bootstrap/popover';
 
 import { AddressesService } from './services/addresses.service';
 import { BalancesService } from './services/balances.service';
@@ -62,7 +63,8 @@ import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.compon
     LottieAnimationViewModule.forRoot(),
     SliderModule,
     UiSwitchModule,
-    TooltipModule
+    TooltipModule,
+    PopoverModule.forRoot()
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

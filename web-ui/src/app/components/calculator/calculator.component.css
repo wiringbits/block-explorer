@@ -54,12 +54,12 @@
     background-color: #0F1223;
     border-radius: 8px;
     padding-top: 27px;
+    margin-bottom: 20px;
 }
 
 ::ng-deep .calculator-panel .tab-content {
     margin-bottom: 26px;
 }
-
 
 @media (min-width:992px) {
     .calculator-panel {
@@ -269,8 +269,25 @@
     width: 40%;
 }
 
+::ng-deep .slider-block .popover {
+    background-color: unset;
+}
+
+::ng-deep .slider-block .popover-content {
+    background-color: #181b2c;
+}
+
+::ng-deep .popover.top>.arrow:after {
+    border-top-color: #181b2c!important;
+}
+
 .slider-block input {
     height: 25px;
+}
+
+.slider-block button {
+    margin-left: 5px;
+    color: black;
 }
 
 .slider-block .slider-value {
