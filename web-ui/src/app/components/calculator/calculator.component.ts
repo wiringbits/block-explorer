@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { SliderComponent } from '@syncfusion/ej2-angular-inputs';
 import { ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
