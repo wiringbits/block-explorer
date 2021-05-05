@@ -40,12 +40,15 @@ import { TposnodesService } from './services/tposnodes.service';
 import { CalculatorComponent } from './components/calculator/calculator.component';
 import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.component';
 
+import { FocusDirective } from './directives/focus-directive';
+
 @NgModule({
   declarations: [
     AppComponent,
     TrezorConnectComponent,
     CalculatorComponent,
-    DexMonitorComponent
+    DexMonitorComponent,
+    FocusDirective
   ],
   imports: [
     AppRoutingModule,

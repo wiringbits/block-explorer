@@ -106,7 +106,7 @@
                                 </div>
                                 <span class="slider-value" [popover]="popTemplate1" [triggers]="'click'" [outsideClick]="true">$ {{toFinString(xsnPrice)}}</span>
                                 <ng-template #popTemplate1>
-                                    <input type="number" min="1" max="1000" [(ngModel)]="xsnPriceInputValue" />
+                                    <input type="number" min="1" max="1000" [(ngModel)]="xsnPriceInputValue" (keyup.enter)="xsnPriceInput()" [focus]="xsnPriceEventEmitter" />
                                     <button type="button" (click)="xsnPriceInput()">Set</button>
                                 </ng-template>
                             </div>
@@ -117,7 +117,7 @@
                                 </div>
                                 <span class="slider-value" [popover]="popTemplate2" [triggers]="'click'" [outsideClick]="true">{{masternodeCountLog | explorerAmount}}</span>
                                 <ng-template #popTemplate2>
-                                    <input type="number" min="2300" max="4000" [(ngModel)]="masternodeCountValue" />
+                                    <input type="number" min="2300" max="4000" autofocus [(ngModel)]="masternodeCountValue" (keyup.enter)="masternodeCountInput()" />
                                     <button type="button" (click)="masternodeCountInput()">Set</button>
                                 </ng-template>
                             </div>
@@ -128,7 +128,7 @@
                                 </div>
                                 <span class="slider-value" [popover]="popTemplate3" [triggers]="'click'" [outsideClick]="true">{{ownedNodes}}</span>
                                 <ng-template #popTemplate3>
-                                    <input type="number" min="1" max="100" [(ngModel)]="ownedNodesValue" />
+                                    <input type="number" min="1" max="100" autofocus [(ngModel)]="ownedNodesValue" (keyup.enter)="ownedNodesInput()" />
                                     <button type="button" (click)="ownedNodesInput()">Set</button>
                                 </ng-template>
                             </div>
@@ -148,7 +148,7 @@
                                 </div>
                                 <span class="slider-value" [popover]="popTemplate4" [triggers]="'click'" [outsideClick]="true">$ {{tradingVolumeString }}</span>
                                 <ng-template #popTemplate4>
-                                    <input type="number" min="1" max="100" [(ngModel)]="tradingVolumeValue" />
+                                    <input type="number" min="1" max="100" autofocus [(ngModel)]="tradingVolumeValue" (keyup.enter)="tradingVolumeInput()" />
                                     <button type="button" (click)="tradingVolumeInput()">Set</button>
                                 </ng-template>
                             </div>
@@ -159,7 +159,7 @@
                                 </div>
                                 <span class="slider-value" [popover]="popTemplate5" [triggers]="'click'" [outsideClick]="true">{{orderbookMNs | explorerAmount:1}}</span>
                                 <ng-template #popTemplate5>
-                                    <input type="number" min="1000" max="4000" step="100" [(ngModel)]="orderbookMNsValue" />
+                                    <input type="number" min="1000" max="4000" autofocus step="100" [(ngModel)]="orderbookMNsValue" (keyup.enter)="orderbookMNsInput()" />
                                     <button type="button" (click)="orderbookMNsInput()">Set</button>
                                 </ng-template>
                             </div>

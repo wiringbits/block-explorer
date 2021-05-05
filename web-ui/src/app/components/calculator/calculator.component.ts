@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, EventEmitter, AfterViewChecked } from '@angular/core';
 import { SliderComponent } from '@syncfusion/ej2-angular-inputs';
 import { ServerStats } from '../../models/ticker';
 import { TickerService } from '../../services/ticker.service';
@@ -10,7 +10,7 @@ import { RewardsSummary, NodeStats, Prices } from '../../models/xsn';
   templateUrl: './calculator.component.html',
   styleUrls: ['./calculator.component.css']
 })
-export class CalculatorComponent implements OnInit {
+export class CalculatorComponent implements OnInit, AfterViewChecked {
 
   transaction: any;
   prices: Prices = new Prices();
@@ -72,6 +72,9 @@ export class CalculatorComponent implements OnInit {
   public rangevalue: Number[] = [30,70];
   public range: string = 'MinRange';
 
+  public xsnPriceEventEmitter = new EventEmitter<boolean>();
+  xsnPriceFocus = false;
+
   @ViewChild('slider')
   public mnSlider: SliderComponent;
 
@@ -85,6 +88,17 @@ export class CalculatorComponent implements OnInit {
   ngOnDestroy() {
     clearInterval(this.interval);
     this.interval = null;
+  }
+
+  ngAfterViewChecked() {
+    if (this.xsnPriceFocus) {
+      this.focusOnXSNPrice();
+      this.xsnPriceFocus = false;
+    }
+  }
+
+  focusOnXSNPrice() {
+    this.xsnPriceEventEmitter.emit(true);
   }
 
   loadData() {
