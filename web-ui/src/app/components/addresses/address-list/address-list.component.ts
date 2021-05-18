@@ -1,6 +1,6 @@
 
 import { tap } from 'rxjs/operators';
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 
 import { Balance } from '../../../models/balance';
 
@@ -18,10 +18,8 @@ import { addressLabels } from '../../../config';
 })
 export class AddressListComponent implements OnInit {
 
-  // ticker
   ticker: ServerStats;
 
-  // pagination
   limit = 100;
   items: Balance[] = [];
 

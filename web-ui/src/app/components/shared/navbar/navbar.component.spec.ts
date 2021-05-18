@@ -18,7 +18,6 @@ import { HttpClientModule } from '@angular/common/http';
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
-  // const tickerServiceSpy: jasmine.SpyObj<TickerService> = jasmine.createSpyObj('TickerService', ['isUpdatingObserver']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

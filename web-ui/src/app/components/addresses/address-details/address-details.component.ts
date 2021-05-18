@@ -1,6 +1,5 @@
 
-import { tap } from 'rxjs/operators';
-import { Component, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Balance } from '../../../models/balance';
 import { AddressesService } from '../../../services/addresses.service';
@@ -30,7 +29,6 @@ export class AddressDetailsComponent implements OnInit {
   addressLoaded: boolean;
   interval = null;
 
-  // pagination
   limit = 10;
   transactions: LightWalletTransaction[] = [];
   items: LightWalletTransaction[] = [];
@@ -48,14 +46,12 @@ export class AddressDetailsComponent implements OnInit {
 
   ngOnInit() {
     const height = this.getScreenSize();
-    // this.limit = getNumberOfRowsForScreen(height);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.reload();
       }
     });
     this.reload();
-    // this.interval = setInterval(() => this.reload(), 10000);
   }
   
   ngOnChanges(changes: any) {
@@ -70,7 +66,6 @@ export class AddressDetailsComponent implements OnInit {
       this.subscription$.unsubscribe();
     }
 
-    // clearInterval(this.interval);
     this.interval = null;
   }
 
@@ -89,25 +84,13 @@ export class AddressDetailsComponent implements OnInit {
           response => this.onError(response)
         );
     } else {
-      // this.transactionsService
-      //   .getList(lastSeenTxId, this.limit)
-      //   .subscribe(
-      //     response => this.onTransactionRetrieved(response.data),
-      //     response => this.onError(response)
-      //   );
     }
   }
 
   private onTransactionRetrieved(response: LightWalletTransaction[]) {
     this.isLoading = false;
     this.loadingType = 1;
-    // this.lastSeenTxId = this.transactions.reduce((max, block) => Math.max(block.height, max), 0);
-    this.transactions = this.transactions.concat(response)
-    // this.transactions = Object.assign([], response)
-      // .sort(function (a, b) {
-      //   if (a.height > b.height) return -1;
-      //   else return 1;
-      // });
+    this.transactions = this.transactions.concat(response);
   }
 
   reload() {

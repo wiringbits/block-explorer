@@ -66,7 +66,6 @@ export class BlockListComponent implements OnInit {
     private onBlockRetrieved(response: Block[]) {
         this.isLoading = false;
         this.loadingType = 1;
-        // this.latestBlockHeight = this.blocks.reduce((max, block) => Math.max(block.height, max), 0);
         this.blocks = this.blocks.concat(response).sort(function (a, b) {
             if (a.height > b.height) return -1;
             else return 1;

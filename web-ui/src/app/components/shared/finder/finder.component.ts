@@ -81,7 +81,6 @@ export class FinderComponent implements OnInit {
       this.masternodesService.getByIP(searchField)
         .subscribe(
           response => this.navigatorService.masternodeDetails(searchField),
-          // response => this.navigatorService.transactionDetails(response.txid),
           error => this.errorDisplay(error)
         );
     } else if (new RegExp(BLOCK_NUMBER_REGEX).test(searchField)) {
@@ -106,6 +105,5 @@ export class FinderComponent implements OnInit {
     console.log(err);
     this.errors.push(err.error.errors[0].message);
     this.errorString = this.errors.join("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-    // this.errorService.setFieldError(this.form, 'searchField', msg)
   }
 }

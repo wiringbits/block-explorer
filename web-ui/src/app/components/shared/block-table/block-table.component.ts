@@ -46,7 +46,7 @@ export class BlockTableComponent implements OnInit, OnDestroy {
         autoplay: true,
         loop: true
       };
-      this.emptyArray = Array(10).fill(4); // [4,4,4,4,4]
+      this.emptyArray = Array(10).fill(4);
     }
 
   ngOnInit() {

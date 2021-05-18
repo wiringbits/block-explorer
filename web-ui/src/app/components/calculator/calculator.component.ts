@@ -17,14 +17,14 @@ export class CalculatorComponent implements OnInit, AfterViewChecked {
   stats: NodeStats = new NodeStats();
   rewardsSummary: RewardsSummary = new RewardsSummary();
   serverStats: ServerStats = new ServerStats();
-  holdAmount = null;
+  holdAmount: number = null;
 
   requiredForMasternode = 15000;
 
-  masternodeCount = 0;
-  xsnStaking = 0;
-  mnstaking = 0;
-  stakingcoin = 0;
+  masternodeCount: number = 0;
+  xsnStaking: number = 0;
+  mnstaking: number = 0;
+  stakingcoin: number = 0;
 
   stakingWaitTime = "";
   mnWaitTime = "";
@@ -32,25 +32,25 @@ export class CalculatorComponent implements OnInit, AfterViewChecked {
   interval: any;
 
   // hydra node
-  xsnPriceLog = 1;
-  xsnPrice = 1;
-  xsnPriceInputValue = null;
+  xsnPriceLog: number = 1;
+  xsnPrice: number = 1;
+  xsnPriceInputValue: number = null;
 
   tradingVolumeLog = 1;
   tradingVolume = 0;
-  tradingVolumeValue = null;
+  tradingVolumeValue: number = null;
 
   ownedNodesLog = 1;
   ownedNodes = 1;
-  ownedNodesValue = null;
+  ownedNodesValue: number = null;
 
   masternodeCountLog = 2300;
-  masternodeCountValue = null;
+  masternodeCountValue: number = null;
 
   dayMonthYear = "month";
   orderbookHostingEnabled = true; // Used to calculate orderbook rewards, included in total rewards calculation
   orderbookMNs = 1000;
-  orderbookMNsValue = null;
+  orderbookMNsValue: number = null;
 
   blockRewards = 0;
   orderbookRewards = 0;
@@ -58,8 +58,8 @@ export class CalculatorComponent implements OnInit, AfterViewChecked {
   mnHostingCost = 0;
   mnCollateralValue = 0;
   totalRewards = 0;
-  roi = null;
-  daysUntilFreeMasternode = null;
+  roi: number = null;
+  daysUntilFreeMasternode: number = null;
   dayMonthYearMultiplier = 1;
   loadedData = false;
   tradingVolumeString = "10M";

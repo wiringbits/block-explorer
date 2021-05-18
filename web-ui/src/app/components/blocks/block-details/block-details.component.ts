@@ -16,7 +16,6 @@ export class BlockDetailsComponent implements OnInit {
   @Input()
   blockDetails: BlockDetails;
 
-  // pagination
   limit = 30;
   transactions: Transaction[] = [];
 
