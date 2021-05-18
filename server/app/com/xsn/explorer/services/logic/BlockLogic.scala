@@ -15,12 +15,13 @@ class BlockLogic {
     Or.from(maybe, One(TransactionError.CoinbaseNotFound(block.hash)))
   }
 
-  /** Get the coinstake transaction id for the given block.
-    *
-    * A PoS block contains at least 2 transactions:
-    * - the 1st one is empty
-    * - the 2nd one is the Coinstake transaction.
-    */
+  /**
+   * Get the coinstake transaction id for the given block.
+   *
+   * A PoS block contains at least 2 transactions:
+   * - the 1st one is empty
+   * - the 2nd one is the Coinstake transaction.
+   */
   def getCoinstakeTransaction[Tx](block: Block[Tx]): ApplicationResult[Tx] = {
     val maybe = block.transactions.lift(1)
 
@@ -46,28 +47,30 @@ class BlockLogic {
     Or.from(maybe, One(BlockNotFoundError))
   }
 
-  /** Computes the rewards for a PoS coinstake transaction.
-    *
-    * There should be a coinstake reward and possibly a master node reward.
-    *
-    * The rewards are computed based on the transaction output which is expected to
-    * contain between 2 and 4 values:
-    * - the 1st one is empty
-    * - the 2nd one goes to the coinstake
-    * - the 3rd one (if present) will go to the coinstake if the address matches, otherwise it goes to master node.
-    * - the 4th one (if present) will go to the master node.
-    *
-    * While the previous format should be meet by the RPC server, we compute the rewards
-    * based on coinstake address.
-    *
-    * Sometimes there could be rounding errors, for example, when the input is not exactly divisible by 2,
-    * we return 0 in that case because the reward could be negative.
-    */
+  /**
+   * Computes the rewards for a PoS coinstake transaction.
+   *
+   * There should be a coinstake reward and possibly a master node reward.
+   *
+   * The rewards are computed based on the transaction output which is expected to
+   * contain between 2 and 4 values:
+   * - the 1st one is empty
+   * - the 2nd one goes to the coinstake
+   * - the 3rd one (if present) will go to the coinstake if the address matches, otherwise it goes to master node.
+   * - the 4th one (if present) will go to the master node.
+   *
+   * While the previous format should be meet by the RPC server, we compute the rewards
+   * based on coinstake address.
+   *
+   * Sometimes there could be rounding errors, for example, when the input is not exactly divisible by 2,
+   * we return 0 in that case because the reward could be negative.
+   */
   def getPoSRewards(
       coinstakeTx: Transaction[_],
       coinstakeAddress: Address,
       stakedTx: Transaction[TransactionVIN],
-      coinstakeInput: BigDecimal
+      coinstakeInput: BigDecimal,
+      totalInput: BigDecimal
   ): ApplicationResult[PoSBlockRewards] = {
 
     // first vout is empty, useless
@@ -78,25 +81,20 @@ class BlockLogic {
         .map(_.value)
         .sum
 
-      val coinstakeReward =
-        BlockReward(coinstakeAddress, (value - coinstakeInput) max 0)
+      val coinstakeReward = BlockReward(coinstakeAddress, (value - totalInput) max 0)
 
       val masternodeRewardOUT = coinstakeVOUT.filterNot(
         _.addresses.getOrElse(List.empty) contains coinstakeAddress
       )
-      val masternodeAddressMaybe =
-        masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
-      val masternodeRewardMaybe = masternodeAddressMaybe.map {
-        masternodeAddress =>
-          BlockReward(
-            masternodeAddress,
-            masternodeRewardOUT
-              .filter(
-                _.addresses.getOrElse(List.empty) contains masternodeAddress
-              )
-              .map(_.value)
-              .sum
-          )
+      val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
+      val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
+        BlockReward(
+          masternodeAddress,
+          masternodeRewardOUT
+            .filter(_.addresses.getOrElse(List.empty) contains masternodeAddress)
+            .map(_.value)
+            .sum
+        )
       }
 
       Good(
@@ -116,17 +114,19 @@ class BlockLogic {
       coinstakeTx: Transaction[_],
       contract: TPoSContract.Details,
       stakedTx: Transaction[TransactionVIN],
-      coinstakeInput: BigDecimal
+      coinstakeInput: BigDecimal,
+      totalInput: BigDecimal
   ): ApplicationResult[TPoSBlockRewards] = {
 
-    /** While we expected the following
-      * - 1st output is empty and it is removed.
-      * - 3 outputs, normal TPoS
-      * - 4 outputs, coin split TPoS
-      *
-      * In order to display partial solutions, we will just filter by the
-      * addresses to get the rewards.
-      */
+    /**
+     * While we expected the following
+     * - 1st output is empty and it is removed.
+     * - 3 outputs, normal TPoS
+     * - 4 outputs, coin split TPoS
+     *
+     * In order to display partial solutions, we will just filter by the
+     * addresses to get the rewards.
+     */
     val coinstakeVOUT = coinstakeTx.vout
 
     val ownerValue = coinstakeVOUT
@@ -135,7 +135,7 @@ class BlockLogic {
       .sum
 
     val ownerReward =
-      BlockReward(contract.owner, (ownerValue - coinstakeInput) max 0)
+      BlockReward(contract.owner, (ownerValue - totalInput) max 0)
 
     // merchant
     val merchantValue =
@@ -152,17 +152,16 @@ class BlockLogic {
     }
     val masternodeAddressMaybe =
       masternodeRewardOUT.flatMap(_.addresses.getOrElse(List.empty)).headOption
-    val masternodeRewardMaybe = masternodeAddressMaybe.map {
-      masternodeAddress =>
-        BlockReward(
-          masternodeAddress,
-          masternodeRewardOUT
-            .filter(
-              _.addresses.getOrElse(List.empty) contains masternodeAddress
-            )
-            .map(_.value)
-            .sum
-        )
+    val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
+      BlockReward(
+        masternodeAddress,
+        masternodeRewardOUT
+          .filter(
+            _.addresses.getOrElse(List.empty) contains masternodeAddress
+          )
+          .map(_.value)
+          .sum
+      )
     }
 
     Good(
