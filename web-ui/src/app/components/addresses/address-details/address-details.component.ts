@@ -27,7 +27,7 @@ export class AddressDetailsComponent implements OnInit {
   isLoading: boolean;
   loadingType = 2;
   addressLoaded: boolean;
-  interval = null;
+  interval: number = null;
 
   limit = 10;
   transactions: LightWalletTransaction[] = [];
