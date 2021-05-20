@@ -184,9 +184,7 @@ class BlockService @Inject() (
 
       rewards <- getBlockRewards(block).map {
         case Good(value) => Good(Some(value))
-        case Bad(e) =>
-          println(e)
-          Good(None)
+        case Bad(e) => Good(None)
       }.toFutureOr
 
     } yield BlockDetails(block, rewards)
