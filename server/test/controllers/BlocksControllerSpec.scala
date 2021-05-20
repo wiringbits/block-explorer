@@ -68,6 +68,27 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
     }
 
+    "retrieve a PoS block with treasury" in {
+      val block = BlockLoader.getRPC("76848793c90ee23b7de68c1c97d0a6dd8d53921c48854fac53a22e56c8549b18")
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      matchBlock(block, jsonBlock)
+
+      val jsonCoinstake = (jsonRewards \ "coinstake").as[JsValue]
+      (jsonCoinstake \ "address").as[String] mustEqual "XtsUZvKvN7ZEwGQ8WPSbJ6NUtxCJgBDBJP"
+      (jsonCoinstake \ "value").as[BigDecimal] mustEqual BigDecimal(36)
+
+      val jsonMasternode = (jsonRewards \ "treasury").as[JsValue]
+      (jsonMasternode \ "address").as[String] mustEqual "XsWsJ7u8dmCVuUn6ShsWiniWkhGDQzctiu"
+      (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal(147700)
+    }
+
     "retrieve a PoS block having a rounding error" in {
       val posBlockRoundingError = BlockLoader.getRPC(
         "25762bf01143f7fe34912c926e0b95528b082c6323de35516de0fc321f5d8058"
@@ -142,6 +163,31 @@ class BlocksControllerSpec extends MyAPISpec {
       (jsonMasternode \ "address")
         .as[String] mustEqual "XydZnssXHCxxRtB4rk7evfKT9XP7GqyA9N"
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("22.5")
+    }
+
+    "retrieve TPoS block with treasury" in {
+      val block = BlockLoader.getRPC("c6c9a39dfe3abc01db2a6049133d9770349dd0a5627e8446b698b3d96c63dc84")
+      val response = GET(url(block.hash.string))
+
+      status(response) mustEqual OK
+
+      val json = contentAsJson(response)
+      val jsonBlock = (json \ "block").as[JsValue]
+      val jsonRewards = (json \ "rewards").as[JsValue]
+
+      matchBlock(block, jsonBlock)
+
+      val jsonOwner = (jsonRewards \ "owner").as[JsValue]
+      (jsonOwner \ "address").as[String] mustEqual "Xf3ThFZVPE8MwNF3ZQ2gmUJuNKYFLgcJgf"
+      (jsonOwner \ "value").as[BigDecimal] mustEqual BigDecimal("17.1")
+
+      val jsonMerchant = (jsonRewards \ "merchant").as[JsValue]
+      (jsonMerchant \ "address").as[String] mustEqual "XgjnF28CLXnWQYGJMMzRzQrJdUPihG2e8G"
+      (jsonMerchant \ "value").as[BigDecimal] mustEqual BigDecimal("0.9")
+
+      val jsonMasternode = (jsonRewards \ "treasury").as[JsValue]
+      (jsonMasternode \ "address").as[String] mustEqual "Xp6PaXBQrN6L8sVFHQYVW5rBnKApecD6vu"
+      (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("7000000")
     }
 
     "retrieve TPoS block with coinsplit" in {

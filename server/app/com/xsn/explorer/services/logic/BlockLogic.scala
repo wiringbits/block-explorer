@@ -86,21 +86,28 @@ class BlockLogic {
       val masternodeRewardOUT = coinstakeVOUT.filterNot(
         _.addresses.getOrElse(List.empty) contains coinstakeAddress
       )
-      val masternodeAddressMaybe = masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
-      val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
+      val remainingRewardAddressMaybe = masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
+      val remainingRewardMaybe = remainingRewardAddressMaybe.map { remainingRewardAddress =>
         BlockReward(
-          masternodeAddress,
+          remainingRewardAddress,
           masternodeRewardOUT
-            .filter(_.addresses.getOrElse(List.empty) contains masternodeAddress)
+            .filter(_.addresses.getOrElse(List.empty) contains remainingRewardAddress)
             .map(_.value)
             .sum
         )
       }
 
+      val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
+        case Some(reward) if reward.value >= BigDecimal(100) => (None, Some(reward))
+        case Some(reward) => (Some(reward), None)
+        case None => (None, None)
+      }
+
       Good(
         PoSBlockRewards(
           coinstakeReward,
-          masternodeRewardMaybe,
+          masternodeReward,
+          treasuryReward,
           coinstakeInput,
           coinstakeTx.time - stakedTx.time
         )
@@ -150,25 +157,31 @@ class BlockLogic {
       out.addresses.getOrElse(List.empty).contains(contract.owner) ||
       out.addresses.getOrElse(List.empty).contains(contract.merchant)
     }
-    val masternodeAddressMaybe =
-      masternodeRewardOUT.flatMap(_.addresses.getOrElse(List.empty)).headOption
-    val masternodeRewardMaybe = masternodeAddressMaybe.map { masternodeAddress =>
+    val remainingRewardAddressMaybe = masternodeRewardOUT.flatMap(_.addresses.getOrElse(List.empty)).headOption
+    val remainingRewardMaybe = remainingRewardAddressMaybe.map { remainingRewardAddress =>
       BlockReward(
-        masternodeAddress,
+        remainingRewardAddress,
         masternodeRewardOUT
           .filter(
-            _.addresses.getOrElse(List.empty) contains masternodeAddress
+            _.addresses.getOrElse(List.empty) contains remainingRewardAddress
           )
           .map(_.value)
           .sum
       )
     }
 
+    val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
+      case Some(reward) if reward.value >= BigDecimal(100) => (None, Some(reward))
+      case Some(reward) => (Some(reward), None)
+      case None => (None, None)
+    }
+
     Good(
       TPoSBlockRewards(
         ownerReward,
         merchantReward,
-        masternodeRewardMaybe,
+        masternodeReward,
+        treasuryReward,
         coinstakeInput,
         coinstakeTx.time - stakedTx.time
       )

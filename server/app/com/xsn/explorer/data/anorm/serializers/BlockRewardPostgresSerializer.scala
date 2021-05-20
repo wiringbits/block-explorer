@@ -10,6 +10,7 @@ import com.xsn.explorer.models.{
 }
 
 object BlockRewardPostgresSerializer {
+
   case class Reward(
       blockReward: BlockReward,
       rewardType: RewardType,
@@ -30,7 +31,8 @@ object BlockRewardPostgresSerializer {
           )
         )
 
-        rewards ++ r.masternode.map(Reward(_, RewardType.Masternode, None))
+        rewards ++ r.masternode.map(Reward(_, RewardType.Masternode, None)) ++
+          r.treasury.map(Reward(_, RewardType.Treasury, None))
       case r: TPoSBlockRewards =>
         val rewards = List(
           Reward(
@@ -41,7 +43,8 @@ object BlockRewardPostgresSerializer {
           Reward(r.merchant, RewardType.TPoSMerchant, None)
         )
 
-        rewards ++ r.masternode.map(Reward(_, RewardType.Masternode, None))
+        rewards ++ r.masternode.map(Reward(_, RewardType.Masternode, None)) ++
+          r.treasury.map(Reward(_, RewardType.Treasury, None))
     }
   }
 
@@ -49,22 +52,30 @@ object BlockRewardPostgresSerializer {
     rewards match {
       case Reward(r, RewardType.PoW, _) :: Nil =>
         Some(PoWBlockRewards(r))
+
       case Reward(
             r,
             RewardType.PoS,
             Some(Stake(stakedAmount, stakedTime))
           ) :: Nil =>
-        Some(PoSBlockRewards(r, None, stakedAmount, stakedTime))
+        Some(PoSBlockRewards(r, None, None, stakedAmount, stakedTime))
+
       case Reward(r, RewardType.PoS, Some(Stake(stakedAmount, stakedTime)))
           :: Reward(masternode, RewardType.Masternode, _) :: Nil =>
-        Some(PoSBlockRewards(r, Some(masternode), stakedAmount, stakedTime))
+        Some(PoSBlockRewards(r, Some(masternode), None, stakedAmount, stakedTime))
+
+      case Reward(r, RewardType.PoS, Some(Stake(stakedAmount, stakedTime)))
+          :: Reward(treasury, RewardType.Treasury, _) :: Nil =>
+        Some(PoSBlockRewards(r, None, Some(treasury), stakedAmount, stakedTime))
+
       case Reward(
             owner,
             RewardType.TPoSOwner,
             Some(Stake(stakedAmount, stakedTime))
           )
           :: Reward(merchant, RewardType.TPoSMerchant, _) :: Nil =>
-        Some(TPoSBlockRewards(owner, merchant, None, stakedAmount, stakedTime))
+        Some(TPoSBlockRewards(owner, merchant, None, None, stakedAmount, stakedTime))
+
       case Reward(masternode, RewardType.Masternode, _)
           :: Reward(
             owner,
@@ -77,12 +88,32 @@ object BlockRewardPostgresSerializer {
             owner,
             merchant,
             Some(masternode),
+            None,
             stakedAmount,
             stakedTime
           )
         )
+
+      case Reward(
+            owner,
+            RewardType.TPoSOwner,
+            Some(Stake(stakedAmount, stakedTime))
+          )
+          :: Reward(merchant, RewardType.TPoSMerchant, _) :: Reward(treasury, RewardType.Treasury, None) :: Nil =>
+        Some(
+          TPoSBlockRewards(
+            owner,
+            merchant,
+            None,
+            Some(treasury),
+            stakedAmount,
+            stakedTime
+          )
+        )
+
       case Nil =>
         None
+
       case _ =>
         throw new RuntimeException("Unknown reward type")
     }

@@ -40,7 +40,7 @@ object LedgerHelper {
     val reward = BlockReward(Address.from(list.head).get, 1000)
     val masternodeReward = BlockReward(Address.from(list.head).get, 250)
 
-    PoSBlockRewards(reward, Some(masternodeReward), 10000, 120000)
+    PoSBlockRewards(reward, Some(masternodeReward), None, 10000, 120000)
   }
 
   @com.github.ghik.silencer.silent
@@ -53,6 +53,7 @@ object LedgerHelper {
       ownerReward,
       merchantReward,
       Some(masternodeReward),
+      None,
       10000,
       120000
     )
