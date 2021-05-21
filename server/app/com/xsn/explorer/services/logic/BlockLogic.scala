@@ -195,7 +195,7 @@ class BlockLogic {
   }
 
   // treasury gets 10% of all rewards and is paid every 43200 blocks but there is one special transactions when
-  // it was paid outside this 43200 blocks cycle so we will used the reward amount to detect if its a treasury
+  // it was paid outside this 43200 blocks cycle so we will use the reward amount to detect if its a treasury
   // payment since no other reward should be as high
   private def isTreasuryReward(amount: BigDecimal): Boolean = amount > BigDecimal(100)
 }
