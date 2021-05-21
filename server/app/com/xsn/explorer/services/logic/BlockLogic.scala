@@ -98,7 +98,7 @@ class BlockLogic {
       }
 
       val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
-        case Some(reward) if reward.value >= BigDecimal(100) => (None, Some(reward))
+        case Some(reward) if isTreasuryReward(reward.value) => (None, Some(reward))
         case Some(reward) => (Some(reward), None)
         case None => (None, None)
       }
@@ -171,7 +171,7 @@ class BlockLogic {
     }
 
     val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
-      case Some(reward) if reward.value >= BigDecimal(100) => (None, Some(reward))
+      case Some(reward) if isTreasuryReward(reward.value) => (None, Some(reward))
       case Some(reward) => (Some(reward), None)
       case None => (None, None)
     }
@@ -193,4 +193,9 @@ class BlockLogic {
     coinbase.vin.isEmpty &&
     coinbase.vout.flatMap(_.addresses.getOrElse(List.empty)).isEmpty
   }
+
+  // treasury gets 10% of all rewards and is paid every 43200 blocks but there is one special transactions when
+  // it was paid outside this 43200 blocks cycle so we will used the reward amount to detect if its a treasury
+  // payment since no other reward should be as high
+  private def isTreasuryReward(amount: BigDecimal): Boolean = amount > BigDecimal(100)
 }

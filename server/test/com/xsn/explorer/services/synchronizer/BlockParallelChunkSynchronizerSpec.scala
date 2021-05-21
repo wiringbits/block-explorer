@@ -111,24 +111,6 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       }
     }
 
-    "store PoS reward" in {
-      val posBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
-      )
-      val reward = BlockReward(DataGenerator.randomAddress, 1000)
-      val masternodeReward = BlockReward(DataGenerator.randomAddress, 250)
-      val treasuryReward = BlockReward(DataGenerator.randomAddress, 2500)
-      val posReward = PoSBlockRewards(reward, Some(masternodeReward), Some(treasuryReward), 10000, 120000)
-      val synchronizer = createSynchronizer()
-      whenReady(
-        synchronizer
-          .sync(posBlock, tposContracts, emptyFilterFactory, Some(posReward))
-      ) { result =>
-        result must be(Good(()))
-        verifyDatabase(posBlock, tposContracts, Some(posReward))
-      }
-    }
-
     "store PoS reward without masternode" in {
       val posBlock = blockWithTransactions.copy(
         block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
@@ -160,32 +142,6 @@ class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandl
       ) { result =>
         result must be(Good(()))
         verifyDatabase(posBlock, tposContracts, Some(posReward))
-      }
-    }
-
-    "store TPoS reward" in {
-      val tposBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
-      )
-      val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
-      val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
-      val masternodeReward = BlockReward(DataGenerator.randomAddress, 250)
-      val treasuryReward = BlockReward(DataGenerator.randomAddress, 2500)
-      val tposReward = TPoSBlockRewards(
-        ownerReward,
-        merchantReward,
-        Some(masternodeReward),
-        Some(treasuryReward),
-        10000,
-        120000
-      )
-      val synchronizer = createSynchronizer()
-      whenReady(
-        synchronizer
-          .sync(tposBlock, tposContracts, emptyFilterFactory, Some(tposReward))
-      ) { result =>
-        result must be(Good(()))
-        verifyDatabase(tposBlock, tposContracts, Some(tposReward))
       }
     }
 
