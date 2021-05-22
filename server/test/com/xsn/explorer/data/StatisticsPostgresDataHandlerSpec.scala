@@ -593,6 +593,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     val reward = PoSBlockRewards(
       BlockReward(rewardAddress, rewardValue),
       None,
+      None,
       rewardStakedValue,
       rewardStakeWaitTime
     )
@@ -620,6 +621,7 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     val reward = TPoSBlockRewards(
       BlockReward(rewardOwnerAddress, rewardValue * 0.9),
       BlockReward(rewarMerchantdAddress, rewardValue * 0.1),
+      None,
       None,
       rewardStakedValue,
       rewardStakeWaitTime

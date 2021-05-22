@@ -1,18 +1,9 @@
 package com.xsn.explorer.data.serializers
 
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
-import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{
-  Reward,
-  Stake
-}
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{Reward, Stake}
 import com.xsn.explorer.helpers.DataGenerator
-import com.xsn.explorer.models.{
-  BlockReward,
-  PoSBlockRewards,
-  PoWBlockRewards,
-  RewardType,
-  TPoSBlockRewards
-}
+import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, RewardType, TPoSBlockRewards}
 import org.scalatest.{MustMatchers, WordSpec}
 
 @com.github.ghik.silencer.silent
@@ -34,6 +25,7 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
         PoSBlockRewards(
           BlockReward(DataGenerator.randomAddress, 100),
           Some(BlockReward(DataGenerator.randomAddress, 50)),
+          None,
           1000,
           123
         )
@@ -53,9 +45,34 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
       result(1).stake mustEqual None
     }
 
-    "serialize PoS block without masternode" in {
+    "serialize PoS block with treasury" in {
       val blockReward = PoSBlockRewards(
         BlockReward(DataGenerator.randomAddress, 100),
+        None,
+        Some(BlockReward(DataGenerator.randomAddress, 50)),
+        1000,
+        123
+      )
+      val result = BlockRewardPostgresSerializer.serialize(blockReward)
+
+      result.length mustEqual 2
+
+      result(0).blockReward.address mustEqual blockReward.coinstake.address
+      result(0).blockReward.value mustEqual blockReward.coinstake.value
+      result(0).rewardType mustEqual RewardType.PoS
+      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+
+      result(1).blockReward.address mustEqual blockReward.treasury.get.address
+      result(1).blockReward.value mustEqual blockReward.treasury.get.value
+      result(1).rewardType mustEqual RewardType.Treasury
+      result(1).stake mustEqual None
+    }
+
+    "serialize PoS block without masternode nor treasury" in {
+      val blockReward = PoSBlockRewards(
+        BlockReward(DataGenerator.randomAddress, 100),
+        None,
         None,
         1000,
         123
@@ -77,6 +94,7 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
           BlockReward(DataGenerator.randomAddress, 100),
           BlockReward(DataGenerator.randomAddress, 200),
           Some(BlockReward(DataGenerator.randomAddress, 50)),
+          None,
           1000,
           123
         )
@@ -101,11 +119,43 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
       result(2).stake mustEqual None
     }
 
-    "serialize TPoS block without masternode" in {
+    "serialize TPoS block with treasury" in {
       val blockReward =
         TPoSBlockRewards(
           BlockReward(DataGenerator.randomAddress, 100),
           BlockReward(DataGenerator.randomAddress, 200),
+          None,
+          Some(BlockReward(DataGenerator.randomAddress, 50)),
+          1000,
+          123
+        )
+      val result = BlockRewardPostgresSerializer.serialize(blockReward)
+
+      result.length mustEqual 3
+
+      result(0).blockReward.address mustEqual blockReward.owner.address
+      result(0).blockReward.value mustEqual blockReward.owner.value
+      result(0).rewardType mustEqual RewardType.TPoSOwner
+      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+
+      result(1).blockReward.address mustEqual blockReward.merchant.address
+      result(1).blockReward.value mustEqual blockReward.merchant.value
+      result(1).rewardType mustEqual RewardType.TPoSMerchant
+      result(1).stake mustEqual None
+
+      result(2).blockReward.address mustEqual blockReward.treasury.get.address
+      result(2).blockReward.value mustEqual blockReward.treasury.get.value
+      result(2).rewardType mustEqual RewardType.Treasury
+      result(2).stake mustEqual None
+    }
+
+    "serialize TPoS block without masternode nor treasury" in {
+      val blockReward =
+        TPoSBlockRewards(
+          BlockReward(DataGenerator.randomAddress, 100),
+          BlockReward(DataGenerator.randomAddress, 200),
+          None,
           None,
           1000,
           123
