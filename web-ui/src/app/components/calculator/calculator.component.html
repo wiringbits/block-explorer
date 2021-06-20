@@ -1,0 +1,400 @@
+<div class="row text-primary mr-0 ml-0">
+    <div class="col-sm-12 col-md-8 calculator-panel" *ngIf="loadedData">
+        <tabset>
+            <tab heading="BLOCK REWARDS">
+                <div>
+                    <div class="col-xs-12 mb-16">
+                        <p class="white--text">The BLOCK REWARDS calculator will only calculate the earned block rewards for staking or running a Masternode. In the case of a Masternode, if you want to also take into account the rewards you could earn from the Stakenet DEX, then please use the DEX HOST calculator.</p>
+                    </div>
+                    <div class="col-xs-12 calculator-label">
+                        {{'label.xsnAmountHold' | translate}}
+                    </div>
+        
+                    <div class="col-xs-12">
+                        <div class="calculator-hold-amount text-highlight">
+                            <span class="glyphicon glyphicon-tasks"></span>
+                            <input type="number" placeholder="0.000" class="form-control calculator-balance-input" [(ngModel)]="holdAmount" [value]="holdAmount" max='100000000' (ngModelChange)="onChangeAmount()" />
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-10 col-md-8 col-md-offset-2 col-sm-offset-1 holdamount-slider">
+                        <ejs-slider [(value)]='holdAmount' [min]='0' [max]='1000000' [type]='range' (change)='onChangeAmount()'></ejs-slider>
+                    </div>
+        
+                    <div class="col-xs-12 calculator-optimal-setup">
+                        <span class="text-label">{{'label.optimalSetup' | translate}}: </span><span *ngIf="holdAmount && holdAmount >=15000 && masternodeCount ">{{masternodeCount}} {{'label.masternodeAnd' | translate}} </span> {{xsnStaking | explorerAmount}} {{'label.xsnStaking' | translate}}
+                    </div>
+        
+                    <div class="col-xs-12 col-sm-6 calculator-comparison-table">
+                        <div class="result-pane">
+                            <h5 class="result-pane-title">{{ holdAmount | explorerAmount }} {{ 'label.stakingAllCoins' | translate | uppercase }}</h5>
+                            <div class="value-block">
+                                <span class="calculator-label">
+                                    {{'label.daily' | translate}}:
+                                </span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount / 365) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 365).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 365) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.monthly' | translate}}:</span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100 / 12).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd / 12) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.yearly' | translate}}:</span>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(rewardsSummary.stakingROI * holdAmount * prices.usd) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(rewardsSummary.stakingROI * holdAmount * prices.btc) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.avgRewardWaitTime' | translate}}:</span>
+                                <p class="price-label">{{stakingWaitTime}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 calculator-comparison-table">
+                        <div class="result-pane">
+                            <h5 class="result-pane-title">
+                                <span>{{(holdAmount >= 15000 ? ((holdAmount - holdAmount % requiredForMasternode) / requiredForMasternode) : 0) | number:'1.0-0' }} {{'label.masternodeAnd' | translate | uppercase}} </span> 
+                                {{ holdAmount >= 15000 ? (holdAmount % requiredForMasternode || 0) : 0 | explorerAmount}} {{'label.stakingAllCoins' | translate | uppercase}}
+                            </h5>
+                            <!-- <h5 class="result-pane-title">{{ 'label.masternodeStakingRemaining' | translate | uppercase }}</h5> -->
+                            <div class="value-block">
+                                <span class="calculator-label">
+                                    {{'label.daily' | translate}}:
+                                </span>
+                                <p class="price-label">{{(mnstaking / 365) | explorerAmount:4:true }} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 365).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd / 365) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc / 365) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.monthly' | translate}}:</span>
+                                <p class="price-label">{{(mnstaking / 12) | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100 / 12).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd / 12) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc / 12) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.yearly' | translate}}:</span>
+                                <p class="price-label">{{mnstaking | explorerAmount:4:true}} XSN <small class="text-label">(ROI: {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%)</small></p>
+                                <p class="price-label">$ {{(mnstaking * prices.usd) | explorerAmount:4:true}}</p>
+                                <p class="price-label">{{(mnstaking * prices.btc) | explorerAmount:8:true}} BTC</p>
+                            </div>
+                            <div class="value-block">
+                                <span class="calculator-label">{{'label.avgRewardWaitTime' | translate}}:</span>
+                                <p class="price-label">{{mnWaitTime}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+            <tab heading="DEX HOST">
+                <div>
+                    <div class="row mr-0 ml-0 slider-row pt-0">
+                        <div class="col-xs-12 mb-16">
+                            <p>This calculator lets you project the future potential earnings of your Masternode(s). Adjust the sliders below to calculate the value of your Masternode(s), as well as the yearly return from them. You can learn about the Hydra network Masternode fee breakdown <a href="https://medium.com/stakenet/hydra-dex-network-upgrade-proposal-4b00a3a3fb8">here</a>.
+                            </p>
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            <h5>{{'label.blockRewardsEstimation' | translate}}</h5>
+                            <div class="slider-block">
+                                <span class="slider-label">{{'label.xsnPrice' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.xsnPrice' | translate"></span></span>
+                                
+                                <div class="slider-wrapper">
+                                    <ejs-slider [(value)]='xsnPriceLog' [min]='1' [max]='100' [step]="1" [type]='range' (change)='xsnPriceLogChange($event)'></ejs-slider>
+                                </div>
+                                <span class="slider-value" [popover]="popTemplate1" [triggers]="'click'" [outsideClick]="true">$ {{toFinString(xsnPrice)}}</span>
+                                <ng-template #popTemplate1>
+                                    <input type="number" min="1" max="1000" [(ngModel)]="xsnPriceInputValue" (keyup.enter)="xsnPriceInput()" [focus]="xsnPriceEventEmitter" />
+                                    <button type="button" (click)="xsnPriceInput()">Set</button>
+                                </ng-template>
+                            </div>
+                            <div class="slider-block">
+                                <span class="slider-label">{{'label.totalMasternodes' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.totalMasternodes' | translate"></span></span>
+                                <div class="slider-wrapper">
+                                    <ejs-slider [(value)]='masternodeCountLog' [min]='2300' [max]='4000' [type]='range' (change)='masternodeCountLogChange($event)'></ejs-slider>
+                                </div>
+                                <span class="slider-value" [popover]="popTemplate2" [triggers]="'click'" [outsideClick]="true">{{masternodeCountLog | explorerAmount}}</span>
+                                <ng-template #popTemplate2>
+                                    <input type="number" min="2300" max="4000" autofocus [(ngModel)]="masternodeCountValue" (keyup.enter)="masternodeCountInput()" />
+                                    <button type="button" (click)="masternodeCountInput()">Set</button>
+                                </ng-template>
+                            </div>
+                            <div class="slider-block">
+                                <span class="slider-label">{{'label.yourMasternodes' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.yourMasternodes' | translate"></span></span>
+                                <div class="slider-wrapper">
+                                    <ejs-slider [(value)]='ownedNodesLog' [min]='1' [max]='100' [type]='range' (change)='ownedNodesLogChange($event)'></ejs-slider>
+                                </div>
+                                <span class="slider-value" [popover]="popTemplate3" [triggers]="'click'" [outsideClick]="true">{{ownedNodes}}</span>
+                                <ng-template #popTemplate3>
+                                    <input type="number" min="1" max="100" autofocus [(ngModel)]="ownedNodesValue" (keyup.enter)="ownedNodesInput()" />
+                                    <button type="button" (click)="ownedNodesInput()">Set</button>
+                                </ng-template>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            <h5>{{'label.dexHostEstimation' | translate}}</h5>
+                            <div class="slider-block switch-block">
+                                <span class="slider-label">{{'label.enableDexHosting' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.enableDexHosting' | translate"></span></span>
+                                <div class="switch-wrapper">
+                                    <ui-switch size="small" [(ngModel)]="orderbookHostingEnabled" (change)="orderbookHostingEnabledChange($event)" color="#01D9DE"></ui-switch>
+                                </div>
+                            </div>
+                            <div class="slider-block">
+                                <span class="slider-label">{{'label.dailyTradingVolume' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.dailyTradingVolume' | translate"></span></span>
+                                <div class="slider-wrapper">
+                                    <ejs-slider [(value)]='tradingVolumeLog' [min]='1' [max]='100' [type]='range' (change)='tradingVolumeLogChange($event)'></ejs-slider>
+                                </div>
+                                <span class="slider-value" [popover]="popTemplate4" [triggers]="'click'" [outsideClick]="true">$ {{tradingVolumeString }}</span>
+                                <ng-template #popTemplate4>
+                                    <input type="number" min="1" max="100" autofocus [(ngModel)]="tradingVolumeValue" (keyup.enter)="tradingVolumeInput()" />
+                                    <button type="button" (click)="tradingVolumeInput()">Set</button>
+                                </ng-template>
+                            </div>
+                            <div class="slider-block">
+                                <span class="slider-label">{{'label.mnsHostingDEX' | translate}}<span class="glyphicon glyphicon-question-sign help" [tooltip]="'help.mnsHostingDEX' | translate"></span></span>
+                                <div class="slider-wrapper">
+                                    <ejs-slider [(value)]='orderbookMNs' [min]='1000' [max]='4000' [step]="100" [type]='range' (change)='orderbookMNsChange($event)' ></ejs-slider>
+                                </div>
+                                <span class="slider-value" [popover]="popTemplate5" [triggers]="'click'" [outsideClick]="true">{{orderbookMNs | explorerAmount:1}}</span>
+                                <ng-template #popTemplate5>
+                                    <input type="number" min="1000" max="4000" autofocus step="100" [(ngModel)]="orderbookMNsValue" (keyup.enter)="orderbookMNsInput()" />
+                                    <button type="button" (click)="orderbookMNsInput()">Set</button>
+                                </ng-template>
+                            </div>
+                        </div>
+                        <ng-template #template>
+                            <div class="modal-header">
+                               <h4 class="modal-title pull-left">Modal</h4>
+                               <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+                                  <span aria-hidden="true">×</span>
+                               </button>
+                            </div>
+                            <div class="modal-body">
+                               This is a sample modal dialog box.
+                            </div>
+                            <div class="modal-footer">
+                               <button type="button" class="btn btn-default" (click)="modalRef.hide()">Close</button>
+                            </div>
+                        </ng-template>
+                    </div>
+                    <div class="row mr-0 ml-0">
+                        <div class="col-xs-12 col-md-4">
+                            <div class="result-pane">
+                                <h5 class="result-pane-title">{{ 'label.daily' | translate | uppercase }}</h5>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedBlockRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ blockRewards | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedOrderbookHostingRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ orderbookRewards | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.masternodeHostingCost' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ mnHostingCost | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.totalRewardsEST' | translate}}:
+                                    </span>
+                                    <span class="price-label total-reward">$ {{ totalRewards | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block roi">
+                                    <span class="calculator-label">
+                                        {{'label.roi' | translate}}:
+                                    </span>
+                                    <span class="price-label">{{ roi | explorerAmount:2 }}%</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.daysUntilFreeMasternodeEarned' | translate}}:
+                                    </span>
+                                    <span class="price-label"> {{ daysUntilFreeMasternode | explorerAmount:1 }} days </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-4">
+                            <div class="result-pane">
+                                <h5 class="result-pane-title">{{ 'label.monthly' | translate | uppercase }}</h5>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedBlockRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ blockRewards * 30 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedOrderbookHostingRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ orderbookRewards * 30 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.masternodeHostingCost' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ mnHostingCost * 30 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.totalRewardsEST' | translate}}:
+                                    </span>
+                                    <span class="price-label total-reward">$ {{ totalRewards * 30 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block roi">
+                                    <span class="calculator-label">
+                                        {{'label.roi' | translate}}:
+                                    </span>
+                                    <span class="price-label">{{ roi * 30 | explorerAmount:2 }}%</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.monthsUntilFreeMasternodeEarned' | translate}}:
+                                    </span>
+                                    <span class="price-label">{{ daysUntilFreeMasternode / 30 | explorerAmount:1 }} months</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-4">
+                            <div class="result-pane">
+                                <h5 class="result-pane-title">{{ 'label.yearly' | translate | uppercase }}</h5>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedBlockRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ blockRewards * 365 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.calculatedOrderbookHostingRewards' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ orderbookRewards * 365 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.masternodeHostingCost' | translate}}:
+                                    </span>
+                                    <span class="price-label">$ {{ mnHostingCost * 365 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.totalRewardsEST' | translate}}:
+                                    </span>
+                                    <span class="price-label total-reward">$ {{ totalRewards * 365 | explorerAmount:2 }}</span>
+                                </div>
+                                <div class="value-block roi">
+                                    <span class="calculator-label">
+                                        {{'label.roi' | translate}}:
+                                    </span>
+                                    <span class="price-label">{{ (roi * 365) | explorerAmount:2 }}%</span>
+                                </div>
+                                <div class="value-block">
+                                    <span class="calculator-label">
+                                        {{'label.yearsUntilFreeMasternodeEarned' | translate}}:
+                                    </span>
+                                    <span class="price-label">{{ (daysUntilFreeMasternode / 365) | explorerAmount:1 }} years</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tab>
+        </tabset>
+    </div>
+
+    <div class="col-sm-12 col-md-4 calculator-stats" *ngIf="loadedData">
+        <div class="tab-content calculator-stats-container">
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.masternodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats && stats.masternodes | explorerAmount}}
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.tposNodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats.tposnodes | explorerAmount}}
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.coinsInMasternodes' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{stats.masternodes * 15000 | explorerAmount}} XSN <br/>
+                    <small>({{stats.masternodes * 15000 / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.coinsStaking' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours | explorerAmount:0 }} XSN <br/>
+                    <small>({{ rewardsSummary.rewardedAddressesSumLast72Hours / serverStats.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.masternodeROI' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{(rewardsSummary.masternodesROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.stakingROI' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{(rewardsSummary.stakingROI * 100) | explorerAmount:2 }}% <small>Yearly</small>
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.requiredForMasternode' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    {{requiredForMasternode | explorerAmount}} XSN <br>
+                    $ {{(prices.usd * requiredForMasternode) | explorerAmount:3 }} <br>
+                    {{(prices.btc * requiredForMasternode) | explorerAmount}} BTC
+                </div>
+            </div>
+
+            <div class="col-xs-6 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.price' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    $ {{prices.usd | explorerAmount:3 }}
+                </div>
+            </div>
+
+            <div class="col-xs-12 calculator-stat-item">
+                <div class="calculator-label">
+                    {{'label.rewardPerBlock' | translate}}:
+                </div>
+                <div class="calculator-stat-data">
+                    9 XSN
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -21,7 +21,8 @@
               "src/favicon.ico"
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "./node_modules/ngx-ui-switch/ui-switch.component.css"
             ],
             "scripts": []
           },

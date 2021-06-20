@@ -1,0 +1,54 @@
+<nav class="navbar navbar-default">
+  <div class="row">
+    <div class="col-xs-12 top-nav">
+      <div class="logo-section">
+        <div class="navbar-header">
+          <a routerLink="/" class="navbar-brand pr-0 pl-0">
+            <img class="navbar-logo" src="assets/xsn-logo.png" alt="Logo">
+          </a>
+          <a routerLink="/" class="title pr-0 pl-0">
+            <span class="navbar-brand pr-0 pl-0"><span class="navbar-brand-bold">XSN</span> Block Explorer</span>
+          </a>
+          <button class="btn navbar-toggler" type="button" (click)="navbarToggle()">
+            <span class="glyphicon glyphicon-menu-hamburger"></span>
+          </button>
+        </div>
+      </div>
+  
+      <app-finder class="search-box"></app-finder>
+    </div>
+
+    <div class="col-xs-12 navbar-tabbar">
+      <ul class="nav navbar-nav {{showNavbar ? 'show' : ''}}">
+        <li *ngFor="let tab of tabs" [ngClass]="{ 'active': isSelected(tab.selector, false)}">
+          <div *ngIf="tab.hasChildren; else elseBlock" class="btn-group dropdown navbar-dropdown" triggers="mouseover" #dp="bs-dropdown" [autoClose]="false" dropdown>
+            <button class="btn dropdown-toggle" (click)="dp.show()" type="button" aria-controls="dropdown-nested" dropdownToggle (mouseleave)="dp.hide()">{{tab.label | translate |
+              uppercase}}</button>
+            <ul id="dropdown-nested" class="dropdown-menu"
+                role="menu" aria-labelledby="button-nested" (mouseleave)="dp.hide()">
+              <li role="menuitem" *ngFor="let child of tab.children" [ngClass]="{ 'active': isSelected(child.path, true)}">
+                <a class="dropdown-item {{child.mainTab ? 'main-tab' : 'disabled'}}" routerLink="{{child.path}}">{{child.label | translate | uppercase}}</a>
+              </li>
+            </ul>
+          </div>
+          
+          <ng-template #elseBlock>
+            <a class="navbar-tab {{tab.mainTab ? 'main-tab' : ''}} " routerLink="{{tab.path}}" >{{tab.label | translate |
+              uppercase}}</a>
+          </ng-template>
+        </li>
+      </ul>
+      <div class="page-updating" >
+        <span [tooltip]="tooltipMessage" [display]="tooltipMessage != null">
+          <lottie-animation-view
+            [options]="lottieConfig"
+            [width]="50"
+            [height]="50"
+            (animCreated)="handleAnimation($event)"
+          >
+          </lottie-animation-view>
+        </span>
+      </div>
+    </div>
+  </div>
+</nav>

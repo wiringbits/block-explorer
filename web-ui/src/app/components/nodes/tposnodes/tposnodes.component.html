@@ -1,0 +1,42 @@
+<div class="tposnodes-container">
+  <div class="table-responsive">
+    <table class="table table-borderless table-striped">
+      <thead>
+        <tr class="row">
+          <th class="col-xs-1 pr-0">#</th>
+          <th class="col-xs-2">{{'label.ip' | translate | uppercase}}</th>
+          <th class="col-xs-2 pr-0 pl-1">{{'label.protocol' | translate | uppercase}}</th>
+          <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
+                <th class="col-xs-2 col-sm-2 col-md-1 col-lg-1">{{'label.status' | translate}}</th>
+                 -->
+          <th class="col-xs-2 pl-0 pr-0">{{'label.active' | translate | uppercase}}</th>
+          <th class="col-xs-2 pr-0 pl-1">{{'label.lastSeen' | translate | uppercase}}</th>
+          <th class="col-xs-3 pl-1">{{'label.payee' | translate | uppercase}}</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let index = index; let item of asyncItems | async | paginate: { id: 'tposnodes', itemsPerPage: pageSize, currentPage: currentPage, totalItems: total }">
+          <td class="text-primary pr-0">{{(currentPage - 1) * pageSize + index + 1}}</td>
+          <td class="text-primary pr-0" style="min-width: 130px;">{{item.ip}}</td>
+          <td class="text-primary pl-1 pr-0">{{item.protocol}}</td>
+          <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
+                <td>{{item.status}}</td>
+                -->
+          <td class="text-primary pl-0 pr-0" style="min-width: 75px;">{{Math.max(item.activeSeconds, 0) | amDuration:'seconds'}}</td>
+          <td class="text-primary pr-0 pl-1">{{amAgo(item.lastSeen)}}</td>
+          <td class="pl-1" style="min-width: 175px;">
+            <a class="text-highlight" routerLink="/addresses/{{item.payee}}">{{truncate(item.payee, 8, 5)}}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 text-center">
+      <pagination-controls (pageChange)="getPage($event)" id="tposnodes" previousLabel="" nextLabel="">
+      </pagination-controls>
+    </div>
+  </div>
+</div>

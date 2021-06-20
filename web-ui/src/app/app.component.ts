@@ -4,13 +4,20 @@ import { Component, OnInit } from '@angular/core';
 
 import { Router, NavigationEnd } from '@angular/router';
 
-
-
 import { TranslateService } from '@ngx-translate/core';
 
 import { DEFAULT_LANG, LanguageService } from './services/language.service';
 
 import { environment } from '../environments/environment';
+
+class Tab {
+  label: string;
+  path?: string;
+  mainTab: boolean;
+  hasChildren: boolean;
+  children?: Array<any>;
+  selector?: any;
+}
 
 @Component({
   selector: 'app-root',
@@ -18,6 +25,75 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  tabs: Tab[] = [
+    {
+      label: 'Dashboard',
+      path: '/',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['']
+    },
+    {
+      label: 'Nodes',
+      path: '/nodes',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['nodes']
+    },
+    {
+      label: 'Blocks',
+      path: '/blocks',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['blocks']
+    },
+    {
+      label: 'Transactions',
+      path: '/transactions',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['transactions']
+    },
+    {
+      label: 'Addresses',
+      path: '/addresses',
+      mainTab: true,
+      hasChildren: false,
+      selector: ['addresses']
+    },
+    {
+      label: 'Tools',
+      path: '/tools',
+      mainTab: true,
+      hasChildren: true,
+      selector: ['trezor', 'calculator', 'governance', 'dex-monitor'],
+      children: [{
+        label: 'Trezor Wallet',
+        path: '/trezor',
+        mainTab: true,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Calculator',
+        path: '/calculator',
+        mainTab: true,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'DEX Monitor',
+        path: '/dex-monitor',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      },{
+        label: 'Governance',
+        path: '/',
+        mainTab: false,
+        hasChildren: false,
+        selector: '/tools'
+      }]
+    }
+  ]
 
   constructor(
     private translate: TranslateService,
@@ -73,18 +149,19 @@ export class AppComponent implements OnInit {
       'TPoS': 'Trustless Proof of Stake',
 
       // messages
-      'message.unavailable': 'Unavailable',
-      'message.serverUnavailable': 'The server unavailable, please try again in a minute',
+      'message.unavailable': '-',
+      'message.serverUnavailable': 'The server is unavailable, please try again in a minute',
       'message.unknownErrors': 'Unknown error, please try again in a minute',
       'message.transactionNotFound': 'Transaction not found',
       'message.addressNotFound': 'Address not found',
       'message.blockNotFound': 'Block not found',
       'message.masternodeNotFound': 'Masternode not found',
       'message.loadingLatestBlocks': 'Loading latest blocks...',
+      'message.loadingTransactions': 'Loading transactions...',
       'message.loadingRichestAddresses': 'Loading richest addresses...',
       'message.transactionsNotAvailable': 'The transactions are not available, please try again in some minutes',
-      'message.totalSupply': 'The total number of coins generated (excluding the burned coins)',
-      'message.circulatingSupply': 'The total number of coins that are in circulation (excludes burned coins and the treasury)',
+      'message.totalSupply': 'The total number of XSN generated.',
+      'message.circulatingSupply': 'The total number of XSN in circulation (excluding the burned coins.)',
       'messages.invalidScriptType': 'Unknown script type',
       'messages.invalidAddressType': 'Unknown address type',
       'messages.invalidNegativeAmount': 'Invalid negative amount',
@@ -98,11 +175,11 @@ export class AppComponent implements OnInit {
       'action.verifyAddress': 'Show full address',
 
       // labels
-      'label.searchField': 'Transaction id, Blockhash, Block number, Address, IP address',
+      'label.searchField': 'Search by transaction ID, address, blockhash, block height, IP address',
       'label.transactionId': 'Transaction Id',
       'label.confirmations': 'Confirmations',
       'label.blockhash': 'Block Hash',
-      'label.blocktime': 'Block Time',
+      'label.blocktime': 'Time',
       'label.medianTime': 'Median Time',
       'label.noInput': 'No input',
       'label.coinbase': 'Coinbase',
@@ -120,6 +197,14 @@ export class AppComponent implements OnInit {
       'label.normalFee': 'Normal',
       'label.lowFee': 'Low',
       'label.satoshis': 'Satoshis',
+      'label.showMore': 'Show More',
+      'label.currentInflation': 'Current Inflation',
+      'label.masternodeROI': 'Masternode ROI',
+      'label.stakingROI': 'Staking ROI',
+      'label.coinsInMasternodes': 'Coins in Masternodes',
+      'label.tposNodes': 'TPoS Nodes',
+      'label.coinsStaking': 'Coins Staking',
+      'label.coinsTrustlesslyStaking': 'Coins Trustlessly Staking',
       'label.merchantAddress': 'Merchant Address',
       'label.ownerAddress': 'Owner Address',
       'label.merchantCommission': 'Merchant Commission',
@@ -135,11 +220,14 @@ export class AppComponent implements OnInit {
 
 
       'label.address': 'Address',
+      'label.addresses': 'Addresses',
+      'label.ip': 'IP',
       'label.balance': 'Balance',
       'label.available': 'Available',
       'label.received': 'Received',
       'label.spent': 'Spent',
       'label.transactionCount': 'Transactions',
+      'label.transactinoLabel': 'Transactions',
 
       'label.blockType': 'Block type',
       'label.next': 'Next',
@@ -157,6 +245,20 @@ export class AppComponent implements OnInit {
       'label.masternode': 'Masternode',
       'label.amount': 'Amount',
       'label.blockReward': 'Block reward',
+      'label.blockRewards': 'Block rewards',
+      'label.blockRewardsEstimation': 'Block rewards estimation',
+      'label.dexHostEstimation': 'Dex Host Estimation',
+      'label.estRewardTime': 'Avg. Reward Frequency',
+      'label.masternodesTVL': 'Masternodes TVL',
+      'label.stakingTVL': 'Staking TVL',
+      'label.totalCoinsMN+StakingTVL': 'Total coins MN+Staking TVL',
+      'label.firstRewardWait': 'First Reward ETA',
+      
+      'label.blockHash': 'Block Hash',
+      'label.txHash': 'TX Hash',
+      'label.type': 'Type',
+      'label.result': 'Result',
+      'label.time': 'Time',
 
       'label.tposContract': 'Contract',
       'label.owner': 'Owner',
@@ -165,25 +267,84 @@ export class AppComponent implements OnInit {
       'label.summary': 'Summary',
       'label.block': 'Block',
       'label.transaction': 'Transaction',
-      'label.height': 'Block height',
+      'label.height': 'Height',
+      'label.inflation': 'Inflation',
+      'label.price': 'Price',
       'label.extractedBy': 'Extracted by',
       'label.latestBlocks': 'Latest 10 blocks',
-      'label.totalSupply': 'Total supply',
-      'label.circulatingSupply': 'Circulating supply',
+      'label.totalSupply': 'Total Supply',
+      'label.circulatingSupply': 'Circulating Supply',
       'label.blocks': 'Blocks',
       'label.richestAddresses': 'Richest addresses',
       'label.masternodes': 'Masternodes',
       'label.percentOfCoins': 'Percent of coins',
+      'label.percentOfCircSupply': '% of circ. supply',
       'label.addressLabel': 'Label',
       'label.protocol': 'Protocol',
       'label.status': 'Status',
       'label.lastSeen': 'Last seen',
-      'label.payee': 'Payee',
-      'label.active': 'Active',
+      'label.payee': 'Payee Address',
+      'label.active': 'Active Since',
       'label.details': 'Details',
       'label.raw': 'Raw',
       'label.date': 'Date',
-      'label.more': 'More'
+      'label.more': 'More',
+      'label.enabled': 'Enabled',
+      'label.distributedAcross': 'Distributed Across',
+      'label.protocols': 'Protocols',
+      'label.totalCoinsMNStaking': 'Total Coins MN+Staking',
+      'label.currentBlockCount': 'Current Block Count',
+
+      'label.isStakingCoinsTrustlessly': 'Is this address staking coins trustlessly?',
+      'label.contractState': 'Contract state',
+      'label.contractsFound': 'Contracts found',
+      'label.contractTxid': 'Contract txid',
+
+      'label.yes': 'Yes',
+      'label.yesOwnerOfTheStakedCoins': 'Yes, it\'s the owner of the staked coins',
+      'label.yesMerchantOfTheStakedCoins': 'Yes, it\'s the merchant of the staked coins',
+      'label.no': 'No',
+      'label.tposDetails': 'TPoS Details',
+
+      'label.calculator': 'Calculator',
+      'label.xsnAmountHold': 'Amount of XSN you hold',
+      'label.optimalSetup': 'Optimal setup',
+      'label.masternodeAnd': 'Masternode(s) and',
+      'label.xsnStaking': 'XSN staking',
+      'label.masternodeStakingRemaining': 'Masternode(s) + staking',
+      'label.moreProfitable': 'is 33% more profitable',
+      'label.stakingAllCoins': 'Staking',
+      'label.daily': 'Daily',
+      'label.monthly': 'Monthly',
+      'label.yearly': 'Yearly',
+      'label.days': 'days',
+      'label.waitingTimePerReward': 'Waiting time per reward (est.)',
+      'label.requiredForMasternode': 'Required for Masternode',
+      'label.rewardPerBlock': 'Reward per Block',
+      'label.avgRewardWaitTime': 'Avg. reward wait time',
+
+      'label.xsnPrice': 'XSN Price',
+      'label.totalMasternodes': 'Total Masternodes',
+      'label.yourMasternodes': 'Your Masternodes',
+      'label.orderbookRewards': 'Orderbook Rewards',
+      'label.dailyTradingVolume': 'Daily Trading Volume',
+      'label.mnsHostingDEX': 'MNs Hosting DEX',
+      'label.enableDexHosting': 'Enable DEX hosting on your Masternode(s)?:',
+      'label.calculatedBlockRewards': 'Calculated Block Rewards',
+      'label.calculatedOrderbookHostingRewards': 'Calculated DEX Hosting Rewards',
+      'label.masternodeHostingCost': 'Masternode Hosting Cost',
+      'label.totalRewardsEST': 'Total rewards (est)',
+      'label.daysUntilFreeMasternodeEarned': 'Days Until Free Masternode Earned',
+      'label.monthsUntilFreeMasternodeEarned': 'Months Until Free Masternode Earned',
+      'label.yearsUntilFreeMasternodeEarned': 'Years Until Free Masternode Earned',
+      'label.roi': 'ROI',
+
+      'help.xsnPrice': 'Estimated XSN Price.',
+      'help.totalMasternodes': 'The estimated total amount of Masternodes within the Stakenet network.',
+      'help.yourMasternodes': 'Number of Masternodes you own.',
+      'help.enableDexHosting': 'Host the DEX on your Masternodes to earn the DEX fees.',
+      'help.dailyTradingVolume': 'The estimated DEX daily trading volume.',
+      'help.mnsHostingDEX': 'The estimated amount of Masternodes hosting the DEX.'
     };
   }
 }

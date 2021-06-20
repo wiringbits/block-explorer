@@ -10,7 +10,7 @@ export class Block {
   previousBlockhash: string;
   nextBlockhash: string;
   merkleRoot: string;
-  transactions: string[];
+  transactions: string[] | number;
   confirmations: number;
   size: number;
   height: number;

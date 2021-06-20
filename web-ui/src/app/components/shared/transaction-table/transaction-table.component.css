@@ -1,0 +1,11 @@
+:host {
+  width: 100%;
+}
+
+span.glyphicon-ok {
+  color: #3FE061;
+}
+
+span.glyphicon-remove {
+  color: #F15F5F;
+}

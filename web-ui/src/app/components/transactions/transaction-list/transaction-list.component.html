@@ -1,0 +1,21 @@
+<div class="tab-content row ml-0 mr-0">
+    <div class="col-xs-12 block-header">
+        <div class="page-title">
+            {{'label.transactinoLabel' | translate}}
+        </div>
+        <div class="blocks-info text-label">
+            <div>
+                {{'label.height' | translate | uppercase}}: <span class="text-highlight">{{stats.blocks}}</span>
+            </div>
+            <div>
+                {{'label.inflation' | translate | uppercase}}: <span class="text-highlight">{{ (10512000 * 100 / ticker.circulatingSupply).toFixed(2) }} %</span>
+            </div>
+            <div>
+                {{'label.price' | translate | uppercase}}: <span class="text-highlight">$ {{ prices.usd && prices.usd.toFixed(3)}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 transaction-table-wrapper">
+        <app-transaction-table [isLoading]="isLoading" [loadingType]="loadingType" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()"></app-transaction-table>
+    </div>
+</div>

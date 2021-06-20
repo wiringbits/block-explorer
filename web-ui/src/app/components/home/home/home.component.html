@@ -1,0 +1,57 @@
+<div class="row">
+  <app-ticker class="col-xs-12" [lastBlock]="blocks[0]"></app-ticker>
+
+  <div class="home-table-container col-xs-12 col-lg-6">
+    <div class="tab-content">
+      <div class="col-xs-12 table-header">
+        <div class="page-title-block">
+          <div class="page-title">
+            {{'label.blocks' | translate}}
+          </div>
+          <!-- <div *ngIf="isBlockUpdating">
+            <lottie-animation-view
+              [options]="lottieConfig"
+              [width]="50"
+              [height]="50"
+            >
+            </lottie-animation-view>
+          </div> -->
+        </div>
+        
+        <div >
+          <a class="show-more text-primary" routerLink="/blocks">
+              {{'label.showMore' | translate | uppercase}}
+          </a>
+        </div>
+      </div>
+      <app-block-table [hideBlockHash]="true" [isLoading]="isBlockLoading" [loadingType]="2" [blocks]="blocks" (updateBlocks)="updateBlocks($event)"></app-block-table>
+    </div>
+  </div>
+
+  <div class="home-table-container col-xs-12 col-lg-6">
+    <div class="tab-content">
+      <div class="col-xs-12 table-header">
+        <div class="page-title-block">
+          <div class="page-title">
+            {{'label.transactions' | translate}}
+          </div>
+          <!-- <div *ngIf="isTransactionUpdating">
+            <lottie-animation-view
+              [options]="lottieConfig"
+              [width]="50"
+              [height]="50"
+            >
+            </lottie-animation-view>
+          </div> -->
+        </div>
+        <div>
+          <a class="show-more text-primary" routerLink="/transactions">
+            {{'label.showMore' | translate | uppercase}}
+          </a>
+        </div>
+      </div>
+      
+      <app-transaction-table [hideBlockHash]="true" [isLoading]="isTransactionLoading" [loadingType]="2" [allowInfiniteScroll]="false" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-table>
+    </div>
+  </div>
+</div>

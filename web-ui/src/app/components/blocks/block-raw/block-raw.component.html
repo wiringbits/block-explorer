@@ -1,0 +1,8 @@
+<div>
+  <div [hidden]="block != null">
+    <alert>{{'message.blockNotFound' | translate}}</alert>
+  </div>
+  <div *ngIf="block != null">
+    <pre class="text-highlight">{{block | json}}</pre>
+  </div>
+</div>

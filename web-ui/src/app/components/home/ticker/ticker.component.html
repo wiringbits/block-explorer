@@ -1,0 +1,185 @@
+<div class="row ticker-container">
+
+  <div class="col-xs-12 col-sm-6 col-lg-3 panel">
+    <div class="panel-body row">
+      <div class="lbl-bottom col-xs-12">
+        {{'label.totalSupply' | translate }}
+      </div>
+      <div class="data col-xs-12">
+        <span *ngIf="ticker == null || ticker.totalSupply == null">
+          {{'message.unavailable' | translate}}
+        </span>
+        <span *ngIf="ticker != null && ticker.totalSupply != null">
+          {{ticker.totalSupply | explorerAmount:0}} {{config.currentCurrency}}
+          <span class="glyphicon glyphicon-question-sign help" [tooltip]="'message.totalSupply' | translate"></span>
+        </span>
+      </div>
+
+      <div class="lbl-bottom col-xs-12">
+        {{'label.circulatingSupply' | translate }}
+      </div>
+      <div class="data col-xs-12">
+        <span *ngIf="ticker == null || ticker.circulatingSupply == null">
+          {{'message.unavailable' | translate}}
+        </span>
+
+        <span *ngIf="ticker != null && ticker.circulatingSupply != null">
+          {{ticker.circulatingSupply | explorerAmount:0}} {{config.currentCurrency}} 
+          <span class="glyphicon glyphicon-question-sign help" [tooltip]="'message.circulatingSupply' | translate"></span> <br/>
+          <small>{{(ticker.totalSupply - ticker.circulatingSupply) | explorerAmount:0}} XSN burned ({{ ((ticker.totalSupply - ticker.circulatingSupply) * 100 / ticker.totalSupply) | explorerAmount:2 }}% of Total Supply)</small>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 col-lg-3 panel">
+    <div class="panel-body row">
+      <div class="lbl-bottom col-xs-12">
+        {{'label.currentBlockCount' | translate }}
+      </div>
+      <div class="data height-data col-xs-12">
+        <span *ngIf="ticker == null">
+          {{'message.unavailable' | translate}}
+        </span>
+
+        <span *ngIf="ticker != null">
+          {{lastBlock && lastBlock.height | explorerAmount}}
+        </span>
+
+        <span *ngIf="ticker != null" class="text-label sub-label">
+          Last {{amAgo(lastBlock && lastBlock.medianTime)}}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 col-lg-3 panel">
+    <div class="panel-body row">
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.masternodes' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{nodeStats.masternodes | explorerAmount}}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.coinsInMasternodes' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{nodeStats.masternodes * 15000 | explorerAmount}} XSN <br/>
+            <small>({{nodeStats.masternodes * 15000 / ticker.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+          </span>
+        </div>
+      </div>
+      
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.tposNodes' | translate}}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{nodeStats.tposnodes}}
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.coinsStaking' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{rewardsSummary && rewardsSummary.rewardedAddressesSumLast72Hours && rewardsSummary.rewardedAddressesSumLast72Hours.toFixed(0) | explorerAmount}} XSN <br/>
+            <small>({{rewardsSummary.rewardedAddressesSumLast72Hours / ticker.circulatingSupply | number: '1.2-2' | percent}} of circ. supply)</small>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 col-lg-3 panel">
+    <div class="panel-body row">
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.currentInflation' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.masternodes == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{ (10512000 * 100 / ticker.circulatingSupply).toFixed(2) }}%    Yearly
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.price' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            $ {{prices && prices.usd && prices.usd.toFixed(3)}}
+          </span>
+        </div>
+      </div>
+      
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.masternodeROI' | translate}}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{(rewardsSummary.masternodesROI * 100).toFixed(2)}}%   Yearly
+          </span>
+        </div>
+      </div>
+
+      <div class="col-xs-6">
+        <div class="lbl-bottom">
+          {{'label.stakingROI' | translate }}
+        </div>
+        <div class="data">
+          <span *ngIf="ticker == null || ticker.totalSupply == null">
+            {{'message.unavailable' | translate}}
+          </span>
+  
+          <span *ngIf="ticker != null && ticker.masternodes != null">
+            {{(rewardsSummary.stakingROI * 100).toFixed(2)}}%   Yearly
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

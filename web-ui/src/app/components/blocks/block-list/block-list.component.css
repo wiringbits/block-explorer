@@ -1,0 +1,23 @@
+.block-table-wrapper {
+    width: 100%;
+    padding: 0;
+    margin-top: 15px;
+}
+
+.blocks-info {
+    background-color: #1C202E;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.blocks-info>div {
+    margin: 10px;
+}
+
+.tab-content {
+    margin-left: 0;
+    margin-right: 0;
+}

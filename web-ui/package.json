@@ -4,14 +4,17 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "serve": "ng serve",
+    "start": "node server.js",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build-prod": "ng build --prod"
   },
   "private": true,
   "dependencies": {
+    "@angular-devkit/build-angular": "^0.10.7",
     "@angular/animations": "^7.2.1",
     "@angular/common": "^7.2.1",
     "@angular/compiler": "^7.2.1",
@@ -22,23 +25,31 @@
     "@angular/platform-browser-dynamic": "^7.2.1",
     "@angular/router": "^7.2.1",
     "@ngx-translate/core": "^10.0.2",
+    "@syncfusion/ej2-angular-inputs": "^18.4.47",
     "babel-polyfill": "^6.26.0",
     "bootstrap": "^3.4.1",
+    "connect-history-api-fallback": "^1.6.0",
     "core-js": "^2.5.4",
+    "express": "^4.16.4",
+    "lottie-web": "^5.7.6",
     "moment": "^2.22.2",
+    "ng-circle-progress": "^1.5.1",
     "ng-http-loader": "^5.0.0",
-    "ngx-bootstrap": "^3.0.1",
+    "ng-lottie": "^0.3.2",
+    "ng2-tooltip-directive": "^2.9.17",
+    "ngx-bootstrap": "^3.3.0",
+    "ngx-bootstrap-slider": "^1.9.0",
     "ngx-infinite-scroll": "^7.0.1",
     "ngx-moment": "^3.0.1",
     "ngx-pagination": "^3.2.1",
     "ngx-toastr": "^9.1.0",
+    "ngx-ui-switch": "^10.0.2",
     "rxjs": "~6.3.3",
-    "rxjs-compat": "^6.3.3",
+    "rxjs-compat": "^6.6.6",
     "trezor-connect": "^7.0.2",
     "zone.js": "~0.8.28"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.8.0",
     "@angular/cli": "^7.2.2",
     "@angular/compiler-cli": "^7.2.1",
     "@angular/language-service": "^7.2.1",
@@ -55,9 +66,9 @@
     "karma-jasmine": "~1.1.2",
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "^5.4.1",
+    "sg-protractor-tools": "^1.0.4",
     "ts-node": "~3.2.0",
     "tslint": "~5.11.0",
-    "typescript": "~3.2.4",
-    "webpack": "4.24.0"
+    "typescript": "~3.2.4"
   }
 }

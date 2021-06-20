@@ -1,0 +1,247 @@
+.navbar-default {
+  background-color: #090D1C;
+  border-color: #090D1C;
+  padding: 48px 0 0;
+}
+
+.navbar-logo {
+  width: 117px;
+  height: 100px;
+  margin-top: -41px;
+}
+
+.navbar-brand {
+  font-size: 30px;
+  text-align: left;
+  letter-spacing: -1.5px;
+  color: #FFFFFF;
+  font-weight: 300;
+}
+
+.navbar-brand:hover {
+  color: #FFFFFF;
+}
+
+.navbar-brand-bold {
+  font-weight: 500;
+}
+
+.navbar-tabbar {
+  margin-top: 30px;
+  padding: 0 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.navbar-nav>li.active {
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+.navbar-nav>li.active::after {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: " ";
+}
+
+.navbar-nav>li {
+  background: transparent;
+}
+
+.navbar-nav>li>.navbar-tab {
+  background: transparent;
+  color: #5C5F7D;
+}
+
+.navbar-nav>li>.navbar-tab.main-tab {
+  color: #989DCC;
+}
+
+.navbar-nav>li>.navbar-tab.main-tab:hover {
+  color: #286090;
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+.navbar-nav>li.active>.navbar-tab {
+  color: #FFFFFF;
+}
+
+.navbar-nav .dropdown-toggle {
+  background: transparent;
+  color: #989DCC;
+  height: 50px;
+}
+
+.navbar-nav ul.dropdown-menu {
+  width: 227px;
+  background: #222534 0% 0% no-repeat padding-box;
+  box-shadow: 0px 22px 33px #01D9DE17;
+  border: 1px solid #222534;
+  border-radius: 0px 0px 10px 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.navbar-nav ul.dropdown-menu:before {
+  height: 2px;
+  display: block;
+  background: #01D9DE 0% 0% no-repeat padding-box;
+  content: " ";
+  margin-top: -13px;
+}
+
+.navbar-nav ul.dropdown-menu li {
+  height: 48px;
+}
+
+.navbar-nav ul.dropdown-menu li:first-child {
+  margin-top: 10px;
+}
+
+.navbar-nav ul.dropdown-menu li a {
+  height: 48px;
+  color: #989DCC;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-nav ul.dropdown-menu li:hover {
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+
+.navbar-nav ul.dropdown-menu li.active a {
+  background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+  color: white;
+}
+
+.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+  background-color: transparent;
+}
+
+.navbar-nav ul.dropdown-menu li:hover a {
+  color: #286090;
+}
+
+.navbar-nav li.active .dropdown-toggle {
+  color: white;
+}
+
+.navbar-nav ul.dropdown-menu li a.disabled {
+  /* color: #286090; */
+  /* background: #575966 0% 0% no-repeat padding-box; */
+  color: grey;
+  pointer-events: none;
+}
+
+.top-nav {
+  display: flex;
+}
+
+.top-nav .logo-section {
+  margin-right: 30px;
+  /* min-width: 400px; */
+}
+
+.top-nav .search-box {
+  flex: auto;
+}
+
+.navbar-toggler {
+  display: none;
+}
+
+.page-loading {
+  min-height: 50px;
+  z-index: 5;
+}
+
+.navbar-header {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .navbar-toggler {
+    display: block;
+    background: transparent;
+    outline: none;
+    border: 1px solid #01D9DE;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    color: #01D9DE;
+    margin-left: auto;
+    margin-top: 10px;
+  }
+
+  .top-nav {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .top-nav .logo-section {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .top-nav .search-box {
+    width: 100%;
+    margin-top: 50px;
+  }
+
+  .navbar-dropdown {
+    width: 100%;
+    z-index: 1;
+  }
+
+  .navbar-dropdown button {
+    width: 100%;
+    text-align: left;
+    height: 40px!important;
+  }
+
+  .navbar-nav {
+    height: 0px;
+    opacity: 0;
+    transition: all 1s;
+    margin-top: 0;
+  }
+
+  .navbar-nav.show {
+    opacity: 1;
+    height: 242px;
+  }
+
+  .navbar-nav ul.dropdown-menu {
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  .navbar-nav ul.dropdown-menu li {
+    height: 40px;
+  }
+
+  .navbar-tabbar {
+    margin-top: 0;
+    display: unset;
+    justify-content: unset;
+    position: relative;
+  }
+
+  .page-updating {
+    position: absolute;
+    top: -110px;
+    right: 0;
+  }
+}
+
+@media (max-width: 500px) {
+  .navbar-brand {
+    font-size: 20px;
+  }
+
+  .navbar-logo {
+    width: 94px;
+    height: 80px;
+    margin-top: -31px;
+  }
+}
