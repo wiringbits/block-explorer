@@ -1,0 +1,76 @@
+<div class="transaction-table-container">
+
+  <div class="row" *ngIf="transactions == null">
+    <div class="col-xs-12">
+      <h4>{{'message.loadingTransactions' | translate}}</h4>
+    </div>
+  </div>
+
+  <div *ngIf="transactions != null">
+    <div class="table-responsive">
+      <table class="table table-borderless table-striped {{isLoading && loadingType == 2 ? 'isLoading' : ''}}">
+        <thead>
+          <tr class="row">
+            <th class="pr-0">#</th>
+            <th class="col-1 pr-0" style="min-width: 70px;" *ngIf="!hideBlockHash">{{'label.height' | translate | uppercase}}</th>
+            <th class="col-2 pr-0">{{'label.txHash' | translate | uppercase}}</th>
+            <!-- <th class="col-2 pr-1 pl-1">{{'label.blockHash' | translate | uppercase}}</th> -->
+            <th class="col-2 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.type' | translate | uppercase}}</th>
+            <th class="col-1 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.result' | translate | uppercase}}</th>
+            <th class="col-2 pl-1 pr-1">{{'label.amount' | translate | uppercase}}</th>
+            <th class="col-2 pl-1 pr-1" *ngIf="!hideBlockHash">{{'label.fee' | translate | uppercase}}</th>
+            <th class="col-2 right-align pl-0">{{'label.time' | translate | uppercase}}</th>
+          </tr>
+        </thead>
+
+        <tbody *ngIf="isLoading && loadingType == 2">
+          <tr *ngFor="let item of emptyArray; let i = index">
+            <td class="pr-0" style="min-width: 40px;"><div>&nbsp;</div></td>
+            <td class="pr-0" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
+            <td class="pr-0" style="min-width: 140px;"><div>&nbsp;</div></td>
+            <!-- <td class="pr-1 pl-1" style="min-width: 125px;"><div>&nbsp;</div></td> -->
+            <td class="pl-1 pr-1" style="min-width: 80px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
+            <td class="pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 65px;"><div>&nbsp;</div></td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash"><div>&nbsp;</div></td>
+            <td class="text-primary right-align pl-0" style="min-width: 240px;"><div>&nbsp;</div></td>
+          </tr>
+        </tbody>
+
+        <tbody infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300" (scrolled)="getTransactions()"
+          [scrollWindow]="true">
+          <tr *ngFor="let item of transactions;let index = index;">
+            <td class="pr-0" style="min-width: 40px;">{{ index + 1 }}</td>
+            <td class="pr-0" style="min-width: 70px;" *ngIf="!hideBlockHash">
+              <a class="text-highlight" routerLink="/blocks/{{item.height}}">{{item.height}}</a>
+            </td>
+            <td class="pr-0" style="min-width: 140px;">
+              <a class="text-highlight" routerLink="/transactions/{{item.id}}">{{truncate(item.id, 8, 5) | uppercase}}</a>
+            </td>
+            <!-- <td class="pr-1 pl-1" style="min-width: 125px;">
+              <a class="text-highlight" routerLink="/blocks/{{item.blockhash}}">{{truncate(item.blockhash, 8, 5) | uppercase}}</a>
+            </td> -->
+            <td class="text-primary pl-1 pr-1" style="min-width: 80px;" *ngIf="!hideBlockHash">Transaction</td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">
+              <span class="glyphicon {{getResult(item) ? 'glyphicon-ok' : 'glyphicon-remove'}}"></span> {{getResult(item) ? 'Success' : 'Fail'}}
+            </td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 65px;">{{getAmount(item) | explorerCurrency}}</td>
+            <td class="text-primary pl-1 pr-1" style="min-width: 70px;" *ngIf="!hideBlockHash">{{item.fee | explorerCurrency}}</td>
+            <td class="text-primary right-align pl-0" style="min-width: 240px;">
+              {{item.time * 1000 | amLocal | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}
+              ({{amAgo(item.time)}})
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="isLoading && loadingType == 1" class="loading">
+        <lottie-animation-view
+          [options]="lottieConfig"
+          [width]="150"
+          [height]="150"
+        >
+        </lottie-animation-view>
+      </div>
+    </div>
+  </div>
+</div>

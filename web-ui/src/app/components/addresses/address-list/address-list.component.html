@@ -1,0 +1,51 @@
+<div class="tab-content row ml-0 mr-0">
+  <div class="page-title col-xs-12">
+      {{'label.addresses' | translate}}
+  </div>
+  <div class="col-md-12 address-table-wrapper">
+    
+    <!-- <div class="row visible-xs">
+      <h2 class="col-xs-12">{{'label.richestAddresses' | translate}}</h2>
+    </div> -->
+
+    <div class="table-responsive">
+      <table class="table table-borderless table-striped">
+        <thead>
+          <tr class="row">
+            <th class="col-xs-1">#</th>
+            <th class="col-xs-4 pl-0 pr-0">{{'label.address' | translate | uppercase}}</th>
+            <th class="col-xs-3 pl-1 pr-1">{{'label.amount' | translate | uppercase}}</th>
+            <th class="col-xs-2 pr-0 pl-1">{{'label.percentOfCircSupply' | translate | uppercase}}</th>
+            <th class="col-xs-2 pl-1">{{'label.addressLabel' | translate | uppercase}}</th>
+          </tr>
+        </thead>
+
+        <tbody class='search-results' infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="300"
+          (scrolled)="load()" [scrollWindow]="true">
+            <tr *ngFor="let index = index; let item of items">
+              <td class="text-primary">{{index + 1}}</td>
+              <td class="pl-0 pr-0" style="min-width: 290px;">
+                <a class="text-highlight" routerLink="/addresses/{{item.address}}">{{item.address}}</a>
+              </td>
+              <td class="text-primary pl-1 pr-0" style="min-width: 160px;">{{item.available | explorerCurrency}}</td>
+              <td *ngIf="ticker == null || ticker.circulatingSupply == null" class="text-primary">{{'message.unavailable' | translate}}</td>
+              <td class="text-primary pl-1 pr-0" style="min-width: 100px;" *ngIf="ticker != null && ticker.circulatingSupply != null">
+                {{getPercent(item) | number:'1.2-2'}} %
+              </td>
+              <td class="pl-1" style="min-width: 125px;">
+                <a class="text-highlight" routerLink="/addresses/{{item.address}}">{{addressLabel[item.address]}}</a>
+              </td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="isLoading" class="loading">
+      <lottie-animation-view
+        [options]="lottieConfig"
+        [width]="150"
+        [height]="150"
+      >
+      </lottie-animation-view>
+    </div>
+  </div>
+</div>

@@ -29,12 +29,19 @@ export class AddressesService {
     return this.http.get<Balance>(url);
   }
 
-  getTransactions(address: string, offset: number = 0, limit: number = 10, orderBy: string = ''): Observable<PaginatedResult<Transaction>> {
-    const url = `${this.baseUrl}/${address}/transactions?offset=${offset}&limit=${limit}&orderBy=${orderBy}`;
+  getTransactions(
+    address: string,
+    limit: number = 10,
+    lastSeenTxid: string = '',
+    order: string = 'desc'): Observable<PaginatedResult<Transaction>> {
+    let url = `${this.baseUrl}/${address}/transactions?limit=${limit}&orderBy=${order}`;
+    if (lastSeenTxid !== '') {
+      url += `&lastSeenTxid=${lastSeenTxid}`;
+    }
     return this.http.get<PaginatedResult<Transaction>>(url);
   }
 
-  getTransactionsV2(
+  getTransactionsV2 (
     address: string,
     limit: number = 10,
     lastSeenTxid: string = '',
@@ -53,8 +60,8 @@ export class AddressesService {
     return this.http.get<UTXO[]>(url);
   }
 
-  getTposContracts(address): Promise<any> {
+  getTposContracts(address): Observable<WrappedResult<TposContract>> {
     const url = `${this.baseUrl}/${address}/tposcontracts`;
-    return this.http.get<any>(url).toPromise();
+    return this.http.get<WrappedResult<TposContract>>(url);
   }
 }

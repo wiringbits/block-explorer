@@ -1,0 +1,50 @@
+<div class="row ml-0 mr-0 dex-monitor">
+  <div class="col-xs-12 page-header">
+    <p class="main-label">TRADING PAIR</p>
+    <select #selectedTradingPair [(ngModel)]="tradingPair" (change)="changeTradingPair()">
+      <option value="BTC_USDT">BTC-USDT</option>
+      <option value="XSN_BTC">XSN-BTC</option>
+      <option value="LTC_BTC">LTC-BTC</option>
+    </select>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 pl-0 dex-stat-block">
+    <div class="dex-monitor_stat total-volume">
+      <p class="main-label uppercase">Total Volume</p>
+      <h4 class="usd-amount" *ngIf="volume">$ {{numberWithCommas(volume.volumeUSD.toFixed(2))}} USD</h4>
+      <p class="btc-amount" *ngIf="volume">{{volume.volumeBTC | explorerAmount:8:true}} BTC</p>
+      <ul>
+        <li class="{{selectedTab == 1 ? 'active' : ''}}" (click)="selectTab(1)">24 Hours</li>
+        <li class="{{selectedTab == 7 ? 'active' : ''}}" (click)="selectTab(7)">1 Week</li>
+        <li class="{{selectedTab == 30 ? 'active' : ''}}" (click)="selectTab(30)">1 Month</li>
+        <li class="{{selectedTab == 0 ? 'active' : ''}}" (click)="selectTab(0)">Total</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-6 pr-0 dex-stat-block">
+    <div class="burned-amount dex-monitor_stat">
+      <p class="main-label uppercase">Burned Amount</p>
+      <h4 class="usd-amount">$ 0.00 USD</h4>
+      <p class="btc-amount">0.0 BTC</p>
+      <div class="coming-soon-badge">
+        Coming Soon
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 pr-0 pl-0 dex-monitor_stat__small-group">
+    <div class="dex-monitor_stat__small node">
+      <p class="sub-label">Number of Connected Nodes :</p>
+      <h3>{{nodesInfo.nodes | explorerAmount}}</h3>
+    </div>
+    <div class="dex-monitor_stat__small channel">
+      <p class="sub-label">Number of Channels :</p>
+      <h3>{{nodesInfo.channels | explorerAmount}}</h3>
+    </div>
+    <div class="dex-monitor_stat__small trade">
+      <p class="sub-label">Number of Trades :</p>
+      <h3>{{tradesNumber.trades | explorerAmount}}</h3>
+    </div>
+  </div>
+</div>

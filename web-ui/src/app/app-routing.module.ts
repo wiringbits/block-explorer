@@ -1,20 +1,19 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { HomeComponent } from './components/home/home.component';
-import { TransactionComponent } from './components/transaction/transaction.component';
-import { AddressDetailsComponent } from './components/address-details/address-details.component';
-import { BlockComponent } from './components/block/block.component';
-import { MasternodeDetailsComponent } from './components/masternode-details/masternode-details.component';
 import { TrezorConnectComponent } from './components/trezor-connect/trezor-connect.component';
+import { CalculatorComponent } from './components/calculator/calculator.component';
+import { DexMonitorComponent } from './components/dex-monitor/dex-monitor.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'addresses/:address', component: AddressDetailsComponent },
-  { path: 'blocks/:query', component: BlockComponent },
-  { path: 'transactions/:txid', component: TransactionComponent },
-  { path: 'masternodes/:ip', component: MasternodeDetailsComponent },
+  { path: '', loadChildren: './components/home/home.module#HomeModule' },
+  { path: 'blocks', loadChildren: './components/blocks/blocks.module#BlocksModule' },
+  { path: 'transactions', loadChildren: './components/transactions/transactions.module#TransactionsModule' },
+  { path: 'nodes', loadChildren: './components/nodes/nodes.module#NodesModule' },
+  { path: 'addresses', loadChildren: './components/addresses/addresses.module#AddressesModule' },
   { path: 'trezor', component: TrezorConnectComponent },
+  { path: 'dex-monitor', component: DexMonitorComponent },
+  { path: 'calculator', component: CalculatorComponent },
   { path: '**', redirectTo: '' }
 ];
 

@@ -1,0 +1,37 @@
+<div class="tab-content row ml-0 mr-0">
+	<div class="col-xs-6 text-primary page-title">
+		<a class="text-highlight" routerLink="/blocks">
+			<span class="glyphicon glyphicon-arrow-left text-highlight"></span>
+		</a>
+		&nbsp; {{'label.block' | translate}} #{{blockDetails && blockDetails.block.height}}
+	</div>
+	<div class="col-xs-6">
+		<ul class="nav block-tab-bar">
+			<li class="nav-item {{isSelected('details') ? 'active' : ''}}">
+				<a class="nav-link" (click)="selectView('details')">{{'label.details' | translate | uppercase}}</a>
+			</li>
+			<li class="nav-item {{isSelected('raw') ? 'active' : ''}}">
+				<a class="nav-link" (click)="selectView('raw')">{{'label.raw' | translate | uppercase}}</a>
+			</li>
+		</ul>
+	</div>
+	<div class="col-xs-12 block-tab-content">
+		<app-block-details *ngIf="isSelected('details') && blockhash" [blockDetails]="blockDetails">
+		</app-block-details>
+
+		<app-block-raw *ngIf="isSelected('raw')"></app-block-raw>
+	</div>
+	<div class="col-xs-12 block-tab-footer">
+		<a *ngIf="blockDetails && blockDetails.block.previousBlockhash != null" class="text-highlight"
+			routerLink="/blocks/{{blockDetails.block.previousBlockhash}}">
+			<span class="glyphicon glyphicon-chevron-left text-highlight"></span>
+			{{'label.block' | translate}} #{{blockDetails.block.height - 1}}
+		</a>
+
+		<a *ngIf="blockDetails && blockDetails.block.nextBlockhash != null" class="text-highlight"
+			routerLink="/blocks/{{blockDetails.block.nextBlockhash}}">
+			{{'label.block' | translate}} #{{blockDetails.block.height + 1}}
+			<span class="glyphicon glyphicon-chevron-right text-highlight"></span>
+		</a>
+	</div>
+</div>

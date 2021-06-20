@@ -6,7 +6,8 @@
 export const environment = {
   production: false,
   api: {
-    url: 'http://localhost:9000'
+    url: 'https://xsnexplorer.io/api',
+    orderbook: 'https://orderbook.stakenet.io/api'
   },
   gtag: {
     // don't track events on dev

@@ -1,0 +1,27 @@
+<div class="tab-content row ml-0 mr-0">
+	<div class="col-xs-6 text-primary page-title">
+		<a class="text-highlight" routerLink="/transactions">
+			<span class="glyphicon glyphicon-arrow-left text-highlight"></span>
+		</a>
+		&nbsp; {{'label.transactinoLabel' | translate}}
+	</div>
+	<div class="col-xs-6">
+		<ul class="nav transaction-tab-bar">
+			<li class="nav-item {{isSelected('details') ? 'active' : ''}}" (click)="selectView('details')">
+				<a class="nav-link">{{'label.details' | translate | uppercase}}</a>
+			</li>
+			<li class="nav-item {{isSelected('raw') ? 'active' : ''}}" (click)="selectView('raw')">
+				<a class="nav-link" >{{'label.raw' | translate | uppercase}}</a>
+			</li>
+		</ul>
+	</div>
+	<div class="col-xs-12 transaction-tab-content">
+		<app-transaction-details *ngIf="isSelected('details')">
+		</app-transaction-details>
+
+		<app-transaction-raw *ngIf="isSelected('raw')"></app-transaction-raw>
+	</div>
+
+	<div class="col-xs-12 transaction-tab-footer">
+	</div>
+</div>

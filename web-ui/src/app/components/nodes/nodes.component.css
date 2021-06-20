@@ -1,0 +1,56 @@
+/* ngx-pagination customization */
+
+::ng-deep .ngx-pagination {
+    padding: 0;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+  
+::ng-deep pagination-controls .ngx-pagination .current,
+::ng-deep pagination-controls .ngx-pagination li{
+    min-width: 20px;
+    margin: 0 2px;
+}
+  
+::ng-deep pagination-controls .ngx-pagination a {
+    color: #989DCC;
+}
+  
+::ng-deep pagination-controls .ngx-pagination a:hover {
+    color: #286090;
+    background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+}
+  
+::ng-deep pagination-controls .ngx-pagination .current {
+    background: transparent linear-gradient(0deg, #01D9DE18 0%, #2558EB00 100%) 0% 0% no-repeat padding-box;
+    color: #FFFFFF;
+    padding: 0;
+    text-align: center;
+}
+  
+::ng-deep pagination-controls  .ngx-pagination .current::after {
+    height: 2px;
+    display: block;
+    background: #01D9DE 0% 0% no-repeat padding-box;
+    content: " ";
+}
+  
+::ng-deep pagination-controls .ngx-pagination .pagination-previous a::before, 
+::ng-deep pagination-controls .ngx-pagination .pagination-previous.disabled::before {
+    content: '\276E';
+}
+  
+::ng-deep pagination-controls .ngx-pagination .pagination-next a::after, 
+::ng-deep pagination-controls .ngx-pagination .pagination-next.disabled::after {
+    content: '\276F';
+}
+  
+::ng-deep pagination-controls .ngx-pagination .pagination-previous a::before,
+::ng-deep pagination-controls .ngx-pagination .pagination-next a::after {
+    color: #01D9DE;
+}
+  
+::ng-deep pagination-controls .ngx-pagination .pagination-previous.disabled::before,
+::ng-deep pagination-controls .ngx-pagination .pagination-next.disabled::after {
+    color: #989DCC;
+}

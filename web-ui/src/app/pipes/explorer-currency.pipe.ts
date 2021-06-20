@@ -11,8 +11,10 @@ export class ExplorerCurrencyPipe implements PipeTransform {
       currencyNumber = currency;
     } else if (typeof(currency) === 'string') {
       currencyNumber = parseFloat(currency);
+    } else {
+      return `0 ${ Config.currentCurrency }`;
     }
 
-    return `${ currencyNumber.toFixed(8) } ${ Config.currentCurrency }`;
+    return `${ currencyNumber.toLocaleString(undefined, { maximumFractionDigits: 8 }) } ${ Config.currentCurrency }`;
   }
 }

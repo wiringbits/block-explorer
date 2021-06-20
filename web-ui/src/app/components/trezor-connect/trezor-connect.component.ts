@@ -29,7 +29,6 @@ import { TposContractsService } from '../../services/tposcontracts.service';
 import { NotificationService } from '../../services/notification.service';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 
-
 @Component({
   selector: 'app-trezor-connect',
   templateUrl: './trezor-connect.component.html',
@@ -68,12 +67,16 @@ export class TrezorConnectComponent implements OnInit {
     this.tposContractFormControl = this.createFormGroup();
 
     this.trezorAddresses.forEach(async address => {
-      const contracts = await this.addressesService.getTposContracts(address.address);
-      if (contracts.data) {
-        contracts.data.forEach(element => {
-          this.tposContracts.push(element);
-        });
-      }
+      // const contracts = await 
+      this.addressesService.getTposContracts(address.address)
+      .subscribe((res) => {
+        if (res.data) {
+          res.data.forEach(element => {
+            this.tposContracts.push(element);
+          });
+        }
+      });
+      
     });
   }
 

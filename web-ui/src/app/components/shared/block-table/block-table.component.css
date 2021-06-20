@@ -1,0 +1,18 @@
+:host {
+  width: 100%;
+}
+
+.block-table {
+  animation: blinker 1s linear;
+}
+
+@keyframes blinker {
+  50% {
+    background-color: #FFFFFF08;
+  }
+}
+
+/* th:last-child,
+td:last-child {
+  text-align: right;
+} */

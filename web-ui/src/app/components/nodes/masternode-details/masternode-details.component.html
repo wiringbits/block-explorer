@@ -1,0 +1,52 @@
+<div class="tab-content row ml-0 mr-0">
+  <div class="col-xs-12 text-primary page-title">
+    {{ (ip ? ip : 'label.masternode') | translate }}
+  </div>
+
+  <div class="col-xs-12 block-tab-content">
+    <div class="text-primary">
+      <div [hidden]="masternode != null">
+        <alert>{{'message.masternodeNotFound' | translate}}</alert>
+      </div>
+
+      <div *ngIf="masternode != null">
+        <div class="row">
+          <div class="col-xs-12 col-sm-6 pl-0">
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <tbody>
+                  <tr>
+                    <td class="text-label">{{'label.address' | translate}}</td>
+                    <td>{{masternode.ip}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.active' | translate}}</td>
+                    <td>{{Math.max(masternode.activeSeconds, 0) | amDuration:'seconds'}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.lastSeen' | translate}}</td>
+                    <td>{{masternode.lastSeen * 1000 | explorerDatetime}}</td>
+                  </tr>
+                  <!-- TODO: Display status when the WATCHDOG_EXPIRED bug is fixed.
+                    <tr>
+                    <td>{{'label.status' | translate}}</td>
+                    <td>{{masternode.status}}</td>
+                    </tr>
+                  -->
+                  <tr>
+                    <td class="text-label">{{'label.address' | translate}}</td>
+                    <td><a routerLink="/addresses/{{masternode.payee}}">{{masternode.payee}}</a></td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.protocol' | translate}}</td>
+                    <td>{{masternode.protocol}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

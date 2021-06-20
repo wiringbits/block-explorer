@@ -1,0 +1,112 @@
+<div class="tab-content row ml-0 mr-0">
+	<div class="col-xs-12 text-primary page-title">
+		<a class="text-highlight" routerLink="/addresses">
+			<span class="glyphicon glyphicon-arrow-left text-highlight"></span>
+    </a>
+    &nbsp; {{addressLabel[addressString] ? addressLabel[addressString] : 'label.address' | translate}}
+  </div>
+  
+	<div class="col-xs-12 block-tab-content">
+    <div class="text-primary">
+      <div [hidden]="address != null" class="not-found">
+        <p>{{'message.addressNotFound' | translate}}</p>
+      </div>
+
+      <div *ngIf="address != null">
+        <div class="row">
+          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 pr-0 address-detail-block">
+            <h4 class="text-primary">
+              {{'label.summary' | translate}}
+            </h4>
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <tbody>
+                  <tr>
+                    <td class="text-label">{{'label.address' | translate}}</td>
+                    <td>{{addressString}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.balance' | translate}}</td>
+                    <td>{{address.available | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.received' | translate}}</td>
+                    <td>{{address.received | explorerCurrency}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.spent' | translate}}</td>
+                    <td>{{address.spent | explorerCurrency}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-xs-12 col-sm-8 col-md-6 pl-0 pr-0" *ngIf="tposContracts && tposContracts.length > 0 && tposContracts[0].merchant">
+            <div class="table-responsive">
+              <table class="table table-borderless">
+                <thead>
+                  <tr>
+                    <th class="col-xs-5">
+                      <h4 class="text-primary">
+                        {{'label.tposDetails' | translate}} <small *ngIf="tposContracts.length > 0" class="text-highlight">({{'label.enabled' | translate | uppercase}})</small>
+                      </h4>  
+                    </th>
+                    <th class="col-xs-7"></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td class="text-label">{{'label.isStakingCoinsTrustlessly' | translate}}</td>
+                    <td>{{(addressString == tposContracts[0].merchant ? 'label.yesMerchantOfTheStakedCoins' : 'label.yesOwnerOfTheStakedCoins') | translate}}</td>
+                  </tr>
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].merchant">
+                    <td class="text-label">{{'label.contractsFound' | translate}}</td>
+                    <td>
+                      <ul class="merchant-select">
+                        <li *ngFor="let item of tposContracts; let i = index" class="{{selectedTpos == i ? 'active' : ''}}" (click)="selectTpos(i)">{{ i + 1}}</li>
+                      </ul>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.contractState' | translate}}</td>
+                    <td>{{tposContracts ? tposContracts[selectedTpos].state : ''}}</td>
+                  </tr>
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].merchant">
+                    <td class="text-label">{{'label.ownerAddress' | translate}}</td>
+                    <td>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContracts[selectedTpos].owner}}">{{tposContracts[selectedTpos].owner}}</a>
+                    </td>
+                  </tr>
+                  <tr *ngIf="tposContracts && addressString == tposContracts[0].owner">
+                    <td class="text-label">{{'label.merchantAddress' | translate}}</td>
+                    <td>
+                      <a class="text-highlight" routerLink="/addresses/{{tposContracts[0].merchant}}">{{tposContracts[0].merchant}}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.merchantCommission' | translate}}</td>
+                    <td>{{tposContracts ? tposContracts[selectedTpos].merchantCommission : ''}}</td>
+                  </tr>
+                  <tr>
+                    <td class="text-label">{{'label.contractTxid' | translate}}</td>
+                    <td>
+                      <a *ngIf="tposContracts" class="text-highlight" routerLink="/transactions/{{tposContracts[selectedTpos].txid}}">{{tposContracts[selectedTpos].txid}}</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="col-xs-12">{{'label.transactinoLabel' | translate}}</h3>
+        
+        <div class="row transaction-table-wrapper">
+          <app-transaction-tablev2 class="col-xs-12 pl-0 pr-0" address={{addressString}} [isLoading]="isLoading" [loadingType]="loadingType" [allowInfiniteScroll]="true" [transactions]="transactions" (updateTransactions)="updateTransactions()" ></app-transaction-tablev2>
+        </div>
+      </div>
+    </div>
+	</div>
+</div>

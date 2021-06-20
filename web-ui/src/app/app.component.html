@@ -1,6 +1,10 @@
-<app-navbar></app-navbar>
-<div class="container-fluid">
+<div class="tab-container">
+  <app-navbar [tabs]="tabs"></app-navbar>
+</div>
+<div class="tab-container">
   <router-outlet></router-outlet>
 </div>
-<ng-http-loader [filteredUrlPatterns]="['/blocks$']"></ng-http-loader>
-<app-footer></app-footer>
+<div class="tab-container">
+  <ng-http-loader [filteredUrlPatterns]="['/blocks$']"></ng-http-loader>
+  <app-footer></app-footer>
+</div>
