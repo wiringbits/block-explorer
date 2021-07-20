@@ -60,7 +60,7 @@ libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.9"
 libraryDependencies += "org.playframework.anorm" %% "anorm" % "2.6.10"
 libraryDependencies += "org.postgresql" % "postgresql" % "42.2.23"
 
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.31"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.32"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.4"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.4"
 libraryDependencies += "io.sentry" % "sentry-logback" % "5.0.1"
