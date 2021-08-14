@@ -103,6 +103,7 @@ object Transaction {
           vin.addresses
         )
       }
+      .filter(_.value > 0)
 
     val outputs = tx.vout.flatMap { vout =>
       for {
