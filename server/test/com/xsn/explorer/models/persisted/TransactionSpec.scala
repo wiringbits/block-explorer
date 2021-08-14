@@ -163,6 +163,32 @@ class TransactionSpec extends WordSpec {
       result.outputs must be(List(expected))
     }
 
+    "discard inputs with 0 value" in {
+      val transactionId = DataGenerator.randomTransactionId
+      val address = DataGenerator.randomAddress
+      val hex = HexString.from("00").get
+
+      val vin = List(
+        rpc.TransactionVIN.HasValues(transactionId, voutIndex = 0, value = 0, List(address), hex),
+        rpc.TransactionVIN.HasValues(transactionId, voutIndex = 1, value = 10, List(address), hex)
+      )
+
+      val tx = rpc.Transaction[rpc.TransactionVIN.HasValues](
+        id = transactionId,
+        size = Size(200),
+        blockhash = DataGenerator.randomBlockhash,
+        time = 10L,
+        blocktime = 10L,
+        confirmations = Confirmations(10),
+        vin = vin,
+        vout = List.empty
+      )
+
+      val expected = Transaction.Input(tx.id, fromOutputIndex = 1, index = 1, value = 10, List(address))
+      val (result, _) = persisted.Transaction.fromRPC(tx)
+      result.inputs must be(List(expected))
+    }
+
     "extract the possible TPoS contracts" in {
       val address = DataGenerator.randomAddress
       val addressHex = DatatypeConverter.printHexBinary(address.string.getBytes)
