@@ -53,10 +53,14 @@ object TPoSContract {
     /** Try to get the contract details from the output script ASM.
       *
       * expected format:
-      * - "OP_RETURN [hex_encoded_owner_address] [hex_encoded_merchant_address] [owner_commission] [signature]
+      *   - "OP_RETURN [hex_encoded_owner_address]
+      *     [hex_encoded_merchant_address] [owner_commission] [signature]
       *
       * example:
-      * - "OP_RETURN 5869337351664d51737932437a4d5a54726e4b573648464770315671465468644c77 58794a4338786e664672484e634d696e68366778755052595939484361593944416f 99"
+      *   - "OP_RETURN
+      *     5869337351664d51737932437a4d5a54726e4b573648464770315671465468644c77
+      *     58794a4338786e664672484e634d696e68366778755052595939484361593944416f
+      *     99"
       */
     def fromOutputScriptASM(asm: String): Option[Details] = {
       val parts = asm.split(" ").toList

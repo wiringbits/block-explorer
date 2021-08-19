@@ -30,9 +30,11 @@ class SipHashKeySpec extends WordSpec {
 
     "calculate the same key as btcutil" in {
 
-      /** The blockhash and the expected key were taken from btcutil tests
-        * see https://github.com/btcsuite/btcutil/blob/9e5f4b9a998d263e3ce9c56664a7816001ac8000/gcs/builder/builder_test.go#L46 for the key
-        * and https://github.com/btcsuite/btcutil/blob/9e5f4b9a998d263e3ce9c56664a7816001ac8000/gcs/builder/builder_test.go#L49 for the hash
+      /** The blockhash and the expected key were taken from btcutil tests see
+        * https://github.com/btcsuite/btcutil/blob/9e5f4b9a998d263e3ce9c56664a7816001ac8000/gcs/builder/builder_test.go#L46
+        * for the key and
+        * https://github.com/btcsuite/btcutil/blob/9e5f4b9a998d263e3ce9c56664a7816001ac8000/gcs/builder/builder_test.go#L49
+        * for the hash
         */
       val blockhash = Blockhash
         .from(

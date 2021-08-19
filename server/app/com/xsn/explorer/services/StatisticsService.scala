@@ -5,7 +5,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{BalanceFutureDataHandler, StatisticsFutureDataHandler}
+import com.xsn.explorer.data.async.{
+  BalanceFutureDataHandler,
+  StatisticsFutureDataHandler
+}
 import com.xsn.explorer.models.{
   AddressesReward,
   MarketStatistics,
@@ -14,7 +17,10 @@ import com.xsn.explorer.models.{
   StatisticsDetails,
   SynchronizationProgress
 }
-import com.xsn.explorer.services.synchronizer.repository.{MasternodeRepository, MerchantnodeRepository}
+import com.xsn.explorer.services.synchronizer.repository.{
+  MasternodeRepository,
+  MerchantnodeRepository
+}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import org.scalactic.{Bad, Good}
 
@@ -48,7 +54,13 @@ class StatisticsService @Inject() (
       mnEnabledCount <- masternodesEnabled.map(x => Good(Some(x))).toFutureOr
       difficulty <- discardErrors(difficultyF).toFutureOr
       tposCount <- tposStats.map(x => Good(Some(x))).toFutureOr
-    } yield StatisticsDetails(stats, mnCount, tposCount, difficulty, mnEnabledCount)
+    } yield StatisticsDetails(
+      stats,
+      mnCount,
+      tposCount,
+      difficulty,
+      mnEnabledCount
+    )
 
     result.toFuture
   }
@@ -93,7 +105,8 @@ class StatisticsService @Inject() (
     result.toFuture
   }
 
-  def getSynchronizationProgress: FutureApplicationResult[SynchronizationProgress] = {
+  def getSynchronizationProgress
+      : FutureApplicationResult[SynchronizationProgress] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val rpcBlock = xsnService.getLatestBlock()
 
@@ -122,21 +135,29 @@ class StatisticsService @Inject() (
       .map(Good(_))
   }
 
-  def getRewardedAddresses(period: FiniteDuration): FutureApplicationResult[AddressesReward] = {
+  def getRewardedAddresses(
+      period: FiniteDuration
+  ): FutureApplicationResult[AddressesReward] = {
     val startDate = Instant.now.minusSeconds(period.toSeconds)
 
     statisticsFutureDataHandler.getRewardedAddresses(startDate)
   }
 
-  def getROI(rewardedAddressesSumLast72Hours: BigDecimal): FutureApplicationResult[ROI] = {
+  def getROI(
+      rewardedAddressesSumLast72Hours: BigDecimal
+  ): FutureApplicationResult[ROI] = {
     masternodeRepository.getEnabledCount().map { enabledMasternodes =>
       val mnROI: BigDecimal =
         if (enabledMasternodes > 0)
-          (BigDecimal(12960) / (enabledMasternodes * BigDecimal(15000)) * BigDecimal(365)).setScale(8, RoundingMode.UP)
+          (BigDecimal(12960) / (enabledMasternodes * BigDecimal(
+            15000
+          )) * BigDecimal(365)).setScale(8, RoundingMode.UP)
         else BigDecimal(0)
       val stakingROI: BigDecimal =
         if (rewardedAddressesSumLast72Hours > 0)
-          ((BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(365)).setScale(8, RoundingMode.UP)
+          ((BigDecimal(12960) / rewardedAddressesSumLast72Hours) * BigDecimal(
+            365
+          )).setScale(8, RoundingMode.UP)
         else BigDecimal(0)
       Good(ROI(masternodes = mnROI, staking = stakingROI))
     }
@@ -152,7 +173,7 @@ class StatisticsService @Inject() (
     value
       .map {
         case Good(result) => Good(Some(result))
-        case Bad(_) => Good(None)
+        case Bad(_)       => Good(None)
       }
       .recover { case _: Throwable => Good(None) }
   }

@@ -5,7 +5,12 @@ import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.DataGenerator.randomTPoSContract
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.rpc.{Block, Transaction, TransactionVIN}
-import com.xsn.explorer.models.values.{Address, Blockhash, Height, TransactionId}
+import com.xsn.explorer.models.values.{
+  Address,
+  Blockhash,
+  Height,
+  TransactionId
+}
 import org.scalactic.{Good, One, Or}
 import play.api.libs.json.JsValue
 

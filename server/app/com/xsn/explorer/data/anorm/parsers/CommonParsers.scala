@@ -14,7 +14,7 @@ object CommonParsers {
     str(field)
       .map { string =>
         Address.from(string) match {
-          case None          => throw new RuntimeException(s"Corrupted $field: $string")
+          case None => throw new RuntimeException(s"Corrupted $field: $string")
           case Some(address) => address
         }
       }

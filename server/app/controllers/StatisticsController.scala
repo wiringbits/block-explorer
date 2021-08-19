@@ -38,15 +38,21 @@ class StatisticsController @Inject() (
   def getBlockRewardsSummary() = public { _ =>
     val response = for {
       blockRewards <- statisticsService.getRewardsSummary(1000).toFutureOr
-      rewardedAddresses <- statisticsService.getRewardedAddresses(72.hours).toFutureOr
+      rewardedAddresses <- statisticsService
+        .getRewardedAddresses(72.hours)
+        .toFutureOr
       roi <- statisticsService.getROI(rewardedAddresses.amount).toFutureOr
       coinsTrustlesslyStaking <- statisticsService.getStakingCoins().toFutureOr
     } yield {
 
       val rewardsJson = Json.toJson(blockRewards).as[JsObject]
       val result = rewardsJson +
-        ("rewardedAddressesCountLast72Hours" -> Json.toJson(rewardedAddresses.addressesNumber)) +
-        ("rewardedAddressesSumLast72Hours" -> Json.toJson(rewardedAddresses.amount)) +
+        ("rewardedAddressesCountLast72Hours" -> Json.toJson(
+          rewardedAddresses.addressesNumber
+        )) +
+        ("rewardedAddressesSumLast72Hours" -> Json.toJson(
+          rewardedAddresses.amount
+        )) +
         ("masternodesROI" -> Json.toJson(roi.masternodes)) +
         ("stakingROI" -> Json.toJson(roi.staking)) +
         ("coinsTrustlesslyStaking" -> Json.toJson(coinsTrustlesslyStaking))
@@ -65,10 +71,14 @@ class StatisticsController @Inject() (
         prices.map { prices =>
           (prices \ currency)
             .asOpt[BigDecimal]
-            .map(price => Ok(Json.obj(currency -> price)).withHeaders("Cache-Control" -> "public, max-age=300"))
+            .map(price =>
+              Ok(Json.obj(currency -> price))
+                .withHeaders("Cache-Control" -> "public, max-age=300")
+            )
             .getOrElse(NotFound)
         }
-      case None => prices.map(Ok(_).withHeaders("Cache-Control" -> "public, max-age=300"))
+      case None =>
+        prices.map(Ok(_).withHeaders("Cache-Control" -> "public, max-age=300"))
     }
 
     result.future

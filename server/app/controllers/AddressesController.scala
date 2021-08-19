@@ -3,7 +3,11 @@ package controllers
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
+import com.xsn.explorer.services.{
+  AddressService,
+  TPoSContractService,
+  TransactionService
+}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
@@ -66,9 +70,8 @@ class AddressesController @Inject() (
         .toFuture
     }
 
-  /**
-   * Format to keep compatibility with the previous approach using the RPC api.
-   */
+  /** Format to keep compatibility with the previous approach using the RPC api.
+    */
   implicit private val writes: Writes[Transaction.Output] = Writes { obj =>
     val address = obj.addresses.headOption
       .map(_.string)

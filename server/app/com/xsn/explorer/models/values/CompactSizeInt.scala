@@ -2,7 +2,8 @@ package com.xsn.explorer.models.values
 
 /** Compact sized integer, a Bitcoin-native data structure
   *
-  * @see https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers
+  * @see
+  *   https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers
   */
 sealed abstract class CompactSizeInt {
 

@@ -19,24 +19,26 @@ private[synchronizer] class LedgerSynchronizationStatusService @Inject() (
 )(implicit ec: ExecutionContext) {
 
   /** Lets define some values:
-    * - The candidate is the block that needs to be stored.
-    * - The latestLedgerBlock is the newer block that is stored.
-    * - The LCA is the least common ancestor between both chains.
+    *   - The candidate is the block that needs to be stored.
+    *   - The latestLedgerBlock is the newer block that is stored.
+    *   - The LCA is the least common ancestor between both chains.
     *
     * There are some trivial cases to handle:
-    * - There are no blocks stored, just sync everything.
-    * - The candidate is already stored, just ignore it.
+    *   - There are no blocks stored, just sync everything.
+    *   - The candidate is already stored, just ignore it.
     *
     * So, let's assume that:
-    * - The candidate is not stored.
-    * - We have at least a block stored (latestLedgerBlock).
-    * - The LCA is on the candidate's chain, and on our stored blocks.
+    *   - The candidate is not stored.
+    *   - We have at least a block stored (latestLedgerBlock).
+    *   - The LCA is on the candidate's chain, and on our stored blocks.
     *
-    * Then, we can apply the candidate by rolling back until the LCA, then, applying missing blocks until catching up
-    * the candidate.
+    * Then, we can apply the candidate by rolling back until the LCA, then,
+    * applying missing blocks until catching up the candidate.
     *
-    * @param candidate the block that we need to store
-    * @return the state that needs to be applied in order to store the candidate block
+    * @param candidate
+    *   the block that we need to store
+    * @return
+    *   the state that needs to be applied in order to store the candidate block
     */
   def getSyncingStatus(
       candidate: rpc.Block[_]

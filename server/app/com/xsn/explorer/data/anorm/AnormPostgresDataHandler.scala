@@ -14,11 +14,11 @@ import play.api.db.Database
 
 /** Allow us to map a PSQLException to a sub type of PostgresError.
   *
-  * This is helpful to differentiate between errors caused by input data
-  * and failures that can not be prevented, these failures are thrown.
+  * This is helpful to differentiate between errors caused by input data and
+  * failures that can not be prevented, these failures are thrown.
   *
   * The errors are mapped based on postgres error codes:
-  * - see: https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html
+  *   - see: https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html
   */
 trait AnormPostgresDataHandler {
 

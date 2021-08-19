@@ -8,8 +8,8 @@ case class AddressBalance(balance: BigDecimal, received: BigDecimal)
 
 object AddressBalance {
 
-  /** The RPC server is giving us these values in satoshis, we transform
-    * them to BigDecimal to match the format used by the application.
+  /** The RPC server is giving us these values in satoshis, we transform them to
+    * BigDecimal to match the format used by the application.
     */
   implicit val reads: Reads[AddressBalance] = {
     val builder =

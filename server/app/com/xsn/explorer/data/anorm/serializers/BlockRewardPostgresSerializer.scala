@@ -62,7 +62,9 @@ object BlockRewardPostgresSerializer {
 
       case Reward(r, RewardType.PoS, Some(Stake(stakedAmount, stakedTime)))
           :: Reward(masternode, RewardType.Masternode, _) :: Nil =>
-        Some(PoSBlockRewards(r, Some(masternode), None, stakedAmount, stakedTime))
+        Some(
+          PoSBlockRewards(r, Some(masternode), None, stakedAmount, stakedTime)
+        )
 
       case Reward(r, RewardType.PoS, Some(Stake(stakedAmount, stakedTime)))
           :: Reward(treasury, RewardType.Treasury, _) :: Nil =>
@@ -74,7 +76,16 @@ object BlockRewardPostgresSerializer {
             Some(Stake(stakedAmount, stakedTime))
           )
           :: Reward(merchant, RewardType.TPoSMerchant, _) :: Nil =>
-        Some(TPoSBlockRewards(owner, merchant, None, None, stakedAmount, stakedTime))
+        Some(
+          TPoSBlockRewards(
+            owner,
+            merchant,
+            None,
+            None,
+            stakedAmount,
+            stakedTime
+          )
+        )
 
       case Reward(masternode, RewardType.Masternode, _)
           :: Reward(
@@ -99,7 +110,11 @@ object BlockRewardPostgresSerializer {
             RewardType.TPoSOwner,
             Some(Stake(stakedAmount, stakedTime))
           )
-          :: Reward(merchant, RewardType.TPoSMerchant, _) :: Reward(treasury, RewardType.Treasury, None) :: Nil =>
+          :: Reward(merchant, RewardType.TPoSMerchant, _) :: Reward(
+            treasury,
+            RewardType.Treasury,
+            None
+          ) :: Nil =>
         Some(
           TPoSBlockRewards(
             owner,

@@ -3,12 +3,21 @@ package controllers
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.alexitc.playsonify.models.ordering.OrderingCondition
-import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
+import com.xsn.explorer.data.{
+  BlockBlockingDataHandler,
+  TransactionBlockingDataHandler
+}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.persisted.{BlockHeader, BlockInfo, Transaction}
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size, TransactionId}
+import com.xsn.explorer.models.values.{
+  Blockhash,
+  Confirmations,
+  Height,
+  Size,
+  TransactionId
+}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import io.scalaland.chimney.dsl._
@@ -69,7 +78,9 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve a PoS block with treasury" in {
-      val block = BlockLoader.getRPC("76848793c90ee23b7de68c1c97d0a6dd8d53921c48854fac53a22e56c8549b18")
+      val block = BlockLoader.getRPC(
+        "76848793c90ee23b7de68c1c97d0a6dd8d53921c48854fac53a22e56c8549b18"
+      )
       val response = GET(url(block.hash.string))
 
       status(response) mustEqual OK
@@ -81,11 +92,13 @@ class BlocksControllerSpec extends MyAPISpec {
       matchBlock(block, jsonBlock)
 
       val jsonCoinstake = (jsonRewards \ "coinstake").as[JsValue]
-      (jsonCoinstake \ "address").as[String] mustEqual "XtsUZvKvN7ZEwGQ8WPSbJ6NUtxCJgBDBJP"
+      (jsonCoinstake \ "address")
+        .as[String] mustEqual "XtsUZvKvN7ZEwGQ8WPSbJ6NUtxCJgBDBJP"
       (jsonCoinstake \ "value").as[BigDecimal] mustEqual BigDecimal(36)
 
       val jsonMasternode = (jsonRewards \ "treasury").as[JsValue]
-      (jsonMasternode \ "address").as[String] mustEqual "XsWsJ7u8dmCVuUn6ShsWiniWkhGDQzctiu"
+      (jsonMasternode \ "address")
+        .as[String] mustEqual "XsWsJ7u8dmCVuUn6ShsWiniWkhGDQzctiu"
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal(147700)
     }
 
@@ -166,7 +179,9 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "retrieve TPoS block with treasury" in {
-      val block = BlockLoader.getRPC("c6c9a39dfe3abc01db2a6049133d9770349dd0a5627e8446b698b3d96c63dc84")
+      val block = BlockLoader.getRPC(
+        "c6c9a39dfe3abc01db2a6049133d9770349dd0a5627e8446b698b3d96c63dc84"
+      )
       val response = GET(url(block.hash.string))
 
       status(response) mustEqual OK
@@ -178,15 +193,18 @@ class BlocksControllerSpec extends MyAPISpec {
       matchBlock(block, jsonBlock)
 
       val jsonOwner = (jsonRewards \ "owner").as[JsValue]
-      (jsonOwner \ "address").as[String] mustEqual "Xf3ThFZVPE8MwNF3ZQ2gmUJuNKYFLgcJgf"
+      (jsonOwner \ "address")
+        .as[String] mustEqual "Xf3ThFZVPE8MwNF3ZQ2gmUJuNKYFLgcJgf"
       (jsonOwner \ "value").as[BigDecimal] mustEqual BigDecimal("17.1")
 
       val jsonMerchant = (jsonRewards \ "merchant").as[JsValue]
-      (jsonMerchant \ "address").as[String] mustEqual "XgjnF28CLXnWQYGJMMzRzQrJdUPihG2e8G"
+      (jsonMerchant \ "address")
+        .as[String] mustEqual "XgjnF28CLXnWQYGJMMzRzQrJdUPihG2e8G"
       (jsonMerchant \ "value").as[BigDecimal] mustEqual BigDecimal("0.9")
 
       val jsonMasternode = (jsonRewards \ "treasury").as[JsValue]
-      (jsonMasternode \ "address").as[String] mustEqual "Xp6PaXBQrN6L8sVFHQYVW5rBnKApecD6vu"
+      (jsonMasternode \ "address")
+        .as[String] mustEqual "Xp6PaXBQrN6L8sVFHQYVW5rBnKApecD6vu"
       (jsonMasternode \ "value").as[BigDecimal] mustEqual BigDecimal("7000000")
     }
 
@@ -430,17 +448,32 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "return the medianTime" in {
-      val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
-      val block = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val latestBlock = BlockLoader.get("0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85")
+      val blockhash = Blockhash
+        .from(
+          "00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd"
+        )
+        .get
+      val block = BlockLoader.get(
+        "000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8"
+      )
+      val latestBlock = BlockLoader.get(
+        "0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85"
+      )
       val blockInfo = block
         .into[BlockInfo]
         .withFieldConst(_.transactions, 1)
         .transform
 
-      when(blockBlockingDataHandlerMock.getLatestBlock()).thenReturn(Good(latestBlock))
+      when(blockBlockingDataHandlerMock.getLatestBlock())
+        .thenReturn(Good(latestBlock))
 
-      when(blockBlockingDataHandlerMock.getBlocks(Limit(1), OrderingCondition.DescendingOrder, Some(blockhash)))
+      when(
+        blockBlockingDataHandlerMock.getBlocks(
+          Limit(1),
+          OrderingCondition.DescendingOrder,
+          Some(blockhash)
+        )
+      )
         .thenReturn(Good(List(blockInfo)))
 
       val response = GET(s"/v2/blocks?lastSeenHash=$blockhash&limit=1")
@@ -453,17 +486,32 @@ class BlocksControllerSpec extends MyAPISpec {
     }
 
     "return the tposContract" in {
-      val blockhash = Blockhash.from("00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd").get
-      val block = BlockLoader.get("000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8")
-      val latestBlock = BlockLoader.get("0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85")
+      val blockhash = Blockhash
+        .from(
+          "00000766115b26ecbc09cd3a3db6870fdaf2f049d65a910eb2f2b48b566ca7bd"
+        )
+        .get
+      val block = BlockLoader.get(
+        "000004645e2717b556682e3c642a4c6e473bf25c653ff8e8c114a3006040ffb8"
+      )
+      val latestBlock = BlockLoader.get(
+        "0000017ee4121cd8ae22f7321041ccb953d53828824217a9dc61a1c857facf85"
+      )
       val blockInfo = block
         .into[BlockInfo]
         .withFieldConst(_.transactions, 1)
         .transform
 
-      when(blockBlockingDataHandlerMock.getLatestBlock()).thenReturn(Good(latestBlock))
+      when(blockBlockingDataHandlerMock.getLatestBlock())
+        .thenReturn(Good(latestBlock))
 
-      when(blockBlockingDataHandlerMock.getBlocks(Limit(1), OrderingCondition.DescendingOrder, Some(blockhash)))
+      when(
+        blockBlockingDataHandlerMock.getBlocks(
+          Limit(1),
+          OrderingCondition.DescendingOrder,
+          Some(blockhash)
+        )
+      )
         .thenReturn(Good(List(blockInfo)))
 
       val response = GET(s"/v2/blocks?lastSeenHash=$blockhash&limit=1")
@@ -472,7 +520,8 @@ class BlocksControllerSpec extends MyAPISpec {
       val blockList = contentAsJson(response).as[List[JsValue]]
       blockList.size must be(1)
 
-      (blockList.head \ "tposContract").asOpt[TransactionId] mustBe blockInfo.tposContract
+      (blockList.head \ "tposContract")
+        .asOpt[TransactionId] mustBe blockInfo.tposContract
     }
   }
 

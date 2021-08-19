@@ -33,10 +33,9 @@ trait MyAPISpec extends PlayAPISpec {
     )
   }
 
-  /**
-   * A dummy [[Database]] and [[DBApi]] just to allow a play application
-   * to start without connecting to a real database from application.conf.
-   */
+  /** A dummy [[Database]] and [[DBApi]] just to allow a play application to
+    * start without connecting to a real database from application.conf.
+    */
   private val dummyDB = Databases.inMemory()
 
   private val dummyDBApi = new DBApi {
@@ -45,12 +44,11 @@ trait MyAPISpec extends PlayAPISpec {
     override def shutdown(): Unit = dummyDB.shutdown()
   }
 
-  /**
-   * Loads configuration disabling evolutions on default database.
-   *
-   * This allows to not write a custom application.conf for testing
-   * and ensure play evolutions are disabled.
-   */
+  /** Loads configuration disabling evolutions on default database.
+    *
+    * This allows to not write a custom application.conf for testing and ensure
+    * play evolutions are disabled.
+    */
   private def loadConfigWithoutEvolutions(env: Environment): Configuration = {
     val map = Map("play.evolutions.db.default.enabled" -> false)
 
