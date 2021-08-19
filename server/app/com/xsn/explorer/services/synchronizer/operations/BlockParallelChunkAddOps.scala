@@ -8,7 +8,10 @@ import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.util.Extensions.FutureApplicationResultListExt
-import com.xsn.explorer.util.{TransactionAddressesHelper, TransactionBalancesHelper}
+import com.xsn.explorer.util.{
+  TransactionAddressesHelper,
+  TransactionBalancesHelper
+}
 import javax.inject.Inject
 import org.scalactic.Good
 
@@ -54,11 +57,10 @@ class BlockParallelChunkAddOps @Inject() (
       updateBalances(block)
   }
 
-  /**
-   * - Marks the block as being synchronized.
-   * - Creates or updates the block on the database.
-   * - Marks the next state to continue the syncrhonization.
-   */
+  /**   - Marks the block as being synchronized.
+    *   - Creates or updates the block on the database.
+    *   - Marks the next state to continue the syncrhonization.
+    */
   private def storeBlock(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -88,13 +90,12 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * In parallel:
-   * - Generate and store the block filter.
-   * - Link the previous block to the new one.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** In parallel:
+    *   - Generate and store the block filter.
+    *   - Link the previous block to the new one.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def storeBlockData(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -129,11 +130,10 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Store all transactions on the transactions table in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Store all transactions on the transactions table in parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def storeTransactions(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -141,8 +141,9 @@ class BlockParallelChunkAddOps @Inject() (
       rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringOutputs
-    val storeTransactionsF = block.transactions.zipWithIndex.map { case (tx, index) =>
-      blockChunkRepository.upsertTransaction(index, tx)
+    val storeTransactionsF = block.transactions.zipWithIndex.map {
+      case (tx, index) =>
+        blockChunkRepository.upsertTransaction(index, tx)
     }.sequence
 
     val result = for {
@@ -162,11 +163,11 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Store the transaction outputs on the transaction_outputs table in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Store the transaction outputs on the transaction_outputs table in
+    * parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def storeOutputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -195,11 +196,10 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Store the inputs on the transaction_inputs table in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Store the inputs on the transaction_inputs table in parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def storeInputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -228,11 +228,10 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Spend the transaction inputs in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Spend the transaction inputs in parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def spendOutputs(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -265,11 +264,10 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Store the transaction details for each involved address in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Store the transaction details for each involved address in parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def storeAddressTransactionDetails(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -301,11 +299,10 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Creates the new contracts, and closes the old ones in parallel.
-   *
-   * Then, mark the next state to continue synchronizing.
-   */
+  /** Creates the new contracts, and closes the old ones in parallel.
+    *
+    * Then, mark the next state to continue synchronizing.
+    */
   private def updateTPoSContracts(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -346,9 +343,9 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Stores the block rewards and then mark the next state to continue synchronizing.
-   */
+  /** Stores the block rewards and then mark the next state to continue
+    * synchronizing.
+    */
   private def storeRewards(
       block: Block.HasTransactions,
       tposContracts: List[TPoSContract],
@@ -376,9 +373,9 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /**
-   * Updates the address balances, available coins and completes the block synchronizaiton.
-   */
+  /** Updates the address balances, available coins and completes the block
+    * synchronizaiton.
+    */
   private def updateBalances(
       block: Block.HasTransactions
   ): FutureApplicationResult[Unit] = {

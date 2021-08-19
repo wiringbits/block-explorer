@@ -3,7 +3,11 @@ package com.xsn.explorer.data
 import java.time.Instant
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
+import com.xsn.explorer.data.anorm.dao.{
+  BalancePostgresDAO,
+  StatisticsPostgresDAO,
+  TPoSContractDAO
+}
 import com.xsn.explorer.data.anorm.{
   BalancePostgresDataHandler,
   LedgerPostgresDataHandler,
@@ -31,7 +35,9 @@ import org.scalatest.BeforeAndAfter
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
+class StatisticsPostgresDataHandlerSpec
+    extends PostgresDataHandlerSpec
+    with BeforeAndAfter {
 
   val secondsInOneDay: Int = 24 * 60 * 60
 
@@ -40,7 +46,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     new StatisticsPostgresDAO,
     new TPoSContractDAO()
   )
-  lazy val ledgerDataHandler: LedgerPostgresDataHandler = createLedgerDataHandler(database)
+  lazy val ledgerDataHandler: LedgerPostgresDataHandler =
+    createLedgerDataHandler(database)
 
   lazy val balanceDataHandler =
     new BalancePostgresDataHandler(
@@ -61,7 +68,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
     "exclude the burn address from the circulating supply" in {
       val burnAddress = Address.from(StatisticsPostgresDAO.BurnAddress).get
 
-      val circulatingSupply = dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
+      val circulatingSupply =
+        dataHandler.getStatistics().get.circulatingSupply.getOrElse(0)
 
       val balance = Balance(
         burnAddress,
@@ -365,10 +373,34 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         time = Instant.now.minusSeconds(73.hours.toSeconds)
       )
 
-      addBalance(Balance(address = address1, received = BigDecimal(500), spent = BigDecimal(100)))
-      addBalance(Balance(address = address2, received = BigDecimal(500), spent = BigDecimal(200)))
-      addBalance(Balance(address = address3, received = BigDecimal(500), spent = BigDecimal(300)))
-      addBalance(Balance(address = address4, received = BigDecimal(500), spent = BigDecimal(400)))
+      addBalance(
+        Balance(
+          address = address1,
+          received = BigDecimal(500),
+          spent = BigDecimal(100)
+        )
+      )
+      addBalance(
+        Balance(
+          address = address2,
+          received = BigDecimal(500),
+          spent = BigDecimal(200)
+        )
+      )
+      addBalance(
+        Balance(
+          address = address3,
+          received = BigDecimal(500),
+          spent = BigDecimal(300)
+        )
+      )
+      addBalance(
+        Balance(
+          address = address4,
+          received = BigDecimal(500),
+          spent = BigDecimal(400)
+        )
+      )
 
       val startDate = Instant.now.minusSeconds(72.hours.toSeconds)
       val expected = AddressesReward(3, BigDecimal(800))
@@ -393,9 +425,18 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
   "getStakingCoins" should {
     "get the correct amount for the active tpos contracts" in {
 
-      val contract1 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Active)
-      val contract2 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Active)
-      val contract3 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+      val contract1 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Active
+      )
+      val contract2 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Active
+      )
+      val contract3 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Closed
+      )
 
       val rewardOwnerAddress1 = contract1.details.owner
       val rewarMerchantdAddress1 = contract1.details.merchant
@@ -440,9 +481,27 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         List(contract3)
       )
 
-      addBalance(Balance(address = rewardOwnerAddress1, received = BigDecimal(500), spent = BigDecimal(100)))
-      addBalance(Balance(address = rewardOwnerAddress2, received = BigDecimal(500), spent = BigDecimal(200)))
-      addBalance(Balance(address = rewardOwnerAddress3, received = BigDecimal(500), spent = BigDecimal(300)))
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress1,
+          received = BigDecimal(500),
+          spent = BigDecimal(100)
+        )
+      )
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress2,
+          received = BigDecimal(500),
+          spent = BigDecimal(200)
+        )
+      )
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress3,
+          received = BigDecimal(500),
+          spent = BigDecimal(300)
+        )
+      )
 
       val expected = BigDecimal(700)
 
@@ -455,9 +514,18 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
     "get 0 when there aren't any active tpos contract" in {
 
-      val contract1 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
-      val contract2 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
-      val contract3 = DataGenerator.randomTPoSContract(index = 0, state = TPoSContract.State.Closed)
+      val contract1 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Closed
+      )
+      val contract2 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Closed
+      )
+      val contract3 = DataGenerator.randomTPoSContract(
+        index = 0,
+        state = TPoSContract.State.Closed
+      )
 
       val rewardOwnerAddress1 = contract1.details.owner
       val rewarMerchantdAddress1 = contract1.details.merchant
@@ -502,9 +570,27 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
         List(contract3)
       )
 
-      addBalance(Balance(address = rewardOwnerAddress1, received = BigDecimal(500), spent = BigDecimal(100)))
-      addBalance(Balance(address = rewardOwnerAddress2, received = BigDecimal(500), spent = BigDecimal(200)))
-      addBalance(Balance(address = rewardOwnerAddress3, received = BigDecimal(500), spent = BigDecimal(300)))
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress1,
+          received = BigDecimal(500),
+          spent = BigDecimal(100)
+        )
+      )
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress2,
+          received = BigDecimal(500),
+          spent = BigDecimal(200)
+        )
+      )
+      addBalance(
+        Balance(
+          address = rewardOwnerAddress3,
+          received = BigDecimal(500),
+          spent = BigDecimal(300)
+        )
+      )
 
       val expected = BigDecimal(0)
 
@@ -558,7 +644,8 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
       time: Instant,
       tposContracts: List[TPoSContract] = List.empty
   ) = {
-    val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+    val emptyFilterFactory = () =>
+      GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
     val block = BlockLoader
       .get(blockhash)
@@ -572,12 +659,22 @@ class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Bef
 
     val tx = tposContracts match {
       case Nil => randomTransaction(blockhash = block.hash, utxos = List.empty)
-      case ::(head, _) => randomTransaction(blockhash = block.hash, utxos = List.empty, id = head.txid)
+      case ::(head, _) =>
+        randomTransaction(
+          blockhash = block.hash,
+          utxos = List.empty,
+          id = head.txid
+        )
     }
     val blockWithTransactions = block.withTransactions(List(tx))
 
     ledgerDataHandler
-      .push(blockWithTransactions, tposContracts, emptyFilterFactory, Some(reward))
+      .push(
+        blockWithTransactions,
+        tposContracts,
+        emptyFilterFactory,
+        Some(reward)
+      )
       .isGood mustEqual true
   }
 

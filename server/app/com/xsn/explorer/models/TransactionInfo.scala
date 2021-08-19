@@ -81,7 +81,11 @@ object TransactionInfo {
         }
       )
 
-      Json.toJson(t.transaction).as[JsObject].deepMerge(inputs).deepMerge(outputs)
+      Json
+        .toJson(t.transaction)
+        .as[JsObject]
+        .deepMerge(inputs)
+        .deepMerge(outputs)
     }
   }
 }

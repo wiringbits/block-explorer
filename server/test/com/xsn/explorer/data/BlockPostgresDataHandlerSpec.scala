@@ -478,7 +478,7 @@ class BlockPostgresDataHandlerSpec
       case (e: BlockHeader.HasFilter, r: BlockHeader.HasFilter) =>
         matchFilter(e.filter, r.filter)
       case (_: BlockHeader.Simple, _: BlockHeader.Simple) => ()
-      case _                                              => fail("The filter doesn't match")
+      case _ => fail("The filter doesn't match")
     }
   }
 

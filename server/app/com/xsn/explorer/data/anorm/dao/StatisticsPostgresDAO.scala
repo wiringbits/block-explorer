@@ -3,9 +3,16 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 import java.time.Instant
 import anorm._
-import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{addressSummaryParser, parseSummary}
+import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{
+  addressSummaryParser,
+  parseSummary
+}
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
-import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  BlockRewardsSummary,
+  Statistics
+}
 import org.slf4j.LoggerFactory
 
 class StatisticsPostgresDAO {
@@ -63,7 +70,9 @@ class StatisticsPostgresDAO {
     ).as(parseSummary.single)
   }
 
-  def getRewardedAddresses(startDate: Instant)(implicit conn: Connection): AddressesReward = {
+  def getRewardedAddresses(
+      startDate: Instant
+  )(implicit conn: Connection): AddressesReward = {
     SQL(
       """
         |WITH addresses AS (
@@ -116,14 +125,15 @@ class StatisticsPostgresDAO {
           |FROM addresses a
           |LEFT JOIN balances b USING(address)
           | 
-          """.stripMargin).as(SqlParser.scalar[BigDecimal].singleOpt).getOrElse(BigDecimal(0))
+          """.stripMargin)
+      .as(SqlParser.scalar[BigDecimal].singleOpt)
+      .getOrElse(BigDecimal(0))
   }
 }
 
 object StatisticsPostgresDAO {
 
-  /**
-   * We need to exclude the burn address from the total supply.
-   */
+  /** We need to exclude the burn address from the total supply.
+    */
   val BurnAddress = "XmPe9BHRsmZeThtYF34YYjdnrjmcAUn8bC"
 }

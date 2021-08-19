@@ -32,8 +32,8 @@ class LegacyLedgerSynchronizerService @Inject() (
   /** Synchronize the given block with our ledger database.
     *
     * The synchronization involves a very complex logic in order to handle
-    * several corner cases, be sure to not call this method concurrently
-    * because the behavior is undefined.
+    * several corner cases, be sure to not call this method concurrently because
+    * the behavior is undefined.
     */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val timer = Kamon
@@ -81,9 +81,10 @@ class LegacyLedgerSynchronizerService @Inject() (
     result.toFuture
   }
 
-  /** 1. current ledger is empty:
+  /**   1. current ledger is empty:
     * 1.1. the given block is the genensis block, it is added.
-    * 1.2. the given block is not the genesis block, sync everything until the given block.
+    * 1.2. the given block is not the genesis block, sync everything until the
+    * given block.
     */
   private def onEmptyLedger(
       block: rpc.Block.Canonical
@@ -106,12 +107,13 @@ class LegacyLedgerSynchronizerService @Inject() (
     }
   }
 
-  /** 2. current ledger has blocks until N, given block height H:
-    * 2.1. if N+1 == H and its previous blockhash is N, it is added.
-    * 2.2. if N+1 == H and its previous blockhash isn't N, pick the expected block N from H and apply the whole process with it, then, apply H.
-    * 2.3. if H > N+1, sync everything until H.
-    * 2.4. if H <= N, if the hash already exists, it is ignored.
-    * 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included), then, add the new H.
+  /** 2. current ledger has blocks until N, given block height H: 2.1. if N+1 ==
+    * H and its previous blockhash is N, it is added. 2.2. if N+1 == H and its
+    * previous blockhash isn't N, pick the expected block N from H and apply the
+    * whole process with it, then, apply H. 2.3. if H > N+1, sync everything
+    * until H. 2.4. if H <= N, if the hash already exists, it is ignored. 2.5.
+    * if H <= N, if the hash doesn't exists, remove blocks from N to H
+    * (included), then, add the new H.
     */
   private def onLatestBlock(
       ledgerBlock: Block,
@@ -242,8 +244,8 @@ class LegacyLedgerSynchronizerService @Inject() (
     }
   }
 
-  /** Trim the ledger until the given block height, if the height is 4,
-    * the last stored block will be 3.
+  /** Trim the ledger until the given block height, if the height is 4, the last
+    * stored block will be 3.
     */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
     val timer = Kamon

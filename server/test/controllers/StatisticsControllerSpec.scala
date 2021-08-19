@@ -74,11 +74,15 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
         address: Address
     ): ApplicationResult[List[Address]] = Good(List(Address.from("123").get))
 
-    override def getRewardedAddresses(startDate: Instant): ApplicationResult[AddressesReward] = Good(
+    override def getRewardedAddresses(
+        startDate: Instant
+    ): ApplicationResult[AddressesReward] = Good(
       AddressesReward(123L, BigDecimal(1000.0))
     )
 
-    override def getStakingCoins(): ApplicationResult[BigDecimal] = Good(BigDecimal(6000))
+    override def getStakingCoins(): ApplicationResult[BigDecimal] = Good(
+      BigDecimal(6000)
+    )
   }
 
   val xsnService = mock[XSNService]
@@ -102,11 +106,12 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   class CurrencyActorMock extends Actor {
 
-    override def receive: Receive = { case CurrencySynchronizerActor.GetMarketStatistics =>
-      val map: Map[Currency, BigDecimal] =
-        Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
-      val reply = MarketStatistics(map, MarketInformation(0, 0))
-      sender() ! reply
+    override def receive: Receive = {
+      case CurrencySynchronizerActor.GetMarketStatistics =>
+        val map: Map[Currency, BigDecimal] =
+          Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+        val reply = MarketStatistics(map, MarketInformation(0, 0))
+        sender() ! reply
     }
   }
 
@@ -214,24 +219,42 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
     "get rewards summary" in {
 
       val enabledMasternodes = 40
-      when(masternodeRepository.getEnabledCount()).thenReturn(Future.successful(enabledMasternodes))
+      when(masternodeRepository.getEnabledCount())
+        .thenReturn(Future.successful(enabledMasternodes))
 
       val response = GET(s"/rewards-summary")
       status(response) mustEqual OK
 
       val json = contentAsJson(response)
-      (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal("1000.12345678")
-      (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal("4800.12345678")
-      (json \ "medianInput").as[BigDecimal] mustEqual BigDecimal("4900.12345678")
-      (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal("5000.12345678")
-      (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal("4500.12345678")
-      (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal("60000.12345678")
-      (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal("70000.12345678")
+      (json \ "averageReward").as[BigDecimal] mustEqual BigDecimal(
+        "1000.12345678"
+      )
+      (json \ "averageInput").as[BigDecimal] mustEqual BigDecimal(
+        "4800.12345678"
+      )
+      (json \ "medianInput").as[BigDecimal] mustEqual BigDecimal(
+        "4900.12345678"
+      )
+      (json \ "averagePoSInput").as[BigDecimal] mustEqual BigDecimal(
+        "5000.12345678"
+      )
+      (json \ "averageTPoSInput").as[BigDecimal] mustEqual BigDecimal(
+        "4500.12345678"
+      )
+      (json \ "medianWaitTime").as[BigDecimal] mustEqual BigDecimal(
+        "60000.12345678"
+      )
+      (json \ "averageWaitTime").as[BigDecimal] mustEqual BigDecimal(
+        "70000.12345678"
+      )
       (json \ "rewardedAddressesCountLast72Hours").as[BigDecimal] mustEqual 123L
-      (json \ "rewardedAddressesSumLast72Hours").as[BigDecimal] mustEqual BigDecimal(1000)
+      (json \ "rewardedAddressesSumLast72Hours")
+        .as[BigDecimal] mustEqual BigDecimal(1000)
       (json \ "masternodesROI").as[BigDecimal] mustEqual BigDecimal(7.884)
       (json \ "stakingROI").as[BigDecimal] mustEqual BigDecimal(4730.4)
-      (json \ "coinsTrustlesslyStaking").as[BigDecimal] mustEqual BigDecimal(6000)
+      (json \ "coinsTrustlesslyStaking").as[BigDecimal] mustEqual BigDecimal(
+        6000
+      )
     }
   }
 

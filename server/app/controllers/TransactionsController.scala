@@ -1,7 +1,10 @@
 package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
-import com.xsn.explorer.models.request.{SendRawTransactionRequest, TposContractsEncodeRequest}
+import com.xsn.explorer.models.request.{
+  SendRawTransactionRequest,
+  TposContractsEncodeRequest
+}
 import com.xsn.explorer.services.TransactionRPCService
 import com.xsn.explorer.services.TransactionService
 import com.alexitc.playsonify.models.pagination.Limit
@@ -24,7 +27,12 @@ class TransactionsController @Inject() (
       includeZeroValueTransactions: Boolean
   ) = public { _ =>
     transactionService
-      .get(Limit(limit), lastSeenTxid, orderingCondition, includeZeroValueTransactions)
+      .get(
+        Limit(limit),
+        lastSeenTxid,
+        orderingCondition,
+        includeZeroValueTransactions
+      )
       .toFutureOr
       .map { value =>
         val response = Ok(Json.toJson(value))
@@ -55,8 +63,9 @@ class TransactionsController @Inject() (
       .toFuture
   }
 
-  def sendRawTransaction() = publicInput { ctx: HasModel[SendRawTransactionRequest] =>
-    transactionRPCService.sendRawTransaction(ctx.model.hex)
+  def sendRawTransaction() = publicInput {
+    ctx: HasModel[SendRawTransactionRequest] =>
+      transactionRPCService.sendRawTransaction(ctx.model.hex)
   }
 
   def getTransactionLite(txid: String) = public { _ =>
@@ -89,19 +98,20 @@ class TransactionsController @Inject() (
       .toFuture
   }
 
-  def encodeTPOSContract() = publicInput { ctx: HasModel[TposContractsEncodeRequest] =>
-    transactionRPCService
-      .encodeTPOSContract(
-        tposAddress = ctx.model.tposAddress,
-        merchantAddress = ctx.model.merchantAddress,
-        commission = ctx.model.commission,
-        signature = ctx.model.signature
-      )
-      .toFutureOr
-      .map { value =>
-        val response = Ok(value)
-        response.withHeaders("Cache-Control" -> "no-store")
-      }
-      .toFuture
+  def encodeTPOSContract() = publicInput {
+    ctx: HasModel[TposContractsEncodeRequest] =>
+      transactionRPCService
+        .encodeTPOSContract(
+          tposAddress = ctx.model.tposAddress,
+          merchantAddress = ctx.model.merchantAddress,
+          commission = ctx.model.commission,
+          signature = ctx.model.signature
+        )
+        .toFutureOr
+        .map { value =>
+          val response = Ok(value)
+          response.withHeaders("Cache-Control" -> "no-store")
+        }
+        .toFuture
   }
 }

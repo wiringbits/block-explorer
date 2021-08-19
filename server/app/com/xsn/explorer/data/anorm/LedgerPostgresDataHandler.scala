@@ -32,8 +32,9 @@ class LedgerPostgresDataHandler @Inject() (
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  /** Push a block into the database chain, note that even if the block is supposed
-    * to have a next block, we remove the link because that block is not stored yet.
+  /** Push a block into the database chain, note that even if the block is
+    * supposed to have a next block, we remove the link because that block is
+    * not stored yet.
     */
   override def push(
       block: Block.HasTransactions,

@@ -20,9 +20,8 @@ class TransactionPostgresDAO @Inject() (
     addressTransactionDetailsDAO: AddressTransactionDetailsPostgresDAO
 ) {
 
-  /**
-   * NOTE: Ensure the connection has an open transaction.
-   */
+  /** NOTE: Ensure the connection has an open transaction.
+    */
   def upsert(index: Int, transaction: Transaction.HasIO)(implicit
       conn: Connection
   ): Option[Transaction.HasIO] = {
@@ -147,9 +146,8 @@ class TransactionPostgresDAO @Inject() (
     }
   }
 
-  /**
-   * NOTE: Ensure the connection has an open transaction.
-   */
+  /** NOTE: Ensure the connection has an open transaction.
+    */
   def deleteBy(
       blockhash: Blockhash
   )(implicit conn: Connection): List[Transaction.HasIO] = {
@@ -199,9 +197,8 @@ class TransactionPostgresDAO @Inject() (
       } // this should not happen
   }
 
-  /**
-   * Get the transactions by the given address (sorted by time).
-   */
+  /** Get the transactions by the given address (sorted by time).
+    */
   def getBy(
       address: Address,
       limit: Limit,
@@ -264,12 +261,13 @@ class TransactionPostgresDAO @Inject() (
 
   }
 
-  /**
-   * Get the transactions by the given address (sorted by time).
-   *
-   * - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are retrieved.
-   * - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are retrieved.
-   */
+  /** Get the transactions by the given address (sorted by time).
+    *
+    *   - When orderingCondition = DescendingOrder, the transactions that
+    *     occurred before the last seen transaction are retrieved.
+    *   - When orderingCondition = AscendingOrder, the transactions that
+    *     occurred after the last seen transaction are retrieved.
+    */
   def getBy(
       address: Address,
       lastSeenTxid: TransactionId,
@@ -282,7 +280,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder => ">"
+      case OrderingCondition.AscendingOrder  => ">"
     }
 
     val transactions = SQL(
@@ -327,7 +325,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder => ">"
+      case OrderingCondition.AscendingOrder  => ">"
     }
 
     SQL(
@@ -423,7 +421,11 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransactionWithValues.*)
   }
 
-  def get(limit: Limit, orderingCondition: OrderingCondition, includeZeroValueTransactions: Boolean)(implicit
+  def get(
+      limit: Limit,
+      orderingCondition: OrderingCondition,
+      includeZeroValueTransactions: Boolean
+  )(implicit
       conn: Connection
   ): List[TransactionInfo] = {
 
@@ -458,11 +460,11 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val timeComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder => ">"
+      case OrderingCondition.AscendingOrder  => ">"
     }
     val indexComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => ">"
-      case OrderingCondition.AscendingOrder => "<"
+      case OrderingCondition.AscendingOrder  => "<"
     }
 
     SQL(
@@ -585,7 +587,7 @@ class TransactionPostgresDAO @Inject() (
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
-    case OrderingCondition.AscendingOrder => "ASC"
+    case OrderingCondition.AscendingOrder  => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
   }
 }

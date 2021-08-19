@@ -102,7 +102,12 @@ class TransactionService @Inject() (
         .toFutureOr
 
       r <- transactionFutureDataHandler
-        .get(limit, lastSeenTxid, orderingCondition, includeZeroValueTransactions)
+        .get(
+          limit,
+          lastSeenTxid,
+          orderingCondition,
+          includeZeroValueTransactions
+        )
         .toFutureOr
     } yield WrappedResult(r)
 

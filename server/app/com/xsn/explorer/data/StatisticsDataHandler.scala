@@ -3,7 +3,11 @@ package com.xsn.explorer.data
 import java.time.Instant
 import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.models.values.Address
-import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
+import com.xsn.explorer.models.{
+  AddressesReward,
+  BlockRewardsSummary,
+  Statistics
+}
 
 import scala.language.higherKinds
 
@@ -22,4 +26,5 @@ trait StatisticsDataHandler[F[_]] {
   def getStakingCoins(): F[BigDecimal]
 }
 
-trait StatisticsBlockingDataHandler extends StatisticsDataHandler[ApplicationResult]
+trait StatisticsBlockingDataHandler
+    extends StatisticsDataHandler[ApplicationResult]

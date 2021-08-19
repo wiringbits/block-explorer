@@ -7,7 +7,11 @@ import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.persisted.BlockInfo
 import com.xsn.explorer.models.persisted.BlockInfoCodec
 import com.xsn.explorer.models.values.Height
-import com.xsn.explorer.services.{BlockService, TransactionRPCService, TransactionService}
+import com.xsn.explorer.services.{
+  BlockService,
+  TransactionRPCService,
+  TransactionService
+}
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
@@ -74,17 +78,19 @@ class BlocksController @Inject() (
       .toFuture
   }
 
-  /**
-   * Try to retrieve a blockHeader by height, in case the query argument
-   * is not a valid height, we assume it might be a blockhash and try to
-   * retrieve the blockHeader by blockhash.
-   */
+  /** Try to retrieve a blockHeader by height, in case the query argument is not
+    * a valid height, we assume it might be a blockhash and try to retrieve the
+    * blockHeader by blockhash.
+    */
   def getBlockHeader(query: String, includeFilter: Boolean) = public { _ =>
     implicit val codec: Writes[BlockHeader] = BlockHeader.completeWrites
     val (cache, resultF) = Try(query.toInt)
       .map(Height.apply)
       .map { value =>
-        "public, max-age=60" -> blockService.getBlockHeader(value, includeFilter)
+        "public, max-age=60" -> blockService.getBlockHeader(
+          value,
+          includeFilter
+        )
       }
       .getOrElse {
         "public, max-age=31536000" -> blockService.getBlockHeader(
@@ -99,11 +105,10 @@ class BlocksController @Inject() (
     }.toFuture
   }
 
-  /**
-   * Try to retrieve a block by height, in case the query argument
-   * is not a valid height, we assume it might be a blockhash and try to
-   * retrieve the block by blockhash.
-   */
+  /** Try to retrieve a block by height, in case the query argument is not a
+    * valid height, we assume it might be a blockhash and try to retrieve the
+    * block by blockhash.
+    */
   def getDetails(query: String) = public { _ =>
     Try(query.toInt)
       .map(Height.apply)

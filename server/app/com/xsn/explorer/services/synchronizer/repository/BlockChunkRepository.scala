@@ -3,7 +3,12 @@ package com.xsn.explorer.services.synchronizer.repository
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
-import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Balance, Block, Transaction}
+import com.xsn.explorer.models.persisted.{
+  AddressTransactionDetails,
+  Balance,
+  Block,
+  Transaction
+}
 import com.xsn.explorer.models.values.{Blockhash, TransactionId}
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import javax.inject.Inject
@@ -51,20 +56,18 @@ trait BlockChunkRepository[F[_]] {
 
   def upsertContract(contract: TPoSContract): F[Unit]
 
-  /**
-   * Atomically do the following:
-   * - Update the given balance list
-   * - Based on the balance list, update the available coins
-   * - Mark the block synchronization as complete (deleting the row)
-   */
+  /** Atomically do the following:
+    *   - Update the given balance list
+    *   - Based on the balance list, update the available coins
+    *   - Mark the block synchronization as complete (deleting the row)
+    */
   def atomicUpdateBalances(
       blockhash: Blockhash,
       balances: List[Balance]
   ): F[Unit]
 
-  /**
-   * Rollback a block atomically, the sync status must be deleted too.
-   */
+  /** Rollback a block atomically, the sync status must be deleted too.
+    */
   def atomicRollback(blockhash: Blockhash): F[Unit]
 
   def upsertBlockReward(
@@ -95,7 +98,8 @@ object BlockChunkRepository {
       }
     }
 
-    override def findSyncingBlock(): FutureApplicationResult[Option[Blockhash]] = Future {
+    override def findSyncingBlock()
+        : FutureApplicationResult[Option[Blockhash]] = Future {
       blocking.findSyncingBlock()
     }
 

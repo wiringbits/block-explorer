@@ -96,9 +96,11 @@ class BalancePostgresDAO @Inject() (
     ).as(parseBalance.*)
   }
 
-  /** Get the highest balances excluding the balances until the given address (excluding hidden_addresses).
+  /** Get the highest balances excluding the balances until the given address
+    * (excluding hidden_addresses).
     *
-    * Note, the results across calls might not be stable if the given address changes its balance drastically.
+    * Note, the results across calls might not be stable if the given address
+    * changes its balance drastically.
     */
   def getHighestBalances(lastSeenAddress: Address, limit: Limit)(implicit
       conn: Connection

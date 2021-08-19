@@ -117,9 +117,8 @@ trait DataGenerator {
           .map(randomInput)
     }
 
-  /**
-   * Generate a random transaction spending the given utxos
-   */
+  /** Generate a random transaction spending the given utxos
+    */
   def randomTransaction(
       blockhash: Blockhash,
       id: TransactionId = randomTransactionId,
