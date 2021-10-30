@@ -1,17 +1,11 @@
 package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
-import com.alexitc.playsonify.models.{
-  FieldValidationError,
-  InputValidationError,
-  PublicError
-}
+import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError}
 
 sealed trait OrderingError
 
-case object UnknownOrderingFieldError
-    extends OrderingError
-    with InputValidationError {
+case object UnknownOrderingFieldError extends OrderingError with InputValidationError {
 
   override def toPublicErrorList[L](
       i18nService: I18nService[L]
@@ -23,9 +17,7 @@ case object UnknownOrderingFieldError
   }
 }
 
-case object InvalidOrderingConditionError
-    extends OrderingError
-    with InputValidationError {
+case object InvalidOrderingConditionError extends OrderingError with InputValidationError {
 
   override def toPublicErrorList[L](
       i18nService: I18nService[L]
@@ -37,9 +29,7 @@ case object InvalidOrderingConditionError
   }
 }
 
-case object InvalidOrderingError
-    extends OrderingError
-    with InputValidationError {
+case object InvalidOrderingError extends OrderingError with InputValidationError {
 
   override def toPublicErrorList[L](
       i18nService: I18nService[L]

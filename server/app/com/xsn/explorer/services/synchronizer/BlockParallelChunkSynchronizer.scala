@@ -24,8 +24,7 @@ class BlockParallelChunkSynchronizer @Inject() (
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  /** Synchronize the given block (continuing from the last step if it is
-    * partially synchronized).
+  /** Synchronize the given block (continuing from the last step if it is partially synchronized).
     */
   def sync(
       block: Block.HasTransactions,

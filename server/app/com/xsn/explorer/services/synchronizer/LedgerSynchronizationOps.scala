@@ -8,11 +8,7 @@ import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.transformers.toPersistedBlock
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.{
-  BlockService,
-  TransactionCollectorService,
-  XSNService
-}
+import com.xsn.explorer.services.{BlockService, TransactionCollectorService, XSNService}
 import com.xsn.explorer.util.Extensions.FutureOrExt
 import javax.inject.Inject
 import kamon.Kamon
@@ -137,7 +133,7 @@ private[synchronizer] class LedgerSynchronizationOps @Inject() (
   ): FutureApplicationResult[Option[BlockRewards]] = {
     blockService.getBlockRewards(rpcBlock, extractionMethod).map {
       case Good(reward) => Good(Some(reward))
-      case Bad(_)       => Good(None)
+      case Bad(_) => Good(None)
     }
   }
 }

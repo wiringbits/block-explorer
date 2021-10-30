@@ -7,8 +7,7 @@ import play.api.libs.json.JsObject
 
 import scala.concurrent.Future
 
-class MaintenanceController @Inject() (components: MyJsonControllerComponents)
-    extends MyJsonController(components) {
+class MaintenanceController @Inject() (components: MyJsonControllerComponents) extends MyJsonController(components) {
 
   @com.github.ghik.silencer.silent
   def run(query: String) = public { _ =>

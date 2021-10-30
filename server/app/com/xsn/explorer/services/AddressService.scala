@@ -2,10 +2,7 @@ package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.xsn.explorer.data.async.{
-  BalanceFutureDataHandler,
-  TransactionFutureDataHandler
-}
+import com.xsn.explorer.data.async.{BalanceFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.models.persisted.{Balance, Transaction}
 import com.xsn.explorer.services.validators.AddressValidator
 import javax.inject.Inject

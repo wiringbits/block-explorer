@@ -14,14 +14,13 @@ object BlockFilterParsers {
   val parseN = int("n")
   val parseHex = parseHexString("hex")
 
-  val parseFilter = (parseN ~ parseM ~ parseP ~ parseHex).map {
-    case n ~ m ~ p ~ hex =>
-      val compactN = CompactSizeInt(n.toLong)
-      new GolombCodedSet(
-        n = n,
-        m = m,
-        p = p,
-        hex = hex.drop(compactN.hex.length)
-      )
+  val parseFilter = (parseN ~ parseM ~ parseP ~ parseHex).map { case n ~ m ~ p ~ hex =>
+    val compactN = CompactSizeInt(n.toLong)
+    new GolombCodedSet(
+      n = n,
+      m = m,
+      p = p,
+      hex = hex.drop(compactN.hex.length)
+    )
   }
 }

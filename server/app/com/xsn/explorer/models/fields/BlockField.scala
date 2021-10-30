@@ -3,8 +3,7 @@ package com.xsn.explorer.models.fields
 import com.alexitc.playsonify.sql.ColumnNameResolver
 import enumeratum.{Enum, EnumEntry}
 
-sealed abstract class BlockField(override val entryName: String)
-    extends EnumEntry
+sealed abstract class BlockField(override val entryName: String) extends EnumEntry
 
 object BlockField extends Enum[BlockField] {
 

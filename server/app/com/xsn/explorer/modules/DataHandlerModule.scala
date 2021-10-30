@@ -3,14 +3,8 @@ package com.xsn.explorer.modules
 import com.google.inject.AbstractModule
 import com.xsn.explorer.data._
 import com.xsn.explorer.data.anorm._
-import com.xsn.explorer.data.async.{
-  RetryableDataHandler,
-  RetryableFutureDataHandler
-}
-import com.xsn.explorer.services.synchronizer.repository.{
-  BlockChunkPostgresRepository,
-  BlockChunkRepository
-}
+import com.xsn.explorer.data.async.{RetryableDataHandler, RetryableFutureDataHandler}
+import com.xsn.explorer.services.synchronizer.repository.{BlockChunkPostgresRepository, BlockChunkRepository}
 
 class DataHandlerModule extends AbstractModule {
 

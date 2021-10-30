@@ -3,19 +3,15 @@ package com.xsn.explorer.data.anorm
 import java.sql.Connection
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.xsn.explorer.errors.{
-  PostgresError,
-  PostgresForeignKeyViolationError,
-  UnknownPostgresError
-}
+import com.xsn.explorer.errors.{PostgresError, PostgresForeignKeyViolationError, UnknownPostgresError}
 import org.postgresql.util.PSQLException
 import org.scalactic.Bad
 import play.api.db.Database
 
 /** Allow us to map a PSQLException to a sub type of PostgresError.
   *
-  * This is helpful to differentiate between errors caused by input data and
-  * failures that can not be prevented, these failures are thrown.
+  * This is helpful to differentiate between errors caused by input data and failures that can not be prevented, these
+  * failures are thrown.
   *
   * The errors are mapped based on postgres error codes:
   *   - see: https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html

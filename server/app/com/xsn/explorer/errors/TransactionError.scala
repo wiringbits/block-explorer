@@ -8,9 +8,7 @@ sealed trait TransactionError
 
 object TransactionError {
 
-  final case object InvalidFormat
-      extends TransactionError
-      with InputValidationError {
+  final case object InvalidFormat extends TransactionError with InputValidationError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -21,9 +19,7 @@ object TransactionError {
     }
   }
 
-  final case class NotFound(txid: TransactionId)
-      extends TransactionError
-      with InputValidationError {
+  final case class NotFound(txid: TransactionId) extends TransactionError with InputValidationError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -34,9 +30,7 @@ object TransactionError {
     }
   }
 
-  final case class IndexNotFound(height: Height, index: Int)
-      extends TransactionError
-      with InputValidationError {
+  final case class IndexNotFound(height: Height, index: Int) extends TransactionError with InputValidationError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -49,9 +43,7 @@ object TransactionError {
     }
   }
 
-  final case class OutputNotFound(txid: TransactionId, index: Int)
-      extends TransactionError
-      with InputValidationError {
+  final case class OutputNotFound(txid: TransactionId, index: Int) extends TransactionError with InputValidationError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -62,9 +54,7 @@ object TransactionError {
     }
   }
 
-  final case class CoinbaseNotFound(blockhash: Blockhash)
-      extends TransactionError
-      with InputValidationError {
+  final case class CoinbaseNotFound(blockhash: Blockhash) extends TransactionError with InputValidationError {
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
     )(implicit lang: L): List[PublicError] = {
@@ -74,9 +64,7 @@ object TransactionError {
     }
   }
 
-  final case object InvalidRawTransaction
-      extends TransactionError
-      with InputValidationError {
+  final case object InvalidRawTransaction extends TransactionError with InputValidationError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -87,9 +75,7 @@ object TransactionError {
     }
   }
 
-  final case object RawTransactionAlreadyExists
-      extends TransactionError
-      with ConflictError {
+  final case object RawTransactionAlreadyExists extends TransactionError with ConflictError {
 
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
@@ -114,9 +100,7 @@ object TransactionError {
     }
   }
 
-  final case object UnconfirmedTransaction
-      extends TransactionError
-      with NotFoundError {
+  final case object UnconfirmedTransaction extends TransactionError with NotFoundError {
     override def toPublicErrorList[L](
         i18nService: I18nService[L]
     )(implicit lang: L): List[PublicError] = {

@@ -263,10 +263,10 @@ class TransactionPostgresDAO @Inject() (
 
   /** Get the transactions by the given address (sorted by time).
     *
-    *   - When orderingCondition = DescendingOrder, the transactions that
-    *     occurred before the last seen transaction are retrieved.
-    *   - When orderingCondition = AscendingOrder, the transactions that
-    *     occurred after the last seen transaction are retrieved.
+    *   - When orderingCondition = DescendingOrder, the transactions that occurred before the last seen transaction are
+    *     retrieved.
+    *   - When orderingCondition = AscendingOrder, the transactions that occurred after the last seen transaction are
+    *     retrieved.
     */
   def getBy(
       address: Address,
@@ -280,7 +280,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     val transactions = SQL(
@@ -325,7 +325,7 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     SQL(
@@ -460,11 +460,11 @@ class TransactionPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val timeComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
     val indexComparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => ">"
-      case OrderingCondition.AscendingOrder  => "<"
+      case OrderingCondition.AscendingOrder => "<"
     }
 
     SQL(
@@ -587,7 +587,7 @@ class TransactionPostgresDAO @Inject() (
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
-    case OrderingCondition.AscendingOrder  => "ASC"
+    case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
   }
 }

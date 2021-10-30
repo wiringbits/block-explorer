@@ -17,9 +17,7 @@ class MerchantnodeSynchronizerActor extends Actor {
     case MerchantnodeSynchronizerActor.UpdateMerchantnodes(newMerchantnodes) =>
       become(behavior(newMerchantnodes))
     case MerchantnodeSynchronizerActor.GetMerchantnode(ipAddress) =>
-      sender() ! merchantnodes.find(x =>
-        x.ip.split(":").headOption.contains(ipAddress.string)
-      )
+      sender() ! merchantnodes.find(x => x.ip.split(":").headOption.contains(ipAddress.string))
     case MerchantnodeSynchronizerActor.GetMerchantnodes =>
       sender() ! merchantnodes
     case MerchantnodeSynchronizerActor.GetMerchantnodeCount =>

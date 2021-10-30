@@ -1,11 +1,7 @@
 package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
-import com.alexitc.playsonify.models.{
-  FieldValidationError,
-  NotFoundError,
-  PublicError
-}
+import com.alexitc.playsonify.models.{FieldValidationError, NotFoundError, PublicError}
 
 trait MasternodeError
 

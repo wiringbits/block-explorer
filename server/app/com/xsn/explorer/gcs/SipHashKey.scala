@@ -19,9 +19,8 @@ case class SipHashKey(k0: Long, k1: Long) {
 
 object SipHashKey {
 
-  /** Parses a SipHash key in the same way that the Btcutil
-    * (https://github.com/btcsuite/btcutil) library does, which uses
-    * https://github.com/aead/siphash
+  /** Parses a SipHash key in the same way that the Btcutil (https://github.com/btcsuite/btcutil) library does, which
+    * uses https://github.com/aead/siphash
     *
     * @param key
     *   16 bytes representing the key
@@ -29,9 +28,8 @@ object SipHashKey {
   def fromBtcutil(key: List[Byte]): SipHashKey = {
     require(key.size == 16, "Invalid SipHash key, it must have 16 bytes")
 
-    /** the bytes are represented as a 128-bit encoded in little-endian while
-      * guava parses the values in big-endian, that's the reason to reverse
-      * them.
+    /** the bytes are represented as a 128-bit encoded in little-endian while guava parses the values in big-endian,
+      * that's the reason to reverse them.
       */
     val k0 = Longs.fromByteArray(key.take(8).reverse.toArray)
     val k1 = Longs.fromByteArray(key.drop(8).reverse.toArray)

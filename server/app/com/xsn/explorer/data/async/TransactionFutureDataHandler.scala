@@ -3,10 +3,7 @@ package com.xsn.explorer.data.async
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.Limit
-import com.xsn.explorer.data.{
-  TransactionBlockingDataHandler,
-  TransactionDataHandler
-}
+import com.xsn.explorer.data.{TransactionBlockingDataHandler, TransactionDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction

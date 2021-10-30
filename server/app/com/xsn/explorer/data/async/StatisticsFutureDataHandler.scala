@@ -3,16 +3,9 @@ package com.xsn.explorer.data.async
 import java.time.Instant
 import javax.inject.Inject
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.xsn.explorer.data.{
-  StatisticsBlockingDataHandler,
-  StatisticsDataHandler
-}
+import com.xsn.explorer.data.{StatisticsBlockingDataHandler, StatisticsDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
-import com.xsn.explorer.models.{
-  AddressesReward,
-  BlockRewardsSummary,
-  Statistics
-}
+import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 import com.xsn.explorer.models.values.Address
 
 import scala.concurrent.Future

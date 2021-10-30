@@ -26,8 +26,7 @@ object EmailService {
     }
   }
 
-  class SendgridService @Inject() (config: SendgridService.Config)
-      extends EmailService {
+  class SendgridService @Inject() (config: SendgridService.Config) extends EmailService {
 
     private val logger = LoggerFactory.getLogger(this.getClass)
     private val sendgrid = new SendGrid(config.apiKey)

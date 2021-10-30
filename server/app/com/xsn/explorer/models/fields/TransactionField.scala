@@ -3,8 +3,7 @@ package com.xsn.explorer.models.fields
 import com.alexitc.playsonify.sql.ColumnNameResolver
 import enumeratum._
 
-sealed abstract class TransactionField(override val entryName: String)
-    extends EnumEntry
+sealed abstract class TransactionField(override val entryName: String) extends EnumEntry
 
 object TransactionField extends Enum[TransactionField] {
 

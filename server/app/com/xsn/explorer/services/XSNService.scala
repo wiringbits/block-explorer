@@ -130,9 +130,9 @@ class XSNServiceRPCImpl @Inject() (
     )
     val shouldRetry: Try[ApplicationResult[A]] => Boolean = {
       case Success(Bad(One(XSNWorkQueueDepthExceeded))) => true
-      case Success(Bad(One(XSNWarmingUp)))              => true
-      case Failure(_: ConnectException)                 => true
-      case _                                            => false
+      case Success(Bad(One(XSNWarmingUp))) => true
+      case Failure(_: ConnectException) => true
+      case _ => false
     }
 
     retry(shouldRetry) {
@@ -235,7 +235,7 @@ class XSNServiceRPCImpl @Inject() (
           maybe
             .map {
               case Good(block) => Good(cleanGenesisBlock(block))
-              case x           => x
+              case x => x
             }
             .getOrElse {
               logger.debug(
@@ -274,7 +274,7 @@ class XSNServiceRPCImpl @Inject() (
           maybe
             .map {
               case Good(block) => Good(block)
-              case x           => x
+              case x => x
             }
             .getOrElse {
               logger.debug(
@@ -423,8 +423,7 @@ class XSNServiceRPCImpl @Inject() (
     result
   }
 
-  override def getLatestBlock()
-      : FutureApplicationResult[rpc.Block.Canonical] = {
+  override def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -450,7 +449,7 @@ class XSNServiceRPCImpl @Inject() (
 
             block <- getBlock(blockhash).map {
               case Good(block) => Good(cleanGenesisBlock(block))
-              case x           => x
+              case x => x
             }.toFutureOr
           } yield block
 
@@ -467,8 +466,7 @@ class XSNServiceRPCImpl @Inject() (
     result
   }
 
-  override def getServerStatistics()
-      : FutureApplicationResult[rpc.ServerStatistics] = {
+  override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -567,8 +565,7 @@ class XSNServiceRPCImpl @Inject() (
     result
   }
 
-  override def getMasternodes()
-      : FutureApplicationResult[List[rpc.Masternode]] = {
+  override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -583,7 +580,7 @@ class XSNServiceRPCImpl @Inject() (
         .map { response =>
           val maybe = getResult[Map[String, String]](response)
             .map {
-              case Good(map)   => Good(rpc.Masternode.fromMap(map))
+              case Good(map) => Good(rpc.Masternode.fromMap(map))
               case Bad(errors) => Bad(errors)
             }
 
@@ -652,8 +649,7 @@ class XSNServiceRPCImpl @Inject() (
     result
   }
 
-  override def getMerchantnodes()
-      : FutureApplicationResult[List[rpc.Merchantnode]] = {
+  override def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]] = {
     val body = s"""
                   |{
                   |  "jsonrpc": "1.0",
@@ -668,7 +664,7 @@ class XSNServiceRPCImpl @Inject() (
         .map { response =>
           val maybe = getResult[Map[String, String]](response)
             .map {
-              case Good(map)   => Good(rpc.Merchantnode.fromMap(map))
+              case Good(map) => Good(rpc.Merchantnode.fromMap(map))
               case Bad(errors) => Bad(errors)
             }
 
@@ -882,7 +878,7 @@ class XSNServiceRPCImpl @Inject() (
 
     result.foreach {
       case Bad(errors) => logger.info(s"Failed to get TxOut, errors = $errors")
-      case _           => ()
+      case _ => ()
     }
 
     result
@@ -979,9 +975,7 @@ class XSNServiceRPCImpl @Inject() (
         // from error code if possible
         (jsonError \ "code")
           .asOpt[Int]
-          .flatMap(code =>
-            errorCodeMapper.get(code) orElse defaultErrorCodeMapper.get(code)
-          )
+          .flatMap(code => errorCodeMapper.get(code) orElse defaultErrorCodeMapper.get(code))
           .orElse {
             // from message
             (jsonError \ "message")

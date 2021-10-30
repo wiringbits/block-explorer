@@ -32,8 +32,8 @@ private[synchronizer] class LedgerSynchronizationStatusService @Inject() (
     *   - We have at least a block stored (latestLedgerBlock).
     *   - The LCA is on the candidate's chain, and on our stored blocks.
     *
-    * Then, we can apply the candidate by rolling back until the LCA, then,
-    * applying missing blocks until catching up the candidate.
+    * Then, we can apply the candidate by rolling back until the LCA, then, applying missing blocks until catching up
+    * the candidate.
     *
     * @param candidate
     *   the block that we need to store

@@ -44,9 +44,8 @@ object TransactionBalancesHelper {
       Balance(address, spent = spent)
     }
 
-    val receiveList = computeReceiveMap(transactions).map {
-      case (address, received) =>
-        Balance(address, received = received)
+    val receiveList = computeReceiveMap(transactions).map { case (address, received) =>
+      Balance(address, received = received)
     }
 
     val result = (spentList ++ receiveList)

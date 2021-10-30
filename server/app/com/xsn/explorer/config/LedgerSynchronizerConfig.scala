@@ -18,8 +18,7 @@ trait LedgerSynchronizerConfig {
   def parallelSynchronizer: Boolean
 }
 
-class LedgerSynchronizerPlayConfig @Inject() (config: Configuration)
-    extends LedgerSynchronizerConfig {
+class LedgerSynchronizerPlayConfig @Inject() (config: Configuration) extends LedgerSynchronizerConfig {
 
   override lazy val enabled: Boolean =
     config.getOptional[Boolean]("synchronizer.enabled").getOrElse(false)

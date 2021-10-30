@@ -2,8 +2,7 @@ package com.xsn.explorer.models
 
 import enumeratum._
 
-sealed abstract class BlockExtractionMethod(override val entryName: String)
-    extends EnumEntry
+sealed abstract class BlockExtractionMethod(override val entryName: String) extends EnumEntry
 
 object BlockExtractionMethod extends Enum[BlockExtractionMethod] {
 

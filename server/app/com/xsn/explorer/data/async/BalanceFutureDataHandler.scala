@@ -1,9 +1,6 @@
 package com.xsn.explorer.data.async
 
-import com.alexitc.playsonify.core.{
-  FutureApplicationResult,
-  FuturePaginatedResult
-}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
 import com.alexitc.playsonify.models.ordering.FieldOrdering
 import com.alexitc.playsonify.models.pagination
 import com.alexitc.playsonify.models.pagination.PaginatedQuery

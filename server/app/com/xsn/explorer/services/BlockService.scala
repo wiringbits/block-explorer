@@ -6,11 +6,7 @@ import com.alexitc.playsonify.models.ordering.OrderingCondition
 import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.BlockFutureDataHandler
-import com.xsn.explorer.errors.{
-  BlockNotFoundError,
-  BlockRewardsNotFoundError,
-  XSNMessageError
-}
+import com.xsn.explorer.errors.{BlockNotFoundError, BlockRewardsNotFoundError, XSNMessageError}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.BlockHeader
 import com.xsn.explorer.models.persisted.BlockInfo
@@ -188,7 +184,7 @@ class BlockService @Inject() (
 
       rewards <- getBlockRewards(block).map {
         case Good(value) => Good(Some(value))
-        case Bad(_)      => Good(None)
+        case Bad(_) => Good(None)
       }.toFutureOr
 
     } yield BlockDetails(block, rewards)
@@ -198,8 +194,7 @@ class BlockService @Inject() (
 
   def getLatestBlocks(): FutureApplicationResult[List[Block.Canonical]] = {
 
-    /** Temporal workaround to retrieve the latest blocks, they will be
-      * retrieved from the database once available.
+    /** Temporal workaround to retrieve the latest blocks, they will be retrieved from the database once available.
       */
     val result = for {
       a <- xsnService.getLatestBlock().toFutureOr
@@ -241,7 +236,7 @@ class BlockService @Inject() (
       _ <- (blocks, lastSeenHash) match {
         // if there are no blocks but a hash was seen, check whether the given hash actually exists
         case (Nil, Some(hash)) => blockDataHandler.getBlock(hash).toFutureOr
-        case _                 => Future.successful(Good(())).toFutureOr
+        case _ => Future.successful(Good(())).toFutureOr
       }
       latestBlock <- blockDataHandler.getLatestBlock().toFutureOr
     } yield (
@@ -265,7 +260,7 @@ class BlockService @Inject() (
           Future.successful(Good(BlockExtractionMethod.ProofOfWork)).toFutureOr
         } else {
           isPoS(block).toFutureOr.map {
-            case true  => BlockExtractionMethod.ProofOfStake
+            case true => BlockExtractionMethod.ProofOfStake
             case false => BlockExtractionMethod.ProofOfWork
           }
         }
@@ -369,7 +364,7 @@ class BlockService @Inject() (
       extractionMethod: BlockExtractionMethod
   ): FutureApplicationResult[BlockRewards] = {
     extractionMethod match {
-      case BlockExtractionMethod.ProofOfWork  => getPoWBlockRewards(block)
+      case BlockExtractionMethod.ProofOfWork => getPoWBlockRewards(block)
       case BlockExtractionMethod.ProofOfStake => getPoSBlockRewards(block)
       case BlockExtractionMethod.TrustlessProofOfStake =>
         getTPoSBlockRewards(block)

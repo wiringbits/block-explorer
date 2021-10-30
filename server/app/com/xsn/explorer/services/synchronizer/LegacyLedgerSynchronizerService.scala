@@ -2,10 +2,7 @@ package com.xsn.explorer.services.synchronizer
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OptionOps}
-import com.xsn.explorer.data.async.{
-  BlockFutureDataHandler,
-  LedgerFutureDataHandler
-}
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler}
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Block
@@ -31,9 +28,8 @@ class LegacyLedgerSynchronizerService @Inject() (
 
   /** Synchronize the given block with our ledger database.
     *
-    * The synchronization involves a very complex logic in order to handle
-    * several corner cases, be sure to not call this method concurrently because
-    * the behavior is undefined.
+    * The synchronization involves a very complex logic in order to handle several corner cases, be sure to not call
+    * this method concurrently because the behavior is undefined.
     */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val timer = Kamon
@@ -83,8 +79,7 @@ class LegacyLedgerSynchronizerService @Inject() (
 
   /**   1. current ledger is empty:
     * 1.1. the given block is the genensis block, it is added.
-    * 1.2. the given block is not the genesis block, sync everything until the
-    * given block.
+    * 1.2. the given block is not the genesis block, sync everything until the given block.
     */
   private def onEmptyLedger(
       block: rpc.Block.Canonical
@@ -107,13 +102,11 @@ class LegacyLedgerSynchronizerService @Inject() (
     }
   }
 
-  /** 2. current ledger has blocks until N, given block height H: 2.1. if N+1 ==
-    * H and its previous blockhash is N, it is added. 2.2. if N+1 == H and its
-    * previous blockhash isn't N, pick the expected block N from H and apply the
-    * whole process with it, then, apply H. 2.3. if H > N+1, sync everything
-    * until H. 2.4. if H <= N, if the hash already exists, it is ignored. 2.5.
-    * if H <= N, if the hash doesn't exists, remove blocks from N to H
-    * (included), then, add the new H.
+  /** 2. current ledger has blocks until N, given block height H: 2.1. if N+1 == H and its previous blockhash is N, it
+    * is added. 2.2. if N+1 == H and its previous blockhash isn't N, pick the expected block N from H and apply the
+    * whole process with it, then, apply H. 2.3. if H > N+1, sync everything until H. 2.4. if H <= N, if the hash
+    * already exists, it is ignored. 2.5. if H <= N, if the hash doesn't exists, remove blocks from N to H (included),
+    * then, add the new H.
     */
   private def onLatestBlock(
       ledgerBlock: Block,
@@ -231,21 +224,19 @@ class LegacyLedgerSynchronizerService @Inject() (
     logger.info(s"Syncing block range = $range")
 
     // TODO: check, it might be safer to use the nextBlockhash instead of the height
-    range.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) {
-      case (previous, height) =>
-        val result = for {
-          _ <- previous.toFutureOr
-          blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-          block <- syncOps.getRPCBlock(blockhash).toFutureOr
-          _ <- synchronize(block).toFutureOr
-        } yield ()
+    range.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) { case (previous, height) =>
+      val result = for {
+        _ <- previous.toFutureOr
+        blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
+        block <- syncOps.getRPCBlock(blockhash).toFutureOr
+        _ <- synchronize(block).toFutureOr
+      } yield ()
 
-        result.toFuture
+      result.toFuture
     }
   }
 
-  /** Trim the ledger until the given block height, if the height is 4, the last
-    * stored block will be 3.
+  /** Trim the ledger until the given block height, if the height is 4, the last stored block will be 3.
     */
   private def trimTo(height: Height): FutureApplicationResult[Unit] = {
     val timer = Kamon

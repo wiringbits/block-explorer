@@ -33,8 +33,7 @@ class LedgerSynchronizerService @Inject() (
 
   /** Synchronize the given block with our ledger database.
     *
-    * This method must not be called concurrently, otherwise, it is likely that
-    * the database will get corrupted.
+    * This method must not be called concurrently, otherwise, it is likely that the database will get corrupted.
     */
   def synchronize(blockhash: Blockhash): FutureApplicationResult[Unit] = {
     val result = for {
@@ -129,23 +128,22 @@ class LedgerSynchronizerService @Inject() (
   }
 
   private def sync(goal: Range): FutureApplicationResult[Unit] = {
-    goal.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) {
-      case (previous, height) =>
-        val timer = Kamon
-          .timer("syncRange")
-          .withTag("height", height.toLong)
-          .start()
+    goal.foldLeft[FutureApplicationResult[Unit]](Future.successful(Good(()))) { case (previous, height) =>
+      val timer = Kamon
+        .timer("syncRange")
+        .withTag("height", height.toLong)
+        .start()
 
-        val result = for {
-          _ <- previous.toFutureOr
-          blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
-          block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
-          _ <- append(block).toFutureOr
-        } yield ()
+      val result = for {
+        _ <- previous.toFutureOr
+        blockhash <- xsnService.getBlockhash(Height(height)).toFutureOr
+        block <- syncOps.getFullRPCBlock(blockhash).toFutureOr
+        _ <- append(block).toFutureOr
+      } yield ()
 
-        result.toFuture.onComplete(_ => timer.stop())
+      result.toFuture.onComplete(_ => timer.stop())
 
-        result.toFuture
+      result.toFuture
     }
   }
 

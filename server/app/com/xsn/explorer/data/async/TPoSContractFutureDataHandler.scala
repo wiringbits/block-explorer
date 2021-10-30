@@ -1,10 +1,7 @@
 package com.xsn.explorer.data.async
 
 import com.alexitc.playsonify.core.FutureApplicationResult
-import com.xsn.explorer.data.{
-  TPoSContractBlockingDataHandler,
-  TPoSContractDataHandler
-}
+import com.xsn.explorer.data.{TPoSContractBlockingDataHandler, TPoSContractDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.values.Address

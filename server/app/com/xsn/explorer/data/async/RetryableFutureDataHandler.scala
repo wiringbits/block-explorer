@@ -31,14 +31,11 @@ class RetryableFutureDataHandler @Inject() (retryConfig: RetryConfig)(implicit
     val shouldRetry: Try[ApplicationResult[A]] => Boolean = {
       case Failure(_: SQLTransientConnectionException) =>
         true
-      case Failure(e: PSQLException)
-          if e.getMessage contains "the database system is starting up" =>
+      case Failure(e: PSQLException) if e.getMessage contains "the database system is starting up" =>
         true
-      case Failure(e: PSQLException)
-          if e.getMessage contains "An I/O error occurred while sending to the backend" =>
+      case Failure(e: PSQLException) if e.getMessage contains "An I/O error occurred while sending to the backend" =>
         true
-      case Failure(e: SQLException)
-          if e.getMessage contains "Connection is closed" =>
+      case Failure(e: SQLException) if e.getMessage contains "Connection is closed" =>
         true
       case _ =>
         false

@@ -3,10 +3,7 @@ package com.xsn.explorer.data.anorm
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination
-import com.alexitc.playsonify.models.pagination.{
-  PaginatedQuery,
-  PaginatedResult
-}
+import com.alexitc.playsonify.models.pagination.{PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BlockBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BlockPostgresDAO
 import com.xsn.explorer.errors._
@@ -38,18 +35,17 @@ class BlockPostgresDataHandler @Inject() (
   override def getBy(
       paginatedQuery: PaginatedQuery,
       ordering: FieldOrdering[BlockField]
-  ): ApplicationResult[PaginatedResult[Block]] = withConnection {
-    implicit conn =>
-      val data = blockPostgresDAO.getBy(paginatedQuery, ordering)
-      val total = blockPostgresDAO.count
-      val result = PaginatedResult(
-        paginatedQuery.offset,
-        paginatedQuery.limit,
-        total,
-        data
-      )
+  ): ApplicationResult[PaginatedResult[Block]] = withConnection { implicit conn =>
+    val data = blockPostgresDAO.getBy(paginatedQuery, ordering)
+    val total = blockPostgresDAO.count
+    val result = PaginatedResult(
+      paginatedQuery.offset,
+      paginatedQuery.limit,
+      total,
+      data
+    )
 
-      Good(result)
+    Good(result)
   }
 
   override def delete(blockhash: Blockhash): ApplicationResult[Block] =

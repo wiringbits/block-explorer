@@ -3,12 +3,7 @@ package com.xsn.explorer.services.synchronizer.repository
 import com.alexitc.playsonify.core.{ApplicationResult, FutureApplicationResult}
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
-import com.xsn.explorer.models.persisted.{
-  AddressTransactionDetails,
-  Balance,
-  Block,
-  Transaction
-}
+import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Balance, Block, Transaction}
 import com.xsn.explorer.models.values.{Blockhash, TransactionId}
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import javax.inject.Inject
@@ -98,8 +93,7 @@ object BlockChunkRepository {
       }
     }
 
-    override def findSyncingBlock()
-        : FutureApplicationResult[Option[Blockhash]] = Future {
+    override def findSyncingBlock(): FutureApplicationResult[Option[Blockhash]] = Future {
       blocking.findSyncingBlock()
     }
 

@@ -7,11 +7,7 @@ import com.alexitc.playsonify.models.ApplicationError
 import com.xsn.explorer.data.LedgerBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao._
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
-import com.xsn.explorer.errors.{
-  PostgresForeignKeyViolationError,
-  PreviousBlockMissingError,
-  RepeatedBlockHeightError
-}
+import com.xsn.explorer.errors.{PostgresForeignKeyViolationError, PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.persisted.{Balance, Block}
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
@@ -32,9 +28,8 @@ class LedgerPostgresDataHandler @Inject() (
 ) extends LedgerBlockingDataHandler
     with AnormPostgresDataHandler {
 
-  /** Push a block into the database chain, note that even if the block is
-    * supposed to have a next block, we remove the link because that block is
-    * not stored yet.
+  /** Push a block into the database chain, note that even if the block is supposed to have a next block, we remove the
+    * link because that block is not stored yet.
     */
   override def push(
       block: Block.HasTransactions,
@@ -68,16 +63,15 @@ class LedgerPostgresDataHandler @Inject() (
 
   /** Pop a block from the database chain (if exists)
     */
-  override def pop(): ApplicationResult[Block] = withTransaction {
-    implicit conn =>
-      val result = for {
-        block <- blockPostgresDAO.getLatestBlock
-        _ <- deleteBlockCascade(block)
-      } yield block
+  override def pop(): ApplicationResult[Block] = withTransaction { implicit conn =>
+    val result = for {
+      block <- blockPostgresDAO.getLatestBlock
+      _ <- deleteBlockCascade(block)
+    } yield block
 
-      result
-        .map(Good(_))
-        .getOrElse(throw new RuntimeException("Unable to pop block"))
+    result
+      .map(Good(_))
+      .getOrElse(throw new RuntimeException("Unable to pop block"))
   }
 
   private def upsertBlockCascade(

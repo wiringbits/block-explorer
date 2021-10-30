@@ -25,9 +25,7 @@ class CurrencySynchronizerActor extends Actor {
 
   private def behavior(marketStatistics: MarketStatistics): Receive = {
     case CurrencySynchronizerActor.UpdatePrice(currency, price) =>
-      val updatedStatistics = marketStatistics.copy(prices =
-        marketStatistics.prices + (currency -> price)
-      )
+      val updatedStatistics = marketStatistics.copy(prices = marketStatistics.prices + (currency -> price))
       become(behavior(updatedStatistics))
     case UpdateMarketInformation(marketInformation) =>
       val updatedStatistics =
@@ -68,9 +66,7 @@ class CurrencySynchronizerTask @Inject() (
       config.initialDelay,
       config.highPriorityInterval
     ) { () =>
-      highPriorityCurrencies.foreach(currency =>
-        syncCurrencyPrice(currency, currencySynchronizerActor)
-      )
+      highPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
 
       currencyService.getMarketInformation().onComplete {
         case Success(Good(marketInformation)) =>
@@ -91,9 +87,7 @@ class CurrencySynchronizerTask @Inject() (
       config.initialDelay,
       config.lowPriorityInterval
     ) { () =>
-      lowPriorityCurrencies.foreach(currency =>
-        syncCurrencyPrice(currency, currencySynchronizerActor)
-      )
+      lowPriorityCurrencies.foreach(currency => syncCurrencyPrice(currency, currencySynchronizerActor))
     }
 
     ()

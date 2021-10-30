@@ -1,20 +1,9 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.alexitc.playsonify.core.{
-  FutureApplicationResult,
-  FuturePaginatedResult
-}
-import com.alexitc.playsonify.models.ordering.{
-  FieldOrdering,
-  OrderingCondition,
-  OrderingQuery
-}
-import com.alexitc.playsonify.models.pagination.{
-  Count,
-  PaginatedQuery,
-  PaginatedResult
-}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition, OrderingQuery}
+import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.errors.{IPAddressFormatError, MerchantnodeNotFoundError}
 import com.xsn.explorer.models.fields.MerchantnodeField
@@ -64,7 +53,7 @@ class MerchantnodeService @Inject() (
         .find(ipAddress)
         .map {
           case Some(x) => Good(x)
-          case None    => Bad(MerchantnodeNotFoundError).accumulating
+          case None => Bad(MerchantnodeNotFoundError).accumulating
         }
         .toFutureOr
     } yield merchantnode
@@ -94,16 +83,16 @@ class MerchantnodeService @Inject() (
   private def sortByField(list: List[Merchantnode], field: MerchantnodeField) =
     field match {
       case MerchantnodeField.ActiveSeconds => list.sortBy(_.activeSeconds)
-      case MerchantnodeField.IP            => list.sortBy(_.ip)
-      case MerchantnodeField.LastSeen      => list.sortBy(_.lastSeen)
-      case MerchantnodeField.Status        => list.sortBy(_.status)
+      case MerchantnodeField.IP => list.sortBy(_.ip)
+      case MerchantnodeField.LastSeen => list.sortBy(_.lastSeen)
+      case MerchantnodeField.Status => list.sortBy(_.status)
     }
 
   private def applyOrderingCondition[A](
       list: List[A],
       orderingCondition: OrderingCondition
   ) = orderingCondition match {
-    case OrderingCondition.AscendingOrder  => list
+    case OrderingCondition.AscendingOrder => list
     case OrderingCondition.DescendingOrder => list.reverse
   }
 }

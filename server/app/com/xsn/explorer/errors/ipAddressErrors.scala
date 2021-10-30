@@ -1,17 +1,11 @@
 package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
-import com.alexitc.playsonify.models.{
-  FieldValidationError,
-  InputValidationError,
-  PublicError
-}
+import com.alexitc.playsonify.models.{FieldValidationError, InputValidationError, PublicError}
 
 trait IPAddressError
 
-case object IPAddressFormatError
-    extends IPAddressError
-    with InputValidationError {
+case object IPAddressFormatError extends IPAddressError with InputValidationError {
 
   override def toPublicErrorList[L](
       i18nService: I18nService[L]

@@ -2,8 +2,7 @@ package com.xsn.explorer.models
 
 import enumeratum._
 
-sealed abstract class RewardType(override val entryName: String)
-    extends EnumEntry
+sealed abstract class RewardType(override val entryName: String) extends EnumEntry
 
 object RewardType extends Enum[RewardType] {
 

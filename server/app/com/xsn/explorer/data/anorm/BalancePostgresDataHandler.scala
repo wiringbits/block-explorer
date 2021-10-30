@@ -2,11 +2,7 @@ package com.xsn.explorer.data.anorm
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{
-  Limit,
-  PaginatedQuery,
-  PaginatedResult
-}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.data.BalanceBlockingDataHandler
 import com.xsn.explorer.data.anorm.dao.BalancePostgresDAO
 import com.xsn.explorer.errors.BalanceUnknownError
@@ -33,13 +29,12 @@ class BalancePostgresDataHandler @Inject() (
   override def get(
       query: PaginatedQuery,
       ordering: FieldOrdering[BalanceField]
-  ): ApplicationResult[PaginatedResult[Balance]] = withConnection {
-    implicit conn =>
-      val balances = balancePostgresDAO.get(query, ordering)
-      val total = balancePostgresDAO.count
-      val result = PaginatedResult(query.offset, query.limit, total, balances)
+  ): ApplicationResult[PaginatedResult[Balance]] = withConnection { implicit conn =>
+    val balances = balancePostgresDAO.get(query, ordering)
+    val total = balancePostgresDAO.count
+    val result = PaginatedResult(query.offset, query.limit, total, balances)
 
-      Good(result)
+    Good(result)
   }
 
   override def getBy(address: Address): ApplicationResult[Balance] =

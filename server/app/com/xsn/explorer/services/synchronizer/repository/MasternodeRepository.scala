@@ -20,8 +20,7 @@ trait MasternodeRepository {
 object MasternodeRepository {
   private implicit val timeout: Timeout = 10.seconds
 
-  class ActorImpl @Inject() (actor: MasternodeSynchronizerActor.Ref)
-      extends MasternodeRepository {
+  class ActorImpl @Inject() (actor: MasternodeSynchronizerActor.Ref) extends MasternodeRepository {
     override def getAll(): Future[List[Masternode]] = {
       actor.ref
         .ask(MasternodeSynchronizerActor.GetMasternodes)

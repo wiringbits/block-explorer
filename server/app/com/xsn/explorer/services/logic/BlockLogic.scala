@@ -50,20 +50,16 @@ class BlockLogic {
     *
     * There should be a coinstake reward and possibly a master node reward.
     *
-    * The rewards are computed based on the transaction output which is expected
-    * to contain between 2 and 4 values:
+    * The rewards are computed based on the transaction output which is expected to contain between 2 and 4 values:
     *   - the 1st one is empty
     *   - the 2nd one goes to the coinstake
-    *   - the 3rd one (if present) will go to the coinstake if the address
-    *     matches, otherwise it goes to master node.
+    *   - the 3rd one (if present) will go to the coinstake if the address matches, otherwise it goes to master node.
     *   - the 4th one (if present) will go to the master node.
     *
-    * While the previous format should be meet by the RPC server, we compute the
-    * rewards based on coinstake address.
+    * While the previous format should be meet by the RPC server, we compute the rewards based on coinstake address.
     *
-    * Sometimes there could be rounding errors, for example, when the input is
-    * not exactly divisible by 2, we return 0 in that case because the reward
-    * could be negative.
+    * Sometimes there could be rounding errors, for example, when the input is not exactly divisible by 2, we return 0
+    * in that case because the reward could be negative.
     */
   def getPoSRewards(
       coinstakeTx: Transaction[_],
@@ -89,26 +85,25 @@ class BlockLogic {
       )
       val remainingRewardAddressMaybe =
         masternodeRewardOUT.flatMap(_.addresses).flatten.headOption
-      val remainingRewardMaybe = remainingRewardAddressMaybe.map {
-        remainingRewardAddress =>
-          BlockReward(
-            remainingRewardAddress,
-            masternodeRewardOUT
-              .filter(
-                _.addresses.getOrElse(
-                  List.empty
-                ) contains remainingRewardAddress
-              )
-              .map(_.value)
-              .sum
-          )
+      val remainingRewardMaybe = remainingRewardAddressMaybe.map { remainingRewardAddress =>
+        BlockReward(
+          remainingRewardAddress,
+          masternodeRewardOUT
+            .filter(
+              _.addresses.getOrElse(
+                List.empty
+              ) contains remainingRewardAddress
+            )
+            .map(_.value)
+            .sum
+        )
       }
 
       val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
         case Some(reward) if isTreasuryReward(reward.value) =>
           (None, Some(reward))
         case Some(reward) => (Some(reward), None)
-        case None         => (None, None)
+        case None => (None, None)
       }
 
       Good(
@@ -138,8 +133,7 @@ class BlockLogic {
       *   - 3 outputs, normal TPoS
       *   - 4 outputs, coin split TPoS
       *
-      * In order to display partial solutions, we will just filter by the
-      * addresses to get the rewards.
+      * In order to display partial solutions, we will just filter by the addresses to get the rewards.
       */
     val coinstakeVOUT = coinstakeTx.vout
 
@@ -166,24 +160,23 @@ class BlockLogic {
     }
     val remainingRewardAddressMaybe =
       masternodeRewardOUT.flatMap(_.addresses.getOrElse(List.empty)).headOption
-    val remainingRewardMaybe = remainingRewardAddressMaybe.map {
-      remainingRewardAddress =>
-        BlockReward(
-          remainingRewardAddress,
-          masternodeRewardOUT
-            .filter(
-              _.addresses.getOrElse(List.empty) contains remainingRewardAddress
-            )
-            .map(_.value)
-            .sum
-        )
+    val remainingRewardMaybe = remainingRewardAddressMaybe.map { remainingRewardAddress =>
+      BlockReward(
+        remainingRewardAddress,
+        masternodeRewardOUT
+          .filter(
+            _.addresses.getOrElse(List.empty) contains remainingRewardAddress
+          )
+          .map(_.value)
+          .sum
+      )
     }
 
     val (masternodeReward, treasuryReward) = remainingRewardMaybe match {
       case Some(reward) if isTreasuryReward(reward.value) =>
         (None, Some(reward))
       case Some(reward) => (Some(reward), None)
-      case None         => (None, None)
+      case None => (None, None)
     }
 
     Good(

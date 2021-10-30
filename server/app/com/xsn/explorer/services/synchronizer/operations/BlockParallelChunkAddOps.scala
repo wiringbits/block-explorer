@@ -8,10 +8,7 @@ import com.xsn.explorer.models.persisted.Block
 import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.util.Extensions.FutureApplicationResultListExt
-import com.xsn.explorer.util.{
-  TransactionAddressesHelper,
-  TransactionBalancesHelper
-}
+import com.xsn.explorer.util.{TransactionAddressesHelper, TransactionBalancesHelper}
 import javax.inject.Inject
 import org.scalactic.Good
 
@@ -141,9 +138,8 @@ class BlockParallelChunkAddOps @Inject() (
       rewards: Option[BlockRewards]
   ): FutureApplicationResult[Unit] = {
     val nextState = BlockSynchronizationState.StoringOutputs
-    val storeTransactionsF = block.transactions.zipWithIndex.map {
-      case (tx, index) =>
-        blockChunkRepository.upsertTransaction(index, tx)
+    val storeTransactionsF = block.transactions.zipWithIndex.map { case (tx, index) =>
+      blockChunkRepository.upsertTransaction(index, tx)
     }.sequence
 
     val result = for {
@@ -163,8 +159,7 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /** Store the transaction outputs on the transaction_outputs table in
-    * parallel.
+  /** Store the transaction outputs on the transaction_outputs table in parallel.
     *
     * Then, mark the next state to continue synchronizing.
     */
@@ -343,8 +338,7 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /** Stores the block rewards and then mark the next state to continue
-    * synchronizing.
+  /** Stores the block rewards and then mark the next state to continue synchronizing.
     */
   private def storeRewards(
       block: Block.HasTransactions,
@@ -373,8 +367,7 @@ class BlockParallelChunkAddOps @Inject() (
     result.toFuture
   }
 
-  /** Updates the address balances, available coins and completes the block
-    * synchronizaiton.
+  /** Updates the address balances, available coins and completes the block synchronizaiton.
     */
   private def updateBalances(
       block: Block.HasTransactions

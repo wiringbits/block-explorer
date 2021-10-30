@@ -17,9 +17,7 @@ class MasternodeSynchronizerActor extends Actor {
     case MasternodeSynchronizerActor.UpdateMasternodes(newMasternodes) =>
       become(behavior(newMasternodes))
     case MasternodeSynchronizerActor.GetMasternode(ipAddress) =>
-      sender() ! masternodes.find(x =>
-        x.ip.split(":").headOption.contains(ipAddress.string)
-      )
+      sender() ! masternodes.find(x => x.ip.split(":").headOption.contains(ipAddress.string))
     case MasternodeSynchronizerActor.GetMasternodes =>
       sender() ! masternodes
     case MasternodeSynchronizerActor.GetMasternodeCount =>

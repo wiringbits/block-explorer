@@ -4,12 +4,7 @@ import java.sql.Connection
 
 import anorm._
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{
-  Count,
-  Limit,
-  Offset,
-  PaginatedQuery
-}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.parsers.BlockParsers._
 import com.xsn.explorer.models.fields.BlockField
@@ -246,7 +241,7 @@ class BlockPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     val headers = SQL(
@@ -355,7 +350,7 @@ class BlockPostgresDAO @Inject() (
     val order = toSQL(orderingCondition)
     val comparator = orderingCondition match {
       case OrderingCondition.DescendingOrder => "<"
-      case OrderingCondition.AscendingOrder  => ">"
+      case OrderingCondition.AscendingOrder => ">"
     }
 
     SQL(
@@ -445,7 +440,7 @@ class BlockPostgresDAO @Inject() (
   }
 
   private def toSQL(condition: OrderingCondition): String = condition match {
-    case OrderingCondition.AscendingOrder  => "ASC"
+    case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
   }
 }

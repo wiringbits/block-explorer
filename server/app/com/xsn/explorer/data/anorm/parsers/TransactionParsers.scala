@@ -3,10 +3,7 @@ package com.xsn.explorer.data.anorm.parsers
 import anorm.SqlParser._
 import anorm.~
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.persisted.{
-  AddressTransactionDetails,
-  Transaction
-}
+import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
 import com.xsn.explorer.models.values._
 
 object TransactionParsers {
@@ -23,9 +20,8 @@ object TransactionParsers {
   val parseHeight = int("height").map(Height.apply)
 
   val parseTransaction =
-    (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map {
-      case txid ~ blockhash ~ time ~ size =>
-        Transaction(txid, blockhash, time, size)
+    (parseTransactionId() ~ parseBlockhashBytes() ~ parseTime ~ parseSize).map { case txid ~ blockhash ~ time ~ size =>
+      Transaction(txid, blockhash, time, size)
     }
 
   val parseTransactionWithValues = (parseTransactionId() ~
@@ -33,10 +29,8 @@ object TransactionParsers {
     parseTime ~
     parseSize ~
     parseSent ~
-    parseReceived).map {
-
-    case txid ~ blockhash ~ time ~ size ~ sent ~ received =>
-      TransactionWithValues(txid, blockhash, time, size, sent, received)
+    parseReceived).map { case txid ~ blockhash ~ time ~ size ~ sent ~ received =>
+    TransactionWithValues(txid, blockhash, time, size, sent, received)
   }
 
   val parseTransactionInfo = (parseTransactionId() ~
@@ -45,10 +39,8 @@ object TransactionParsers {
     parseSize ~
     parseSent ~
     parseReceived ~
-    parseHeight).map {
-
-    case txid ~ blockhash ~ time ~ size ~ sent ~ received ~ height =>
-      TransactionInfo(txid, blockhash, time, size, sent, received, height)
+    parseHeight).map { case txid ~ blockhash ~ time ~ size ~ sent ~ received ~ height =>
+    TransactionInfo(txid, blockhash, time, size, sent, received, height)
   }
 
   val parseTransactionInput =

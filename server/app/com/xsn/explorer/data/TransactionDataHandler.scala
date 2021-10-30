@@ -49,5 +49,4 @@ trait TransactionDataHandler[F[_]] {
   ): F[List[Transaction.HasIO]]
 }
 
-trait TransactionBlockingDataHandler
-    extends TransactionDataHandler[ApplicationResult]
+trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

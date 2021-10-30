@@ -3,11 +3,7 @@ package controllers
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.models.persisted.Transaction
-import com.xsn.explorer.services.{
-  AddressService,
-  TPoSContractService,
-  TransactionService
-}
+import com.xsn.explorer.services.{AddressService, TPoSContractService, TransactionService}
 import com.xsn.explorer.util.Extensions.BigDecimalExt
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
 import javax.inject.Inject

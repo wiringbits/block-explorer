@@ -27,14 +27,12 @@ object TPoSContractParsers {
     parseMerchant ~
     parseMerchantCommission ~
     parseTime ~
-    parseTPoSContractState).map {
-
-    case txid ~ index ~ owner ~ merchant ~ merchantCommission ~ time ~ state =>
-      val details = TPoSContract.Details(
-        owner = owner,
-        merchant = merchant,
-        merchantCommission = merchantCommission
-      )
-      TPoSContract(TPoSContract.Id(txid, index), details, time, state)
+    parseTPoSContractState).map { case txid ~ index ~ owner ~ merchant ~ merchantCommission ~ time ~ state =>
+    val details = TPoSContract.Details(
+      owner = owner,
+      merchant = merchant,
+      merchantCommission = merchantCommission
+    )
+    TPoSContract(TPoSContract.Id(txid, index), details, time, state)
   }
 }

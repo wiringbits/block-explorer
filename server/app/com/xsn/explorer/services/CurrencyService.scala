@@ -69,8 +69,8 @@ class CurrencyServiceCoinMarketCapImpl @Inject() (
       case Success(Bad(One(CoinMarketCapRequestFailedError(502)))) => true
       case Success(Bad(One(CoinMarketCapRequestFailedError(503)))) => true
       case Success(Bad(One(CoinMarketCapRequestFailedError(504)))) => true
-      case Failure(_: ConnectException)                            => true
-      case _                                                       => false
+      case Failure(_: ConnectException) => true
+      case _ => false
     }
 
     retry(shouldRetry) {
@@ -123,9 +123,7 @@ class CurrencyServiceCoinMarketCapImpl @Inject() (
                     .map(Good(_))
                     .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
 
-                withGood(volume, marketcap)((volume, marketcap) =>
-                  MarketInformation(volume, marketcap)
-                )
+                withGood(volume, marketcap)((volume, marketcap) => MarketInformation(volume, marketcap))
               }
               .getOrElse(Bad(One(CoinMarketCapUnexpectedResponseError)))
           case (code, _) =>

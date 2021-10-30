@@ -2,11 +2,7 @@ package com.xsn.explorer.services.logic
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ApplicationError
-import com.xsn.explorer.models.rpc.{
-  Transaction,
-  TransactionVIN,
-  TransactionVOUT
-}
+import com.xsn.explorer.models.rpc.{Transaction, TransactionVIN, TransactionVOUT}
 import com.xsn.explorer.models.values.Address
 import org.scalactic.{One, Or}
 

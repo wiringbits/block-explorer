@@ -11,8 +11,7 @@ import play.api.mvc.Results.{InternalServerError, Status}
 
 import scala.concurrent.Future
 
-class MyHttpErrorHandler @Inject() (errorRenderer: PublicErrorRenderer)
-    extends HttpErrorHandler {
+class MyHttpErrorHandler @Inject() (errorRenderer: PublicErrorRenderer) extends HttpErrorHandler {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 

@@ -27,9 +27,8 @@ object Masternode {
     * }
     * ```
     *
-    * The key is the transaction id used to send the funds to the masternode and
-    * the value a console formatted string with the values. Note that the
-    * transaction id ends with `-x` where x is a number.
+    * The key is the transaction id used to send the funds to the masternode and the value a console formatted string
+    * with the values. Note that the transaction id ends with `-x` where x is a number.
     */
   def fromMap(values: Map[String, String]): List[Masternode] = {
     values

@@ -1,20 +1,9 @@
 package com.xsn.explorer.services
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.{FutureOps, OrOps}
-import com.alexitc.playsonify.core.{
-  FutureApplicationResult,
-  FuturePaginatedResult
-}
-import com.alexitc.playsonify.models.ordering.{
-  FieldOrdering,
-  OrderingCondition,
-  OrderingQuery
-}
-import com.alexitc.playsonify.models.pagination.{
-  Count,
-  PaginatedQuery,
-  PaginatedResult
-}
+import com.alexitc.playsonify.core.{FutureApplicationResult, FuturePaginatedResult}
+import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition, OrderingQuery}
+import com.alexitc.playsonify.models.pagination.{Count, PaginatedQuery, PaginatedResult}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.errors.{IPAddressFormatError, MasternodeNotFoundError}
 import com.xsn.explorer.models.fields.MasternodeField
@@ -61,7 +50,7 @@ class MasternodeService @Inject() (
         .find(ipAddress)
         .map {
           case Some(x) => Good(x)
-          case None    => Bad(MasternodeNotFoundError).accumulating
+          case None => Bad(MasternodeNotFoundError).accumulating
         }
         .toFutureOr
     } yield masternode
@@ -91,16 +80,16 @@ class MasternodeService @Inject() (
   private def sortByField(list: List[Masternode], field: MasternodeField) =
     field match {
       case MasternodeField.ActiveSeconds => list.sortBy(_.activeSeconds)
-      case MasternodeField.IP            => list.sortBy(_.ip)
-      case MasternodeField.LastSeen      => list.sortBy(_.lastSeen)
-      case MasternodeField.Status        => list.sortBy(_.status)
+      case MasternodeField.IP => list.sortBy(_.ip)
+      case MasternodeField.LastSeen => list.sortBy(_.lastSeen)
+      case MasternodeField.Status => list.sortBy(_.status)
     }
 
   private def applyOrderingCondition[A](
       list: List[A],
       orderingCondition: OrderingCondition
   ) = orderingCondition match {
-    case OrderingCondition.AscendingOrder  => list
+    case OrderingCondition.AscendingOrder => list
     case OrderingCondition.DescendingOrder => list.reverse
   }
 }

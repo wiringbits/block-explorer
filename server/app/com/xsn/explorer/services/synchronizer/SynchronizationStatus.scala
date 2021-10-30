@@ -16,8 +16,7 @@ private[synchronizer] object SynchronizationStatus {
     * @param range
     *   the missing interval
     */
-  final case class MissingBlockInterval(range: Range)
-      extends SynchronizationStatus
+  final case class MissingBlockInterval(range: Range) extends SynchronizationStatus
 
   /** The ledger needs a reorganization.
     *
@@ -26,8 +25,7 @@ private[synchronizer] object SynchronizationStatus {
     * @param goal
     *   the goal to reach after rolling back
     */
-  final case class PendingReorganization(cutPoint: BlockPointer, goal: Height)
-      extends SynchronizationStatus {
+  final case class PendingReorganization(cutPoint: BlockPointer, goal: Height) extends SynchronizationStatus {
     require(
       goal.int > cutPoint.height.int,
       "The goal must go after the cut point"

@@ -3,8 +3,7 @@ package com.xsn.explorer.models.fields
 import com.alexitc.playsonify.sql.ColumnNameResolver
 import enumeratum._
 
-sealed abstract class BalanceField(override val entryName: String)
-    extends EnumEntry
+sealed abstract class BalanceField(override val entryName: String) extends EnumEntry
 
 object BalanceField extends Enum[BalanceField] {
 
@@ -22,7 +21,7 @@ object BalanceField extends Enum[BalanceField] {
 
       override def getColumnName(field: BalanceField): String = field match {
         case Available => s"(${Received.entryName} - ${Spent.entryName})"
-        case f         => f.entryName
+        case f => f.entryName
       }
     }
 }

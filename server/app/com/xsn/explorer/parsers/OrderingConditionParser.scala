@@ -9,9 +9,9 @@ class OrderingConditionParser {
   def parse(unsafeOrderingCondition: String): Option[OrderingCondition] =
     unsafeOrderingCondition.toLowerCase match {
 
-      case "asc"  => Some(OrderingCondition.AscendingOrder)
+      case "asc" => Some(OrderingCondition.AscendingOrder)
       case "desc" => Some(OrderingCondition.DescendingOrder)
-      case _      => None
+      case _ => None
     }
 
   def parseReuslt(

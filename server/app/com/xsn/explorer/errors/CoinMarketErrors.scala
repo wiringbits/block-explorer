@@ -9,5 +9,4 @@ sealed trait CoinMarketCapError extends ServerError {
 }
 
 case object CoinMarketCapUnexpectedResponseError extends CoinMarketCapError
-case class CoinMarketCapRequestFailedError(status: Int)
-    extends CoinMarketCapError
+case class CoinMarketCapRequestFailedError(status: Int) extends CoinMarketCapError

@@ -84,7 +84,7 @@ object BlockHeader {
   val partialWrites: Writes[BlockHeader] = (obj: BlockHeader) => {
     val filterMaybe = obj match {
       case x: HasFilter => Some(x.filter)
-      case _            => Option.empty
+      case _ => Option.empty
     }
 
     Json.obj(
@@ -103,7 +103,7 @@ object BlockHeader {
   val completeWrites: Writes[BlockHeader] = (obj: BlockHeader) => {
     val filterMaybe = obj match {
       case x: HasFilter => Some(x.filter)
-      case _            => Option.empty
+      case _ => Option.empty
     }
 
     Json.obj(

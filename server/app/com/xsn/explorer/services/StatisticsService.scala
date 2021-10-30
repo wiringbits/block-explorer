@@ -5,10 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.core.FutureOr.Implicits._
-import com.xsn.explorer.data.async.{
-  BalanceFutureDataHandler,
-  StatisticsFutureDataHandler
-}
+import com.xsn.explorer.data.async.{BalanceFutureDataHandler, StatisticsFutureDataHandler}
 import com.xsn.explorer.models.{
   AddressesReward,
   MarketStatistics,
@@ -17,10 +14,7 @@ import com.xsn.explorer.models.{
   StatisticsDetails,
   SynchronizationProgress
 }
-import com.xsn.explorer.services.synchronizer.repository.{
-  MasternodeRepository,
-  MerchantnodeRepository
-}
+import com.xsn.explorer.services.synchronizer.repository.{MasternodeRepository, MerchantnodeRepository}
 import com.xsn.explorer.tasks.CurrencySynchronizerActor
 import org.scalactic.{Bad, Good}
 
@@ -105,8 +99,7 @@ class StatisticsService @Inject() (
     result.toFuture
   }
 
-  def getSynchronizationProgress
-      : FutureApplicationResult[SynchronizationProgress] = {
+  def getSynchronizationProgress: FutureApplicationResult[SynchronizationProgress] = {
     val dbStats = statisticsFutureDataHandler.getStatistics()
     val rpcBlock = xsnService.getLatestBlock()
 
@@ -173,7 +166,7 @@ class StatisticsService @Inject() (
     value
       .map {
         case Good(result) => Good(Some(result))
-        case Bad(_)       => Good(None)
+        case Bad(_) => Good(None)
       }
       .recover { case _: Throwable => Good(None) }
   }

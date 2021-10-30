@@ -1,10 +1,7 @@
 package com.xsn.explorer.migrations
 
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
-import com.xsn.explorer.data.async.{
-  BlockFutureDataHandler,
-  TransactionFutureDataHandler
-}
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
 import javax.inject.Inject
 import org.slf4j.LoggerFactory

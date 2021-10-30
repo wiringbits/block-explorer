@@ -13,8 +13,7 @@ case class Transaction(
 
 object Transaction {
 
-  /** The coins where generated on the given output index of the given txid
-    * (from).
+  /** The coins where generated on the given output index of the given txid (from).
     */
   case class Input(
       fromTxid: TransactionId,
@@ -87,8 +86,7 @@ object Transaction {
 
   /** Transform a rpc transaction to a persisted transaction.
     *
-    * As the TPoS contracts aren't stored in the persisted transaction, they are
-    * returned as possible contracts
+    * As the TPoS contracts aren't stored in the persisted transaction, they are returned as possible contracts
     */
   def fromRPC(
       tx: rpc.Transaction[TransactionVIN.HasValues]
@@ -135,9 +133,7 @@ object Transaction {
   ): Boolean = {
     val collateralMaybe = tx.vout.find(_.value == 1)
     val zeroAmount = tx.vout.find(_.value == 0)
-    val hasOpReturn = zeroAmount.exists(t =>
-      t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN"))
-    )
+    val hasOpReturn = zeroAmount.exists(t => t.scriptPubKey.exists(_.asm.startsWith("OP_RETURN")))
 
     collateralMaybe.isDefined && zeroAmount.isDefined && hasOpReturn
   }

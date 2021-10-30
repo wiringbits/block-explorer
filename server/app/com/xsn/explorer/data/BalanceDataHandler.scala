@@ -2,11 +2,7 @@ package com.xsn.explorer.data
 
 import com.alexitc.playsonify.core.ApplicationResult
 import com.alexitc.playsonify.models.ordering.FieldOrdering
-import com.alexitc.playsonify.models.pagination.{
-  Limit,
-  PaginatedQuery,
-  PaginatedResult
-}
+import com.alexitc.playsonify.models.pagination.{Limit, PaginatedQuery, PaginatedResult}
 import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.Address

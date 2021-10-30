@@ -3,16 +3,9 @@ package com.xsn.explorer.data.anorm.dao
 import java.sql.Connection
 import java.time.Instant
 import anorm._
-import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{
-  addressSummaryParser,
-  parseSummary
-}
+import com.xsn.explorer.data.anorm.parsers.BlockRewardParsers.{addressSummaryParser, parseSummary}
 import com.xsn.explorer.data.anorm.parsers.StatisticsParsers
-import com.xsn.explorer.models.{
-  AddressesReward,
-  BlockRewardsSummary,
-  Statistics
-}
+import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 import org.slf4j.LoggerFactory
 
 class StatisticsPostgresDAO {

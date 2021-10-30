@@ -8,8 +8,7 @@ import play.api.libs.json._
   */
 sealed trait Block[Tx] {
   def hash: Blockhash
-  def previousBlockhash
-      : Option[Blockhash] // first block doesn't have a previous block
+  def previousBlockhash: Option[Blockhash] // first block doesn't have a previous block
   def nextBlockhash: Option[Blockhash] // last block doesn't have a next block
   def merkleRoot: Blockhash
   def transactions: List[Tx]

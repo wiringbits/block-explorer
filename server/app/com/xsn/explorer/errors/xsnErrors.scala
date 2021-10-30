@@ -1,12 +1,7 @@
 package com.xsn.explorer.errors
 
 import com.alexitc.playsonify.core.I18nService
-import com.alexitc.playsonify.models.{
-  ErrorId,
-  GenericPublicError,
-  PublicError,
-  ServerError
-}
+import com.alexitc.playsonify.models.{ErrorId, GenericPublicError, PublicError, ServerError}
 
 sealed trait XSNServerError extends ServerError {
 

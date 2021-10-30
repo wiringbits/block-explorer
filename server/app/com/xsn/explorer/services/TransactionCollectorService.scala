@@ -22,20 +22,18 @@ class TransactionCollectorService @Inject() (
 
   /** Collects the given transactions, returning all or none.
     *
-    * The method is designed for the block synchronization process, hence, we
-    * assume that the transactions aren't in the database but the reference
-    * transactions might be in the database.
+    * The method is designed for the block synchronization process, hence, we assume that the transactions aren't in the
+    * database but the reference transactions might be in the database.
     *
-    * For each transaction, it is retrieved from the RPC API in parallel, trying
-    * sequentially if the RPC server gets overloaded.
+    * For each transaction, it is retrieved from the RPC API in parallel, trying sequentially if the RPC server gets
+    * overloaded.
     *
-    * When retrieving a transaction from the RPC API, the inputs are completed
-    * from the first available source:
+    * When retrieving a transaction from the RPC API, the inputs are completed from the first available source:
     *   - The database.
     *   - The RPC API.
     *
-    * When dealing with the RPC API, we try to get the details in parallel, if
-    * the server gets overloaded, we'll try to load the data sequentially.
+    * When dealing with the RPC API, we try to get the details in parallel, if the server gets overloaded, we'll try to
+    * load the data sequentially.
     */
   def collect(block: rpc.Block[_]): FutureApplicationResult[Result] = {
     val futureOr = for {
@@ -87,12 +85,9 @@ class TransactionCollectorService @Inject() (
   }
 
   /** Retrieves the VIN details (address, amount, all or nothing):
-    *   - Tries to retrieve the details from all inputs concurrently from the
-    *     database.
-    *   - The inputs that aren't present in the database are retrieved from the
-    *     RPC API.
-    *   - The ones that weren't retrieved are retried sequentially using the RPC
-    *     API.
+    *   - Tries to retrieve the details from all inputs concurrently from the database.
+    *   - The inputs that aren't present in the database are retrieved from the RPC API.
+    *   - The ones that weren't retrieved are retried sequentially using the RPC API.
     */
   private[services] def getRPCTransactionVIN(
       vinList: List[rpc.TransactionVIN]
@@ -165,8 +160,7 @@ class TransactionCollectorService @Inject() (
 
   /** Get a list of RPC transactions (all or nothing):
     *   - Try to get them all from the RPC API in parallel
-    *   - Retry the ones that weren't retrieved in parallel by retrieving them
-    *     sequentially.
+    *   - Retry the ones that weren't retrieved in parallel by retrieving them sequentially.
     */
   private[services] def getRPCTransactions(
       txidList: List[TransactionId]
@@ -294,7 +288,7 @@ class TransactionCollectorService @Inject() (
     futureList.map { list =>
       val x = list.flatMap {
         case Good(a) => a.map(Good(_))
-        case Bad(e)  => Some(Bad(e))
+        case Bad(e) => Some(Bad(e))
       }
 
       val initial: ApplicationResult[List[persisted.Transaction.HasIO]] =
@@ -302,7 +296,7 @@ class TransactionCollectorService @Inject() (
       x.foldLeft(initial) { case (acc, cur) =>
         cur match {
           case Good(txid) => acc.map(txid :: _)
-          case Bad(e)     => acc.badMap(prev => prev ++ e)
+          case Bad(e) => acc.badMap(prev => prev ++ e)
         }
       }
     }

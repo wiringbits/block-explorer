@@ -4,8 +4,7 @@ import com.alexitc.playsonify.models.ServerError
 import com.alexitc.playsonify.play.AbstractJsonController
 import org.slf4j.LoggerFactory
 
-abstract class MyJsonController(cc: MyJsonControllerComponents)
-    extends AbstractJsonController[Nothing](cc) {
+abstract class MyJsonController(cc: MyJsonControllerComponents) extends AbstractJsonController[Nothing](cc) {
 
   protected val logger = LoggerFactory.getLogger(this.getClass)
 

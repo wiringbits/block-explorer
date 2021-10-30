@@ -1,10 +1,6 @@
 package controllers.common
 
-import com.alexitc.playsonify.play.{
-  I18nPlayService,
-  JsonControllerComponents,
-  PublicErrorRenderer
-}
+import com.alexitc.playsonify.play.{I18nPlayService, JsonControllerComponents, PublicErrorRenderer}
 import javax.inject.Inject
 import play.api.mvc.MessagesControllerComponents
 

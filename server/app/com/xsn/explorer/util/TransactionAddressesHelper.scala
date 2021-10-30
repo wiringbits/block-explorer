@@ -1,9 +1,6 @@
 package com.xsn.explorer.util
 
-import com.xsn.explorer.models.persisted.{
-  AddressTransactionDetails,
-  Transaction
-}
+import com.xsn.explorer.models.persisted.{AddressTransactionDetails, Transaction}
 
 object TransactionAddressesHelper {
 
