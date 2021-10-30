@@ -52,7 +52,7 @@ object CompactSizeInt {
     if (num <= 252) 1
     // can be represented with two bytes
     else if (num <= 65535) 3
-    //can be represented with 4 bytes
+    // can be represented with 4 bytes
     else if (num <= Integer.MAX_VALUE) 5
     else 9
   }
