@@ -20,48 +20,9 @@ jobs:
       - run: cd web-ui && npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
       # - run: cd web-ui && npm run e2e -- --protractor-config=e2e/protractor-ci.conf.js
 
-  build-server:
-    machine:
-      image: ubuntu-1604:201903-01
-    steps:
-      - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "server/build.sbt" }}-{{ checksum "server/project/plugins.sbt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run:
-          name: compile
-          command: cd server && sbt test:compile
-
-      - save_cache:
-          paths:
-            - ~/.m2
-            - ~/.cache/coursier
-            - ~/.ivy2
-          key: v1-dependencies-{{ checksum "server/build.sbt" }}-{{ checksum "server/project/plugins.sbt" }}
-
-      # run tests!
-      - run:
-          name: Pre-download postgres image
-          command: docker pull postgres:11.5
-      - run:
-          name: Run tests
-          command: cd server && sbt test
-      - run:
-          name: sbt dist
-          command: cd server && sbt dist
-
-      # store results
-      - store_test_results:
-          path: server/target/test-reports
-
 workflows:
   version: 2
   build:
     jobs:
       - build-web
-      - build-server
+
