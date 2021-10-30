@@ -34,12 +34,6 @@ jobs:
             - v1-dependencies-
 
       - run:
-          name: Install playsonify
-          command: |
-              sudo curl -L -o /usr/local/bin/mill https://github.com/lihaoyi/mill/releases/download/0.7.3/0.7.3 && sudo chmod +x /usr/local/bin/mill
-              git clone https://github.com/AlexITC/playsonify.git
-              cd playsonify && git checkout 1ab09bd0c76b571894e6cea0960a708fe0f2113d && mill __.publishLocal
-      - run:
           name: compile
           command: cd server && sbt test:compile
 
