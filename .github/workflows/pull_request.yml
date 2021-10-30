@@ -3,8 +3,10 @@ name: Build the server app
 on:
   push:
     branches: [ develop, master ]
+    paths: ['server/**']
   pull_request:
     branches: [ develop, master ]
+    paths: ['server/**']
 
 jobs:
   build:
