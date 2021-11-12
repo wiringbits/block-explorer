@@ -63,7 +63,7 @@ libraryDependencies += "org.postgresql" % "postgresql" % "42.3.1"
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.32"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.7"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.7"
-libraryDependencies += "io.sentry" % "sentry-logback" % "5.3.0"
+libraryDependencies += "io.sentry" % "sentry-logback" % "5.4.0"
 
 libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.0"
