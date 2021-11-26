@@ -6,11 +6,12 @@ import com.alexitc.playsonify.models.pagination.{Limit, Offset, PaginatedQuery}
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.transformers._
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.validators._
-import javax.inject.Inject
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TransactionService @Inject() (
@@ -161,6 +162,15 @@ class TransactionService @Inject() (
 
       WrappedResult(lightTxs)
     }
+
+    result.toFuture
+  }
+
+  def getSpendingTransaction(txid: String, outputIndex: Int): FutureApplicationResult[Option[Transaction]] = {
+    val result = for {
+      transactionId <- transactionIdValidator.validate(txid).toFutureOr
+      spendingTransaction <- transactionFutureDataHandler.getSpendingTransaction(transactionId, outputIndex).toFutureOr
+    } yield spendingTransaction
 
     result.toFuture
   }

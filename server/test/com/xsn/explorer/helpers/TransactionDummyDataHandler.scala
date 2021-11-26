@@ -51,4 +51,9 @@ class TransactionDummyDataHandler extends TransactionBlockingDataHandler {
       limit: pagination.Limit,
       lastSeenTxid: Option[TransactionId]
   ): ApplicationResult[List[Transaction.HasIO]] = ???
+
+  override def getSpendingTransaction(
+      txid: TransactionId,
+      outputIndex: Int
+  ): ApplicationResult[Option[Transaction]] = ???
 }

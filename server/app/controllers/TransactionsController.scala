@@ -2,16 +2,20 @@ package controllers
 
 import com.alexitc.playsonify.core.FutureOr.Implicits.FutureOps
 import com.xsn.explorer.models.request.{SendRawTransactionRequest, TposContractsEncodeRequest}
-import com.xsn.explorer.services.TransactionRPCService
-import com.xsn.explorer.services.TransactionService
+import com.xsn.explorer.services.{BlockService, TransactionRPCService, TransactionService}
 import com.alexitc.playsonify.models.pagination.Limit
 import controllers.common.{MyJsonController, MyJsonControllerComponents}
+import org.scalactic.Good
+
 import javax.inject.Inject
 import play.api.libs.json.Json
+
+import scala.concurrent.Future
 
 class TransactionsController @Inject() (
     transactionRPCService: TransactionRPCService,
     transactionService: TransactionService,
+    blockService: BlockService,
     cc: MyJsonControllerComponents
 ) extends MyJsonController(cc) {
 
@@ -92,6 +96,26 @@ class TransactionsController @Inject() (
         response.withHeaders("Cache-Control" -> "public, max-age=31536000")
       }
       .toFuture
+  }
+
+  def getSpendingTransaction(txid: String, index: Int) = public { _ =>
+    val result = transactionService.getSpendingTransaction(txid, index).toFutureOr.flatMap {
+      case Some(spendingTransaction) =>
+        for {
+          blockHeader <- blockService
+            .getBlockHeader(spendingTransaction.blockhash.toString, includeFilter = false)
+            .toFutureOr
+
+          rawTransaction <- transactionRPCService.getRawTransaction(spendingTransaction.id.string).toFutureOr
+
+          response = Json.obj("rawTransaction" -> rawTransaction, "height" -> blockHeader.height.int)
+        } yield Ok(Json.toJson(response))
+
+      case None =>
+        Future.successful(Good(Ok(Json.parse("{}")))).toFutureOr
+    }
+
+    result.toFuture
   }
 
   def encodeTPOSContract() = publicInput { ctx: HasModel[TposContractsEncodeRequest] =>

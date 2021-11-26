@@ -47,6 +47,11 @@ trait TransactionDataHandler[F[_]] {
       limit: Limit,
       lastSeenTxid: Option[TransactionId]
   ): F[List[Transaction.HasIO]]
+
+  def getSpendingTransaction(
+      txid: TransactionId,
+      outputIndex: Int
+  ): F[Option[Transaction]]
 }
 
 trait TransactionBlockingDataHandler extends TransactionDataHandler[ApplicationResult]

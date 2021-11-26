@@ -649,6 +649,93 @@ class TransactionPostgresDataHandlerSpec
     }
   }
 
+  "getSpendingTransaction" should {
+    "return the spending transaction when output has been spent" in {
+      val block1 = randomBlock()
+      val transaction1 = Transaction(
+        id = randomTransactionId,
+        blockhash = block1.hash,
+        time = java.lang.System.currentTimeMillis(),
+        size = Size(1000)
+      )
+      val input1 = Transaction.Input(
+        fromTxid = dummyTransaction.id,
+        fromOutputIndex = 0,
+        index = 0,
+        value = 100,
+        address = randomAddress
+      )
+      val output1 = Transaction.Output(
+        txid = transaction1.id,
+        index = 0,
+        value = 100,
+        address = randomAddress,
+        script = randomHexString()
+      )
+
+      val block2 = randomBlock()
+      val transaction2 = Transaction(
+        id = randomTransactionId,
+        blockhash = block2.hash,
+        time = java.lang.System.currentTimeMillis(),
+        size = Size(1000)
+      )
+      val input2 = Transaction.Input(
+        fromTxid = transaction1.id,
+        fromOutputIndex = 0,
+        index = 0,
+        value = 100,
+        address = randomAddress
+      )
+      val output2 = Transaction.Output(
+        txid = transaction2.id,
+        index = 0,
+        value = 100,
+        address = randomAddress,
+        script = randomHexString()
+      )
+
+      createBlock(block1, List(Transaction.HasIO(transaction1, List(input1), List(output1))))
+      createBlock(block2, List(Transaction.HasIO(transaction2, List(input2), List(output2))))
+
+      val result = dataHandler.getSpendingTransaction(transaction1.id, 0)
+
+      result.isGood mustBe true
+      result.get mustBe Some(transaction2)
+    }
+
+    "return None when output has not been spent" in {
+      val block = randomBlock()
+      val transaction = Transaction(
+        id = randomTransactionId,
+        blockhash = block.hash,
+        time = java.lang.System.currentTimeMillis(),
+        size = Size(1000)
+      )
+      val input1 = Transaction.Input(
+        fromTxid = dummyTransaction.id,
+        fromOutputIndex = 0,
+        index = 0,
+        value = 100,
+        address = randomAddress
+      )
+      val output1 = Transaction.Output(
+        txid = transaction.id,
+        index = 0,
+        value = 100,
+        address = randomAddress,
+        script = randomHexString()
+      )
+
+      createBlock(block, List(Transaction.HasIO(transaction, List(input1), List(output1))))
+
+      val result = dataHandler.getSpendingTransaction(transaction.id, 0)
+
+      result.isGood mustBe true
+      result.get mustBe None
+    }
+  }
+
   private def createBlock(block: Block.Canonical) = {
     val transactions = block.transactions
       .map(_.string)

@@ -586,6 +586,21 @@ class TransactionPostgresDAO @Inject() (
     ).as(parseTransaction.singleOpt)
   }
 
+  def getSpendingTransaction(txid: TransactionId, outputIndex: Int)(implicit conn: Connection): Option[Transaction] = {
+    SQL(
+      """
+        |SELECT t.txid, t.blockhash, t.time, t.size
+        |FROM transactions t
+        |INNER JOIN transaction_inputs ti USING (txid)
+        |WHERE ti.from_txid = {txid} AND
+        |      ti.from_output_index = {output_index}
+      """.stripMargin
+    ).on(
+      'txid -> txid.toBytesBE.toArray,
+      'output_index -> outputIndex
+    ).as(parseTransaction.singleOpt)
+  }
+
   private def toSQL(condition: OrderingCondition): String = condition match {
     case OrderingCondition.AscendingOrder => "ASC"
     case OrderingCondition.DescendingOrder => "DESC"
