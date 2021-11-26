@@ -1,26 +1,23 @@
 package controllers
 
 import com.alexitc.playsonify.core.ApplicationResult
-import com.alexitc.playsonify.play.PublicErrorRenderer
-import com.alexitc.playsonify.models.pagination.Limit
 import com.alexitc.playsonify.models.ordering.OrderingCondition
-import com.xsn.explorer.data.TransactionBlockingDataHandler
+import com.alexitc.playsonify.models.pagination.Limit
+import com.alexitc.playsonify.play.PublicErrorRenderer
+import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{
-  DataHelper,
-  FileBasedXSNService,
-  TransactionDummyDataHandler,
-  TransactionLoader
-}
+import com.xsn.explorer.helpers.DataGenerator.{randomBlockHeader, randomBlockhash, randomTransactionId}
+import com.xsn.explorer.helpers.{DataHelper, FileBasedXSNService, TransactionDummyDataHandler, TransactionLoader}
 import com.xsn.explorer.models._
+import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
-import org.scalactic.Bad
+import org.mockito.MockitoSugar.{mock, when}
+import org.scalactic.{Bad, Good}
 import play.api.inject.bind
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
-import org.scalactic.Good
 
 class TransactionsControllerSpec extends MyAPISpec {
 
@@ -68,6 +65,14 @@ class TransactionsControllerSpec extends MyAPISpec {
     )
   )
 
+  private val spentTransaction = "0c0f595a004eab5cf62ea70570f175701d120a0da31c8222d2d99fc60bf96577"
+  private val spendingTransaction = Transaction(
+    id = createTransactionId("a3c43d22bbba31a6e5c00f565cb9c5a1a365407df4cc90efa8a865656b52c0eb"),
+    blockhash = randomBlockhash,
+    time = java.lang.System.currentTimeMillis(),
+    size = Size(1000)
+  )
+
   private val customXSNService = new FileBasedXSNService
 
   private val transactionDataHandler = new TransactionDummyDataHandler {
@@ -91,11 +96,25 @@ class TransactionsControllerSpec extends MyAPISpec {
         Good(List(transactionList.last))
       }
     }
+
+    override def getSpendingTransaction(
+        txid: TransactionId,
+        outputIndex: Int
+    ): ApplicationResult[Option[Transaction]] = {
+      if (txid.string == spentTransaction) {
+        Good(Some(spendingTransaction))
+      } else {
+        Good(None)
+      }
+    }
   }
+
+  private val blockDataHandler = mock[BlockBlockingDataHandler]
 
   override val application = guiceApplicationBuilder
     .overrides(bind[XSNService].to(customXSNService))
     .overrides(bind[TransactionBlockingDataHandler].to(transactionDataHandler))
+    .overrides(bind[BlockBlockingDataHandler].to(blockDataHandler))
     .build()
 
   "GET /transactions/:txid" should {
@@ -389,6 +408,28 @@ class TransactionsControllerSpec extends MyAPISpec {
 
       val cacheHeader = header("Cache-Control", response)
       cacheHeader mustBe None
+    }
+  }
+
+  "GET /transactions/:txid/utxos/:index/spending-transaction" should {
+    "return the spending information when output has been spent" in {
+      val header = randomBlockHeader()
+      when(blockDataHandler.getHeader(spendingTransaction.blockhash, false)).thenReturn(Good(header))
+
+      val response = GET(s"/transactions/$spentTransaction/utxos/0/spending-transaction")
+      val json = contentAsJson(response)
+
+      status(response) mustEqual OK
+      (json \ "rawTransaction").as[JsValue] mustBe TransactionLoader.json(spendingTransaction.id.string)
+      (json \ "height").as[Int] mustBe header.height.int
+    }
+
+    "return empty JSON when output has not been spent" in {
+      val response = GET(s"/transactions/$randomTransactionId/utxos/0/spending-transaction")
+      val json = contentAsJson(response)
+
+      status(response) mustEqual OK
+      json mustBe Json.parse("{}")
     }
   }
 

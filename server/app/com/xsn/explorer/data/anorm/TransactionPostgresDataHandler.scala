@@ -127,4 +127,12 @@ class TransactionPostgresDataHandler @Inject() (
 
     Good(transactions)
   }
+
+  override def getSpendingTransaction(txid: TransactionId, outputIndex: Int): ApplicationResult[Option[Transaction]] = {
+    withConnection { implicit conn =>
+      val spendingTransaction = transactionPostgresDAO.getSpendingTransaction(txid, outputIndex)
+
+      Good(spendingTransaction)
+    }
+  }
 }

@@ -118,4 +118,15 @@ class TransactionFutureDataHandler @Inject() (
         )
       }
     }
+
+  override def getSpendingTransaction(
+      txid: TransactionId,
+      outputIndex: Int
+  ): FutureApplicationResult[Option[Transaction]] = {
+    retryableFutureDataHandler.retrying {
+      Future {
+        blockingDataHandler.getSpendingTransaction(txid, outputIndex)
+      }
+    }
+  }
 }

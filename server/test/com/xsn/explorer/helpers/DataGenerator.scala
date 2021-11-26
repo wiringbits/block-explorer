@@ -1,7 +1,7 @@
 package com.xsn.explorer.helpers
 
-import com.xsn.explorer.models.TPoSContract
-import com.xsn.explorer.models.persisted.Transaction
+import com.xsn.explorer.models.{BlockExtractionMethod, TPoSContract}
+import com.xsn.explorer.models.persisted.{BlockHeader, Transaction}
 import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values.{TransactionId, _}
 
@@ -63,6 +63,26 @@ trait DataGenerator {
       chainwork = "abcdef",
       difficulty = 12.2,
       tposContract = None
+    )
+  }
+
+  def randomBlockHeader(): BlockHeader = {
+    BlockHeader.Simple(
+      hash = randomBlockhash,
+      previousBlockhash = Some(randomBlockhash),
+      nextBlockhash = Some(randomBlockhash),
+      tposContract = Some(randomTransactionId),
+      merkleRoot = randomBlockhash,
+      size = Size(nextInt()),
+      height = Height(nextInt()),
+      version = nextInt(),
+      time = nextLong(),
+      medianTime = nextLong(),
+      nonce = nextLong(),
+      bits = "",
+      chainwork = "",
+      difficulty = BigDecimal(nextDouble()),
+      extractionMethod = BlockExtractionMethod.ProofOfWork
     )
   }
 
