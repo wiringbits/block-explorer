@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.10")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.11")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.2")
 
