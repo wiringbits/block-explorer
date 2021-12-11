@@ -31,7 +31,7 @@ export class DexMonitorComponent implements OnInit {
     private orderBookService: OrderBookService,
     private tickerService: TickerService
   ) {
-    this.tradingPair = "BTC_USDT";
+    this.tradingPair = "XSN_BTC";
     this.selectedTab = 1;
   }
 
