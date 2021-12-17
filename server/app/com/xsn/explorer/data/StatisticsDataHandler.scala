@@ -5,8 +5,6 @@ import com.alexitc.playsonify.core.ApplicationResult
 import com.xsn.explorer.models.values.Address
 import com.xsn.explorer.models.{AddressesReward, BlockRewardsSummary, Statistics}
 
-import scala.language.higherKinds
-
 trait StatisticsDataHandler[F[_]] {
 
   def getStatistics(): F[Statistics]

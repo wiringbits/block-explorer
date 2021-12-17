@@ -55,7 +55,7 @@ class CurrencySynchronizerTask @Inject() (
     logger.info("Starting currency synchronizer task")
 
     val currencySynchronizerActor = actorSystem.actorOf(
-      Props[CurrencySynchronizerActor],
+      Props[CurrencySynchronizerActor](),
       "currency_synchronizer"
     )
     val highPriorityCurrencies = List(Currency.BTC, Currency.USD)

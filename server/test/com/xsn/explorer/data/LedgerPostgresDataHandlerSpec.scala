@@ -2,29 +2,18 @@ package com.xsn.explorer.data
 
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
-import com.xsn.explorer.errors.{
-  PreviousBlockMissingError,
-  RepeatedBlockHeightError
-}
+import com.xsn.explorer.errors.{PreviousBlockMissingError, RepeatedBlockHeightError}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers.Converters._
 import com.xsn.explorer.helpers.DataHandlerObjects._
 import com.xsn.explorer.helpers.LedgerHelper._
-import com.xsn.explorer.models.{
-  BlockExtractionMethod,
-  PoSBlockRewards,
-  PoWBlockRewards,
-  TPoSBlockRewards
-}
+import com.xsn.explorer.models.{BlockExtractionMethod, PoSBlockRewards, PoWBlockRewards, TPoSBlockRewards}
 import org.scalactic.{Bad, Good}
 import org.scalatest.BeforeAndAfter
 
-class LedgerPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
-  private val emptyFilterFactory = () =>
-    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
   private val reward = Some(getPoWReward(blockList.head))
   lazy val dataHandler = createLedgerDataHandler(database)
 
@@ -150,7 +139,7 @@ class LedgerPostgresDataHandlerSpec
             r.reward.address mustEqual powReward.reward.address
             r.reward.value mustEqual powReward.reward.value
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -184,7 +173,7 @@ class LedgerPostgresDataHandlerSpec
             r.stakedAmount mustEqual posReward.stakedAmount
             r.stakedDuration mustEqual posReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -217,7 +206,7 @@ class LedgerPostgresDataHandlerSpec
             r.stakedAmount mustEqual posReward.stakedAmount
             r.stakedDuration mustEqual posReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -254,7 +243,7 @@ class LedgerPostgresDataHandlerSpec
             r.stakedAmount mustEqual tposReward.stakedAmount
             r.stakedDuration mustEqual tposReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -290,7 +279,7 @@ class LedgerPostgresDataHandlerSpec
             r.stakedAmount mustEqual tposReward.stakedAmount
             r.stakedDuration mustEqual tposReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }

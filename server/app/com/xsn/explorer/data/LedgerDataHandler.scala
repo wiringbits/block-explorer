@@ -5,8 +5,6 @@ import com.xsn.explorer.gcs.GolombCodedSet
 import com.xsn.explorer.models.{BlockRewards, TPoSContract}
 import com.xsn.explorer.models.persisted.Block
 
-import scala.language.higherKinds
-
 /** The ledger could be handled as a stack, we should be able to keep the consistency even in the case of
   * reorganizations using just stack operations.
   */

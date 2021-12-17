@@ -16,9 +16,11 @@ object TransactionBalancesHelper {
 
     addressValueList
       .groupBy(_._1)
+      .view
       .mapValues { list =>
         list.map(_._2).sum
       }
+      .toMap
   }
 
   def computeReceiveMap(
@@ -32,9 +34,11 @@ object TransactionBalancesHelper {
 
     addressValueList
       .groupBy(_._1)
+      .view
       .mapValues { list =>
         list.map(_._2).sum
       }
+      .toMap
   }
 
   def computeBalances(
@@ -50,6 +54,7 @@ object TransactionBalancesHelper {
 
     val result = (spentList ++ receiveList)
       .groupBy(_.address)
+      .view
       .mapValues { _.reduce(mergeBalances) }
       .values
 

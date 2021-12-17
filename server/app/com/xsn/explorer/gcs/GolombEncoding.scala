@@ -69,7 +69,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
         (remaining, hash, hash :: hashes)
       }
 
-    result.to[SortedSet]
+    result.to(SortedSet)
   }
 
   /** Maps the word set to a sorted set of hashes.
@@ -80,7 +80,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     data
       .map(hash)
       .map(f)
-      .to[SortedSet]
+      .to(SortedSet)
   }
 
   private def golombEncode(x: BigInt): List[Bit] = {

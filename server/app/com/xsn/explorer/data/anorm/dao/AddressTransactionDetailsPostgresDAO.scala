@@ -29,11 +29,11 @@ class AddressTransactionDetailsPostgresDAO @Inject() (
       case _ =>
         val params = details.map { d =>
           List(
-            'address -> d.address.string: NamedParameter,
-            'txid -> d.txid.toBytesBE.toArray: NamedParameter,
-            'received -> d.received: NamedParameter,
-            'sent -> d.sent: NamedParameter,
-            'time -> d.time: NamedParameter
+            Symbol("address") -> d.address.string: NamedParameter,
+            Symbol("txid") -> d.txid.toBytesBE.toArray: NamedParameter,
+            Symbol("received") -> d.received: NamedParameter,
+            Symbol("sent") -> d.sent: NamedParameter,
+            Symbol("time") -> d.time: NamedParameter
           )
         }
 
@@ -80,11 +80,11 @@ class AddressTransactionDetailsPostgresDAO @Inject() (
         |    time = EXCLUDED.time
       """.stripMargin
     ).on(
-      'address -> details.address.string,
-      'txid -> details.txid.toBytesBE.toArray,
-      'received -> details.received,
-      'sent -> details.sent,
-      'time -> details.time
+      Symbol("address") -> details.address.string,
+      Symbol("txid") -> details.txid.toBytesBE.toArray,
+      Symbol("received") -> details.received,
+      Symbol("sent") -> details.sent,
+      Symbol("time") -> details.time
     ).executeUpdate()
   }
 
@@ -98,7 +98,7 @@ class AddressTransactionDetailsPostgresDAO @Inject() (
         |RETURNING address, txid, received, sent, time
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray
+      Symbol("txid") -> txid.toBytesBE.toArray
     ).as(parseAddressTransactionDetails.*)
 
     result

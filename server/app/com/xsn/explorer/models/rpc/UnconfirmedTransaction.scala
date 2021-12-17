@@ -14,10 +14,10 @@ case class UnconfirmedTransaction[VIN <: TransactionVIN](
 object UnconfirmedTransaction {
 
   implicit val reads: Reads[UnconfirmedTransaction[TransactionVIN]] = {
-    val builder = (__ \ 'txid).read[TransactionId] and
-      (__ \ 'size).read[Size] and
-      (__ \ 'vout).read[List[TransactionVOUT]] and
-      (__ \ 'vin)
+    val builder = (__ \ Symbol("txid")).read[TransactionId] and
+      (__ \ Symbol("size")).read[Size] and
+      (__ \ Symbol("vout")).read[List[TransactionVOUT]] and
+      (__ \ Symbol("vin"))
         .readNullable[List[JsValue]]
         .map(_ getOrElse List.empty)
         .map { list =>

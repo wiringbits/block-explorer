@@ -31,9 +31,9 @@ class BalancePostgresDAO @Inject() (
         |RETURNING address, received, spent
       """.stripMargin
     ).on(
-      'address -> partial.address.string,
-      'received -> partial.received,
-      'spent -> partial.spent
+      Symbol("address") -> partial.address.string,
+      Symbol("received") -> partial.received,
+      Symbol("spent") -> partial.spent
     ).as(parseBalance.singleOpt)
   }
 
@@ -51,8 +51,8 @@ class BalancePostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'offset -> query.offset.int,
-      'limit -> query.limit.int
+      Symbol("offset") -> query.offset.int,
+      Symbol("limit") -> query.limit.int
     ).as(parseBalance.*)
   }
 
@@ -75,7 +75,7 @@ class BalancePostgresDAO @Inject() (
          |wHERE address = {address}
       """.stripMargin
     ).on(
-      'address -> address.string
+      Symbol("address") -> address.string
     ).as(parseBalance.singleOpt)
   }
 
@@ -92,7 +92,7 @@ class BalancePostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int
+      Symbol("limit") -> limit.int
     ).as(parseBalance.*)
   }
 
@@ -118,8 +118,8 @@ class BalancePostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int,
-      'lastSeenAddress -> lastSeenAddress.string
+      Symbol("limit") -> limit.int,
+      Symbol("lastSeenAddress") -> lastSeenAddress.string
     ).as(parseBalance.*)
   }
 }

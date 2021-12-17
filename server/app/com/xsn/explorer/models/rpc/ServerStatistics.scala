@@ -13,9 +13,9 @@ case class ServerStatistics(
 object ServerStatistics {
 
   implicit val reads: Reads[ServerStatistics] = {
-    val builder = (__ \ 'height).read[Height] and
-      (__ \ 'transactions).read[Int] and
-      (__ \ 'total_amount).read[BigDecimal]
+    val builder = (__ \ Symbol("height")).read[Height] and
+      (__ \ Symbol("transactions")).read[Int] and
+      (__ \ Symbol("total_amount")).read[BigDecimal]
 
     builder.apply { (height, transactions, totalSupply) =>
       ServerStatistics(height, transactions, totalSupply)

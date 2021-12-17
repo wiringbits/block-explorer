@@ -34,21 +34,21 @@ class BlockPostgresDAO @Inject() (
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
-      'blockhash -> block.hash.toBytesBE.toArray,
-      'previous_blockhash -> block.previousBlockhash.map(_.toBytesBE.toArray),
-      'next_blockhash -> block.nextBlockhash.map(_.toBytesBE.toArray),
-      'tpos_contract -> block.tposContract.map(_.toBytesBE.toArray),
-      'merkle_root -> block.merkleRoot.toBytesBE.toArray,
-      'size -> block.size.int,
-      'height -> block.height.int,
-      'version -> block.version,
-      'time -> block.time,
-      'median_time -> block.medianTime,
-      'nonce -> block.nonce,
-      'bits -> block.bits,
-      'chainwork -> block.chainwork,
-      'difficulty -> block.difficulty,
-      'extraction_method -> block.extractionMethod.entryName
+      Symbol("blockhash") -> block.hash.toBytesBE.toArray,
+      Symbol("previous_blockhash") -> block.previousBlockhash.map(_.toBytesBE.toArray),
+      Symbol("next_blockhash") -> block.nextBlockhash.map(_.toBytesBE.toArray),
+      Symbol("tpos_contract") -> block.tposContract.map(_.toBytesBE.toArray),
+      Symbol("merkle_root") -> block.merkleRoot.toBytesBE.toArray,
+      Symbol("size") -> block.size.int,
+      Symbol("height") -> block.height.int,
+      Symbol("version") -> block.version,
+      Symbol("time") -> block.time,
+      Symbol("median_time") -> block.medianTime,
+      Symbol("nonce") -> block.nonce,
+      Symbol("bits") -> block.bits,
+      Symbol("chainwork") -> block.chainwork,
+      Symbol("difficulty") -> block.difficulty,
+      Symbol("extraction_method") -> block.extractionMethod.entryName
     ).as(parseBlock.singleOpt)
   }
 
@@ -83,21 +83,21 @@ class BlockPostgresDAO @Inject() (
         |    extraction_method = EXCLUDED.extraction_method
       """.stripMargin
     ).on(
-      'blockhash -> block.hash.toBytesBE.toArray,
-      'previous_blockhash -> block.previousBlockhash.map(_.toBytesBE.toArray),
-      'next_blockhash -> block.nextBlockhash.map(_.toBytesBE.toArray),
-      'tpos_contract -> block.tposContract.map(_.toBytesBE.toArray),
-      'merkle_root -> block.merkleRoot.toBytesBE.toArray,
-      'size -> block.size.int,
-      'height -> block.height.int,
-      'version -> block.version,
-      'time -> block.time,
-      'median_time -> block.medianTime,
-      'nonce -> block.nonce,
-      'bits -> block.bits,
-      'chainwork -> block.chainwork,
-      'difficulty -> block.difficulty,
-      'extraction_method -> block.extractionMethod.entryName
+      Symbol("blockhash") -> block.hash.toBytesBE.toArray,
+      Symbol("previous_blockhash") -> block.previousBlockhash.map(_.toBytesBE.toArray),
+      Symbol("next_blockhash") -> block.nextBlockhash.map(_.toBytesBE.toArray),
+      Symbol("tpos_contract") -> block.tposContract.map(_.toBytesBE.toArray),
+      Symbol("merkle_root") -> block.merkleRoot.toBytesBE.toArray,
+      Symbol("size") -> block.size.int,
+      Symbol("height") -> block.height.int,
+      Symbol("version") -> block.version,
+      Symbol("time") -> block.time,
+      Symbol("median_time") -> block.medianTime,
+      Symbol("nonce") -> block.nonce,
+      Symbol("bits") -> block.bits,
+      Symbol("chainwork") -> block.chainwork,
+      Symbol("difficulty") -> block.difficulty,
+      Symbol("extraction_method") -> block.extractionMethod.entryName
     ).execute()
   }
 
@@ -114,8 +114,8 @@ class BlockPostgresDAO @Inject() (
         |          height, version, time, median_time, nonce, bits, chainwork, difficulty, extraction_method
       """.stripMargin
     ).on(
-      'blockhash -> blockhash.toBytesBE.toArray,
-      'next_blockhash -> nextBlockhash.toBytesBE.toArray
+      Symbol("blockhash") -> blockhash.toBytesBE.toArray,
+      Symbol("next_blockhash") -> nextBlockhash.toBytesBE.toArray
     ).as(parseBlock.singleOpt)
   }
 
@@ -163,8 +163,8 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'offset -> paginatedQuery.offset.int,
-      'limit -> paginatedQuery.limit.int
+      Symbol("offset") -> paginatedQuery.offset.int,
+      Symbol("limit") -> paginatedQuery.limit.int
     ).as(parseBlock.*)
   }
 
@@ -220,7 +220,7 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'limit -> limit.int
+      Symbol("limit") -> limit.int
     ).as(parseHeader.*)
 
     for {
@@ -259,8 +259,8 @@ class BlockPostgresDAO @Inject() (
         |LIMIT {limit}
       """.stripMargin
     ).on(
-      'lastSeenHash -> lastSeenHash.toBytesBE.toArray,
-      'limit -> limit.int
+      Symbol("lastSeenHash") -> lastSeenHash.toBytesBE.toArray,
+      Symbol("limit") -> limit.int
     ).as(parseHeader.*)
 
     for {
@@ -336,7 +336,7 @@ class BlockPostgresDAO @Inject() (
         |ON blk.blockhash = tx.blockhash
       """.stripMargin
     ).on(
-      'limit -> limit.int
+      Symbol("limit") -> limit.int
     ).as(parseBlockInfo.*)
   }
 
@@ -378,8 +378,8 @@ class BlockPostgresDAO @Inject() (
         |ORDER BY blk.height $order
       """.stripMargin
     ).on(
-      'lastSeenHash -> lastSeenHash.toBytesBE.toArray,
-      'limit -> limit.int
+      Symbol("lastSeenHash") -> lastSeenHash.toBytesBE.toArray,
+      Symbol("limit") -> limit.int
     ).as(parseBlockInfo.*)
   }
 

@@ -25,7 +25,7 @@ class MerchantnodeSynchronizerActor extends Actor {
     case MerchantnodeSynchronizerActor.GetEnabledMerchantnodeCount =>
       sender() ! merchantnodes.count(x => x.status == "ENABLED")
     case MerchantnodeSynchronizerActor.GetMerchantnodeProtocols =>
-      sender() ! merchantnodes.groupBy(_.protocol).mapValues(_.length).toMap
+      sender() ! merchantnodes.groupBy(_.protocol).view.mapValues(_.length).toMap
   }
 }
 

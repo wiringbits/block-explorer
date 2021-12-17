@@ -25,7 +25,7 @@ class MasternodeSynchronizerActor extends Actor {
     case MasternodeSynchronizerActor.GetEnabledMasternodeCount =>
       sender() ! masternodes.count(x => x.status == "ENABLED")
     case MasternodeSynchronizerActor.GetMasternodeProtocols =>
-      sender() ! masternodes.groupBy(_.protocol).mapValues(_.length).toMap
+      sender() ! masternodes.groupBy(_.protocol).view.mapValues(_.length).toMap
   }
 }
 
