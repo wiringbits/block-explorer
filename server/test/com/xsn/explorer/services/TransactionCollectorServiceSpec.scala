@@ -10,14 +10,14 @@ import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
 import org.scalactic.{Bad, Good, One}
 import org.scalatest.EitherValues._
-import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.concurrent.ScalaFutures._
 
 import scala.concurrent.Future
 
 @com.github.ghik.silencer.silent
-class TransactionCollectorServiceSpec extends WordSpec {
+class TransactionCollectorServiceSpec extends AnyWordSpec {
 
   import Executors.globalEC
 
@@ -56,7 +56,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactionVINWithValues(vin)) { result =>
-        result.toEither.right.value must be(expected)
+        result.get must be(expected)
       }
     }
 
@@ -103,7 +103,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
     "do nothing on empty list" in {
       val service = create(null, null)
       whenReady(service.completeRPCTransactionsSequentially(List.empty)) { result =>
-        result.toEither.right.value must be(empty)
+        result.get must be(empty)
       }
     }
 
@@ -116,7 +116,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
 
       val service = create(null, null)
       whenReady(service.completeRPCTransactionsSequentially(input.toList)) { result =>
-        result.toEither.right.value must be(input.flatMap(_._2.toOption))
+        result.get must be(input.flatMap(_._2.toOption))
       }
     }
 
@@ -192,7 +192,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
         ) ::: secondHalf.flatMap(_._2.toOption) ::: List(
           pending2Tx
         )
-        result.toEither.right.value must be(expected)
+        result.get must be(expected)
       }
     }
   }
@@ -231,7 +231,7 @@ class TransactionCollectorServiceSpec extends WordSpec {
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactions(input)) { result =>
         val expected = List(tx, pending)
-        result.toEither.right.value must be(expected)
+        result.get must be(expected)
       }
     }
   }

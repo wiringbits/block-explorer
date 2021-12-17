@@ -71,7 +71,7 @@ class BlockLogic {
 
     // first vout is empty, useless
     val coinstakeVOUT = coinstakeTx.vout.drop(1)
-    if (coinstakeVOUT.size >= 1 && coinstakeVOUT.size <= 3) {
+    if (coinstakeVOUT.nonEmpty && coinstakeVOUT.size <= 3) {
       val value = coinstakeVOUT
         .filter(_.addresses.getOrElse(List.empty) contains coinstakeAddress)
         .map(_.value)

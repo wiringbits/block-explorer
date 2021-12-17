@@ -1,6 +1,8 @@
 package com.xsn.explorer.util
 
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.wordspec.AsyncWordSpec
+import org.scalatest.matchers.must.Matchers
 
 import scala.concurrent.Future
 import akka.actor.{ActorSystem, Scheduler}
@@ -9,7 +11,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 @com.github.ghik.silencer.silent
-class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
+class RetryableFutureSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()

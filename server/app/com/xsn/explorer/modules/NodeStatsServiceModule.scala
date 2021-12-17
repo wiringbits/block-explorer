@@ -17,10 +17,8 @@ class NodeStatsServiceModule extends AbstractModule {
   }
 
   override def configure(): Unit = {
-    val _ = (
-      bind(classOf[NodeStatsRepository]).to(
-        classOf[NodeStatsRepository.ActorImpl]
-      )
+    val _ = bind(classOf[NodeStatsRepository]).to(
+      classOf[NodeStatsRepository.ActorImpl]
     )
   }
 }

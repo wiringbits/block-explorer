@@ -54,7 +54,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     }
 
     "succeed storing a repeated block by hash" in {
-      val genesis = blockList(0)
+      val genesis = blockList.head
       dataHandler.push(
         genesis.withTransactions(getTransactions(genesis)),
         List.empty,
@@ -74,7 +74,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     }
 
     "fail to store a repeated block by height" in {
-      val genesis = blockList(0)
+      val genesis = blockList.head
       dataHandler.push(
         genesis.withTransactions(getTransactions(genesis)),
         List.empty,

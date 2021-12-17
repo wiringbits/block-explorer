@@ -1,8 +1,8 @@
 package com.xsn.explorer.tasks
 
-import akka.actor.{ActorSystem}
+import akka.actor.ActorSystem
 import com.xsn.explorer.config.MerchantnodeSynchronizerConfig
-import com.xsn.explorer.services.{XSNService}
+import com.xsn.explorer.services.XSNService
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
@@ -27,7 +27,7 @@ class MerchantnodeSynchronizerTask @Inject() (
     if (config.enabled) {
       logger.info("Starting merchantnode synchronizer task")
 
-      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
+      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) {
         xsnService.getMerchantnodes().onComplete {
           case Success(Good(merchantnodes)) =>
             logger

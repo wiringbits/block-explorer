@@ -1,10 +1,12 @@
 package com.xsn.explorer.models
 
 import com.xsn.explorer.models.values._
-import org.scalatest.{MustMatchers, OptionValues, WordSpec}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 @com.github.ghik.silencer.silent
-class AddressSpec extends WordSpec with MustMatchers with OptionValues {
+class AddressSpec extends AnyWordSpec with Matchers with OptionValues {
 
   val addresses = Map(
     "xsn legacy" -> "19Gfgd95swmT8jmktPK19mbYw9hiBGYV4",

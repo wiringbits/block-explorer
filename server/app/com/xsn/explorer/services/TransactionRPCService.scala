@@ -130,11 +130,9 @@ class TransactionRPCService @Inject() (
           One(TransactionError.NotFound(txid))
         )
         .toFutureOr
-    } yield (
-      Json.obj("hex" -> hex, "blockhash" -> blockhash) -> canCacheResult(
-        latestBlock,
-        height
-      )
+    } yield Json.obj("hex" -> hex, "blockhash" -> blockhash) -> canCacheResult(
+      latestBlock,
+      height
     )
 
     result.toFuture

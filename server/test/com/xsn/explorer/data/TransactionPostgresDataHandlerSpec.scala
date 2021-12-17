@@ -580,7 +580,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
             fromTxid = transaction.id,
             fromOutputIndex = 0,
             index = 0,
-            value = transaction.outputs(0).value,
+            value = transaction.outputs.head.value,
             address = newAddress
           ),
           Transaction.Input(

@@ -1,9 +1,11 @@
 package com.xsn.explorer.models.values
 
-import org.scalatest.{MustMatchers, OptionValues, WordSpec}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 @com.github.ghik.silencer.silent
-class HexStringSpec extends WordSpec with MustMatchers with OptionValues {
+class HexStringSpec extends AnyWordSpec with Matchers with OptionValues {
 
   "from" should {
     "accept a valid hex" in {

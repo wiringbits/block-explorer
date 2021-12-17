@@ -2,12 +2,12 @@ package com.xsn.explorer.models
 
 import com.xsn.explorer.models.values.Address
 import javax.xml.bind.DatatypeConverter
-import org.scalatest.MustMatchers._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.OptionValues._
-import org.scalatest.WordSpec
+import org.scalatest.wordspec.AnyWordSpec
 
 @com.github.ghik.silencer.silent
-class TPoSContractSpec extends WordSpec {
+class TPoSContractSpec extends AnyWordSpec {
 
   val address1 = Address.from("Xi3sQfMQsy2CzMZTrnKW6HFGp1VqFThdLw").get
   val address2 = Address.from("XyJC8xnfFrHNcMinh6gxuPRYY9HCaY9DAo").get

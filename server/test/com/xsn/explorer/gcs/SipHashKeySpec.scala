@@ -1,11 +1,11 @@
 package com.xsn.explorer.gcs
 
 import com.xsn.explorer.models.values.Blockhash
-import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 
 @com.github.ghik.silencer.silent
-class SipHashKeySpec extends WordSpec {
+class SipHashKeySpec extends AnyWordSpec {
 
   "parsing a Btcutil-like key" should {
     "parse the right values" in {

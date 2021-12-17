@@ -4,10 +4,11 @@ import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{Reward, Stake}
 import com.xsn.explorer.helpers.DataGenerator
 import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, RewardType, TPoSBlockRewards}
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 @com.github.ghik.silencer.silent
-class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
+class BlockRewardPostgresSerializerSpec extends AnyWordSpec with Matchers {
   "serialize" should {
     "serialize PoW block" in {
       val blockReward =
@@ -33,11 +34,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 2
 
-      result(0).blockReward.address mustEqual blockReward.coinstake.address
-      result(0).blockReward.value mustEqual blockReward.coinstake.value
-      result(0).rewardType mustEqual RewardType.PoS
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.coinstake.address
+      result.head.blockReward.value mustEqual blockReward.coinstake.value
+      result.head.rewardType mustEqual RewardType.PoS
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
 
       result(1).blockReward.address mustEqual blockReward.masternode.get.address
       result(1).blockReward.value mustEqual blockReward.masternode.get.value
@@ -57,11 +58,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 2
 
-      result(0).blockReward.address mustEqual blockReward.coinstake.address
-      result(0).blockReward.value mustEqual blockReward.coinstake.value
-      result(0).rewardType mustEqual RewardType.PoS
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.coinstake.address
+      result.head.blockReward.value mustEqual blockReward.coinstake.value
+      result.head.rewardType mustEqual RewardType.PoS
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
 
       result(1).blockReward.address mustEqual blockReward.treasury.get.address
       result(1).blockReward.value mustEqual blockReward.treasury.get.value
@@ -81,11 +82,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 1
 
-      result(0).blockReward.address mustEqual blockReward.coinstake.address
-      result(0).blockReward.value mustEqual blockReward.coinstake.value
-      result(0).rewardType mustEqual RewardType.PoS
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.coinstake.address
+      result.head.blockReward.value mustEqual blockReward.coinstake.value
+      result.head.rewardType mustEqual RewardType.PoS
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
     }
 
     "serialize TPoS block with masternode" in {
@@ -102,11 +103,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 3
 
-      result(0).blockReward.address mustEqual blockReward.owner.address
-      result(0).blockReward.value mustEqual blockReward.owner.value
-      result(0).rewardType mustEqual RewardType.TPoSOwner
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.owner.address
+      result.head.blockReward.value mustEqual blockReward.owner.value
+      result.head.rewardType mustEqual RewardType.TPoSOwner
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
 
       result(1).blockReward.address mustEqual blockReward.merchant.address
       result(1).blockReward.value mustEqual blockReward.merchant.value
@@ -133,11 +134,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 3
 
-      result(0).blockReward.address mustEqual blockReward.owner.address
-      result(0).blockReward.value mustEqual blockReward.owner.value
-      result(0).rewardType mustEqual RewardType.TPoSOwner
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.owner.address
+      result.head.blockReward.value mustEqual blockReward.owner.value
+      result.head.rewardType mustEqual RewardType.TPoSOwner
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
 
       result(1).blockReward.address mustEqual blockReward.merchant.address
       result(1).blockReward.value mustEqual blockReward.merchant.value
@@ -164,11 +165,11 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result.length mustEqual 2
 
-      result(0).blockReward.address mustEqual blockReward.owner.address
-      result(0).blockReward.value mustEqual blockReward.owner.value
-      result(0).rewardType mustEqual RewardType.TPoSOwner
-      result(0).stake.get.stakedAmount mustEqual blockReward.stakedAmount
-      result(0).stake.get.stakedTime mustEqual blockReward.stakedDuration
+      result.head.blockReward.address mustEqual blockReward.owner.address
+      result.head.blockReward.value mustEqual blockReward.owner.value
+      result.head.rewardType mustEqual RewardType.TPoSOwner
+      result.head.stake.get.stakedAmount mustEqual blockReward.stakedAmount
+      result.head.stake.get.stakedTime mustEqual blockReward.stakedDuration
 
       result(1).blockReward.address mustEqual blockReward.merchant.address
       result(1).blockReward.value mustEqual blockReward.merchant.value
@@ -213,10 +214,10 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result match {
         case Some(r: PoSBlockRewards) =>
-          r.coinstake.value mustEqual rewards(0).blockReward.value
-          r.coinstake.address mustEqual rewards(0).blockReward.address
-          r.stakedAmount mustEqual rewards(0).stake.get.stakedAmount
-          r.stakedDuration mustEqual rewards(0).stake.get.stakedTime
+          r.coinstake.value mustEqual rewards.head.blockReward.value
+          r.coinstake.address mustEqual rewards.head.blockReward.address
+          r.stakedAmount mustEqual rewards.head.stake.get.stakedAmount
+          r.stakedDuration mustEqual rewards.head.stake.get.stakedTime
           r.masternode.get.value mustEqual rewards(1).blockReward.value
           r.masternode.get.address mustEqual rewards(1).blockReward.address
         case _ => fail
@@ -266,8 +267,8 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
 
       result match {
         case Some(r: TPoSBlockRewards) =>
-          r.masternode.get.value mustEqual rewards(0).blockReward.value
-          r.masternode.get.address mustEqual rewards(0).blockReward.address
+          r.masternode.get.value mustEqual rewards.head.blockReward.value
+          r.masternode.get.address mustEqual rewards.head.blockReward.address
           r.owner.value mustEqual rewards(1).blockReward.value
           r.owner.address mustEqual rewards(1).blockReward.address
           r.stakedAmount mustEqual rewards(1).stake.get.stakedAmount
@@ -296,10 +297,10 @@ class BlockRewardPostgresSerializerSpec extends WordSpec with MustMatchers {
       result match {
         case Some(r: TPoSBlockRewards) =>
           r.masternode mustEqual None
-          r.owner.value mustEqual rewards(0).blockReward.value
-          r.owner.address mustEqual rewards(0).blockReward.address
-          r.stakedAmount mustEqual rewards(0).stake.get.stakedAmount
-          r.stakedDuration mustEqual rewards(0).stake.get.stakedTime
+          r.owner.value mustEqual rewards.head.blockReward.value
+          r.owner.address mustEqual rewards.head.blockReward.address
+          r.stakedAmount mustEqual rewards.head.stake.get.stakedAmount
+          r.stakedDuration mustEqual rewards.head.stake.get.stakedTime
           r.merchant.value mustEqual rewards(1).blockReward.value
           r.merchant.address mustEqual rewards(1).blockReward.address
         case _ => fail
