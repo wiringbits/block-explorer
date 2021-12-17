@@ -23,12 +23,12 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
       case _ =>
         val params = inputs.map { case (txid, input) =>
           List(
-            Symbol("txid") -> txid.toBytesBE.toArray: NamedParameter,
-            Symbol("index") -> input.index: NamedParameter,
-            Symbol("from_txid") -> input.fromTxid.toBytesBE.toArray: NamedParameter,
-            Symbol("from_output_index") -> input.fromOutputIndex: NamedParameter,
-            Symbol("value") -> input.value: NamedParameter,
-            Symbol("addresses") -> input.addresses.map(_.string).toArray: NamedParameter
+            "txid" -> txid.toBytesBE.toArray: NamedParameter,
+            "index" -> input.index: NamedParameter,
+            "from_txid" -> input.fromTxid.toBytesBE.toArray: NamedParameter,
+            "from_output_index" -> input.fromOutputIndex: NamedParameter,
+            "value" -> input.value: NamedParameter,
+            "addresses" -> input.addresses.map(_.string).toArray: NamedParameter
           )
         }
 
@@ -75,12 +75,12 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |    addresses = EXCLUDED.addresses
       """.stripMargin
     ).on(
-      Symbol("txid") -> txid.toBytesBE.toArray,
-      Symbol("index") -> input.index,
-      Symbol("from_txid") -> input.fromTxid.toBytesBE.toArray,
-      Symbol("from_output_index") -> input.fromOutputIndex,
-      Symbol("value") -> input.value,
-      Symbol("addresses") -> input.addresses.map(_.string).toArray
+      "txid" -> txid.toBytesBE.toArray,
+      "index" -> input.index,
+      "from_txid" -> input.fromTxid.toBytesBE.toArray,
+      "from_output_index" -> input.fromOutputIndex,
+      "value" -> input.value,
+      "addresses" -> input.addresses.map(_.string).toArray
     ).execute()
   }
 
@@ -94,7 +94,7 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, from_txid, from_output_index, value, addresses
       """.stripMargin
     ).on(
-      Symbol("txid") -> txid.toBytesBE.toArray
+      "txid" -> txid.toBytesBE.toArray
     ).as(parseTransactionInput.*)
   }
 
@@ -109,7 +109,7 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-      Symbol("txid") -> txid.toBytesBE.toArray
+      "txid" -> txid.toBytesBE.toArray
     ).as(parseTransactionInput.*)
   }
 
@@ -125,8 +125,8 @@ class TransactionInputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-      Symbol("txid") -> txid.toBytesBE.toArray,
-      Symbol("address") -> address.string
+      "txid" -> txid.toBytesBE.toArray,
+      "address" -> address.string
     ).as(parseTransactionInput.*)
   }
 }

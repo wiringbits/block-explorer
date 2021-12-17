@@ -23,11 +23,11 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray,
-      Symbol("m") -> filter.m,
-      Symbol("n") -> filter.n,
-      Symbol("p") -> filter.p,
-      Symbol("hex") -> filter.getHexString.toBytes
+      "blockhash" -> blockhash.toBytesBE.toArray,
+      "m" -> filter.m,
+      "n" -> filter.n,
+      "p" -> filter.p,
+      "hex" -> filter.getHexString.toBytes
     ).as(parseFilter.single)
   }
 
@@ -47,11 +47,11 @@ class BlockFilterPostgresDAO {
         |    hex = EXCLUDED.hex
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray,
-      Symbol("m") -> filter.m,
-      Symbol("n") -> filter.n,
-      Symbol("p") -> filter.p,
-      Symbol("hex") -> filter.getHexString.toBytes
+      "blockhash" -> blockhash.toBytesBE.toArray,
+      "m" -> filter.m,
+      "n" -> filter.n,
+      "p" -> filter.p,
+      "hex" -> filter.getHexString.toBytes
     ).execute()
   }
 
@@ -65,7 +65,7 @@ class BlockFilterPostgresDAO {
         |RETURNING blockhash, m, n, p, hex
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray
+      "blockhash" -> blockhash.toBytesBE.toArray
     ).as(parseFilter.singleOpt)
   }
 
@@ -79,7 +79,7 @@ class BlockFilterPostgresDAO {
         |WHERE blockhash = {blockhash}
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray
+      "blockhash" -> blockhash.toBytesBE.toArray
     ).as(parseFilter.singleOpt)
   }
 }

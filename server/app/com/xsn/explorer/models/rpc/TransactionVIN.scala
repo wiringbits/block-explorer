@@ -46,8 +46,8 @@ object TransactionVIN {
   ) extends TransactionVIN
 
   implicit val reads: Reads[TransactionVIN] = {
-    val builder = (__ \ Symbol("txid")).read[TransactionId] and
-      (__ \ Symbol("vout")).read[Int]
+    val builder = (__ \ "txid").read[TransactionId] and
+      (__ \ "vout").read[Int]
 
     builder.apply { (txid, index) =>
       Raw(txid, index)

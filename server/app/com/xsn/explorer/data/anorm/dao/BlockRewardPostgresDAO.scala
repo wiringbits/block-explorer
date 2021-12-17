@@ -25,12 +25,12 @@ class BlockRewardPostgresDAO {
         |    staked_time = EXCLUDED.staked_time
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray,
-      Symbol("value") -> reward.blockReward.value,
-      Symbol("address") -> reward.blockReward.address.string,
-      Symbol("type") -> reward.rewardType.entryName,
-      Symbol("staked_amount") -> reward.stake.map(_.stakedAmount),
-      Symbol("staked_time") -> reward.stake.map(_.stakedTime)
+      "blockhash" -> blockhash.toBytesBE.toArray,
+      "value" -> reward.blockReward.value,
+      "address" -> reward.blockReward.address.string,
+      "type" -> reward.rewardType.entryName,
+      "staked_amount" -> reward.stake.map(_.stakedAmount),
+      "staked_time" -> reward.stake.map(_.stakedTime)
     ).execute()
   }
 
@@ -44,7 +44,7 @@ class BlockRewardPostgresDAO {
         |RETURNING address, value, type, staked_amount, staked_time
       """.stripMargin
     ).on(
-      Symbol("blockhash") -> blockhash.toBytesBE.toArray
+      "blockhash" -> blockhash.toBytesBE.toArray
     ).as(parseBlockReward.*)
   }
 
