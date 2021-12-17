@@ -4,11 +4,14 @@ import com.xsn.explorer.helpers.{DataGenerator, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.ScriptPubKey
 import com.xsn.explorer.models.values._
+
 import javax.xml.bind.DatatypeConverter
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
+import scala.annotation.nowarn
+
+@nowarn
 class TransactionSpec extends AnyWordSpec {
 
   "HasIO" should {

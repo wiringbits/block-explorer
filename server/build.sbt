@@ -12,13 +12,11 @@ scalacOptions ++= Seq(
   "-target:jvm-1.8",
   "-encoding",
   "UTF-8",
-  "-Xfuture",
   "-Xlint:missing-interpolator",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard",
-  "-Ywarn-unused",
-  "-P:silencer:checkUnused"
+  "-Ywarn-unused"
 )
 
 val playsonifyVersion = "2.3.0"
@@ -37,12 +35,6 @@ RoutesKeys.routesImport := Seq.empty
 
 // don't include play generated classes into code coverage
 coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
-
-// silence noisy warnings
-libraryDependencies ++= Seq(
-  compilerPlugin("com.github.ghik" % "silencer-plugin_2.13.7" % "1.7.7"),
-  "com.github.ghik" % "silencer-lib_2.13.7" % "1.7.7" % Provided
-)
 
 libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
 

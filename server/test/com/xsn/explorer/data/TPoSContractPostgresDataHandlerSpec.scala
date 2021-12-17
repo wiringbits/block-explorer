@@ -6,7 +6,9 @@ import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.helpers.DataGenerator
 import com.xsn.explorer.models.TPoSContract
 
-@com.github.ghik.silencer.silent
+import scala.annotation.nowarn
+
+@nowarn
 class TPoSContractPostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
   val dao = new TPoSContractDAO

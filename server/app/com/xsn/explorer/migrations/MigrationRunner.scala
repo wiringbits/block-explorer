@@ -3,13 +3,15 @@ package com.xsn.explorer.migrations
 import com.xsn.explorer.data.anorm.AnormPostgresDataHandler
 import com.xsn.explorer.data.async.{BlockFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.executors.DatabaseExecutionContext
+
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.db.Database
 
+import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
 
-@com.github.ghik.silencer.silent
+@nowarn
 class MigrationRunner @Inject() (
     transactionsDataHandler: TransactionFutureDataHandler,
     blockDataHandler: BlockFutureDataHandler,
@@ -34,7 +36,7 @@ class MigrationRunner @Inject() (
 
 object MigrationRunner {
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   class DatabaseOperations @Inject() (override val database: Database)(implicit
       dbEC: DatabaseExecutionContext
   ) extends AnormPostgresDataHandler {}

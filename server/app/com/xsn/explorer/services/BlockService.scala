@@ -15,10 +15,12 @@ import com.xsn.explorer.models.values.{Blockhash, Height, Size}
 import com.xsn.explorer.parsers.OrderingConditionParser
 import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.validators._
+
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
 import play.api.libs.json.{JsValue, Json}
 
+import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
 class BlockService @Inject() (
@@ -530,7 +532,7 @@ class BlockService @Inject() (
   }
 
   // TODO: Fix me, compiler problem due to type erasure
-  @com.github.ghik.silencer.silent
+  @nowarn
   private def getCoinstakeTransaction(
       block: Block[_]
   ): FutureApplicationResult[rpc.Transaction[rpc.TransactionVIN]] = {

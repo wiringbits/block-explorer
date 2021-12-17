@@ -6,11 +6,12 @@ import org.scalactic.Good
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
 
+import scala.annotation.nowarn
 import scala.concurrent.Future
 
 class MyAuthenticatorService extends AbstractAuthenticatorService[Nothing] {
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   override def authenticate(
       request: Request[JsValue]
   ): FutureApplicationResult[Nothing] = {

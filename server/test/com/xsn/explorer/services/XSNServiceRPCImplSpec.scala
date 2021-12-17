@@ -25,10 +25,11 @@ import org.scalatest.wordspec.AsyncWordSpec
 import play.api.libs.json.{JsNull, JsString, JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
+import scala.annotation.nowarn
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-@com.github.ghik.silencer.silent
+@nowarn
 class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   override def afterAll: Unit = {

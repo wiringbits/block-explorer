@@ -4,6 +4,8 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.Address
 
+import scala.annotation.nowarn
+
 object LedgerHelper {
 
   private val list = List(
@@ -30,12 +32,12 @@ object LedgerHelper {
       .map(_._1)
   }
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   def getPoWReward(block: rpc.Block.Canonical): PoWBlockRewards = {
     PoWBlockRewards(BlockReward(Address.from(list.head).get, 1000))
   }
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   def getPoSReward(block: rpc.Block.Canonical): PoSBlockRewards = {
     val reward = BlockReward(Address.from(list.head).get, 1000)
     val masternodeReward = BlockReward(Address.from(list.head).get, 250)
@@ -43,7 +45,7 @@ object LedgerHelper {
     PoSBlockRewards(reward, Some(masternodeReward), None, 10000, 120000)
   }
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   def getTPoSReward(block: rpc.Block.Canonical): TPoSBlockRewards = {
     val ownerReward = BlockReward(Address.from(list.head).get, 1000)
     val merchantReward = BlockReward(Address.from(list(1)).get, 100)

@@ -7,10 +7,11 @@ import org.scalatest.matchers.must.Matchers
 import scala.concurrent.Future
 import akka.actor.{ActorSystem, Scheduler}
 
+import scala.annotation.nowarn
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
-@com.github.ghik.silencer.silent
+@nowarn
 class RetryableFutureSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   override def afterAll: Unit = {

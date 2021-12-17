@@ -8,9 +8,11 @@ import com.xsn.explorer.gcs.{GolombCodedSet, GolombEncoding}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.values._
 import io.scalaland.chimney.dsl._
+
 import javax.inject.Inject
 import org.scalactic.{Bad, Good, One, Or}
 
+import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransactionCollectorService @Inject() (
@@ -145,7 +147,7 @@ class TransactionCollectorService @Inject() (
   }
 
   // TODO: Fix me, compiler problem due to type erasure
-  @com.github.ghik.silencer.silent
+  @nowarn
   private[services] def getRPCTransactions(
       block: rpc.Block[_]
   ): FutureApplicationResult[List[RPCTransaction]] = {

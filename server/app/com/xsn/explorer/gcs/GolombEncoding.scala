@@ -3,6 +3,7 @@ package com.xsn.explorer.gcs
 import com.google.common.hash.Hashing
 import com.xsn.explorer.models._
 
+import scala.annotation.nowarn
 import scala.collection.SortedSet
 
 /** A Golomb-coded set, matches all items in the set with probability 1, and matches other items with probability 1/M.
@@ -104,7 +105,7 @@ class GolombEncoding(p: Int, m: Int, key: SipHashKey) {
     (pending, x)
   }
 
-  @com.github.ghik.silencer.silent
+  @nowarn
   private def differences(sortedHashes: SortedSet[BigInt]): List[BigInt] = {
     (BigInt(0) :: sortedHashes.toList)
       .sliding(2)

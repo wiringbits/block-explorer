@@ -6,10 +6,11 @@ import com.xsn.explorer.migrations.MigrationRunner
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 
+import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-@com.github.ghik.silencer.silent
+@nowarn
 class DatabaseMigrationsTask @Inject() (
     actorSystem: ActorSystem,
     migration: MigrationRunner

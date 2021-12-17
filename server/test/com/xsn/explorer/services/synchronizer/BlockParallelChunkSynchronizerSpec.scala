@@ -1,7 +1,6 @@
 package com.xsn.explorer.services.synchronizer
 
 import java.sql.Connection
-
 import com.alexitc.playsonify.models.pagination.Limit
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
@@ -26,7 +25,9 @@ import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
+import scala.annotation.nowarn
+
+@nowarn
 class BlockParallelChunkSynchronizerSpec extends AnyWordSpec with PostgresDataHandlerSpec with BeforeAndAfter {
 
   private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))

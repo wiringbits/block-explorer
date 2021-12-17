@@ -7,7 +7,9 @@ import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, R
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
+import scala.annotation.nowarn
+
+@nowarn
 class BlockRewardPostgresSerializerSpec extends AnyWordSpec with Matchers {
   "serialize" should {
     "serialize PoW block" in {
