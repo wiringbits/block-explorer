@@ -4,7 +4,6 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
 class HexStringSpec extends AnyWordSpec with Matchers with OptionValues {
 
   "from" should {

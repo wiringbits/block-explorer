@@ -3,7 +3,6 @@ package com.xsn.explorer.util
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
 class BigDecimalExtSpec extends AnyWordSpec with Matchers {
 
   import Extensions.BigDecimalExt

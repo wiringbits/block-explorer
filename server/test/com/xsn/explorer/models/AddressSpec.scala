@@ -5,7 +5,6 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
 class AddressSpec extends AnyWordSpec with Matchers with OptionValues {
 
   val addresses = Map(

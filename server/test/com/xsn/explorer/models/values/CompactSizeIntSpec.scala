@@ -4,7 +4,6 @@ import org.scalatest.OptionValues
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
 
-@com.github.ghik.silencer.silent
 class CompactSizeIntSpec extends AnyWordSpec with Matchers with OptionValues {
   "CompactSizeUInt" should {
     "serialize a VarInt with size 1 correctly" in {

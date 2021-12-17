@@ -4,7 +4,6 @@ import com.xsn.explorer.models.values.Blockhash
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
 class SipHashKeySpec extends AnyWordSpec {
 
   "parsing a Btcutil-like key" should {
