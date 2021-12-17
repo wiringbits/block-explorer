@@ -84,6 +84,6 @@ libraryDependencies += "org.mockito" %% "mockito-scala-scalatest" % "1.16.49" % 
 
 libraryDependencies ++= Seq(
   "com.spotify" % "docker-client" % "8.16.0" % "test",
-  "com.whisk" %% "docker-testkit-scalatest" % "0.10.0" % "test",
+  "com.whisk" %% "docker-testkit-scalatest" % "0.9.9" % "test",
   "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "test"
 )
