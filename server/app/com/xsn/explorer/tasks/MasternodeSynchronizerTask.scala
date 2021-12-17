@@ -21,13 +21,12 @@ class MasternodeSynchronizerTask @Inject() (
 
   start()
 
-  @com.github.ghik.silencer.silent
   def start() = {
 
     if (config.enabled) {
       logger.info("Starting masternode synchronizer task")
 
-      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
+      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) { () =>
         xsnService.getMasternodes().onComplete {
           case Success(Good(masternodes)) =>
             logger.info(s"Masternode information synced ${masternodes.length}")

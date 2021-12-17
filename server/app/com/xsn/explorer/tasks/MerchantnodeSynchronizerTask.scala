@@ -21,13 +21,12 @@ class MerchantnodeSynchronizerTask @Inject() (
 
   start()
 
-  @com.github.ghik.silencer.silent
   def start() = {
 
     if (config.enabled) {
       logger.info("Starting merchantnode synchronizer task")
 
-      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
+      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) { () =>
         xsnService.getMerchantnodes().onComplete {
           case Success(Good(merchantnodes)) =>
             logger
