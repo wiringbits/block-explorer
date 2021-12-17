@@ -27,7 +27,7 @@ class MasternodeSynchronizerTask @Inject() (
     if (config.enabled) {
       logger.info("Starting masternode synchronizer task")
 
-      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) {
+      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
         xsnService.getMasternodes().onComplete {
           case Success(Good(masternodes)) =>
             logger.info(s"Masternode information synced ${masternodes.length}")

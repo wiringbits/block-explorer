@@ -27,7 +27,7 @@ class MerchantnodeSynchronizerTask @Inject() (
     if (config.enabled) {
       logger.info("Starting merchantnode synchronizer task")
 
-      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) {
+      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
         xsnService.getMerchantnodes().onComplete {
           case Success(Good(merchantnodes)) =>
             logger
