@@ -16,6 +16,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values._
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
+import org.scalatest.OptionValues._
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
@@ -132,7 +133,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       upsertTransaction(tx)
       val result = dataHandler.getOutput(txid, 2)
-      result.get must be(expected)
+      result.toEither.toOption.value must be(expected)
     }
   }
 

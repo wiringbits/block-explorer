@@ -10,6 +10,7 @@ import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
 import org.scalactic.{Bad, Good, One}
 import org.scalatest.EitherValues._
+import org.scalatest.OptionValues._
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.concurrent.ScalaFutures._
@@ -55,7 +56,7 @@ class TransactionCollectorServiceSpec extends AnyWordSpec {
 
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactionVINWithValues(vin)) { result =>
-        result.get must be(expected)
+        result.toEither.toOption.value must be(expected)
       }
     }
 
@@ -102,7 +103,7 @@ class TransactionCollectorServiceSpec extends AnyWordSpec {
     "do nothing on empty list" in {
       val service = create(null, null)
       whenReady(service.completeRPCTransactionsSequentially(List.empty)) { result =>
-        result.get must be(empty)
+        result.toEither.toOption.value must be(empty)
       }
     }
 
@@ -115,7 +116,7 @@ class TransactionCollectorServiceSpec extends AnyWordSpec {
 
       val service = create(null, null)
       whenReady(service.completeRPCTransactionsSequentially(input.toList)) { result =>
-        result.get must be(input.flatMap(_._2.toOption))
+        result.toEither.toOption.value must be(input.flatMap(_._2.toOption))
       }
     }
 
@@ -191,7 +192,7 @@ class TransactionCollectorServiceSpec extends AnyWordSpec {
         ) ::: secondHalf.flatMap(_._2.toOption) ::: List(
           pending2Tx
         )
-        result.get must be(expected)
+        result.toEither.toOption.value must be(expected)
       }
     }
   }
@@ -230,7 +231,7 @@ class TransactionCollectorServiceSpec extends AnyWordSpec {
       val service = create(xsnService, null)
       whenReady(service.getRPCTransactions(input)) { result =>
         val expected = List(tx, pending)
-        result.get must be(expected)
+        result.toEither.toOption.value must be(expected)
       }
     }
   }
