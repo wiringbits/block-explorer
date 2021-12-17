@@ -9,10 +9,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 @com.github.ghik.silencer.silent
-class RetryableFutureSpec
-    extends AsyncWordSpec
-    with MustMatchers
-    with BeforeAndAfterAll {
+class RetryableFutureSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()
@@ -58,7 +55,7 @@ class RetryableFutureSpec
   private val retryOnRuntimeException = (result: Try[Int]) => {
     result match {
       case Failure(_: RuntimeException) => true
-      case _                            => false
+      case _ => false
     }
   }
 

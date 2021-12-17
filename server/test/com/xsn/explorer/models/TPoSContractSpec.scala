@@ -37,8 +37,7 @@ class TPoSContractSpec extends WordSpec {
       val expected = TPoSContract.Details(
         owner = address1,
         merchant = address2,
-        merchantCommission =
-          TPoSContract.Commission.from(100 - commission.toInt).get
+        merchantCommission = TPoSContract.Commission.from(100 - commission.toInt).get
       )
 
       val result = TPoSContract.Details.fromOutputScriptASM(asm)

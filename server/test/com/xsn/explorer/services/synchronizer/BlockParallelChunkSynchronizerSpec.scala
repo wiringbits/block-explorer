@@ -20,22 +20,15 @@ import com.xsn.explorer.models.{
   TPoSContract
 }
 import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
-import com.xsn.explorer.services.synchronizer.repository.{
-  BlockChunkRepository,
-  BlockSynchronizationProgressDAO
-}
+import com.xsn.explorer.services.synchronizer.repository.{BlockChunkRepository, BlockSynchronizationProgressDAO}
 import io.scalaland.chimney.dsl._
 import org.scalactic.Good
 import org.scalatest.{BeforeAndAfter, WordSpec}
 
 @com.github.ghik.silencer.silent
-class BlockParallelChunkSynchronizerSpec
-    extends WordSpec
-    with PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class BlockParallelChunkSynchronizerSpec extends WordSpec with PostgresDataHandlerSpec with BeforeAndAfter {
 
-  private val emptyFilterFactory = () =>
-    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val blockDataHandler = createBlockDataHandler(database)
   lazy val transactionDataHandler = createTransactionDataHandler(database)
@@ -105,9 +98,7 @@ class BlockParallelChunkSynchronizerSpec
 
     "store PoW reward" in {
       val powBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod =
-          BlockExtractionMethod.ProofOfWork
-        )
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfWork)
       )
       val powReward =
         PoWBlockRewards(BlockReward(DataGenerator.randomAddress, 1000))
@@ -123,9 +114,7 @@ class BlockParallelChunkSynchronizerSpec
 
     "store PoS reward without masternode" in {
       val posBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod =
-          BlockExtractionMethod.ProofOfStake
-        )
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
       )
       val reward = BlockReward(DataGenerator.randomAddress, 1000)
       val treasuryReward = BlockReward(DataGenerator.randomAddress, 2500)
@@ -143,9 +132,7 @@ class BlockParallelChunkSynchronizerSpec
 
     "store PoS reward without treasury" in {
       val posBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod =
-          BlockExtractionMethod.ProofOfStake
-        )
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.ProofOfStake)
       )
       val reward = BlockReward(DataGenerator.randomAddress, 1000)
       val masternodeReward = BlockReward(DataGenerator.randomAddress, 250)
@@ -163,9 +150,7 @@ class BlockParallelChunkSynchronizerSpec
 
     "store TPoS reward without masternode" in {
       val tposBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod =
-          BlockExtractionMethod.TrustlessProofOfStake
-        )
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
       )
       val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
       val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
@@ -190,9 +175,7 @@ class BlockParallelChunkSynchronizerSpec
 
     "store TPoS reward without treasury" in {
       val tposBlock = blockWithTransactions.copy(
-        block = blockWithTransactions.block.copy(extractionMethod =
-          BlockExtractionMethod.TrustlessProofOfStake
-        )
+        block = blockWithTransactions.block.copy(extractionMethod = BlockExtractionMethod.TrustlessProofOfStake)
       )
       val ownerReward = BlockReward(DataGenerator.randomAddress, 1000)
       val merchantReward = BlockReward(DataGenerator.randomAddress, 100)
@@ -293,8 +276,7 @@ class BlockParallelChunkSynchronizerSpec
   }
 
   private def createSynchronizer(
-      blockSyncProgressDAO: BlockSynchronizationProgressDAO =
-        blockSynchronizationProgressDAO
+      blockSyncProgressDAO: BlockSynchronizationProgressDAO = blockSynchronizationProgressDAO
   ): BlockParallelChunkSynchronizer = {
     val blockChunkRepository =
       createBlockChunkRepository(database, blockSyncProgressDAO)
@@ -324,10 +306,10 @@ class BlockParallelChunkSynchronizerSpec
     }
 
     reward match {
-      case Some(r: PoWBlockRewards)  => verifyPoWReward(block.hash, r)
-      case Some(r: PoSBlockRewards)  => verifyPoSReward(block.hash, r)
+      case Some(r: PoWBlockRewards) => verifyPoWReward(block.hash, r)
+      case Some(r: PoSBlockRewards) => verifyPoSReward(block.hash, r)
       case Some(r: TPoSBlockRewards) => verifyTPoSReward(block.hash, r)
-      case _                         => verifyNoReward(block.hash)
+      case _ => verifyNoReward(block.hash)
     }
   }
 
@@ -399,8 +381,8 @@ class BlockParallelChunkSynchronizerSpec
   ) = {
     (masternode, expectedMasternode) match {
       case (Some(r1), Some(r2)) => verifyReward(r1, r2)
-      case (None, None)         => succeed
-      case _                    => fail
+      case (None, None) => succeed
+      case _ => fail
     }
   }
 

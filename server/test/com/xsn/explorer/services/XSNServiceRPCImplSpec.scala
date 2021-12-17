@@ -9,12 +9,7 @@ import com.xsn.explorer.errors.TransactionError.{
   UnconfirmedTransaction
 }
 import com.xsn.explorer.errors._
-import com.xsn.explorer.helpers.{
-  BlockLoader,
-  DataHelper,
-  Executors,
-  TransactionLoader
-}
+import com.xsn.explorer.helpers.{BlockLoader, DataHelper, Executors, TransactionLoader}
 import com.xsn.explorer.models.TPoSContract
 import com.xsn.explorer.models.TPoSContract.Commission
 import com.xsn.explorer.models.rpc.Masternode
@@ -570,8 +565,7 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
       val expected = List(
         Merchantnode(
-          pubkey =
-            "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
+          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
           txid = TransactionId
             .from(
               "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
@@ -585,8 +579,7 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
           Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
         ),
         Merchantnode(
-          pubkey =
-            "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
+          pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
           txid = TransactionId
             .from(
               "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
@@ -777,14 +770,13 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       val txid = createTransactionId(
         "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54b"
       )
-      whenReady(service.getTxOut(txid, index = 1, includeMempool = true)) {
-        result =>
-          result.isGood mustEqual true
-          (result.get \ "scriptPubKey" \ "hex")
-            .as[
-              String
-            ] mustEqual "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac"
-          (result.get \ "value").as[Double] mustEqual 3233.5
+      whenReady(service.getTxOut(txid, index = 1, includeMempool = true)) { result =>
+        result.isGood mustEqual true
+        (result.get \ "scriptPubKey" \ "hex")
+          .as[
+            String
+          ] mustEqual "76a9141523235378b73bad58c8e580b7ecc59057e923fa88ac"
+        (result.get \ "value").as[Double] mustEqual 3233.5
       }
     }
 
@@ -798,9 +790,8 @@ class XSNServiceRPCImplSpec extends AsyncWordSpec with BeforeAndAfterAll {
       val txid = createTransactionId(
         "af30877625d8f1387399e24bc52626f3c316fb9ec844a5770f7dbd132e34b54c"
       )
-      whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) {
-        result =>
-          result mustEqual Good(JsNull)
+      whenReady(service.getTxOut(txid, index = 0, includeMempool = true)) { result =>
+        result mustEqual Good(JsNull)
       }
     }
   }

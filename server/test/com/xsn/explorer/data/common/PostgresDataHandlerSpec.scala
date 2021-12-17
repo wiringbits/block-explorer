@@ -15,8 +15,8 @@ import play.api.db.{Database, Databases}
   *
   * The database is launched in a docker instance using docker-it-scala library.
   *
-  * When the database is started, play evolutions are automatically applied, the
-  * idea is to let you write tests like this:
+  * When the database is started, play evolutions are automatically applied, the idea is to let you write tests like
+  * this:
   * {{{
   *   class UserPostgresDALSpec extends PostgresDALSpec {
   *     lazy val dal = new UserPostgresDAL(database)

@@ -2,12 +2,7 @@ package com.xsn.explorer.helpers
 
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.models._
-import com.xsn.explorer.models.rpc.{
-  Block,
-  Masternode,
-  Transaction,
-  TransactionVIN
-}
+import com.xsn.explorer.models.rpc.{Block, Masternode, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
 import com.xsn.explorer.services.XSNService
 import play.api.libs.json.JsValue
@@ -38,8 +33,7 @@ class DummyXSNService extends XSNService {
   ): FutureApplicationResult[Blockhash] = ???
   override def getLatestBlock(): FutureApplicationResult[rpc.Block.Canonical] =
     ???
-  override def getServerStatistics()
-      : FutureApplicationResult[rpc.ServerStatistics] = ???
+  override def getServerStatistics(): FutureApplicationResult[rpc.ServerStatistics] = ???
   override def getMasternodeCount(): FutureApplicationResult[Int] = ???
   override def getDifficulty(): FutureApplicationResult[BigDecimal] = ???
   override def getMasternodes(): FutureApplicationResult[List[rpc.Masternode]] =
@@ -47,8 +41,7 @@ class DummyXSNService extends XSNService {
   override def getMasternode(
       ipAddress: IPAddress
   ): FutureApplicationResult[Masternode] = ???
-  override def getMerchantnodes()
-      : FutureApplicationResult[List[rpc.Merchantnode]] = ???
+  override def getMerchantnodes(): FutureApplicationResult[List[rpc.Merchantnode]] = ???
   override def getUnspentOutputs(
       address: Address
   ): FutureApplicationResult[JsValue] = ???

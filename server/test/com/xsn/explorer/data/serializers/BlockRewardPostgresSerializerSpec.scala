@@ -1,18 +1,9 @@
 package com.xsn.explorer.data.serializers
 
 import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer
-import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{
-  Reward,
-  Stake
-}
+import com.xsn.explorer.data.anorm.serializers.BlockRewardPostgresSerializer.{Reward, Stake}
 import com.xsn.explorer.helpers.DataGenerator
-import com.xsn.explorer.models.{
-  BlockReward,
-  PoSBlockRewards,
-  PoWBlockRewards,
-  RewardType,
-  TPoSBlockRewards
-}
+import com.xsn.explorer.models.{BlockReward, PoSBlockRewards, PoWBlockRewards, RewardType, TPoSBlockRewards}
 import org.scalatest.{MustMatchers, WordSpec}
 
 @com.github.ghik.silencer.silent

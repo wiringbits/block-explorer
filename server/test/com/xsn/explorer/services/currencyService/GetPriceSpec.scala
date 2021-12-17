@@ -3,10 +3,7 @@ package com.xsn.explorer.services.currencyService
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.CoinMarketCapConfig.{CoinID, Host, Key}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
-import com.xsn.explorer.errors.{
-  CoinMarketCapRequestFailedError,
-  CoinMarketCapUnexpectedResponseError
-}
+import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUnexpectedResponseError}
 import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.services.{Currency, CurrencyServiceCoinMarketCapImpl}
 import org.mockito.ArgumentMatchers._

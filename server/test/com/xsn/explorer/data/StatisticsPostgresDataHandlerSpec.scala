@@ -3,11 +3,7 @@ package com.xsn.explorer.data
 import java.time.Instant
 
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
-import com.xsn.explorer.data.anorm.dao.{
-  BalancePostgresDAO,
-  StatisticsPostgresDAO,
-  TPoSContractDAO
-}
+import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{
   BalancePostgresDataHandler,
   LedgerPostgresDataHandler,
@@ -35,9 +31,7 @@ import org.scalatest.BeforeAndAfter
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class StatisticsPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   val secondsInOneDay: Int = 24 * 60 * 60
 
@@ -644,8 +638,7 @@ class StatisticsPostgresDataHandlerSpec
       time: Instant,
       tposContracts: List[TPoSContract] = List.empty
   ) = {
-    val emptyFilterFactory = () =>
-      GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+    val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
     val block = BlockLoader
       .get(blockhash)

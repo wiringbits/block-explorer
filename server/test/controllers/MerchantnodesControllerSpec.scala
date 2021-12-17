@@ -19,8 +19,7 @@ class MerchantnodesControllerSpec extends MyAPISpec {
 
   val merchantnodes = List(
     Merchantnode(
-      pubkey =
-        "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
+      pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363232",
       txid = TransactionId
         .from(
           "c3efb8b60bda863a3a963d340901dc2b870e6ea51a34276a8f306d47ffb94f01"
@@ -34,8 +33,7 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       payee = Address.from("XqdmM7rop8Sdgn8UjyNh3Povc3rhNSXYw2").get
     ),
     Merchantnode(
-      pubkey =
-        "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
+      pubkey = "36383165613065623435373332353634303664656666653535303735616465343966306433363233",
       txid = TransactionId
         .from(
           "b02f99d87194c9400ab147c070bf621770684906dedfbbe9ba5f3a35c26b8d01"
@@ -92,7 +90,7 @@ class MerchantnodesControllerSpec extends MyAPISpec {
       override def areEqual(a: IPAddress, b: Any): Boolean = {
         b match {
           case ip: IPAddress => a.string == ip.string
-          case _             => false
+          case _ => false
         }
       }
     }

@@ -70,8 +70,7 @@ trait DataHandlerObjects {
 
   def createBlockChunkRepository(
       database: Database,
-      blockSynchronizationProgressDAO: BlockSynchronizationProgressDAO =
-        blockSynchronizationProgressDAO
+      blockSynchronizationProgressDAO: BlockSynchronizationProgressDAO = blockSynchronizationProgressDAO
   ) = {
     new BlockChunkPostgresRepository(
       database,
