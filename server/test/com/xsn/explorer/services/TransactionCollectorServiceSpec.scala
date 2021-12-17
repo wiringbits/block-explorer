@@ -4,12 +4,7 @@ import com.alexitc.playsonify.core.FutureApplicationResult
 import com.xsn.explorer.data.TransactionBlockingDataHandler
 import com.xsn.explorer.data.async.TransactionFutureDataHandler
 import com.xsn.explorer.errors.TransactionError
-import com.xsn.explorer.helpers.{
-  DataGenerator,
-  DummyRetryableDataHandler,
-  DummyXSNService,
-  Executors
-}
+import com.xsn.explorer.helpers.{DataGenerator, DummyRetryableDataHandler, DummyXSNService, Executors}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.{ScriptPubKey, Transaction, TransactionVIN}
 import com.xsn.explorer.models.values._
@@ -107,9 +102,8 @@ class TransactionCollectorServiceSpec extends WordSpec {
   "completeRPCTransactionsSequentially" should {
     "do nothing on empty list" in {
       val service = create(null, null)
-      whenReady(service.completeRPCTransactionsSequentially(List.empty)) {
-        result =>
-          result.toEither.right.value must be(empty)
+      whenReady(service.completeRPCTransactionsSequentially(List.empty)) { result =>
+        result.toEither.right.value must be(empty)
       }
     }
 
@@ -121,9 +115,8 @@ class TransactionCollectorServiceSpec extends WordSpec {
       }
 
       val service = create(null, null)
-      whenReady(service.completeRPCTransactionsSequentially(input.toList)) {
-        result =>
-          result.toEither.right.value must be(input.flatMap(_._2.toOption))
+      whenReady(service.completeRPCTransactionsSequentially(input.toList)) { result =>
+        result.toEither.right.value must be(input.flatMap(_._2.toOption))
       }
     }
 

@@ -54,26 +54,22 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
 
     val balances = List(
       Balance(
-        address =
-          DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
+        address = DataHelper.createAddress("XxQ7j37LfuXgsLd5DZAwFKhT3s2ZMkW85F"),
         received = BigDecimal("1000"),
         spent = BigDecimal("0")
       ),
       Balance(
-        address =
-          DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
+        address = DataHelper.createAddress("Xbh5pJdBNm8J9PxnEmwVcuQKRmZZ7DkpcF"),
         received = BigDecimal("1000"),
         spent = BigDecimal("100")
       ),
       Balance(
-        address =
-          DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
+        address = DataHelper.createAddress("XfAATXtkRgCdMTrj2fxHvLsKLLmqAjhEAt"),
         received = BigDecimal("10000"),
         spent = BigDecimal("1000")
       ),
       Balance(
-        address =
-          DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
+        address = DataHelper.createAddress("XiHW7SR56UPHeXKwcpeVsE4nUfkHv5RqE3"),
         received = BigDecimal("1000"),
         spent = BigDecimal("500")
       )

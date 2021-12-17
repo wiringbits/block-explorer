@@ -86,7 +86,7 @@ class MasternodesControllerSpec extends MyAPISpec {
       override def areEqual(a: IPAddress, b: Any): Boolean = {
         b match {
           case ip: IPAddress => a.string == ip.string
-          case _             => false
+          case _ => false
         }
       }
     }

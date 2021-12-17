@@ -2,13 +2,7 @@ package com.xsn.explorer.data.common
 
 import java.sql.DriverManager
 
-import com.whisk.docker.{
-  DockerCommandExecutor,
-  DockerContainer,
-  DockerContainerState,
-  DockerKit,
-  DockerReadyChecker
-}
+import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainerState, DockerKit, DockerReadyChecker}
 
 import scala.concurrent.ExecutionContext
 

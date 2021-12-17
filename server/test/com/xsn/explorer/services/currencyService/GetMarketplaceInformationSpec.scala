@@ -3,10 +3,7 @@ package com.xsn.explorer.services.currencyService
 import akka.actor.ActorSystem
 import com.xsn.explorer.config.CoinMarketCapConfig.{CoinID, Host, Key}
 import com.xsn.explorer.config.{CoinMarketCapConfig, RetryConfig}
-import com.xsn.explorer.errors.{
-  CoinMarketCapRequestFailedError,
-  CoinMarketCapUnexpectedResponseError
-}
+import com.xsn.explorer.errors.{CoinMarketCapRequestFailedError, CoinMarketCapUnexpectedResponseError}
 import com.xsn.explorer.helpers.Executors
 import com.xsn.explorer.services.CurrencyServiceCoinMarketCapImpl
 import org.mockito.ArgumentMatchers._
@@ -23,9 +20,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 @com.github.ghik.silencer.silent
-class GetMarketplaceInformationSpec
-    extends AsyncWordSpec
-    with BeforeAndAfterAll {
+class GetMarketplaceInformationSpec extends AsyncWordSpec with BeforeAndAfterAll {
 
   override def afterAll: Unit = {
     actorSystem.terminate()

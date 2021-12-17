@@ -1,12 +1,7 @@
 package com.xsn.explorer.data
 
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
-import com.alexitc.playsonify.models.pagination.{
-  Count,
-  Limit,
-  Offset,
-  PaginatedQuery
-}
+import com.alexitc.playsonify.models.pagination.{Count, Limit, Offset, PaginatedQuery}
 import com.xsn.explorer.data.anorm.BlockPostgresDataHandler
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
@@ -19,9 +14,7 @@ import org.scalactic.{Bad, One, Or}
 import org.scalatest.BeforeAndAfter
 import io.scalaland.chimney.dsl._
 
-class BlockPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   import DataHandlerObjects._
 

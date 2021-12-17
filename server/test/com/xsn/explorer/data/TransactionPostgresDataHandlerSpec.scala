@@ -19,14 +19,11 @@ import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.EitherValues._
 
-class TransactionPostgresDataHandlerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter {
+class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   import DataGenerator._
 
-  private val emptyFilterFactory = () =>
-    GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
+  private val emptyFilterFactory = () => GolombCodedSet(1, 2, 3, List(new UnsignedByte(0.toByte)))
 
   lazy val dataHandler = createTransactionDataHandler(database)
   lazy val ledgerDataHandler = createLedgerDataHandler(database)
@@ -167,13 +164,12 @@ class TransactionPostgresDataHandlerSpec
     )
 
     val transactions =
-      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
 
     val block = randomBlock(blockhash = blockhash)
@@ -322,13 +318,12 @@ class TransactionPostgresDataHandlerSpec
     )
 
     val transactions =
-      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+      List.fill(4)(randomTransactionId).zip(List(321L, 320L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
 
     val block = randomBlock(blockhash = blockhash)
@@ -438,23 +433,21 @@ class TransactionPostgresDataHandlerSpec
     )
 
     val emptyTransactions =
-      List.fill(2)(randomTransactionId).zip(List(320L, 325L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            List.empty,
-            List.empty
-          )
+      List.fill(2)(randomTransactionId).zip(List(320L, 325L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          List.empty,
+          List.empty
+        )
       }
 
     val nonEmptyTransactions =
-      List.fill(4)(randomTransactionId).zip(List(322L, 321L, 319L, 319L)).map {
-        case (txid, time) =>
-          Transaction.HasIO(
-            Transaction(txid, blockhash, time, Size(1000)),
-            inputs,
-            outputs.map(_.copy(txid = txid))
-          )
+      List.fill(4)(randomTransactionId).zip(List(322L, 321L, 319L, 319L)).map { case (txid, time) =>
+        Transaction.HasIO(
+          Transaction(txid, blockhash, time, Size(1000)),
+          inputs,
+          outputs.map(_.copy(txid = txid))
+        )
       }
 
     val transactions = emptyTransactions ::: nonEmptyTransactions

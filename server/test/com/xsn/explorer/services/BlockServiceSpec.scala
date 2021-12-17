@@ -43,28 +43,27 @@ class BlockServiceSpec extends AsyncWordSpecLike with Matchers {
       block.height.int mustBe 1663808
 
       val service = createService()
-      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map {
-        rewards =>
-          rewards.get match {
-            case PoSBlockRewards(
-                  coinstake,
-                  Some(masternode),
-                  None,
-                  stakedAmount,
-                  stakedDuration
-                ) =>
-              coinstake.value mustBe BigDecimal(8.89999999)
-              coinstake.address.string mustBe "7bs9TobPv6k9vvZVwYHEVwUQzv2t3MQcWD"
+      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map { rewards =>
+        rewards.get match {
+          case PoSBlockRewards(
+                coinstake,
+                Some(masternode),
+                None,
+                stakedAmount,
+                stakedDuration
+              ) =>
+            coinstake.value mustBe BigDecimal(8.89999999)
+            coinstake.address.string mustBe "7bs9TobPv6k9vvZVwYHEVwUQzv2t3MQcWD"
 
-              masternode.value mustBe BigDecimal(9)
-              masternode.address.string mustBe "XuUzwDzqwYynjGfmMYY9ba3nzt6xTPjsE6"
+            masternode.value mustBe BigDecimal(9)
+            masternode.address.string mustBe "XuUzwDzqwYynjGfmMYY9ba3nzt6xTPjsE6"
 
-              stakedAmount mustBe BigDecimal(182513.58176347)
-              stakedDuration mustBe 7897385
+            stakedAmount mustBe BigDecimal(182513.58176347)
+            stakedDuration mustBe 7897385
 
-            case _ =>
-              fail()
-          }
+          case _ =>
+            fail()
+        }
       }
     }
 
@@ -76,28 +75,27 @@ class BlockServiceSpec extends AsyncWordSpecLike with Matchers {
       block.height.int mustBe 1531049
 
       val service = createService()
-      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map {
-        rewards =>
-          rewards.get match {
-            case PoSBlockRewards(
-                  coinstake,
-                  Some(masternode),
-                  None,
-                  stakedAmount,
-                  stakedDuration
-                ) =>
-              coinstake.value mustBe BigDecimal(9)
-              coinstake.address.string mustBe "7bs9TobPv6k9vvZVwYHEVwUQzv2t3MQcWD"
+      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map { rewards =>
+        rewards.get match {
+          case PoSBlockRewards(
+                coinstake,
+                Some(masternode),
+                None,
+                stakedAmount,
+                stakedDuration
+              ) =>
+            coinstake.value mustBe BigDecimal(9)
+            coinstake.address.string mustBe "7bs9TobPv6k9vvZVwYHEVwUQzv2t3MQcWD"
 
-              masternode.value mustBe BigDecimal(9)
-              masternode.address.string mustBe "XjP23TKrSpw1yraSeGaenv7ce5dVNiKYSZ"
+            masternode.value mustBe BigDecimal(9)
+            masternode.address.string mustBe "XjP23TKrSpw1yraSeGaenv7ce5dVNiKYSZ"
 
-              stakedAmount mustBe BigDecimal(120000)
-              stakedDuration mustBe 177358
+            stakedAmount mustBe BigDecimal(120000)
+            stakedDuration mustBe 177358
 
-            case _ =>
-              fail()
-          }
+          case _ =>
+            fail()
+        }
       }
     }
 
@@ -109,28 +107,27 @@ class BlockServiceSpec extends AsyncWordSpecLike with Matchers {
       block.height.int mustBe 1671361
 
       val service = createService()
-      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map {
-        rewards =>
-          rewards.get match {
-            case PoSBlockRewards(
-                  coinstake,
-                  Some(masternode),
-                  None,
-                  stakedAmount,
-                  stakedDuration
-                ) =>
-              coinstake.value mustBe BigDecimal(9)
-              coinstake.address.string mustBe "Xi1BEVHFRYg1QQfrNJF8L9yXvREAADxCLk"
+      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map { rewards =>
+        rewards.get match {
+          case PoSBlockRewards(
+                coinstake,
+                Some(masternode),
+                None,
+                stakedAmount,
+                stakedDuration
+              ) =>
+            coinstake.value mustBe BigDecimal(9)
+            coinstake.address.string mustBe "Xi1BEVHFRYg1QQfrNJF8L9yXvREAADxCLk"
 
-              masternode.value mustBe BigDecimal(9)
-              masternode.address.string mustBe "Xi53MGFpPYZN5rFeKqGk3WSuNk7CGfQ4cj"
+            masternode.value mustBe BigDecimal(9)
+            masternode.address.string mustBe "Xi53MGFpPYZN5rFeKqGk3WSuNk7CGfQ4cj"
 
-              stakedAmount mustBe BigDecimal(2112)
-              stakedDuration mustBe 4965844
+            stakedAmount mustBe BigDecimal(2112)
+            stakedDuration mustBe 4965844
 
-            case _ =>
-              fail()
-          }
+          case _ =>
+            fail()
+        }
       }
     }
 
@@ -218,28 +215,27 @@ class BlockServiceSpec extends AsyncWordSpecLike with Matchers {
       block.height.int mustBe 129600
 
       val service = createService()
-      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map {
-        rewards =>
-          rewards.get match {
-            case PoSBlockRewards(
-                  coinstake,
-                  None,
-                  Some(treasury),
-                  stakedAmount,
-                  stakedDuration
-                ) =>
-              coinstake.value mustBe BigDecimal(36)
-              coinstake.address.string mustBe "XtsUZvKvN7ZEwGQ8WPSbJ6NUtxCJgBDBJP"
+      service.getBlockRewards(block, BlockExtractionMethod.ProofOfStake).map { rewards =>
+        rewards.get match {
+          case PoSBlockRewards(
+                coinstake,
+                None,
+                Some(treasury),
+                stakedAmount,
+                stakedDuration
+              ) =>
+            coinstake.value mustBe BigDecimal(36)
+            coinstake.address.string mustBe "XtsUZvKvN7ZEwGQ8WPSbJ6NUtxCJgBDBJP"
 
-              treasury.value mustBe BigDecimal(147700)
-              treasury.address.string mustBe "XsWsJ7u8dmCVuUn6ShsWiniWkhGDQzctiu"
+            treasury.value mustBe BigDecimal(147700)
+            treasury.address.string mustBe "XsWsJ7u8dmCVuUn6ShsWiniWkhGDQzctiu"
 
-              stakedAmount mustBe BigDecimal(1356.05180221)
-              stakedDuration mustBe 3631992
+            stakedAmount mustBe BigDecimal(1356.05180221)
+            stakedDuration mustBe 3631992
 
-            case _ =>
-              fail()
-          }
+          case _ =>
+            fail()
+        }
       }
     }
   }

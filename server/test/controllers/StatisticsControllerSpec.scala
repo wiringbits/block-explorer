@@ -106,12 +106,11 @@ class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
   class CurrencyActorMock extends Actor {
 
-    override def receive: Receive = {
-      case CurrencySynchronizerActor.GetMarketStatistics =>
-        val map: Map[Currency, BigDecimal] =
-          Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
-        val reply = MarketStatistics(map, MarketInformation(0, 0))
-        sender() ! reply
+    override def receive: Receive = { case CurrencySynchronizerActor.GetMarketStatistics =>
+      val map: Map[Currency, BigDecimal] =
+        Map(Currency.USD -> 0.071231351, Currency.BTC -> 0.063465494)
+      val reply = MarketStatistics(map, MarketInformation(0, 0))
+      sender() ! reply
     }
   }
 

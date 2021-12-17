@@ -3,11 +3,7 @@ package com.xsn.explorer.services.synchronizer
 import com.alexitc.playsonify.core.FutureApplicationResult
 import com.alexitc.playsonify.validators.PaginatedQueryValidator
 import com.xsn.explorer.config.{LedgerSynchronizerConfig, NotificationsConfig}
-import com.xsn.explorer.data.async.{
-  BlockFutureDataHandler,
-  LedgerFutureDataHandler,
-  TransactionFutureDataHandler
-}
+import com.xsn.explorer.data.async.{BlockFutureDataHandler, LedgerFutureDataHandler, TransactionFutureDataHandler}
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
 import com.xsn.explorer.errors.BlockNotFoundError
 import com.xsn.explorer.helpers.DataHandlerObjects._
@@ -20,12 +16,7 @@ import com.xsn.explorer.services.logic.{BlockLogic, TransactionLogic}
 import com.xsn.explorer.services.synchronizer.operations.BlockParallelChunkAddOps
 import com.xsn.explorer.services.synchronizer.repository.BlockChunkRepository
 import com.xsn.explorer.services.validators.BlockhashValidator
-import com.xsn.explorer.services.{
-  BlockService,
-  EmailService,
-  TransactionCollectorService,
-  XSNService
-}
+import com.xsn.explorer.services.{BlockService, EmailService, TransactionCollectorService, XSNService}
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -33,10 +24,7 @@ import org.scalatest.concurrent.ScalaFutures
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class LedgerSynchronizerSpec
-    extends PostgresDataHandlerSpec
-    with BeforeAndAfter
-    with ScalaFutures {
+class LedgerSynchronizerSpec extends PostgresDataHandlerSpec with BeforeAndAfter with ScalaFutures {
 
   lazy val dataHandler = createLedgerDataHandler(database)
   lazy val transactionDataHandler = createTransactionDataHandler(database)
@@ -300,8 +288,7 @@ class LedgerSynchronizerSpec
           }
       }
 
-      override def getLatestBlock()
-          : FutureApplicationResult[Block.Canonical] = {
+      override def getLatestBlock(): FutureApplicationResult[Block.Canonical] = {
         val block = cleanGenesisBlock(canonicalBlocks.maxBy(_.height.int))
         Future.successful(Good(block))
       }

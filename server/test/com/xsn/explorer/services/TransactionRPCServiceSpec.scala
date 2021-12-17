@@ -3,10 +3,7 @@ package com.xsn.explorer.services
 import com.xsn.explorer.errors.{BlockNotFoundError, TransactionError}
 import com.xsn.explorer.helpers.BlockLoader
 import com.xsn.explorer.models.values._
-import com.xsn.explorer.services.validators.{
-  AddressValidator,
-  TransactionIdValidator
-}
+import com.xsn.explorer.services.validators.{AddressValidator, TransactionIdValidator}
 import org.mockito.MockitoSugar._
 import org.scalactic.{Bad, Good, One}
 import org.scalatest.concurrent.ScalaFutures._

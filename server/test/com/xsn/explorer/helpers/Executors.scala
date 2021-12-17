@@ -1,9 +1,6 @@
 package com.xsn.explorer.helpers
 
-import com.xsn.explorer.executors.{
-  DatabaseExecutionContext,
-  ExternalServiceExecutionContext
-}
+import com.xsn.explorer.executors.{DatabaseExecutionContext, ExternalServiceExecutionContext}
 
 import scala.concurrent.ExecutionContext
 

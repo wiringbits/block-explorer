@@ -3,21 +3,12 @@ package controllers
 import com.alexitc.playsonify.models.pagination._
 import com.alexitc.playsonify.play.PublicErrorRenderer
 import com.alexitc.playsonify.models.ordering.OrderingCondition
-import com.xsn.explorer.data.{
-  BlockBlockingDataHandler,
-  TransactionBlockingDataHandler
-}
+import com.xsn.explorer.data.{BlockBlockingDataHandler, TransactionBlockingDataHandler}
 import com.xsn.explorer.gcs.{GolombCodedSet, UnsignedByte}
 import com.xsn.explorer.helpers._
 import com.xsn.explorer.models.persisted.{BlockHeader, BlockInfo, Transaction}
 import com.xsn.explorer.models.rpc.Block
-import com.xsn.explorer.models.values.{
-  Blockhash,
-  Confirmations,
-  Height,
-  Size,
-  TransactionId
-}
+import com.xsn.explorer.models.values.{Blockhash, Confirmations, Height, Size, TransactionId}
 import com.xsn.explorer.services.XSNService
 import controllers.common.MyAPISpec
 import io.scalaland.chimney.dsl._
