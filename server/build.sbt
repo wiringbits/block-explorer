@@ -1,6 +1,6 @@
 name := "xsn-block-explorer"
 organization := "com.xsn"
-scalaVersion := "2.12.10"
+scalaVersion := "2.13.7"
 
 fork in Test := true
 
@@ -14,16 +14,14 @@ scalacOptions ++= Seq(
   "UTF-8",
   "-Xfuture",
   "-Xlint:missing-interpolator",
-  "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard",
   "-Ywarn-unused",
-  "-Ywarn-unused-import",
   "-P:silencer:checkUnused"
 )
 
-val playsonifyVersion = "2.2.0"
+val playsonifyVersion = "2.3.0"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, JavaAgent)
@@ -42,8 +40,8 @@ coverageExcludedPackages := "<empty>;Reverse.*;router\\.*"
 
 // silence noisy warnings
 libraryDependencies ++= Seq(
-  compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.3.4"),
-  "com.github.ghik" %% "silencer-lib" % "1.3.4" % Provided
+  compilerPlugin("com.github.ghik" % "silencer-plugin_2.13.7" % "1.7.7"),
+  "com.github.ghik" % "silencer-lib_2.13.7" % "1.7.7" % Provided
 )
 
 libraryDependencies ++= Seq(guice, evolutions, jdbc, ws)
@@ -64,7 +62,6 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.32"
 libraryDependencies += "ch.qos.logback" % "logback-core" % "1.2.9"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.9"
 libraryDependencies += "io.sentry" % "sentry-logback" % "5.5.1"
-
 
 libraryDependencies ++= Seq(
   "com.beachape" %% "enumeratum" % "1.7.0"
