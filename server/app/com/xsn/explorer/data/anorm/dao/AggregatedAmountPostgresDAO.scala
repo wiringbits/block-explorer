@@ -17,7 +17,7 @@ class AggregatedAmountPostgresDAO {
         |UPDATE SET value = aggregated_amounts.value + EXCLUDED.value
       """.stripMargin
     ).on(
-      'delta -> delta
+      "delta" -> delta
     ).executeUpdate()
 
     require(affectedRows == 1)

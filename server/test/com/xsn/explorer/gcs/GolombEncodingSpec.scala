@@ -2,11 +2,10 @@ package com.xsn.explorer.gcs
 
 import com.google.common.io.BaseEncoding
 import com.xsn.explorer.helpers.BlockLoader
-import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 
-@com.github.ghik.silencer.silent
-class GolombEncodingSpec extends WordSpec {
+class GolombEncodingSpec extends AnyWordSpec {
 
   val words = Set(
     "Alex",

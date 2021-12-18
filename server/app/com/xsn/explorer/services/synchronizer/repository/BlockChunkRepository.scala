@@ -9,7 +9,6 @@ import com.xsn.explorer.services.synchronizer.BlockSynchronizationState
 import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.higherKinds
 
 trait BlockChunkRepository[F[_]] {
 

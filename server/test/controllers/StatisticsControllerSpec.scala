@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class StatisticsControllerSpec extends MyAPISpec with BeforeAndAfterAll {
 
-  override def afterAll: Unit = {
+  override def afterAll(): Unit = {
     actorSystem.terminate()
     ()
   }

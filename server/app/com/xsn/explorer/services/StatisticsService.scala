@@ -118,7 +118,7 @@ class StatisticsService @Inject() (
     statisticsFutureDataHandler.getRewardsSummary(numberOfBlocks)
   }
 
-  def getPrices(): FutureApplicationResult[MarketStatistics] = {
+  def getPrices: FutureApplicationResult[MarketStatistics] = {
     val currencyActor = actorSystem.actorSelection("user/currency_synchronizer")
     implicit val timeout: Timeout = 10.seconds
 

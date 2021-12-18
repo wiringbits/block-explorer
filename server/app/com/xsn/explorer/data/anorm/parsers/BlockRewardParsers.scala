@@ -25,7 +25,7 @@ object BlockRewardParsers {
           val stake = for {
             stakedAmount <- stakedAmount
             stakedTime <- stakedTime
-          } yield (Stake(stakedAmount, stakedTime))
+          } yield Stake(stakedAmount, stakedTime)
 
           Reward(BlockReward(address, value), rewardType, stake)
         }

@@ -4,12 +4,15 @@ import com.xsn.explorer.helpers.{DataGenerator, TransactionLoader}
 import com.xsn.explorer.models._
 import com.xsn.explorer.models.rpc.ScriptPubKey
 import com.xsn.explorer.models.values._
-import javax.xml.bind.DatatypeConverter
-import org.scalatest.MustMatchers._
-import org.scalatest.WordSpec
 
-@com.github.ghik.silencer.silent
-class TransactionSpec extends WordSpec {
+import javax.xml.bind.DatatypeConverter
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
+
+import scala.annotation.nowarn
+
+@nowarn
+class TransactionSpec extends AnyWordSpec {
 
   "HasIO" should {
     "expect outputs matching the txid" in {

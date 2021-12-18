@@ -14,7 +14,9 @@ object TransactionAddressesHelper {
 
     val received = outputAddressValueList
       .groupBy(_._1)
+      .view
       .mapValues { _.map(_._2).sum }
+      .toMap
       .map { case (address, value) =>
         AddressTransactionDetails(
           address,
@@ -37,7 +39,9 @@ object TransactionAddressesHelper {
 
     val sent = inputAddressValueList
       .groupBy(_._1)
+      .view
       .mapValues { _.map(_._2).sum }
+      .toMap
       .map { case (address, value) =>
         AddressTransactionDetails(
           address,
@@ -56,9 +60,11 @@ object TransactionAddressesHelper {
     val details =
       (computeReceiveDetails(transaction) ++ computeSendDetails(transaction))
         .groupBy(_.address)
+        .view
         .mapValues { case head :: list =>
           list.foldLeft(head)(merge)
         }
+        .toMap
         .values
 
     details

@@ -1,6 +1,5 @@
 package com.xsn.explorer.data
 
-import _root_.anorm.SQL
 import com.alexitc.playsonify.models.ordering.{FieldOrdering, OrderingCondition}
 import com.alexitc.playsonify.models.pagination._
 import com.xsn.explorer.data.common.PostgresDataHandlerSpec
@@ -17,7 +16,7 @@ import com.xsn.explorer.models.rpc.Block
 import com.xsn.explorer.models.values._
 import org.scalactic.{Bad, Good, One, Or}
 import org.scalatest.BeforeAndAfter
-import org.scalatest.EitherValues._
+import org.scalatest.OptionValues._
 
 class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
@@ -134,7 +133,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
 
       upsertTransaction(tx)
       val result = dataHandler.getOutput(txid, 2)
-      result.toEither.right.value must be(expected)
+      result.toEither.toOption.value must be(expected)
     }
   }
 
@@ -582,7 +581,7 @@ class TransactionPostgresDataHandlerSpec extends PostgresDataHandlerSpec with Be
             fromTxid = transaction.id,
             fromOutputIndex = 0,
             index = 0,
-            value = transaction.outputs(0).value,
+            value = transaction.outputs.head.value,
             address = newAddress
           ),
           Transaction.Input(

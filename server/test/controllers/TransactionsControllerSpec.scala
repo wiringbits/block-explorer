@@ -90,7 +90,7 @@ class TransactionsControllerSpec extends MyAPISpec {
         orderingCondition: OrderingCondition,
         includeZeroValueTransactions: Boolean
     ): ApplicationResult[List[TransactionInfo]] = {
-      if (lastSeenTxid == None) {
+      if (lastSeenTxid.isEmpty) {
         Good(transactionList)
       } else {
         Good(List(transactionList.last))

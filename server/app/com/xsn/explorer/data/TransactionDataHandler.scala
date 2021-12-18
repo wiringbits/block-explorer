@@ -7,8 +7,6 @@ import com.xsn.explorer.models._
 import com.xsn.explorer.models.persisted.Transaction
 import com.xsn.explorer.models.values.{Address, Blockhash, TransactionId}
 
-import scala.language.higherKinds
-
 trait TransactionDataHandler[F[_]] {
 
   def getBy(

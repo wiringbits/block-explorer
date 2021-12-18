@@ -1,8 +1,8 @@
 package com.xsn.explorer.tasks
 
-import akka.actor.{ActorSystem}
+import akka.actor.ActorSystem
 import com.xsn.explorer.config.NodeStatsSynchronizerConfig
-import com.xsn.explorer.services.{StatisticsService}
+import com.xsn.explorer.services.StatisticsService
 import javax.inject.Inject
 import org.scalactic.{Bad, Good}
 import org.slf4j.LoggerFactory
@@ -21,13 +21,12 @@ class NodeStatsSynchronizerTask @Inject() (
 
   start()
 
-  @com.github.ghik.silencer.silent
   def start() = {
 
     if (config.enabled) {
       logger.info("Starting node-stats synchronizer task")
 
-      actorSystem.scheduler.schedule(config.initialDelay, config.interval) {
+      actorSystem.scheduler.scheduleAtFixedRate(config.initialDelay, config.interval) { () =>
         statisticsService.getCoinsStaking().onComplete {
           case Success(Good(coinsStaking)) =>
             logger.info(s"CoinsStaking information synced ${coinsStaking}")

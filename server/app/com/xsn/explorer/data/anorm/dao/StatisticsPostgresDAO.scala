@@ -59,7 +59,7 @@ class StatisticsPostgresDAO {
         |) t
       """.stripMargin
     ).on(
-      'number_of_blocks -> numberOfBlocks
+      "number_of_blocks" -> numberOfBlocks
     ).as(parseSummary.single)
   }
 
@@ -92,7 +92,7 @@ class StatisticsPostgresDAO {
         |LEFT JOIN balances b USING(address)
       """.stripMargin
     ).on(
-      'start_date -> startDate.getEpochSecond
+      "start_date" -> startDate.getEpochSecond
     ).as(addressSummaryParser.single)
   }
 

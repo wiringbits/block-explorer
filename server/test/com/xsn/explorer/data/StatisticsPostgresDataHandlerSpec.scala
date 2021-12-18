@@ -1,7 +1,6 @@
 package com.xsn.explorer.data
 
 import java.time.Instant
-
 import com.alexitc.playsonify.sql.FieldOrderingSQLInterpreter
 import com.xsn.explorer.data.anorm.dao.{BalancePostgresDAO, StatisticsPostgresDAO, TPoSContractDAO}
 import com.xsn.explorer.data.anorm.{
@@ -28,9 +27,10 @@ import com.xsn.explorer.models.{
 import org.scalactic.Good
 import org.scalatest.BeforeAndAfter
 
+import scala.annotation.nowarn
 import scala.concurrent.duration._
 
-@com.github.ghik.silencer.silent
+@nowarn
 class StatisticsPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAndAfter {
 
   val secondsInOneDay: Int = 24 * 60 * 60

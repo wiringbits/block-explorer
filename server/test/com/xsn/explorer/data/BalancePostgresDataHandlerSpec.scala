@@ -95,7 +95,7 @@ class BalancePostgresDataHandlerSpec extends PostgresDataHandlerSpec {
     "skip the first richest address" in {
       prepare()
       val query = PaginatedQuery(Offset(1), Limit(3))
-      val expected = balances.drop(1).take(3)
+      val expected = balances.slice(1, 4)
 
       val result = dataHandler.get(query, defaultOrdering)
       result.map(_.data) mustEqual Good(expected)

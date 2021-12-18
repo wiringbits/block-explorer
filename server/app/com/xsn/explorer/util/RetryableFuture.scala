@@ -4,6 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import akka.actor.Scheduler
 import akka.pattern.Patterns.after
 
+import scala.annotation.nowarn
 import scala.concurrent.duration._
 import scala.util.{Random, Try}
 
@@ -19,7 +20,7 @@ object RetryableFuture {
     * @param f
     *   the future to be retried
     */
-  @com.github.ghik.silencer.silent
+  @nowarn
   def apply[A](
       delays: List[FiniteDuration]
   )(

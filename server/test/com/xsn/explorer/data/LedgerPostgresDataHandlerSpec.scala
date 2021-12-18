@@ -54,7 +54,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     }
 
     "succeed storing a repeated block by hash" in {
-      val genesis = blockList(0)
+      val genesis = blockList.head
       dataHandler.push(
         genesis.withTransactions(getTransactions(genesis)),
         List.empty,
@@ -74,7 +74,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
     }
 
     "fail to store a repeated block by height" in {
-      val genesis = blockList(0)
+      val genesis = blockList.head
       dataHandler.push(
         genesis.withTransactions(getTransactions(genesis)),
         List.empty,
@@ -139,7 +139,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.reward.address mustEqual powReward.reward.address
             r.reward.value mustEqual powReward.reward.value
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -173,7 +173,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.stakedAmount mustEqual posReward.stakedAmount
             r.stakedDuration mustEqual posReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -206,7 +206,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.stakedAmount mustEqual posReward.stakedAmount
             r.stakedDuration mustEqual posReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -243,7 +243,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.stakedAmount mustEqual tposReward.stakedAmount
             r.stakedDuration mustEqual tposReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }
@@ -279,7 +279,7 @@ class LedgerPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeA
             r.stakedAmount mustEqual tposReward.stakedAmount
             r.stakedDuration mustEqual tposReward.stakedDuration
           }
-          case _ => fail
+          case _ => fail()
         }
       }
     }

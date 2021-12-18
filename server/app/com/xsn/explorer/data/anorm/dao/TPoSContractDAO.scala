@@ -24,13 +24,13 @@ class TPoSContractDAO {
         |RETURNING txid, index, owner, merchant, merchant_commission, state, time
       """.stripMargin
     ).on(
-      'txid -> contract.id.txid.toBytesBE.toArray,
-      'index -> contract.id.index,
-      'owner -> contract.details.owner.string,
-      'merchant -> contract.details.merchant.string,
-      'merchant_commission -> contract.details.merchantCommission.int,
-      'state -> contract.state.entryName,
-      'time -> contract.time
+      "txid" -> contract.id.txid.toBytesBE.toArray,
+      "index" -> contract.id.index,
+      "owner" -> contract.details.owner.string,
+      "merchant" -> contract.details.merchant.string,
+      "merchant_commission" -> contract.details.merchantCommission.int,
+      "state" -> contract.state.entryName,
+      "time" -> contract.time
     ).as(parseTPoSContract.single)
   }
 
@@ -51,13 +51,13 @@ class TPoSContractDAO {
         |    time = EXCLUDED.time
       """.stripMargin
     ).on(
-      'txid -> contract.id.txid.toBytesBE.toArray,
-      'index -> contract.id.index,
-      'owner -> contract.details.owner.string,
-      'merchant -> contract.details.merchant.string,
-      'merchant_commission -> contract.details.merchantCommission.int,
-      'state -> contract.state.entryName,
-      'time -> contract.time
+      "txid" -> contract.id.txid.toBytesBE.toArray,
+      "index" -> contract.id.index,
+      "owner" -> contract.details.owner.string,
+      "merchant" -> contract.details.merchant.string,
+      "merchant_commission" -> contract.details.merchantCommission.int,
+      "state" -> contract.state.entryName,
+      "time" -> contract.time
     ).executeUpdate()
   }
 
@@ -71,7 +71,7 @@ class TPoSContractDAO {
         |RETURNING txid, index, owner, merchant, merchant_commission, state, time
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray
+      "txid" -> txid.toBytesBE.toArray
     ).as(parseTPoSContract.singleOpt)
   }
 
@@ -87,10 +87,10 @@ class TPoSContractDAO {
         |      index = {index}
       """.stripMargin
     ).on(
-      'txid -> id.txid.toBytesBE.toArray,
-      'index -> id.index,
-      'state -> TPoSContract.State.Closed.entryName,
-      'closed_on -> closedOn.toBytesBE.toArray
+      "txid" -> id.txid.toBytesBE.toArray,
+      "index" -> id.index,
+      "state" -> TPoSContract.State.Closed.entryName,
+      "closed_on" -> closedOn.toBytesBE.toArray
     ).executeUpdate()
   }
 
@@ -104,9 +104,9 @@ class TPoSContractDAO {
         |      index = {index}
       """.stripMargin
     ).on(
-      'txid -> id.txid.toBytesBE.toArray,
-      'index -> id.index,
-      'state -> TPoSContract.State.Active.entryName
+      "txid" -> id.txid.toBytesBE.toArray,
+      "index" -> id.index,
+      "state" -> TPoSContract.State.Active.entryName
     ).executeUpdate()
   }
 
@@ -119,7 +119,7 @@ class TPoSContractDAO {
         |ORDER BY time DESC
       """.stripMargin
     ).on(
-      'address -> address.string
+      "address" -> address.string
     ).as(parseTPoSContract.*)
   }
 
@@ -134,7 +134,7 @@ class TPoSContractDAO {
         |AND state='ACTIVE'
       """.stripMargin
     ).on(
-      'merchantAddress -> merchantAddress.string
+      "merchantAddress" -> merchantAddress.string
     ).as(parseAddress("owner").*)
   }
 }

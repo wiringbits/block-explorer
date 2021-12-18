@@ -23,7 +23,7 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      value > 0
       """.stripMargin
     ).on(
-      'address -> address.string
+      "address" -> address.string
     ).as(parseTransactionOutput.*)
   }
 
@@ -38,8 +38,8 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |      index = {index}
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray,
-      'index -> index
+      "txid" -> txid.toBytesBE.toArray,
+      "index" -> index
     ).as(parseTransactionOutput.singleOpt)
   }
 
@@ -52,13 +52,13 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
       case _ =>
         val params = outputs.map { output =>
           List(
-            'txid -> output.txid.toBytesBE.toArray: NamedParameter,
-            'index -> output.index: NamedParameter,
-            'value -> output.value: NamedParameter,
-            'addresses -> output.addresses
+            "txid" -> output.txid.toBytesBE.toArray: NamedParameter,
+            "index" -> output.index: NamedParameter,
+            "value" -> output.value: NamedParameter,
+            "addresses" -> output.addresses
               .map(_.string)
               .toArray: NamedParameter,
-            'hex_script -> output.script.toBytes: NamedParameter
+            "hex_script" -> output.script.toBytes: NamedParameter
           )
         }
 
@@ -100,11 +100,11 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |    hex_script = EXCLUDED.hex_script
       """.stripMargin)
       .on(
-        'txid -> output.txid.toBytesBE.toArray,
-        'index -> output.index,
-        'value -> output.value,
-        'addresses -> output.addresses.map(_.string).toArray,
-        'hex_script -> output.script.toBytes
+        "txid" -> output.txid.toBytesBE.toArray,
+        "index" -> output.index,
+        "value" -> output.value,
+        "addresses" -> output.addresses.map(_.string).toArray,
+        "hex_script" -> output.script.toBytes
       )
       .execute()
   }
@@ -119,7 +119,7 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |RETURNING txid, index, hex_script, value, addresses
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray
+      "txid" -> txid.toBytesBE.toArray
     ).as(parseTransactionOutput.*)
 
     result
@@ -136,7 +136,7 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray
+      "txid" -> txid.toBytesBE.toArray
     ).as(parseTransactionOutput.*)
   }
 
@@ -152,8 +152,8 @@ class TransactionOutputPostgresDAO @Inject() (explorerConfig: ExplorerConfig) {
         |ORDER BY index
       """.stripMargin
     ).on(
-      'txid -> txid.toBytesBE.toArray,
-      'address -> address.string
+      "txid" -> txid.toBytesBE.toArray,
+      "address" -> address.string
     ).as(parseTransactionOutput.*)
   }
 

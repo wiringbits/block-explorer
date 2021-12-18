@@ -115,7 +115,7 @@ class BlockPostgresDataHandlerSpec extends PostgresDataHandlerSpec with BeforeAn
       result.data.size mustEqual expected.size
 
       val data = result.data
-      matches(data(0), expected(0))
+      matches(data.head, expected.head)
       matches(data(1), expected(1))
     }
 

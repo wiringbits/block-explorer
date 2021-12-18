@@ -17,7 +17,7 @@ object Extensions {
     }
 
     def toSatoshis: BigInt = {
-      (inner * SatoshiScale).toBigInt()
+      (inner * SatoshiScale).toBigInt
     }
   }
 

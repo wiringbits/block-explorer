@@ -13,7 +13,7 @@ object AddressBalance {
     */
   implicit val reads: Reads[AddressBalance] = {
     val builder =
-      (__ \ 'balance).read[BigDecimal] and (__ \ 'received).read[BigDecimal]
+      (__ \ "balance").read[BigDecimal] and (__ \ "received").read[BigDecimal]
 
     builder.apply { (balance, received) =>
       AddressBalance(balance.fromSatoshis, received.fromSatoshis)

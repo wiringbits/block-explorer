@@ -1,9 +1,9 @@
 package com.xsn.explorer.data.common
 
 import java.sql.DriverManager
-
 import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainerState, DockerKit, DockerReadyChecker}
 
+import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
 
 trait DockerPostgresService extends DockerKit {
@@ -31,7 +31,7 @@ trait DockerPostgresService extends DockerKit {
     postgresContainer :: super.dockerContainers
 }
 
-@com.github.ghik.silencer.silent
+@nowarn
 object DockerPostgresService {
 
   val PostgresImage = "postgres:12"

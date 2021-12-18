@@ -7,8 +7,6 @@ import com.xsn.explorer.models.fields.BalanceField
 import com.xsn.explorer.models.persisted.Balance
 import com.xsn.explorer.models.values.Address
 
-import scala.language.higherKinds
-
 trait BalanceDataHandler[F[_]] {
 
   def upsert(balance: Balance): F[Balance]

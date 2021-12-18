@@ -7,8 +7,6 @@ import com.xsn.explorer.models.fields.BlockField
 import com.xsn.explorer.models.persisted.{Block, BlockHeader, BlockInfo}
 import com.xsn.explorer.models.values.{Blockhash, Height}
 
-import scala.language.higherKinds
-
 trait BlockDataHandler[F[_]] {
 
   def getBy(blockhash: Blockhash): F[Block]

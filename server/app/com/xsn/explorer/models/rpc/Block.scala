@@ -66,22 +66,22 @@ object Block {
   ) extends Block[Transaction[VIN]]
 
   implicit val canonicalReads: Reads[Block.Canonical] = {
-    val builder = (__ \ 'hash).read[Blockhash] and
-      (__ \ 'previousblockhash).readNullable[Blockhash] and
-      (__ \ 'nextblockhash).readNullable[Blockhash] and
-      (__ \ 'merkleroot).read[Blockhash] and
-      (__ \ 'tx).read[List[TransactionId]] and
-      (__ \ 'confirmations).read[Confirmations] and
-      (__ \ 'size).read[Size] and
-      (__ \ 'height).read[Height] and
-      (__ \ 'version).read[Int] and
-      (__ \ 'time).read[Long] and
-      (__ \ 'mediantime).read[Long] and
-      (__ \ 'nonce).read[Long] and
-      (__ \ 'bits).read[String] and
-      (__ \ 'chainwork).read[String] and
-      (__ \ 'difficulty).read[BigDecimal] and
-      (__ \ 'tposcontract).readNullable[TransactionId]
+    val builder = (__ \ "hash").read[Blockhash] and
+      (__ \ "previousblockhash").readNullable[Blockhash] and
+      (__ \ "nextblockhash").readNullable[Blockhash] and
+      (__ \ "merkleroot").read[Blockhash] and
+      (__ \ "tx").read[List[TransactionId]] and
+      (__ \ "confirmations").read[Confirmations] and
+      (__ \ "size").read[Size] and
+      (__ \ "height").read[Height] and
+      (__ \ "version").read[Int] and
+      (__ \ "time").read[Long] and
+      (__ \ "mediantime").read[Long] and
+      (__ \ "nonce").read[Long] and
+      (__ \ "bits").read[String] and
+      (__ \ "chainwork").read[String] and
+      (__ \ "difficulty").read[BigDecimal] and
+      (__ \ "tposcontract").readNullable[TransactionId]
 
     builder.apply {
       (
