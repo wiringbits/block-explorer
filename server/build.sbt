@@ -1,6 +1,6 @@
 name := "xsn-block-explorer"
 organization := "com.xsn"
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.8"
 
 fork in Test := true
 
