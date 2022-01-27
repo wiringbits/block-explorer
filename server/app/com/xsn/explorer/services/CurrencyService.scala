@@ -29,6 +29,13 @@ object Currency extends Enum[Currency] {
   final case object NZD extends Currency("NZD")
   final case object TRY extends Currency("TRY")
   final case object UAH extends Currency("UAH")
+  final case object UAH extends Currency("AUD")
+  final case object UAH extends Currency("CNY")
+  final case object UAH extends Currency("CHF")
+  final case object UAH extends Currency("RUB")
+  final case object UAH extends Currency("NOK")
+  final case object UAH extends Currency("WON")
+  final case object UAH extends Currency("BRL")
 
   val values = findValues
 }
