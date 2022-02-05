@@ -21,7 +21,7 @@ object EmailService {
     ): Unit = {
       logger.info(
         s"Not sending email, subject = $subject, recipients = ${recipients
-          .mkString(", ")}, text = $text"
+            .mkString(", ")}, text = $text"
       )
     }
   }

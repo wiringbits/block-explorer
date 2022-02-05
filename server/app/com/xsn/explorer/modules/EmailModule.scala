@@ -24,8 +24,8 @@ class EmailModule extends AbstractModule {
 
     logger.info(
       s"notifications config loaded, monitoredAddresses = ${monitoredAddresses
-        .mkString(", ")}, recipients = ${recipients
-        .mkString(", ")}"
+          .mkString(", ")}, recipients = ${recipients
+          .mkString(", ")}"
     )
     NotificationsConfig(
       recipients = recipients,
