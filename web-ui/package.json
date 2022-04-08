@@ -32,7 +32,7 @@
     "core-js": "^2.5.4",
     "express": "^4.16.4",
     "lottie-web": "^5.7.6",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "ng-circle-progress": "^1.5.1",
     "ng-http-loader": "^5.0.0",
     "ng-lottie": "^0.3.2",
