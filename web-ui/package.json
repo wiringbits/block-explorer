@@ -37,7 +37,7 @@
     "ng-http-loader": "^5.0.0",
     "ng-lottie": "^0.3.2",
     "ng2-tooltip-directive": "^2.9.17",
-    "ngx-bootstrap": "^3.3.0",
+    "ngx-bootstrap": "^4.2.0",
     "ngx-bootstrap-slider": "^1.9.0",
     "ngx-infinite-scroll": "^7.0.1",
     "ngx-moment": "^3.0.1",
