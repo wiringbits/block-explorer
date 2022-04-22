@@ -1,2 +1,25 @@
-<p>
-</p>
+<div class="wiringbitsLogoContainer" [hidden]="!isClosed">
+  <div class="wiringbitsLogoTitle">
+    <div class="wiringbitsLogoImg">
+      <img
+        src="assets/wiringbits.png">
+      <span>Wiringbits</span>
+    </div>
+    <div class="wiringbitsLogoOptions">
+      <button type="button" class="btn" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed"
+        aria-controls="collapseBasic">
+        <span class="glyphicon {{ isCollapsed ? 'glyphicon-chevron-up' : 'glyphicon-chevron-down' }} text-highlight"></span>
+      </button>
+      <button type="button" class="btn" (click)="isClosed = !isClosed" [attr.aria-expanded]="!isCollapsed"
+        aria-controls="collapseBasic">
+        <span class="glyphicon glyphicon-remove text-highlight"></span>
+      </button>
+    </div>
+
+  </div>
+  <div class="wiringbitsLogoLink" id="collapseBasic" [collapse]="isCollapsed"
+    [isAnimated]="true">
+    <a href="https://wiringbits.net/" target="_Blank">Do you like this app?
+      <br>Wiringbits can help you <br> Click here!</a>
+  </div>
+</div>
