@@ -1,59 +1,22 @@
-.wiringbitsLogoContainer {
-    width: 12%;
-    height: auto;
-    border-top: 1px solid #fff;
-    border-left: 1px solid #fff;
-    border-right: 1px solid #fff;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+.wiringbitsLogoLink {
+    text-decoration: none;
+    font-size: 18px;
+    color: #fff;
+}
+
+.wiringbitsFloatLogo {
+    background-color: #fff;
+    border-radius: 30px;
+    border: 2px solid #ffffff;
+    background-image: linear-gradient(to bottom right, #101011, #2a51e7);
     bottom: 0px;
     right: 0px;
     position: fixed;
     z-index: 100;
 }
 
-.wiringbitsLogoTitle {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    color: #fff;
-    background: #0f1223;
-}
-
-.wiringbitsLogoImg {
-    width: 70px;
-    margin-left: 8px;
-    display: inline-block;
-}
-
-.wiringbitsLogoImg img {
-    width: 70px;
-    object-fit: cover;
-}
-
-.wiringbitsLogoImg span {
-    margin: 0 auto;
-    display: table;
-}
-
-.wiringbitsLogoOptions {
-    float: right;
-    margin-top: 10px;
-    margin-right: 2px;
-}
-
-.wiringbitsLogoOptions button {
-    background: #0f1223;
-}
-
-.wiringbitsLogoLink {
-    width: auto;
-    background: #fefcfe;
-    padding: 5px;
-}
-
-.wiringbitsLogoLink a {
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    font-size: 18px;
+.wiringbitsFloatLogo img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
 }

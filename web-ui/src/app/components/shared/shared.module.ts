@@ -14,7 +14,7 @@ import { TransactionTablev2Component } from './transaction-tablev2/transaction-t
 import { PipesModule } from '../../pipes/pipes.module';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TooltipModule } from 'ng2-tooltip-directive';
-import { CollapseModule  } from 'ngx-bootstrap/collapse';
+import { PopoverModule } from 'ngx-bootstrap/popover';
 
 import { LottieAnimationViewModule } from 'ng-lottie';
 
@@ -32,7 +32,7 @@ import { LottieAnimationViewModule } from 'ng-lottie';
         BsDropdownModule.forRoot(),
         LottieAnimationViewModule.forRoot(),
         TooltipModule,
-        CollapseModule.forRoot()    
+        PopoverModule.forRoot()
     ],
     declarations: [
         NavbarComponent,
