@@ -5,6 +5,8 @@ The XSN Block Explorer (https://xsnexplorer.io/) is composed by several sub proj
 - [web-ui](web-ui)
 - [infra](infra)
 
+**NOTE** The project was taken down by Jul/2022, the Stakenet cryptocurrency is dead now, if you are interested in the project, you can either run it to see how it works or check the [screenshots](./screenshots) directory.
+
 ## server
 The server is a backend service that interacts with the `xsnd` (RPC server) to provide a RESTful API for retrieving information from the blockchain, it also maps the blockchain to a relational database to support several operations that otherwise would kill the application performance.
 
