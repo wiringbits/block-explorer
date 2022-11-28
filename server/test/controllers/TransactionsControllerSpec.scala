@@ -294,6 +294,22 @@ class TransactionsControllerSpec extends MyAPISpec {
       (error \ "field").as[String] mustEqual "transactionId"
       (error \ "message").as[String].nonEmpty mustEqual true
     }
+
+    "work with transactions from bitcoin core 23" in {
+      val tx = TransactionLoader.get("f69b3b50639df7bfda7897e978d8d6d7047aa97cb929163cdbe105acd005a1aa")
+
+      val response = GET(url(tx.id.string))
+
+      status(response) mustEqual OK
+      val json = contentAsJson(response)
+
+      val inputs = (json \ "input").as[List[JsValue]]
+      val outputs = (json \ "output").as[List[JsValue]]
+
+      (inputs.head \ "address").asOpt[String] mustBe Some("tb1qsexpvl92hmfh66c38dkx35rycfjakcfhy0892x")
+      (outputs.head \ "address").asOpt[String] mustBe Some("tb1qdhznp5jxyw9ypew0npl9sqc2za2ryf9zykwxh3")
+      (outputs(1) \ "address").asOpt[String] mustBe Some("tb1qzfevzferqdydtjca9k3n0dqp48ks0pz90629uq")
+    }
   }
 
   "GET transactions/:txid/raw" should {
