@@ -460,3 +460,17 @@ table.isLoading tr:nth-child(odd) td div::after {
 .small, small {
   font-size: 75%;
 }
+
+.wiringbitsPopOver {
+  background-color: #00135b;
+  color: #ffffff;
+  border: 2px solid #fff;
+}
+
+.wiringbitsHighlight {
+  box-shadow: 0px 0px 13px 5px #0ab8ca;
+}
+
+.wiringbitsPopOver.popover>.arrow, .popover>.arrow:after {
+  border-color: transparent !important;
+}
